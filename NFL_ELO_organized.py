@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 NFL ELO Rating System Analysis Tool
 
