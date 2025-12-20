@@ -386,55 +386,81 @@ config = NFLConfig()
 def safefig(func):
     """
     Decorator to safely handle figure creation and saving.
-    Ensures figures are properly closed and saved even if errors occur.
+    
+    This wrapper ensures that matplotlib figures are properly closed even if
+    an error occurs. This prevents memory leaks from accumulating unclosed figures.
+    Think of it as a safety net for plotting functions.
+    
+    Usage:
+        @safefig
+        def my_plotting_function():
+            fig, ax = plt.subplots()
+            # ... plotting code ...
     """
     def wrapper(*args, **kwargs):
-        fig = None
+        figure = None
         try:
             result = func(*args, **kwargs)
             return result
-        except Exception as e:
-            print(f"Error in {func.__name__}: {e}")
-            if fig:
-                plt.close(fig)
+        except Exception as error:
+            print(f"[ERROR] {func.__name__}: {error}")
+            if figure:
+                plt.close(figure)
             raise
         finally:
-            if fig:
-                plt.close(fig)
+            if figure:
+                plt.close(figure)
     return wrapper
 
-def season_from_date(dt: pd.Timestamp) -> Union[int, float]:
+def season_from_date(date: pd.Timestamp) -> Union[int, float]:
     """
-    Convert a date to NFL season.
+    Convert a date to the NFL season year.
     
-    NFL season logic: Games in Jan/Feb belong to the previous season.
-    Games in Aug–Dec belong to that calendar year.
+    NFL seasons are weird - they span two calendar years!
+    - Games in January/February belong to the PREVIOUS season
+    - Games in August through December belong to the CURRENT calendar year
+    
+    Examples:
+        - January 15, 2024 → Season 2023 (it's the playoffs from the 2023 season)
+        - September 10, 2024 → Season 2024 (it's the regular season)
+        - February 5, 2024 → Season 2023 (Super Bowl from 2023 season)
     
     Args:
-        dt: Date to convert
+        date: The date to convert
         
     Returns:
-        Season year (int) or NaN if invalid date
+        The season year (e.g., 2024) or NaN if the date is invalid
     """
-    if pd.isna(dt):
+    if pd.isna(date):
         return np.nan
-    dt = pd.Timestamp(dt)
-    return dt.year - 1 if dt.month in (1, 2) else dt.year
-
-def canonical_franchise(code: str, date: pd.Timestamp) -> str:
-    """
-    Map historical team codes/locations to current 32 franchises.
     
-    Handles team relocations and name changes throughout NFL history.
+    date = pd.Timestamp(date)
+    
+    # If it's January or February, it's part of the previous year's season
+    if date.month in (1, 2):
+        return date.year - 1
+    else:
+        # August through December belong to the current year's season
+        return date.year
+
+def canonical_franchise(team_code: str, game_date: pd.Timestamp) -> str:
+    """
+    Map historical team codes to current 32 NFL franchises.
+    
+    Teams have moved around a lot! The Rams were in LA, then St. Louis, then back to LA.
+    The Raiders were in Oakland, then LA, then back to Oakland, then Las Vegas.
+    This function handles all those relocations and name changes so we can track
+    franchises consistently over time.
     
     Args:
-        code: Team code to map
-        date: Date for historical context
+        team_code: The team code from the data (e.g., "STL", "OAK", "SDG")
+        game_date: The date of the game (needed to figure out which city/name was active)
         
     Returns:
-        Canonical franchise code
+        The canonical franchise code (e.g., "LAR", "LVR", "LAC")
     """
-    code = (code or "").strip().upper()
+    # Clean up the input
+    team_code = (team_code or "").strip().upper()
     
     # Static mappings for relocations
     static_map = {
@@ -446,60 +472,64 @@ def canonical_franchise(code: str, date: pd.Timestamp) -> str:
         "OTI": "TEN",
     }
     
-    if code in static_map:
-        return static_map[code]
+    # Check if this team code has a simple static mapping (no date logic needed)
+    if team_code in static_map:
+        return static_map[team_code]
     
-    # Handle Los Angeles - Rams vs Raiders
-    # Los Angeles Rams: 1946-1994 (LA), 1995-2015 (St. Louis), 2016+ (LA)
+    # Handle Los Angeles - this is tricky because both Rams and Raiders were there!
+    # Los Angeles Rams: 1946-1994 (LA), 1995-2015 (St. Louis), 2016+ (back to LA)
     # Los Angeles Raiders: 1982-1994 (LA), then back to Oakland, then Las Vegas
-    if code == "LAR":
-        # 1982-1994: Los Angeles Raiders → Las Vegas Raiders
-        if date >= pd.Timestamp("1982-01-01") and date < pd.Timestamp("1995-01-01"):
-            return "LVR"
-        # All other times: Los Angeles Rams
+    if team_code == "LAR":
+        # Between 1982-1994, "LAR" could mean the Raiders (who were in LA then)
+        if game_date >= pd.Timestamp("1982-01-01") and game_date < pd.Timestamp("1995-01-01"):
+            return "LVR"  # Los Angeles Raiders → Las Vegas Raiders
+        # All other times, "LAR" means the Los Angeles Rams
         else:
             return "LAR"
     
-    # Handle St. Louis - Cardinals (1960-1987) vs Rams (1995-2015)
-    # Cardinals were in St. Louis 1960-1987, then moved to Phoenix
-    # Rams were in St. Louis 1995-2015, then moved back to LA
-    if code == "STL":
-        # Before 1995: St. Louis Cardinals → Arizona Cardinals
-        if date < pd.Timestamp("1995-01-01"):
-            return "ARI"
-        # 1995-2015: St. Louis Rams → Los Angeles Rams
+    # Handle St. Louis - Cardinals were there first, then Rams moved in
+    # St. Louis Cardinals: 1960-1987, then moved to Phoenix (became Arizona)
+    # St. Louis Rams: 1995-2015, then moved back to LA
+    if team_code == "STL":
+        # Before 1995, "STL" means the Cardinals
+        if game_date < pd.Timestamp("1995-01-01"):
+            return "ARI"  # St. Louis Cardinals → Arizona Cardinals
+        # 1995-2015, "STL" means the Rams
         else:
-            return "LAR"
+            return "LAR"  # St. Louis Rams → Los Angeles Rams
     
-    # Handle Houston Oilers/Texans special case
-    if code == "HOU":
-        return "TEN" if date < pd.Timestamp("1999-01-01") else "HOU"
+    # Handle Houston - the Oilers became the Titans, then Houston got a new team
+    # Houston Oilers: pre-1999 → became Tennessee Titans
+    # Houston Texans: 1999+ → new expansion team
+    if team_code == "HOU":
+        if game_date < pd.Timestamp("1999-01-01"):
+            return "TEN"  # Houston Oilers → Tennessee Titans
+        else:
+            return "HOU"  # Houston Texans (new team)
     
-    # Handle Baltimore - Colts (pre-1984) vs Ravens (1996+)
-    # Baltimore Colts moved to Indianapolis in 1984
-    # Baltimore Ravens created in 1996 (from Browns relocation)
-    # Gap: 1984-1995 (no team in Baltimore)
-    if code == "BAL":
-        if date < pd.Timestamp("1984-01-01"):
+    # Handle Baltimore - Colts left, then Ravens arrived
+    # Baltimore Colts: pre-1984 → moved to Indianapolis
+    # Baltimore Ravens: 1996+ → new team (from Browns relocation)
+    if team_code == "BAL":
+        if game_date < pd.Timestamp("1984-01-01"):
             return "IND"  # Baltimore Colts → Indianapolis Colts
-        elif date < pd.Timestamp("1996-01-01"):
-            # Gap period - no team in Baltimore (1984-1995)
-            # If BAL appears here, it's likely an error, but map to IND for continuity
+        elif game_date < pd.Timestamp("1996-01-01"):
+            # Gap period (1984-1995) - no team in Baltimore
+            # If we see BAL here, it's probably an error, but map to IND for continuity
             return "IND"
         else:
-            return "BAL"  # Baltimore Ravens (1996+)
+            return "BAL"  # Baltimore Ravens (new team in 1996)
     
-    # Handle Dallas - Cowboys vs Chiefs (Dallas Texans 1960-1962)
-    # Since data starts in 1970, DAL is always Cowboys
-    # But if DAL appears before 1963, it could be Chiefs (Dallas Texans)
-    # For 1970+ data, DAL is always Cowboys, so no mapping needed
-    # Keeping this for completeness if pre-1970 data exists
-    if code == "DAL":
-        # Dallas Cowboys started 1960, Chiefs (Dallas Texans) moved to KC 1963
-        # Since our data is 1970+, DAL is always Cowboys
+    # Handle Dallas - Cowboys vs Chiefs confusion
+    # Dallas Cowboys: 1960+ (always in Dallas)
+    # Dallas Texans: 1960-1962 (became Kansas City Chiefs in 1963)
+    # Since our data starts in 1970, DAL is always the Cowboys
+    if team_code == "DAL":
         return "DAL"  # No change needed for 1970+ data
     
-    return code
+    # If we don't recognize the code, just return it as-is
+    # (might be a valid current team code)
+    return team_code
 
 def _z(x: pd.Series) -> pd.Series:
     """Calculate z-scores for a series."""
@@ -623,22 +653,28 @@ def calculate_elo_ratings(df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate ELO ratings for all teams based on game results.
     
+    This is the heart of the ELO system - it processes every game and updates
+    team ratings based on outcomes. Think of it like a chess rating system
+    adapted for football, where beating a strong team gives you more points
+    than beating a weak team.
+    
     Features:
-    - Margin of victory scaling (optional)
-    - Season reset/regression to mean (optional)
-    - League mean tracking
+    - Margin of victory scaling (blowouts matter more than close wins)
+    - Season reset/regression to mean (prevents ratings from drifting too far)
+    - League mean tracking (monitors overall league strength over time)
     
     Args:
-        df: DataFrame with game data
+        df: DataFrame with game data (each game appears twice - once per team)
         
     Returns:
-        DataFrame with ELO calculations
+        DataFrame with ELO calculations for every game
     """
     print("Calculating ELO ratings...")
     
-    # Prepare games data
-    # Note: Each game appears twice in the database (once per team)
-    # We need to deduplicate to process each game only once
+    # Step 1: Prepare the game data
+    # Our data has each game listed twice (once for each team's perspective)
+    # We need to deduplicate so we only process each game once
+    print("  Preparing game data...")
     games_prep = (
         df.rename(columns={"Team_FR": "TeamA", "Opp_FR": "TeamB"})
         .sort_values(["Date", "GameID"])[
@@ -648,167 +684,256 @@ def calculate_elo_ratings(df: pd.DataFrame) -> pd.DataFrame:
         .reset_index(drop=True)
     )
     
-    # Deduplicate: Create a unique game key from Date and sorted team pair
+    # Step 2: Remove duplicate games
+    # Create a unique key for each game by combining date and team names
+    # This way we can identify and remove the duplicate entries
+    def create_game_key(row):
+        """Create a unique identifier for each game."""
+        teams_sorted = sorted([row['TeamA'], row['TeamB']])
+        return f"{row['Date']}_{teams_sorted[0]}_{teams_sorted[1]}"
+    
+    games_prep['GameKey'] = games_prep.apply(create_game_key, axis=1)
+    original_row_count = len(games_prep)
+    
     # Keep only the first occurrence of each unique game
-    # Note: Each game appears twice in the database (once per team), so we deduplicate here
-    games_prep['GameKey'] = (
-        games_prep['Date'].astype(str) + '_' + 
-        games_prep[['TeamA', 'TeamB']].apply(lambda x: '_'.join(sorted([x['TeamA'], x['TeamB']])), axis=1)
-    )
-    original_count = len(games_prep)
-    games = games_prep.drop_duplicates(subset=['GameKey'], keep='first').drop(columns=['GameKey'])
+    unique_games = games_prep.drop_duplicates(subset=['GameKey'], keep='first').drop(columns=['GameKey'])
     
-    # Verify all teams appear in at least one column
-    teams_in_a = set(games['TeamA'].unique())
-    teams_in_b = set(games['TeamB'].unique())
-    all_teams = teams_in_a.union(teams_in_b)
-    only_in_a = teams_in_a - teams_in_b
-    only_in_b = teams_in_b - teams_in_a
+    # Step 3: Verify data quality
+    # Make sure all teams appear in both columns (this catches data issues)
+    teams_as_team_a = set(unique_games['TeamA'].unique())
+    teams_as_team_b = set(unique_games['TeamB'].unique())
+    all_unique_teams = teams_as_team_a.union(teams_as_team_b)
     
-    if only_in_a or only_in_b:
-        print(f"  Warning: Some teams only appear in one column after deduplication:")
-        if only_in_a:
-            print(f"    Only in TeamA: {sorted(only_in_a)}")
-        if only_in_b:
-            print(f"    Only in TeamB: {sorted(only_in_b)}")
+    teams_only_in_a = teams_as_team_a - teams_as_team_b
+    teams_only_in_b = teams_as_team_b - teams_as_team_a
     
-    print(f"  Deduplicated games: {original_count} rows -> {len(games)} unique games")
-    print(f"  Total unique teams: {len(all_teams)} (TeamA: {len(teams_in_a)}, TeamB: {len(teams_in_b)})")
+    if teams_only_in_a or teams_only_in_b:
+        print(f"  [WARNING] Some teams only appear in one column (possible data issue):")
+        if teams_only_in_a:
+            print(f"           Only in TeamA column: {sorted(teams_only_in_a)}")
+        if teams_only_in_b:
+            print(f"           Only in TeamB column: {sorted(teams_only_in_b)}")
     
-    # Initialize ratings and track league mean
-    ratings: Dict[str, float] = {}
-    season_end_ratings: Dict[int, Dict[str, float]] = {}  # Track end-of-season ratings
-    league_means: List[Dict] = []  # Track league-wide mean ELO
+    print(f"  [OK] Deduplicated: {original_row_count:,} rows → {len(unique_games):,} unique games")
+    print(f"  [OK] Found {len(all_unique_teams)} unique teams")
     
-    def get_elo(team: str) -> float:
-        return ratings.get(team, config.START_ELO)
+    # Step 4: Initialize the rating system
+    # Start all teams at the baseline ELO rating
+    current_ratings = {}  # Dictionary: team_name -> current_elo_rating
+    ratings_at_end_of_season = {}  # Track ratings at end of each season
+    league_average_over_time = []  # Track how the league average changes
     
-    def calculate_mov_factor(point_diff: float, ra_eff: float, rb_eff: float) -> float:
-        """Calculate margin of victory scaling factor."""
+    def get_current_rating(team_name: str) -> float:
+        """Get a team's current ELO rating, or default to starting value if new team."""
+        return current_ratings.get(team_name, config.START_ELO)
+    
+    def calculate_margin_of_victory_factor(point_difference: float, 
+                                         team_a_effective_elo: float, 
+                                         team_b_effective_elo: float) -> float:
+        """
+        Calculate how much the margin of victory should affect the rating change.
+        
+        A 30-point blowout should matter more than a 3-point squeaker, but only
+        if the teams were evenly matched. Beating a weak team by 30 doesn't
+        mean as much as beating a strong team by 30.
+        """
         if not config.USE_MARGIN_OF_VICTORY:
+            return 1.0  # Don't scale by margin of victory
+        
+        # Ties get no margin-of-victory bonus (but still get ELO change from the tie itself)
+        if point_difference == 0:
             return 1.0
         
-        # Special case: ties (point_diff == 0) should have MOV_Factor = 1.0
-        # This ensures ties still cause ELO movement based on expected vs actual outcome
-        if point_diff == 0:
-            return 1.0
-        
-        margin = abs(point_diff)
+        margin = abs(point_difference)
         
         if config.MOV_SCALING_METHOD == "elo_standard":
-            # Standard ELO MOV formula
-            mov_factor = np.log(margin + 1) * (2.2 / ((abs(ra_eff - rb_eff) * 0.001 + 2.2)))
+            # The standard ELO formula for margin of victory
+            # Bigger margins matter more, but less so when teams are mismatched
+            elo_difference = abs(team_a_effective_elo - team_b_effective_elo)
+            mov_factor = np.log(margin + 1) * (2.2 / ((elo_difference * 0.001 + 2.2)))
         elif config.MOV_SCALING_METHOD == "log":
-            mov_factor = np.log(margin + 1) / np.log(21)  # Normalize to ~1 for 20-point margin
+            # Logarithmic scaling: diminishing returns on bigger margins
+            mov_factor = np.log(margin + 1) / np.log(21)  # Normalized so 20 points ≈ factor of 1
         elif config.MOV_SCALING_METHOD == "sqrt":
-            mov_factor = np.sqrt(margin) / np.sqrt(20)  # Normalize to ~1 for 20-point margin
+            # Square root scaling: moderate returns on bigger margins
+            mov_factor = np.sqrt(margin) / np.sqrt(20)  # Normalized so 20 points ≈ factor of 1
         else:
             mov_factor = 1.0
         
-        # Cap the factor to prevent extreme values
+        # Cap the factor to prevent extreme values from dominating
         return min(mov_factor, 2.0)
     
-    def apply_season_reset(season: int):
-        """Apply regression to mean at season start."""
+    def apply_season_reset_at_start_of_new_season(new_season: int):
+        """
+        Apply regression to the mean at the start of a new season.
+        
+        This prevents ratings from drifting too far from the baseline over time.
+        A lambda of 0.15 means we move 15% of the way back toward the starting
+        ELO (1000) at the start of each season.
+        """
         if not config.USE_SEASON_RESET:
             return
         
-        lambda_val = config.SEASON_RESET_LAMBDA
-        for team in ratings:
-            elo_end = ratings[team]
-            elo_new = (1 - lambda_val) * elo_end + lambda_val * config.START_ELO
-            ratings[team] = elo_new
+        regression_factor = config.SEASON_RESET_LAMBDA
+        
+        for team_name in current_ratings:
+            rating_at_end_of_last_season = current_ratings[team_name]
+            
+            # Blend the end-of-season rating with the starting rating
+            # Higher lambda = more regression toward the mean
+            new_rating = ((1 - regression_factor) * rating_at_end_of_last_season + 
+                         regression_factor * config.START_ELO)
+            
+            current_ratings[team_name] = new_rating
     
-    # Process each game
-    rows = []
-    current_season = None
+    # Step 5: Process each game chronologically
+    # This is where the magic happens - we update ratings after each game
+    game_results = []
+    current_season_being_processed = None
     
-    for _, g in games.iterrows():
-        season = int(g["Season"])
+    print("  Processing games chronologically...")
+    for _, game_row in unique_games.iterrows():
+        season = int(game_row["Season"])
         
-        # Apply season reset if we're starting a new season
-        if current_season is not None and season != current_season:
-            # Store end-of-season ratings
-            season_end_ratings[current_season] = ratings.copy()
-            # Apply regression to mean
-            apply_season_reset(season)
+        # Check if we're starting a new season
+        if current_season_being_processed is not None and season != current_season_being_processed:
+            # Save the ratings from the end of the previous season
+            ratings_at_end_of_season[current_season_being_processed] = current_ratings.copy()
+            # Apply the season reset (regression toward mean)
+            apply_season_reset_at_start_of_new_season(season)
         
-        current_season = season
+        current_season_being_processed = season
         
-        a, b = g["TeamA"], g["TeamB"]
-        Ra, Rb = get_elo(a), get_elo(b)
+        # Get the two teams playing
+        team_a_name = game_row["TeamA"]
+        team_b_name = game_row["TeamB"]
         
-        # Home field advantage
-        hfa_a = config.HOME_FIELD_ADVANTAGE if g["A_Home"] and not g["B_Home"] else 0.0
-        hfa_b = config.HOME_FIELD_ADVANTAGE if g["B_Home"] and not g["A_Home"] else 0.0
-        Ra_eff, Rb_eff = Ra + hfa_a, Rb + hfa_b
+        # Get their current ELO ratings
+        team_a_rating = get_current_rating(team_a_name)
+        team_b_rating = get_current_rating(team_b_name)
         
-        # Expected scores
-        Ea = 1.0 / (1.0 + 10 ** ((Rb_eff - Ra_eff) / 400.0))
-        Eb = 1.0 - Ea
+        # Apply home field advantage
+        # Home teams get a boost to their effective rating
+        team_a_is_home = game_row["A_Home"] and not game_row["B_Home"]
+        team_b_is_home = game_row["B_Home"] and not game_row["A_Home"]
         
-        # Actual scores
-        Sa = 1.0 if g["Outcome"] == "W" else 0.5 if g["Outcome"] == "T" else 0.0
-        Sb = 1.0 - Sa if g["Outcome"] != "T" else 0.5
+        team_a_home_advantage = config.HOME_FIELD_ADVANTAGE if team_a_is_home else 0.0
+        team_b_home_advantage = config.HOME_FIELD_ADVANTAGE if team_b_is_home else 0.0
+        
+        team_a_effective_rating = team_a_rating + team_a_home_advantage
+        team_b_effective_rating = team_b_rating + team_b_home_advantage
+        
+        # Calculate expected win probability for Team A
+        # This is the core ELO formula: probability = 1 / (1 + 10^(rating_diff/400))
+        rating_difference = team_b_effective_rating - team_a_effective_rating
+        team_a_expected_win_probability = 1.0 / (1.0 + 10 ** (rating_difference / 400.0))
+        team_b_expected_win_probability = 1.0 - team_a_expected_win_probability
+        
+        # Determine actual outcome
+        # 1.0 = win, 0.5 = tie, 0.0 = loss
+        game_outcome = game_row["Outcome"]
+        if game_outcome == "W":
+            team_a_actual_score = 1.0
+            team_b_actual_score = 0.0
+        elif game_outcome == "T":
+            team_a_actual_score = 0.5
+            team_b_actual_score = 0.5
+        else:  # Loss
+            team_a_actual_score = 0.0
+            team_b_actual_score = 1.0
         
         # Calculate margin of victory factor
-        point_diff = g["TeamPoints"] - g["OppPoints"]
-        mov_factor = calculate_mov_factor(point_diff, Ra_eff, Rb_eff)
+        point_difference = game_row["TeamPoints"] - game_row["OppPoints"]
+        mov_scaling_factor = calculate_margin_of_victory_factor(
+            point_difference, 
+            team_a_effective_rating, 
+            team_b_effective_rating
+        )
         
-        # Rating changes with MOV scaling
-        delta_a = config.K_FACTOR * mov_factor * (Sa - Ea)
-        delta_b = config.K_FACTOR * mov_factor * (Sb - Eb)
+        # Calculate rating changes
+        # The change = K-factor × MOV-factor × (actual - expected)
+        # If you win when you were expected to lose, you gain a lot
+        # If you win when you were expected to win, you gain a little
+        team_a_rating_change = (config.K_FACTOR * mov_scaling_factor * 
+                                (team_a_actual_score - team_a_expected_win_probability))
+        team_b_rating_change = (config.K_FACTOR * mov_scaling_factor * 
+                                (team_b_actual_score - team_b_expected_win_probability))
         
-        Ra_new, Rb_new = Ra + delta_a, Rb + delta_b
-        ratings[a], ratings[b] = Ra_new, Rb_new
+        # Update the ratings
+        team_a_new_rating = team_a_rating + team_a_rating_change
+        team_b_new_rating = team_b_rating + team_b_rating_change
         
-        # Track league mean if enabled
+        current_ratings[team_a_name] = team_a_new_rating
+        current_ratings[team_b_name] = team_b_new_rating
+        
+        # Track league-wide average if enabled
+        # This helps us see if the league is getting stronger/weaker over time
         if config.TRACK_LEAGUE_MEAN:
-            league_mean = np.mean(list(ratings.values()))
-            league_means.append({
-                "Date": g["Date"],
+            average_rating_across_all_teams = np.mean(list(current_ratings.values()))
+            league_average_over_time.append({
+                "Date": game_row["Date"],
                 "Season": season,
-                "LeagueMean": league_mean,
-                "GameID": int(g["GameID"])
+                "LeagueMean": average_rating_across_all_teams,
+                "GameID": int(game_row["GameID"])
             })
         
-        rows.append({
-            "Date": g["Date"], "Season": season, "GameID": int(g["GameID"]),
-            "TeamA": a, "TeamB": b,
-            "A_Pre": Ra, "B_Pre": Rb, "A_Exp": Ea, "B_Exp": Eb,
-            "A_Act": Sa, "B_Act": Sb, "A_Delta": delta_a, "B_Delta": delta_b,
-            "A_Post": Ra_new, "B_Post": Rb_new,
-            "A_Home": g["A_Home"], "B_Home": g["B_Home"],
-            "A_Points": g["TeamPoints"], "B_Points": g["OppPoints"],
-            "PointDiff": point_diff,
-            "MOV_Factor": mov_factor,
-            "Outcome": g["Outcome"]
+        # Store all the details for this game
+        game_results.append({
+            "Date": game_row["Date"], 
+            "Season": season, 
+            "GameID": int(game_row["GameID"]),
+            "TeamA": team_a_name, 
+            "TeamB": team_b_name,
+            "A_Pre": team_a_rating, 
+            "B_Pre": team_b_rating, 
+            "A_Exp": team_a_expected_win_probability, 
+            "B_Exp": team_b_expected_win_probability,
+            "A_Act": team_a_actual_score, 
+            "B_Act": team_b_actual_score, 
+            "A_Delta": team_a_rating_change, 
+            "B_Delta": team_b_rating_change,
+            "A_Post": team_a_new_rating, 
+            "B_Post": team_b_new_rating,
+            "A_Home": game_row["A_Home"], 
+            "B_Home": game_row["B_Home"],
+            "A_Points": game_row["TeamPoints"], 
+            "B_Points": game_row["OppPoints"],
+            "PointDiff": point_difference,
+            "MOV_Factor": mov_scaling_factor,
+            "Outcome": game_outcome
         })
     
-    # Store final season's end ratings
-    if current_season is not None:
-        season_end_ratings[current_season] = ratings.copy()
+    # Save the final season's ratings
+    if current_season_being_processed is not None:
+        ratings_at_end_of_season[current_season_being_processed] = current_ratings.copy()
     
-    elo_games = pd.DataFrame(rows)
+    # Convert results to DataFrame
+    elo_games = pd.DataFrame(game_results)
     
-    # Store league mean tracking data as class attribute if needed
-    if config.TRACK_LEAGUE_MEAN and league_means:
-        league_mean_df = pd.DataFrame(league_means)
-        # Create a unique index by combining Date and GameID
-        league_mean_df["DateGameID"] = league_mean_df["Date"].astype(str) + "_" + league_mean_df["GameID"].astype(str)
-        elo_games["DateGameID"] = elo_games["Date"].astype(str) + "_" + elo_games["GameID"].astype(str)
+    # Merge in league mean data if we tracked it
+    if config.TRACK_LEAGUE_MEAN and league_average_over_time:
+        league_mean_dataframe = pd.DataFrame(league_average_over_time)
+        # Create a unique key to match games with their league mean
+        league_mean_dataframe["DateGameID"] = (
+            league_mean_dataframe["Date"].astype(str) + "_" + 
+            league_mean_dataframe["GameID"].astype(str)
+        )
+        elo_games["DateGameID"] = (
+            elo_games["Date"].astype(str) + "_" + 
+            elo_games["GameID"].astype(str)
+        )
         elo_games = elo_games.merge(
-            league_mean_df[["DateGameID", "LeagueMean"]],
+            league_mean_dataframe[["DateGameID", "LeagueMean"]],
             on="DateGameID",
             how="left"
         )
         elo_games = elo_games.drop(columns=["DateGameID"])
     
-    print(f"Calculated ELO ratings for {len(elo_games)} games")
+    print(f"  [OK] Calculated ELO ratings for {len(elo_games):,} games")
     if config.USE_MARGIN_OF_VICTORY:
-        print(f"  Using margin of victory scaling: {config.MOV_SCALING_METHOD}")
+        print(f"  [OK] Using margin of victory scaling: {config.MOV_SCALING_METHOD}")
     if config.USE_SEASON_RESET:
-        print(f"  Using season reset with lambda={config.SEASON_RESET_LAMBDA}")
+        print(f"  [OK] Using season reset with lambda={config.SEASON_RESET_LAMBDA}")
     
     return elo_games
 
@@ -816,84 +941,102 @@ def create_team_timeline(elo_games: pd.DataFrame) -> pd.DataFrame:
     """
     Create a timeline of ELO ratings for each team.
     
+    This reorganizes the game-by-game data into a team-centric view,
+    where each row represents one team's perspective of a game. This makes
+    it much easier to analyze individual team performance over time.
+    
     Args:
-        elo_games: DataFrame with ELO game data
+        elo_games: DataFrame with ELO game data (each game has TeamA and TeamB)
         
     Returns:
-        DataFrame with team ELO timeline
+        DataFrame with team ELO timeline (each row is one team in one game)
     """
     print("Creating team ELO timeline...")
     
-    # Create timeline for each team
-    timeline_rows = []
+    # We'll build a list of timeline entries, one per team per game
+    timeline_entries = []
     
-    # Get all unique teams from both TeamA and TeamB columns
-    all_teams = pd.concat([elo_games['TeamA'], elo_games['TeamB']]).unique()
+    # Get all unique teams (they might appear as either TeamA or TeamB)
+    all_teams_in_data = pd.concat([elo_games['TeamA'], elo_games['TeamB']]).unique()
     
-    for team in all_teams:
-        # Get all games for this team
-        team_games = elo_games[
-            (elo_games['TeamA'] == team) | (elo_games['TeamB'] == team)
+    # For each team, find all their games and create timeline entries
+    for team_name in all_teams_in_data:
+        # Find all games where this team played (either as TeamA or TeamB)
+        games_for_this_team = elo_games[
+            (elo_games['TeamA'] == team_name) | (elo_games['TeamB'] == team_name)
         ].sort_values('Date')
         
-        for _, game in team_games.iterrows():
-            if game['TeamA'] == team:
-                # Derive Outcome from Actual value for TeamA
-                a_act = game['A_Act']
-                if a_act == 1.0:
-                    outcome = 'W'
-                elif a_act == 0.5:
-                    outcome = 'T'
-                else:
-                    outcome = 'L'
+        # Process each game from this team's perspective
+        for _, game_row in games_for_this_team.iterrows():
+            # Figure out if this team was TeamA or TeamB
+            if game_row['TeamA'] == team_name:
+                # This team was TeamA
+                opponent_name = game_row['TeamB']
+                team_was_home = game_row['A_Home']
                 
-                timeline_rows.append({
-                    'Date': game['Date'],
-                    'Season': game['Season'],
-                    'Team': team,
-                    'Opponent': game['TeamB'],
-                    'Elo_Pre': game['A_Pre'],
-                    'Elo_Post': game['A_Post'],
-                    'Elo_Change': game['A_Delta'],
-                    'Expected': game['A_Exp'],
-                    'Actual': game['A_Act'],
-                    'Home': game['A_Home'],
-                    'Points_For': game['A_Points'],
-                    'Points_Against': game['B_Points'],
-                    'Outcome': outcome
+                # Convert the numeric outcome (1.0, 0.5, 0.0) to a letter (W, T, L)
+                actual_outcome_value = game_row['A_Act']
+                if actual_outcome_value == 1.0:
+                    outcome_letter = 'W'
+                elif actual_outcome_value == 0.5:
+                    outcome_letter = 'T'
+                else:
+                    outcome_letter = 'L'
+                
+                # Create timeline entry from TeamA's perspective
+                timeline_entries.append({
+                    'Date': game_row['Date'],
+                    'Season': game_row['Season'],
+                    'Team': team_name,
+                    'Opponent': opponent_name,
+                    'Elo_Pre': game_row['A_Pre'],
+                    'Elo_Post': game_row['A_Post'],
+                    'Elo_Change': game_row['A_Delta'],
+                    'Expected': game_row['A_Exp'],
+                    'Actual': game_row['A_Act'],
+                    'Home': team_was_home,
+                    'Points_For': game_row['A_Points'],
+                    'Points_Against': game_row['B_Points'],
+                    'Outcome': outcome_letter
                 })
             else:
-                # Derive Outcome from Actual value for TeamB
-                b_act = game['B_Act']
-                if b_act == 1.0:
-                    outcome = 'W'
-                elif b_act == 0.5:
-                    outcome = 'T'
-                else:
-                    outcome = 'L'
+                # This team was TeamB
+                opponent_name = game_row['TeamA']
+                team_was_home = game_row['B_Home']
                 
-                timeline_rows.append({
-                    'Date': game['Date'],
-                    'Season': game['Season'],
-                    'Team': team,
-                    'Opponent': game['TeamA'],
-                    'Elo_Pre': game['B_Pre'],
-                    'Elo_Post': game['B_Post'],
-                    'Elo_Change': game['B_Delta'],
-                    'Expected': game['B_Exp'],
-                    'Actual': game['B_Act'],
-                    'Home': game['B_Home'],
-                    'Points_For': game['B_Points'],
-                    'Points_Against': game['A_Points'],
-                    'Outcome': outcome
+                # Convert the numeric outcome to a letter
+                actual_outcome_value = game_row['B_Act']
+                if actual_outcome_value == 1.0:
+                    outcome_letter = 'W'
+                elif actual_outcome_value == 0.5:
+                    outcome_letter = 'T'
+                else:
+                    outcome_letter = 'L'
+                
+                # Create timeline entry from TeamB's perspective
+                timeline_entries.append({
+                    'Date': game_row['Date'],
+                    'Season': game_row['Season'],
+                    'Team': team_name,
+                    'Opponent': opponent_name,
+                    'Elo_Pre': game_row['B_Pre'],
+                    'Elo_Post': game_row['B_Post'],
+                    'Elo_Change': game_row['B_Delta'],
+                    'Expected': game_row['B_Exp'],
+                    'Actual': game_row['B_Act'],
+                    'Home': team_was_home,
+                    'Points_For': game_row['B_Points'],
+                    'Points_Against': game_row['A_Points'],
+                    'Outcome': outcome_letter
                 })
     
-    timeline = pd.DataFrame(timeline_rows).sort_values(['Team', 'Date'])
+    # Convert to DataFrame and sort by team and date
+    timeline = pd.DataFrame(timeline_entries).sort_values(['Team', 'Date'])
     
-    # Add rolling features
+    # Add rolling statistics (moving averages, etc.) to smooth out the data
     timeline = add_rolling_features(timeline, config.ROLLING_WINDOW_MONTHS)
     
-    print(f"Created timeline with {len(timeline)} records for {timeline['Team'].nunique()} teams")
+    print(f"  [OK] Created timeline with {len(timeline):,} game records for {timeline['Team'].nunique()} teams")
     
     return timeline
 
@@ -4357,122 +4500,164 @@ def export_team_story_card(season_team_summary: pd.DataFrame, luck_df: pd.DataFr
 # =============================================================================
 
 def main():
-    """Main execution function with plot toggles."""
+    """
+    Main execution function - this is where everything happens!
     
-    print("=" * 60)
-    print("NFL ELO Analysis Tool")
-    print("=" * 60)
+    This function orchestrates the entire analysis pipeline:
+    1. Load the game data
+    2. Calculate ELO ratings for all teams
+    3. Create timelines and summaries
+    4. Calculate advanced metrics (luck, parity, calibration, etc.)
+    5. Generate visualizations
+    6. Export results
     
-    # Load and process data
+    You can customize what runs by modifying the config object.
+    """
+    
+    print("=" * 70)
+    print(" " * 20 + "NFL ELO ANALYSIS TOOL")
+    print("=" * 70)
+    
+    # Step 1: Load and process the raw data
     try:
-        print("\nLoading and processing data...")
-        raw_data = load_nfl_data()
-        elo_games = calculate_elo_ratings(raw_data)
-        timeline = create_team_timeline(elo_games)
-        team_monthly_elo = create_monthly_elo_data(timeline)
+        print("\n" + "-" * 70)
+        print("STEP 1: Loading and Processing Data")
+        print("-" * 70)
+        raw_game_data = load_nfl_data()
+        elo_games = calculate_elo_ratings(raw_game_data)
+        team_timeline = create_team_timeline(elo_games)
+        monthly_elo_data = create_monthly_elo_data(team_timeline)
         
-        print(f"\nData Summary:")
-        print(f"  Total games: {len(elo_games)}")
-        print(f"  Teams: {timeline['Team'].nunique()}")
-        print(f"  Date range: {timeline['Date'].min().date()} to {timeline['Date'].max().date()}")
-        print(f"  Seasons: {timeline['Season'].min()} to {timeline['Season'].max()}")
-        print(f"  Monthly data points: {len(team_monthly_elo)}")
+        print("\n" + " " * 4 + "Data Summary")
+        print(" " * 4 + "-" * 66)
+        print(f"  Total games processed:     {len(elo_games):>10,}")
+        print(f"  Unique teams:              {team_timeline['Team'].nunique():>10}")
+        print(f"  Date range:                {str(team_timeline['Date'].min().date()):>10} to {team_timeline['Date'].max().date()}")
+        print(f"  Seasons covered:           {team_timeline['Season'].min():>10} to {team_timeline['Season'].max()}")
+        print(f"  Monthly data points:       {len(monthly_elo_data):>10,}")
         
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-        print("Please ensure the data file exists in the current directory.")
+    except FileNotFoundError as error:
+        print(f"\n[ERROR] {error}")
+        print("        Please ensure 'NFLELO_data.xlsx' exists in the current directory.")
         return
-    except Exception as e:
-        print(f"Error processing data: {e}")
+    except Exception as error:
+        print(f"\n[ERROR] Processing data failed: {error}")
+        import traceback
+        traceback.print_exc()
         return
     
-    # Display configuration
-    print(f"\nPlot Configuration:")
+    # Step 2: Show what plots will be generated
+    print("\n" + "-" * 70)
+    print("STEP 2: Plot Configuration")
+    print("-" * 70)
     enabled_plots = [name for name, enabled in config.PLOTS_ENABLED.items() if enabled]
     disabled_plots = [name for name, enabled in config.PLOTS_ENABLED.items() if not enabled]
     
     if enabled_plots:
-        print(f"  Enabled: {', '.join(enabled_plots)}")
+        enabled_list = ', '.join(enabled_plots[:5])
+        if len(enabled_plots) > 5:
+            enabled_list += f" and {len(enabled_plots)-5} more"
+        print(f"  Enabled plots ({len(enabled_plots)}):  {enabled_list}")
     if disabled_plots:
-        print(f"  Disabled: {', '.join(disabled_plots)}")
+        disabled_list = ', '.join(disabled_plots[:5])
+        if len(disabled_plots) > 5:
+            disabled_list += f" and {len(disabled_plots)-5} more"
+        print(f"  Disabled plots ({len(disabled_plots)}): {disabled_list}")
     
-    print(f"\nTo toggle plots, use:")
-    print(f"  config.toggle_plot('plot_name')")
-    print(f"  config.disable_all_plots()")
-    print(f"  config.enable_all_plots()")
+    print("\n  Configuration options:")
+    print("    config.toggle_plot('plot_name')")
+    print("    config.disable_all_plots()")
+    print("    config.enable_all_plots()")
     
-    # Generate additional analysis
-    print(f"\nGenerating additional analysis...")
-    summary_stats = calculate_team_summary_stats(timeline)
-    biggest_swings = find_biggest_swings(timeline, top_n=20)
+    # Step 3: Calculate summary statistics
+    print("\n" + "-" * 70)
+    print("STEP 3: Generating Summary Statistics")
+    print("-" * 70)
+    team_summary_statistics = calculate_team_summary_stats(team_timeline)
+    biggest_elo_swings = find_biggest_swings(team_timeline, top_n=20)
     
     # Use the original elo_games data structure for calibration and upset analysis
     # (already created in calculate_elo_ratings)
     
-    # Create comprehensive parity analysis
-    season_team_summary = create_season_team_summary(timeline)
+    # Step 4: Create comprehensive analysis metrics
+    print("\n" + "-" * 70)
+    print("STEP 4: Calculating Advanced Metrics")
+    print("-" * 70)
+    season_team_summary = create_season_team_summary(team_timeline)
     season_conference_summary = create_season_conference_summary(season_team_summary)
-    luck_index = build_luck_index(timeline, elo_games)
-    average_luck_by_team = calculate_average_luck_by_team(luck_index)
+    luck_index_data = build_luck_index(team_timeline, elo_games)
+    average_luck_by_team = calculate_average_luck_by_team(luck_index_data)
     
-    # Save luck index data to CSV (full team-season data with close-game luck)
+    # Save luck index data to CSV files
     luck_index_csv_path = config.OUTPUT_DIR / 'luck_index_full.csv'
-    luck_index.to_csv(luck_index_csv_path, index=False)
-    print(f"Saved full luck index data to {luck_index_csv_path}")
+    luck_index_data.to_csv(luck_index_csv_path, index=False)
+    print(f"  [OK] Saved luck index data: {luck_index_csv_path.name}")
     
-    # Save average luck data to CSV
     avg_luck_csv_path = config.OUTPUT_DIR / 'average_luck_by_team.csv'
     average_luck_by_team.to_csv(avg_luck_csv_path, index=False)
-    print(f"Saved average luck scores to {avg_luck_csv_path}")
+    print(f"  [OK] Saved average luck scores: {avg_luck_csv_path.name}")
     
-    calibration_curve, calibration_perf = build_calibration_bins(elo_games)
+    # Calculate calibration and forecast quality metrics
+    calibration_curve, calibration_performance = build_calibration_bins(elo_games)
     brier_decomposition = calculate_brier_decomposition(elo_games)
     upset_map = build_upset_map(elo_games, elo_bin_edges=list(range(0, 401, 25)), min_bin_n=30)
-    sos_data = build_sos(season_team_summary, timeline, elo_games, weighting="home_adj")
+    
+    # Calculate strength of schedule and parity metrics
+    strength_of_schedule_data = build_sos(season_team_summary, team_timeline, elo_games, weighting="home_adj")
     parity_metrics = build_parity_metrics_clean(season_team_summary, elo_games)
     
-    # Additional metrics
-    season_team_summary = calculate_volatility_and_dynasty(timeline, season_team_summary)
-    sharpness_metrics = calculate_forecast_sharpness(elo_games)
+    # Calculate additional team metrics
+    season_team_summary = calculate_volatility_and_dynasty(team_timeline, season_team_summary)
+    forecast_sharpness_metrics = calculate_forecast_sharpness(elo_games)
     division_summary = create_division_summary(season_team_summary)
     
-    # Generate plots based on configuration
-    print(f"\nGenerating plots...")
+    # Step 5: Generate visualizations
+    print("\n" + "-" * 70)
+    print("STEP 5: Generating Visualizations")
+    print("-" * 70)
     
-    # Core analysis plots
-    plot_league_tapestry(team_monthly_elo)
-    plot_team_small_multiples(team_monthly_elo)
-    plot_season_ladder(timeline)
+    # Core visualizations - the main plots everyone wants to see
+    plot_league_tapestry(monthly_elo_data)
+    plot_team_small_multiples(monthly_elo_data)
+    plot_season_ladder(team_timeline)
     
-    # Additional analysis plots
-    plot_team_summary_stats(summary_stats)
-    plot_biggest_swings(biggest_swings)
+    # Team performance analysis plots
+    plot_team_summary_stats(team_summary_statistics)
+    plot_biggest_swings(biggest_elo_swings)
+    
+    # League-wide analysis plots
     plot_parity_metrics(parity_metrics)
     plot_combined_parity(parity_metrics)
-    
-    # New plots from original script
     plot_season_delta_normalized(season_team_summary)
     plot_conference_balance(season_conference_summary)
-    plot_luck_index(luck_index)
-    plot_calibration_and_brier(calibration_curve, calibration_perf)
-    plot_murphy_diagram(sharpness_metrics, brier_decomposition)
-    plot_brier_score_by_season(brier_decomposition)
-    plot_logloss_by_season(calibration_perf)
-    plot_any_given_sunday_line(upset_map)
-    plot_luck_timelines(luck_index)
-    plot_sos_vs_elo(sos_data)
-    export_team_story_card(season_team_summary, luck_index, timeline)
     
-    # Run sensitivity analysis
-    print("\n" + "=" * 60)
-    print("Sensitivity Analysis")
-    print("=" * 60)
-    sensitivity_results = run_sensitivity_analysis(raw_data)
+    # Luck and calibration analysis plots
+    plot_luck_index(luck_index_data)
+    plot_calibration_and_brier(calibration_curve, calibration_performance)
+    plot_murphy_diagram(forecast_sharpness_metrics, brier_decomposition)
+    plot_brier_score_by_season(brier_decomposition)
+    plot_logloss_by_season(calibration_performance)
+    plot_any_given_sunday_line(upset_map)
+    plot_luck_timelines(luck_index_data)
+    
+    # Strength of schedule and team story visualizations
+    plot_sos_vs_elo(strength_of_schedule_data)
+    export_team_story_card(season_team_summary, luck_index_data, team_timeline)
+    
+    # Step 6: Run sensitivity analysis (tests different parameter combinations)
+    print("\n" + "=" * 70)
+    print("STEP 6: Sensitivity Analysis")
+    print("=" * 70)
+    print("  Testing different ELO parameter combinations to find optimal settings...")
+    sensitivity_results = run_sensitivity_analysis(raw_game_data)
     plot_sensitivity_analysis_table(sensitivity_results)
     
-    # Export comprehensive CSV with all data
+    # Step 7: Export comprehensive data
+    print("\n" + "-" * 70)
+    print("STEP 7: Exporting Comprehensive Data")
+    print("-" * 70)
     comprehensive_data = export_comprehensive_data_csv(
-        timeline, elo_games, season_team_summary, luck_index, sos_data
+        team_timeline, elo_games, season_team_summary, luck_index_data, strength_of_schedule_data
     )
     
     # Add more plot calls here as needed
@@ -4481,37 +4666,52 @@ def main():
     # plot_conference_balance(timeline)
     # etc.
     
-    # Display summary statistics
-    print(f"\nSummary Statistics:")
-    print(f"  Current top 5 teams by ELO:")
-    for i, (_, team) in enumerate(summary_stats.head(5).iterrows()):
-        print(f"    {i+1}. {team['Team']}: {team['Current_ELO']:.0f} ELO")
+    # Step 8: Display key findings
+    print("\n" + "=" * 70)
+    print("STEP 8: Key Findings")
+    print("=" * 70)
     
-    print(f"\n  Biggest ELO swing:")
-    if not biggest_swings.empty:
-        biggest = biggest_swings.iloc[0]
-        print(f"    {biggest['Team']} vs {biggest['Opponent']} on {biggest['Date'].strftime('%Y-%m-%d')}: {biggest['Elo_Change']:+.0f} ELO")
+    print("\n" + " " * 4 + "Current Top 5 Teams by ELO Rating")
+    print(" " * 4 + "-" * 66)
+    for rank, (_, team_row) in enumerate(team_summary_statistics.head(5).iterrows(), 1):
+        print(f"  {rank:2d}. {team_row['Team']:3s}  {team_row['Current_ELO']:>7.0f} ELO")
     
-    print(f"\n  League parity (most recent season):")
+    print("\n" + " " * 4 + "Biggest ELO Swing in History")
+    print(" " * 4 + "-" * 66)
+    if not biggest_elo_swings.empty:
+        biggest_swing = biggest_elo_swings.iloc[0]
+        print(f"  {biggest_swing['Team']} vs {biggest_swing['Opponent']}")
+        print(f"  Date: {biggest_swing['Date'].strftime('%B %d, %Y')}")
+        print(f"  ELO Change: {biggest_swing['Elo_Change']:+.0f} points")
+    
+    print("\n" + " " * 4 + "League Parity (Most Recent Season)")
+    print(" " * 4 + "-" * 66)
     if not parity_metrics.empty:
-        recent = parity_metrics.iloc[-1]
-        if 'Dispersion_STD' in recent and 'ELO_Range' in recent:
-            print(f"    Season {recent['Season']}: ELO Std = {recent['Dispersion_STD']:.1f}, Range = {recent['ELO_Range']:.0f}")
-        elif 'Parity_Index' in recent:
-            print(f"    Season {recent['Season']}: Parity Index = {recent['Parity_Index']:.2f}")
+        most_recent_season = parity_metrics.iloc[-1]
+        if 'Dispersion_STD' in most_recent_season and 'ELO_Range' in most_recent_season:
+            print(f"  Season: {most_recent_season['Season']}")
+            print(f"  ELO Standard Deviation: {most_recent_season['Dispersion_STD']:>6.1f}")
+            print(f"  ELO Range:              {most_recent_season['ELO_Range']:>6.0f} points")
+        elif 'Parity_Index' in most_recent_season:
+            print(f"  Season: {most_recent_season['Season']}")
+            print(f"  Parity Index: {most_recent_season['Parity_Index']:>6.2f}")
     
-    print(f"\n  Average Luck Scores by Team (across all seasons):")
-    print(f"    Most Lucky Teams (Top 5):")
-    for i, (_, team) in enumerate(average_luck_by_team.head(5).iterrows()):
-        print(f"      {i+1}. {team['Team']}: {team['Avg_Luck_Index']:+.2f} per season "
-              f"({team['Seasons']:.0f} seasons, {team['Overall_Luck_Index']:+.1f} total)")
-    print(f"    Least Lucky Teams (Bottom 5):")
-    for i, (_, team) in enumerate(average_luck_by_team.tail(5).iterrows()):
-        print(f"      {i+1}. {team['Team']}: {team['Avg_Luck_Index']:+.2f} per season "
-              f"({team['Seasons']:.0f} seasons, {team['Overall_Luck_Index']:+.1f} total)")
+    print("\n" + " " * 4 + "Luck Analysis (Average Across All Seasons)")
+    print(" " * 4 + "-" * 66)
+    print("  Most Lucky Teams (Top 5):")
+    for rank, (_, team_row) in enumerate(average_luck_by_team.head(5).iterrows(), 1):
+        print(f"    {rank:2d}. {team_row['Team']:3s}  {team_row['Avg_Luck_Index']:>+6.2f} per season "
+              f"({team_row['Seasons']:.0f} seasons, {team_row['Overall_Luck_Index']:>+6.1f} total)")
+    print("  Least Lucky Teams (Bottom 5):")
+    for rank, (_, team_row) in enumerate(average_luck_by_team.tail(5).iterrows(), 1):
+        print(f"    {rank:2d}. {team_row['Team']:3s}  {team_row['Avg_Luck_Index']:>+6.2f} per season "
+              f"({team_row['Seasons']:.0f} seasons, {team_row['Overall_Luck_Index']:>+6.1f} total)")
     
-    print(f"\nAnalysis complete!")
-    print(f"Output files saved to: {config.OUTPUT_DIR.absolute()}")
+    print("\n" + "=" * 70)
+    print(" " * 25 + "ANALYSIS COMPLETE")
+    print("=" * 70)
+    print(f"  Output directory: {config.OUTPUT_DIR.absolute()}")
+    print("=" * 70)
 
 if __name__ == "__main__":
     main()
