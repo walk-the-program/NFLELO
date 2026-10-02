@@ -2,7 +2,7 @@
 
 This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
 
-Last updated: 2026-10-02
+Last updated: 2026-10-02 (Elo v2 round)
 
 ## What this project is
 
@@ -15,19 +15,24 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 
 ## What exists today (as of 2026-10-02)
 
-| Path | What it is |
+**Elo v2, the current system.** `scripts/build.py` pulls nflverse, rebuilds `data/games.csv` (1970 onward), runs Elo, and writes `outputs/` (per-game ratings, current ratings JSON, model report). Details are in `context/data-and-elo.md`.
+
+**Legacy 2025 analysis.** Everything below now lives in `legacy_2025/`. The pipeline still reads the 1970-1998 games from its spreadsheet, so the folder must stay.
+
+| Path (inside `legacy_2025/`) | What it is |
 |---|---|
 | `NFL_ELO_organized.py` | The entire pipeline in one file (~4,500 lines): data load, Elo, metrics, and plots. Configured through the `NFLConfig` class. |
-| `NFLELO_data.xlsx` | Hand-built game log, 26,214 team-game rows from 1970 to 2025. Columns: GameID, Team, Date, Day, Game Number, Week, Hosting, Opp, Result. |
+| `NFLELO_data.xlsx` | Still the source for 1970-1998. Hand-built game log, 26,214 team-game rows from 1970 to 2025. Columns: GameID, Team, Date, Day, Game Number, Week, Hosting, Opp, Result. |
 | `NFL Elo Analysis 1970-2024.pdf`, `LaTeX Files/main.tex` | The paper. |
 | `Outputs/`, `Outputs_Addendum/` | PNG charts and CSVs for 2024 and for the 2025 addendum. |
 | `NFL_Dash.html` | An earlier static dashboard. |
 | `Markdowns/` | Notes on documentation, the 2002 realignment, and team mapping fixes. |
-| `README.md` | Usage notes for the script. |
+| `README.md` | Usage notes for the legacy script. |
+| `Other/` | Word drafts. Kept out of git because the repo is public. |
 
 No machine learning code exists yet; the grep came back empty. The ML work starts from scratch.
 
-### Current Elo model
+### Legacy Elo model (2025)
 
 - Start rating 1000. K = 20. Home-field advantage (HFA) = 55 Elo points, set to 0 for international games.
 - Margin-of-victory multiplier in the 538 style.
@@ -54,18 +59,14 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 - **Gap:** nflverse has no data before 1999. For 1970 to 1998, either keep the existing spreadsheet or use FiveThirtyEight's `nfl_elo` game file (CC-BY 4.0, which covers those years). **Open question:** where did the original 1970 to 1998 spreadsheet data come from? If it came from Pro-Football-Reference, their terms of use need a check before commercial use.
 - Data dictionaries are at https://nflreadr.nflverse.com/articles/. Datasets include pbp, player stats, team stats, rosters, depth charts, injuries, snap counts, participation, Next Gen Stats, ESPN QBR, draft picks, combine, contracts, trades, and FTN charting.
 
-## Proposed direction (not yet approved by Walker)
+## Direction
 
 ### Elo site
 
 - **Pipeline.** A scheduled GitHub Action runs every Wednesday. It pulls nflverse with `nflreadpy`, reruns Elo, and writes JSON. A static site reads the JSON. Hosting is free on GitHub Pages or Cloudflare Pages, with no server and no database.
-- **Model fixes,** in this order:
-  1. Switch the data source.
-  2. Make HFA era-dependent.
-  3. Widen the λ grid and tune on held-out seasons.
-  4. Add playoffs.
-  5. Add a starting-QB adjustment.
-  6. Show Elo against the betting market on the site.
+- **Model fixes.** Done 2026-10-02: data switch to nflverse, learned HFA, a wider grid tuned on held-out seasons, and a playoffs option (tested; it doesn't help, so it's off). Held-out Brier for 2010-2025 went from 0.2244 to 0.2201. The market scores 0.2104 on the same games.
+  - Next: a starting-QB adjustment.
+  - Later: show Elo against the betting market on the site.
 - **Site features:**
   - Weekly power ladder with movement since last week.
   - Playoff odds from a Monte Carlo season simulation.
@@ -94,8 +95,12 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 | Date | Decision |
 |---|---|
 | 2026-10-02 | This file is the single general context doc. Sub-project context goes in `context/*.md`, each linked below. |
+| 2026-10-02 | Old work was moved to `legacy_2025/`. GitHub repo `walk-the-program/NFLELO` (public) is restructured to match. Claude handles all git and GitHub work, committing to main. |
+| 2026-10-02 | Data: 1970-1998 from the legacy spreadsheet, 1999+ from nflverse. The overlap check matched 6,967 of 6,967 games. |
+| 2026-10-02 | Elo v2 default: K 20, λ 0.40, online HFA (init 65, k_hfa 0.5), expansion start 1300, no playoff updates. It ties the fixed-HFA-65 winner on the tune window and was chosen because fixed HFA can't track the decline in home-field advantage. |
 
 ## Context file index
 
 - `CONTEXT.md`: this file, for the general project.
-- `context/`: the folder for sub-project files once that work starts. Planned files are `context/data-pipeline.md`, `context/elo-site.md`, and `context/ml.md`.
+- `context/data-and-elo.md`: the data pipeline, franchise mapping, the Elo v2 config, and evaluation results.
+- Planned: `context/elo-site.md` and `context/ml.md`.

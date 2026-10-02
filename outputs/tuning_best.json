@@ -1,0 +1,28 @@
+{
+  "config": {
+    "start": 1500.0,
+    "k": 20.0,
+    "lam": 0.4,
+    "hfa_mode": "fixed",
+    "hfa": 65.0,
+    "hfa_init": 65.0,
+    "k_hfa": 1.0,
+    "hfa_mov": false,
+    "mov_mode": "winner",
+    "mov_cap": null,
+    "expansion_start": 1300.0,
+    "include_playoffs": false
+  },
+  "tune_window": [
+    1980,
+    2009
+  ],
+  "tune_metrics": {
+    "n": 7000,
+    "brier": 0.21990105392773093,
+    "logloss": 0.6303333081353639,
+    "accuracy": 0.6425708559977097
+  },
+  "n_configs": 3072,
+  "runtime_seconds": 32.661646127700806
+}
