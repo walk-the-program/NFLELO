@@ -4,7 +4,7 @@
     python scripts/build.py --offline  # reuse data/raw/schedules.csv
 
 Writes data/games.csv, outputs/elo_games.csv, outputs/ratings_current.json,
-outputs/model_report.md.
+outputs/model_report.md, outputs/dashboards/team_summary.png.
 """
 import argparse
 import json
@@ -214,6 +214,8 @@ def main() -> None:
     print(test["market"].to_string(index=False))
     print(f"as of {ratings['as_of']} (season {ratings['season']} week {ratings['week']}); "
           f"wrote outputs/elo_games.csv, ratings_current.json, model_report.md")
+    import dashboard  # noqa: E402  (scripts/ is on sys.path when run as a script)
+    dashboard.render()
 
 
 if __name__ == "__main__":

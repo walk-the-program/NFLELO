@@ -24,5 +24,14 @@ python3.13 -m venv .venv
 - `outputs/elo_games.csv`: pre-game ratings, win probability, post-game ratings, and the home-field advantage used, per game.
 - `outputs/ratings_current.json`: current rating, rank, and 7-day change per franchise.
 - `outputs/model_report.md`: data validation, tuning, and the held-out test against the legacy model and the betting market.
+- `outputs/dashboards/team_summary.png`: the Team Summary dashboard (see below).
+
+## Dashboard
+
+`scripts/dashboard.py` draws the Team Summary PNG (power ladder, Elo vs. winning, biggest rises and falls, highest average Elo) from `outputs/elo_games.csv` and `outputs/ratings_current.json`. `build.py` regenerates it every run; to redraw it alone, or to print the four tables behind the panels:
+
+```
+.venv/bin/python scripts/dashboard.py --show-tables
+```
 
 Project notes are in [`CONTEXT.md`](CONTEXT.md) and [`context/data-and-elo.md`](context/data-and-elo.md).

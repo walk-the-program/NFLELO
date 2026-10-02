@@ -4,3 +4,4 @@ openpyxl>=3.1
 nflreadpy>=0.1.5
 pyarrow>=15
 pytest>=8
+matplotlib>=3.8

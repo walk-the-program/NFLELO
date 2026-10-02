@@ -57,6 +57,10 @@ Grid (3,072 configs, 33 seconds): K {15, 20, 25, 30}; lambda {0.10 to 0.50, 8 va
 
 `tune.py` writes `outputs/tuning_results.csv` and `outputs/tuning_best.json`; `build.py` reads them for the report.
 
+## Dashboard (`scripts/dashboard.py`)
+
+Renders `outputs/dashboards/team_summary.png` (16x11 in, 200 dpi, about 0.5 MB) from `outputs/elo_games.csv` and `outputs/ratings_current.json`; `build.py` calls it at the end. Four panels, each backed by a DataFrame from `build_tables()` (`--show-tables` prints them): power ladder (all 32 teams, bars from 1500, 7-day rating and rank change), all-time REG win % vs. all-time average Elo (both axes cover every REG game since 1970), top 10 peak-to-low swings in post-game rating with the season of each extreme, and top 10 all-time average Elo. Records and averages use REG games only (ties count half). Expansion-era franchises (BAL, HOU, CAR, JAX, SEA, TB) average over fewer games, and their swings start from the 1300 expansion rating. Team colors are in `nflelo/colors.py` (from the legacy palette, remapped to current codes; no logos).
+
 ## Known gaps
 
 - No pre-1999 playoff games.
