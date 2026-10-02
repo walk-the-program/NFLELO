@@ -1,0 +1,789 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MANUSCRIPT TEMPLATE (adapted for Overleaf). Keep this file in your Overleaf root.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% DOCUMENT SETUP
+\documentclass[a4paper,10.5pt,twoside]{article}
+\hyphenpenalty=8000
+\textwidth=125mm
+\textheight=200mm
+\usepackage[top=3cm, bottom=3cm, inner=3cm, outer=3cm, includehead]{geometry}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+\raggedbottom
+
+\usepackage{xurl}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{amssymb,amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage[hidelinks, pdftex]{hyperref}
+\urlstyle{same}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{csquotes}
+\usepackage{setspace}
+
+\usepackage{ragged2e}
+\newcommand{\Keywords}[1]{%
+  \par\smallskip
+  \noindent\textbf{Keywords: }\RaggedRight #1\par
+  \justifying
+}
+
+% === Optional bibliography toggle ===
+\newif\ifwithbib
+\withbibfalse
+\ifwithbib
+  \usepackage[notes, backend=biber]{biblatex-chicago}
+  \addbibresource{references.bib}
+\fi
+
+% AUTHOR AND TITLE
+\begin{document}
+\setstretch{1.25}
+\fancyhead[LE]{\thepage\ \ \ \ NFL ELO: Methods and Findings}
+\fancyhead[RO]{A Comprehensive ELO-Based Analysis\ \ \ \ \thepage}
+
+\begin{center}
+\LARGE\textbf{You Play to Win the Game}\\[12pt]
+\normalsize\textbf{Analyzing the National Football League With ELO Rating Systems}\\[10pt]
+\normalsize\textbf{Metrics, Methods, and Insights (1970--2024)}\\[10pt]
+\normalsize\textbf{Walker Tracy}\\[5pt]
+\rule{\textwidth}{1 pt}\\[20pt]
+\end{center}
+
+% Abstract 
+
+\begin{abstract}\normalsize
+\RaggedRight 
+This paper presents an analytical framework for evaluating National Football League (NFL) team performances through the usage and iteration of an ELO rating system. Through the development of other metrics such as luck indices, parity measurement, calibration analyses, and strength-of-schedule calculations, I have created a holistic view of team performance beyond a win-loss record. This system utilizes 50 years of historical NFL regular-season game data from 1970 to the present and generates 15+ distinct visualizations that show patterns in overall league and conference competitiveness, team trajectory, and historical performance. This work demonstrates how rating systems can show the complex dynamics of football by providing insights into dynasty formation, competitive forces, and the role of luck and skill in close-game outcomes.\\[1em]
+\justifying
+
+{\noindent\textbf{Keywords: }\RaggedRight
+ELO rating; NFL; competitive balance; calibration; strength of schedule; parity; Pythagorean expectation; forecasting; luck index.\par}
+\end{abstract}
+
+
+\section{Introduction}
+
+\subsection{Motivation and Objectives}
+
+The National Football League presents a unique challenge for analysts; with only 17 regular season games per team, small sample sizes can make traditional statistical analysis unreliable. For example, a team with a 10-7 record may have been much better or worse than its paper record suggests depending on its difficulty of schedule, clutch factor, injuries, and timing of wins and losses. There is a story that cannot be told only through the lens of who won and who lost.
+
+My objective in this research was to develop a framework that could simultaneously: (i) rate team strength through a game-by-game assessment that accounts for factors like opponent strength, home field advantage, and margin of victory; (ii) quantify luck and skill by separating the contribution of luck and execution in outcomes, particularly in close games where small variations in scores play a larger role; (iii) measure overall league competitiveness by tracking how parity evolved over time and identifying eras of dominance and instability; (iv) evaluate forecast quality by assessing the accuracy of my predictions and identifying systematic biases and areas of improvement; and (v) provide insights through visualizations and metrics that show patterns not visible in the raw data.
+
+\subsection{Scope and Data}
+
+This analysis covers the majority of the modern NFL era, from 1970 to 2024. The dataset encompasses more than 15,000 games and tracks all 32 current franchises while handling relocations and name changes. Each game contains a date, the teams involved, final score, location, and outcome. 
+
+\begin{table}[htbp]
+\centering
+\caption{Team Relocations and Name Changes (1970--2024)}
+\label{tab:team_relocations}
+\begin{tabular}{lll}
+\hline
+\textbf{Original Code/Name} & \textbf{Current Code/Name} & \textbf{Approximate Year} \\
+\hline
+SDG (San Diego Chargers) & LAC (Los Angeles Chargers) & 2017 \\
+OAK/RAI (Oakland/Los Angeles Raiders) & LVR (Las Vegas Raiders) & 2020 \\
+RAM/STL (Los Angeles/St.\ Louis Rams) & LAR (Los Angeles Rams) & 2016 \\
+PHO/STL (Phoenix/St.\ Louis Cardinals) & ARI (Arizona Cardinals) & 1988--1994 \\
+BOS (Boston Patriots) & NWE (New England Patriots) & 1971 \\
+OTI (Tennessee Oilers) & TEN (Tennessee Titans) & 1999 \\
+HOU (Houston Oilers) & TEN (Tennessee Titans) & 1997 \\
+HOU (Houston Texans) & HOU (Houston Texans) & 2002 (expansion) \\
+BAL (Baltimore Colts) & IND (Indianapolis Colts) & 1984 \\
+BAL (Baltimore Ravens) & BAL (Baltimore Ravens) & 1996 \\
+CLE (Cleveland Browns, pre-1996) & CLE (Cleveland Browns) & --- \\
+CLE (Cleveland Browns, 1999+) & CLE (Cleveland Browns) & 1999 (expansion) \\
+\hline
+\end{tabular}
+\end{table}
+
+
+Historical team codes such as STL, PHO, and HOU were mapped to the canonical 32 modern franchises using the rules in Table~\ref{tab:team_relocations} and date-based logic where necessary.
+
+\textbf{Data Provenance:} All data was scraped manually from publicly available sources and verified using Pro Football Reference (PRF): an online database with in-depth player and game statistics on most major American sports. The PRF also has an extensive historical database on previous team names and locations that was helpful for verifying team changes over time\footnote{Pro Football Reference, “List of all the Pro Football Franchises,” accessed October 2025.}. The resulting dataset only includes regular season games from 1970--2024 and can handle ties, overtime games, and other special cases like rescheduled or international contests. The data snapshot reflects the state of records as of the end of the 2024 regular season.
+
+The system feeds the data through a Python-generated pipeline that creates a dataframe, verifies data types (with special consideration for date-centered calculations), calculates ELO ratings for each team after every match, generates corresponding win probabilities for matchups, tracks other metrics like luck, parity, and calibration, produces aggregations for analysis, and creates season-level summaries for each team.
+
+\subsection{Paper Structure}
+
+The rest of this paper is organized as follows: Section 2 gives a historical overview of ELO and related rating systems. It also provides a reference for the symbols that will be used throughout the rest of the paper. Section 3 details my usage of the ELO system as it relates to the NFL and includes explanations of some complementary statistics like margin-of-victory adjustments. Section 4 goes over other metrics I developed, such as luck indices, parity measurement, calibration analysis, and strength-of-schedule calculations. Section 5 demonstrates how all of my metrics can be applied and analyzed in the context of a matchup between the Detroit Lions and the San Francisco 49ers. Section 6 presents visualizations and their accompanying interpretations. Section 7 contains my findings and broad analysis. Section 8 is my conclusion and includes instructions for reproducibility and key takeaways.
+
+\newpage
+\section{ELO Ratings, Pythagorean Expectations, and Brier Score}
+\subsection{Background}
+
+Originally developed for chess in the 1960s\footnote{Arpad E. Elo, “The USCF Rating System: A Scientific Achievement,” \textit{Chess Life} 16, no.\ 6 (June 1961): 160--161.}, the ELO rating system has since been adapted to sports analytics. The system’s core mechanism is that ratings change depending on both the outcome and the expected outcome calculated from pre-game ratings. My work implements an iteration of the ELO system for NFL game analysis with margin-of-victory scaling, home-field advantage, and season reset mechanisms.
+
+The Pythagorean expectation was first used by statistician Bill James to estimate the percentage of games a given team was expected to win based on the runs and scores allowed\footnote{Bill James first introduced the Pythagorean expectation in his \textit{1979 Baseball Abstract} (1980), where he proposed the original exponent of 2 based on empirical fit to run-scoring data.}. I adopt the Pythagorean analysis by changing weights to ones specifically designed for the NFL.
+Additionally, the Brier score and logarithmic loss are standard metrics used for evaluating probabilistic forecasts. The Brier score measures the mean squared error between predicted probabilities and the actual outcomes and penalizes incorrect predictions quadratically\footnote{Glenn W. Brier, “Verification of Forecasts Expressed in Terms of Probability,” \textit{Monthly Weather Review} 78, no.\ 1 (1950): 1--3.}; the log loss metric uses a logarithmic scoring mechanism that heavily penalizes overconfident, incorrect predictions\footnote{I. J. Good introduces the logarithmic scoring rule on p.~112 of “Rational Decisions,” \textit{Journal of the Royal Statistical Society, Series B} 14, no.~1 (1952): 107--114.}.
+
+
+My work combines these analytical frameworks with other previously mentioned complementary metrics for maximum insights. As has been said many times, this analysis stands on the shoulders of giants.
+
+
+\subsection{Notation}
+
+Table~\ref{tab:notation} provides a reference for various key mathematical symbols and variables used throughout this paper.
+
+\begin{table}[h]
+\centering
+\caption{Notation Reference for Symbols and Variables.}
+\label{tab:notation}
+\begin{tabular}{ll}
+\hline
+Symbol & Description \\
+\hline
+$R_a, R_b$ & ELO ratings for teams A and B \\
+$E_a$ & Expected win probability for team A \\
+$S_a$ & Actual outcome for team A (1=win, 0.5=tie, 0=loss) \\
+$K$ & K-factor controlling rating volatility \\
+$\Delta R_a$ & Rating change for team A \\
+$s$ & Scale constant (400 points) \\
+$\lambda$ & Season reset parameter (0.15) \\
+$\gamma$ & Pythagorean exponent (2.37) \\
+$PF, PA$ & Points for and points against \\
+$\sigma$ & Standard deviation \\
+$\rho$ & Spearman correlation coefficient \\
+\hline
+\end{tabular}
+\end{table}
+\newpage
+\section{The ELO Rating System: Fundamentals and Implementation}
+
+\subsection{Mathematical Foundation}
+
+The ELO rating system developed by Arpad Elo is an elegant solution to the problem of rating competitors in zero-sum games (as was the case for its first application: Chess). However, by devising a system where ratings change proportional to the expected and actual outcomes, the ELO system is able to provide reliable and dynamic predictions.
+
+The ELO system's formula for calculating the expected win probability for a given game is given by the expression:
+\[
+E_a = \frac{1}{1 + 10^{(R_b - R_a) / 400}},
+\]
+where $R_a$ and $R_b$ are the ratings of teams A and B, and $E_a$ is the probability that team A wins. The number 400 acts as the scale constant (borrowed from Chess' use of the ELO system) and determines sensitivity: a 400-point rating difference corresponds to approximately a 90\% win probability for the stronger team. While 400 acted as the standard scale constant used in this implementation, I validated this choice through parameter estimation (see Section 3.2.5) and found that values in the range of 350--450 produce similar forecasting performance, with 400 acting as a reasonable default for my analysis.
+
+After observing the actual outcome $S_a$ (1 for win, 0.5 for tie, 0 for loss), the rating update is
+\[
+\Delta R_a = K \times (S_a - E_a),
+\]
+where $K$ is the K-factor: a control that rates volatility. Higher K-factors make ratings more responsive to recent results but less stable over time. I chose to set the K-factor equal to 20, which provides moderate responsiveness game-to-game while also avoiding excessive volatility.
+
+\subsection{Home Field Advantage}
+
+I implemented a home field advantage mechanism that adds 55 ELO points to the hosting team — roughly equivalent to a +3.5-point spread advantage in expected score. With this consideration, the formula for the expected value of the game if Team A hosts is given by:
+
+\[
+E_a = \frac{1}{1 + 10^{(R_b - (R_a + 55)) / 400}},
+\]
+
+\subsubsection{Margin of Victory Scaling}
+
+An important enhancement I made to the standard ELO system is margin of victory (MOV) scaling. Traditional ELO systems treat all wins equally, but any fan can attest that some wins mean more than others. For example, if Team A is predicted to dominate Team B and does so, the model didn't learn anything new. But if, in the same scenario, Team B beats Team A, then the model has learned a lot about Team A's potential overrating. My implementation builds upon the standard ELO MOV formula:
+
+\[
+\text{MOV\_Factor} = \min\left\{\ln(margin + 1) \times \frac{2.2}{|\Delta R| \times 0.001 + 2.2},\ 2.0\right\},
+\]
+where $margin$ is the point differential and $\Delta R$ is the pre-game rating difference. This formula uses logarithmic scaling to prevent extreme predicted blowouts from spiking ratings, adjusts based on expected outcomes, and caps at 2 to further prevent excessive volatility. There is an additional edge case for the MOV calculation, which is ties. In the case of a tie, I set the MOV factor equal to 1. 
+
+Essentially, close games between similarly matched teams produce “normal” MOV multipliers due to the logarithmic term and the absence of the dampening term. The MOV adjustment only becomes small when the margin is extremely low or when teams were mismatched and the expectedness of the result justifies a heavier down-weighting (a predicted blowout that comes to fruition is worth less).
+
+With the margin of victory adjustment, the rating update becomes:
+\[
+\Delta R_a = K \times \text{MOV\_Factor} \times (S_a - E_a).
+\]
+
+\subsubsection{Season Reset and Regression to Mean}
+
+To prevent long-term drift and to anchor ratings to the most current competitive era, I implemented a season reset mechanism. At the beginning of each new season, teams regress 15\% towards the league mean as denoted by:
+\[
+R_{\text{new}} = 0.85 \times R_{\text{end}} + 0.15 \times 1000.
+\]
+
+The $\lambda = 0.15$ parameter denotes that teams retain 85\% of their previous season's rating, preventing runaway inflation while still carrying forward information about a team's long-term strength. This feature is also important due to roster turnover, coaching changes, and some natural regression that occurs in professional sports leagues like the NFL.
+
+\subsubsection{League Mean Tracking}
+
+I track league-wide mean ELO over time to monitor for systemic drift. While the season reset prevents the majority of the drift, tracking the mean provides convenient diagnostic information about whether or not the system is maintaining proper calibration across eras. 
+
+\subsubsection{Era and Rules Effects}
+
+Over the last 50+ years, the NFL has undergone several significant structural changes including rule modifications, franchise expansion, conference realignment, and schedule changes. To address those changes, I implemented several mechanisms including: 
+
+\textbf{International Home Field Advantage:} Home field advantage is an important consideration for each game. With regular-season international games (London, Mexico City, etc.) starting in 2007,\footnote{“The NFL International Series.” \textit{NFL Football Operations}, National Football League, 2025. \url{https://operations.nfl.com/journey-to-the-nfl/the-nfl-s-international-impact/the-nfl-international-series/}} I account for international games by eliminating the home field advantage (HFA = 0). Likewise, international games are marked in the data as having neither team as a host. 
+
+\textbf{Overtime Rule Changes:} The NFL implemented and changed overtime rules in 1974, 2010, 2012, 2017, and 2022,\footnote{“What Are the NFL’s Regular-Season and Postseason Overtime Rules?” \textit{ESPN}, 4 Sept. 2025. \url{https://www.espn.com/nfl/story/_/id/39111637/what-nfl-rules-regular-postseason-play}} affecting game outcomes and some close-game dynamics. These changes are mostly captured implicitly through results, but more work could be done to model the impact of overtime rules on outcomes in the future. 
+
+\textbf{Schedule Changes and Realignment:} The expansion to 17 regular season games in 2021 and the 2002 conference realignments are handled naturally by the system, with the season reset mechanism helping to prevent structural breaks from causing rating drift.
+
+\textbf{Playoffs vs Regular Season:} Playoff games were not included in this analysis. 
+
+\subsubsection{Mechanisms Summary}
+
+
+\begin{table}[h!]
+\centering
+\caption{Key Parameters Used in the ELO Rating System}
+\begin{tabular}{lll}
+\hline
+\textbf{Symbol} & \textbf{Meaning} & \textbf{Value Used} \\
+\hline
+$R_a$ & Rating of Team A & Dynamic (game-by-game) \\
+$R_b$ & Rating of Team B & Dynamic (game-by-game) \\
+$E_a$ & Expected win probability for Team A & Computed via formula \\
+$S_a$ & Actual game outcome (1/0.5/0) & Observed per game \\
+$K$ & K-factor controlling rating volatility & $20$ \\
+$H$ & Home-field advantage adjustment & $55$ Elo points \\
+$c$ & Scale constant in expected value formula & $400$ \\
+$\Delta R_a$ & Rating change for Team A & $K \times (S_a - E_a)$ or MOV-adjusted \\
+$\Delta R$ & Pre-game rating difference & Computed per game \\
+$\lambda$ & Season regression parameter & $0.15$ \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\begin{table}[htbp]
+\centering
+\caption{2002 NFL Realignment: Complete Division Structure}
+\label{tab:realignment_2002_detailed}
+\begin{tabular}{p{5cm}p{5cm}p{3cm}}
+\hline
+\textbf{Pre-2002 Structure} & \textbf{Post-2002 Structure} & \textbf{Team Movements} \\
+\hline
+\multicolumn{3}{l}{\textit{AFC Conference}} \\
+\hline
+\textbf{AFC East (5 teams)} & \textbf{AFC East (4 teams)} & \\
+BUF, IND, MIA, NWE, NYJ & BUF, MIA, NWE, NYJ & IND $\rightarrow$ AFC South \\
+\hline
+\textbf{AFC Central (6 teams)} & \textbf{AFC North (4 teams)} & \\
+BAL, CIN, CLE, JAX, PIT, TEN & BAL, CIN, CLE, PIT & Division split \\
+& \textbf{AFC South (4 teams)} & \\
+& HOU, IND, JAX, TEN & HOU (expansion), IND (from East), \\
+& & JAX, TEN (from Central) \\
+\hline
+\textbf{AFC West (5 teams)} & \textbf{AFC West (4 teams)} & \\
+DEN, KAN, LVR, LAC, SEA & DEN, KAN, LVR, LAC & SEA $\rightarrow$ NFC West \\
+\hline
+\multicolumn{3}{l}{\textit{NFC Conference}} \\
+\hline
+\textbf{NFC East (5 teams)} & \textbf{NFC East (4 teams)} & \\
+ARI, DAL, NYG, PHI, WAS & DAL, NYG, PHI, WAS & ARI $\rightarrow$ NFC West \\
+\hline
+\textbf{NFC Central (5 teams)} & \textbf{NFC North (4 teams)} & \\
+CHI, DET, GNB, MIN, TAM & CHI, DET, GNB, MIN & TAM $\rightarrow$ NFC South \\
+& & Renamed: Central $\rightarrow$ North \\
+\hline
+\textbf{NFC West (5 teams)} & \textbf{NFC West (4 teams)} & \\
+ATL, CAR, NOR, SFO, STL & ARI, STL, SFO, SEA & ARI (from East), SEA (from AFC), \\
+& & ATL, CAR, NOR $\rightarrow$ NFC South \\
+& & Note: STL $\rightarrow$ LAR (2016) \\
+& \textbf{NFC South (4 teams)} & \\
+& ATL, CAR, NOR, TAM & TAM (from Central) \\
+\hline
+\multicolumn{3}{l}{\textbf{Key Statistics}} \\
+\hline
+\multicolumn{3}{l}{• Total teams: 31 (pre-2002) $\rightarrow$ 32 (post-2002)} \\
+\multicolumn{3}{l}{• Divisions: 6 $\rightarrow$ 8 (4 per conference)} \\
+\multicolumn{3}{l}{• Teams per division: 4-6 $\rightarrow$ 4 (standardized)} \\
+\multicolumn{3}{l}{• Conference crossover: SEA moved from AFC to NFC} \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+\section{Complementary Metrics}
+
+While ELO ratings can provide a good foundation for understanding comparative team strength, they also tell an incomplete story. To complete my analytical framework, I have developed several complementary metrics to capture different aspects of performance and league dynamics.
+
+\subsection{Luck Index: Separating Skill from Fortune}
+
+\subsubsection{Definition and Calculation}
+
+The luck index shows the difference between a team's actual wins and their expected wins based on ELO-derived probabilities.
+
+\begin{equation}
+\text{Luck\_Index} = \text{ActualWins} - \text{ExpectedWins}
+\end{equation}
+
+\noindent where
+\begin{equation}
+\text{ExpectedWins} = \sum_{i=1}^{N} E_i
+\end{equation}
+
+\noindent for every game in a regular season, and $E_i$ is the ELO-derived win probability for game $i$.
+
+\textbf{Interpretation:} Positive values indicate that a team won more games than they were expected to (due to good luck, clutch factor, or model underestimation). Likewise, negative values indicate that a team won fewer games than expected (due to bad luck, poor execution in close games, or model overestimation). A score of zero indicates that a team performed exactly as predicted by the ELO rating system. Typical luck scores ranged from approximately $-5.5$ to $+5.5$ wins per season (5th to 95th percentile), with most teams falling within $\pm 2.5$ wins of their expected value (interquartile range).
+
+\subsubsection{Close-Game Luck}
+
+I further augmented my luck calculations with a close-game luck analysis. I defined close games as games with point differentials of $\leq 7$ points or those with a predicted win probability between 0.45 and 0.55. This analysis isolates performance in close coin-flip situations and separates true clutch ability from my model's overall accuracy. A team with high overall luck but neutral close-game luck likely benefits from favorable scheduling or blowout wins, while a team with high close-game luck may demonstrate superior execution in critical moments and tight matches.
+
+\subsubsection{Pythagorean Luck}
+
+For comparison, I also calculated Pythagorean expected wins\footnote{Bill James, \textit{The Bill James Baseball Abstract 1982} (New York: Ballantine Books, 1982).} using the formula:
+
+\[
+\text{Pyth\_WinPct} = \frac{PF^\gamma}{PF^\gamma + PA^\gamma},
+\]
+where $PF$ and $PA$ are points for and against, and $\gamma = 2.37$ is the NFL-specific exponent derived by Tom Gower\footnote{Tom Gower, “Pythagorean Exponents Over Time,” *Reading and Thinking Football*, April 15, 2010, para. 1, https://readthinkfootball.wordpress.com/2010/04/15/pythagorean-exponents-over-time/.}. Pythagorean luck compares actual wins to point-differential-based expectations.
+
+\textbf{Interpretation:} Comparing the traditional ELO measure of luck to Pythagorean luck reveals different ways of categorizing over- or under-performance: high ELO luck combined with low Pythagorean luck may indicate that a team wins close games but generally gets outscored (due to execution in key moments); low ELO luck with high Pythagorean luck may indicate that a team loses close games but generally outscores opponents. Both metrics aligning indicates a truer sense of over- or under-performance relative to a team's underlying strength.
+
+\subsection{Parity Metrics: Measuring League Competitiveness}
+
+League parity—the degree to which teams are evenly or unevenly matched—is a fundamental characteristic of competitive balance. To measure league parity, I developed a comprehensive suite with four main measurements.
+
+\subsubsection{Dispersion (Standard Deviation)}
+
+The standard deviation of end-of-season ELO ratings measures how spread out teams are in strength. Lower dispersion indicates more parity—that is, teams are closer together—while higher dispersion indicates a clear hierarchy. Dispersion is therefore defined as:
+\[
+\text{Dispersion} = \sigma(\text{ELO}_{\text{end}}).
+\]
+I then converted the dispersion value to a z-score and negated it (lower standard deviation = more parity), given by the following expression:
+\[
+Z_{\text{Dispersion}} = -\frac{\text{Dispersion} - \mu_{\text{Dispersion}}}{\sigma_{\text{Dispersion}}}.
+\]
+
+\subsubsection{Rank Stability (Spearman Correlation)}
+
+The correlation between the start-of-season and end-of-season rankings can tell us how predictable the league is. I use Spearman rank correlation\footnote{Charles Spearman, ``The Proof and Measurement of Association Between Two Things,'' \textit{American Journal of Psychology} 15, no.\ 1 (1904): 72--101.} to measure overall rank stability in the league. Lower correlation may indicate more parity (rankings change more, so there is more competitive balance), while higher correlation indicates a more stable hierarchical ranking of teams. Rank stability is given by:
+\[
+\text{RankStability} = \rho(\text{StartRank}, \text{EndRank}).
+\]
+Again adapted for parity interpretation:
+\[
+Z_{\text{RankStab}} = -\frac{\text{RankStability} - \mu_{\text{RankStability}}}{\sigma_{\text{RankStability}}}.
+\]
+
+\newpage
+
+\subsubsection{Upset Gap}
+
+The difference between actual and expected upsets measures the “Any Given Sunday” effect. More upsets than expected indicate higher parity (underdogs win more), while fewer upsets indicate that favorites tend to dominate. The upset gap is given by:
+\[
+\text{UpsetGap} = \text{ActualUpsets} - \text{ExpectedUpsets},
+\]
+where an upset is defined as an underdog (lower pre-game ELO) winning the game.
+
+\subsubsection{Forecast Entropy}
+
+Entropy provides a way to quantify the uncertainty of the engine’s predictions by measuring how close a game's win probability is to a true coin flip. Therefore, higher entropy values (closer to 50/50) reflect that the league has a high level of parity—both teams could reasonably win—and lower values indicate a stronger hierarchy. By averaging this entropy across all of the games in a season, I can capture the overall uncertainty embedded in the NFL's matchups. I call that term Forecast Entropy, and it is given by the expressions:
+\[
+\text{Entropy} = -p \log(p) - (1-p) \log(1-p),
+\]
+\[
+\text{ForecastEntropy} = \frac{1}{N} \sum \text{Entropy}_i.
+\]
+
+\subsubsection{Composite Parity Index}
+
+I combined the aforementioned four components into a weighted composite index:
+\[
+\text{Parity\_Index} = 0.35 \times Z_{\text{Dispersion}} + 0.25 \times Z_{\text{RankStab}} + 0.25 \times Z_{\text{UpsetGap}} + 0.15 \times Z_{\text{Entropy}}.
+\]
+The weights assigned to each measure reflect my judgment about the relative importance of each component. Dispersion received the highest weight, as it most directly measures the spread of team strength. I then rescaled the resulting value to a 0--100 ``Parity Score'' anchored to the 1970s as a reference era (score of 50). This makes the interpretation more intuitive: values above 50 indicate more parity than the 1970s, while lower scores indicate less parity. Additionally, the 1970s were chosen as a good baseline because they marked the beginning of the modern NFL league structure.
+
+\subsection{Calibration Analysis: Evaluating Forecast Quality}
+
+A probabilistic forecast is only useful if it is well calibrated. If the model predicts a 70\% win probability, then teams should actually win approximately 70\% of the time. I evaluated the calibration of my model through reliability curves and performance metrics.
+
+\subsubsection{Reliability Curves}
+
+I began by organizing games by win probability using quantiles to ensure roughly equal sample sizes per bin, and then I compared the mean predicted probability to the actual outcome within each bin. Perfect calibration lies on the $y=x$ line.
+
+\textbf{Segmented Calibration:} I can segment my calibration analysis by era to see if my model performs differently across different decades, by ELO difference to see if the model is overconfident for large favorites, and for home vs.\ away games to evaluate whether the home advantage is properly calibrated as well. This segmentation can help reveal systematic biases that aggregate analysis might miss.
+
+\subsubsection{Performance Metrics}
+
+\textbf{Brier Score:} Mean squared error between predicted and actual outcomes:
+\[
+\text{Brier} = \frac{1}{N} \sum (\text{Actual}_i - \text{Predicted}_i)^2.
+\]
+Lower is better, with perfect forecasts scoring 0. Typical NFL values range from approximately 0.18 to 0.22 (5th to 95th percentile).\\
+\\
+\textbf{Log Loss:} Logarithmic loss that penalizes confidently wrong predictions more heavily:
+\[
+\text{LogLoss} = -\frac{1}{N} \sum [\text{Actual}_i \log(\text{Predicted}_i) + (1-\text{Actual}_i) \log(1-\text{Predicted}_i)].
+\]
+Lower is better, with typical NFL values ranging from approximately 0.53 to 0.64 (5th to 95th percentile). \\
+\\
+Both metrics are calculated season-by-season to track forecast quality over time.\\
+\\
+\textbf{Murphy Decomposition:}\footnote{Allan H. Murphy, ``A New Vector Partition of the Probability Score,'' \textit{Journal of Applied Meteorology} 12, no.\ 4 (1973): 595--600.} The Brier score can be decomposed into three components:
+\[
+\text{Brier} = \text{Uncertainty} - \text{Resolution} + \text{Reliability},
+\]
+where the uncertainty term measures the inherent unpredictability of outcomes, resolution measures how well forecasts can discriminate between different outcomes, and reliability measures the model's calibration quality. This decomposition provides deeper diagnostic information: higher uncertainty indicates inherently unpredictable games (high parity), high resolution indicates the model makes strong distinctions between teams, and low reliability indicates that there may be calibration issues.
+
+\textbf{Sharpness vs. Calibration:} I complement calibration analysis with sharpness metrics (standard deviation of predicted probabilities). A well-calibrated model should be both sharp (make confident predictions) and reliable (predictions match outcomes). A Murphy diagram plotting sharpness against reliability reveals whether the model is appropriately confident or overly timid.
+
+\subsection{Strength of Schedule: Contextualizing Performance}
+
+Traditional strength of schedule (SoS) metrics use win-loss records, but this creates circular logic because a team's schedule is hard if they played good teams, but those teams are only ``good'' because they beat other teams. Therefore, I calculated SoS using ELO ratings.
+
+\subsubsection{Four SoS Metrics}
+
+I computed four variants to capture different perspectives: (i) \textbf{SoS\_PreMean:} mean opponent ELO at the time of the game, capturing schedule difficulty as it was experienced at the time; (ii) \textbf{SoS\_EndMean:} mean opponent end-of-season ELO, capturing schedule difficulty in hindsight and revealing if a team faced opponents who turned out to be strong; (iii) \textbf{SoS\_PreWeighted:} pre-game opponent ELO, weighted by home/away games, with away games weighted 15\% more to account for travel and home-field disadvantage; (iv) \textbf{SoS\_EndWeighted:} end-of-season opponent ELO, weighted by home/away, combining hindsight logic with the location adjustment. These metrics give a comprehensive view of teams that succeeded despite difficult schedules or struggled despite having easy schedules—insights invisible with plain win-loss records.
+
+\textbf{End-of-Season SoS and Leakage:} SoS\_EndMean and SoS\_EndWeighted use hindsight metrics, like opponent final ELO, and therefore contain some information leakage because they reflect what was learned about opponents after the season has finished. This is by design, because these metrics answer the question, "How difficult was the schedule in hindsight?" rather than "How difficult was the schedule at the time?" For predictive purposes, PreMean variants are more appropriate, whereas for retrospective analysis of team performance, EndMean variants provide more valuable context.
+
+\subsection{Additional Metrics}
+
+\subsubsection{ELO Volatility}
+
+The standard deviation of game-to-game ELO measures team consistency:
+\[
+\text{Volatility} = \sigma(\Delta \text{ELO}).
+\]
+High volatility indicates teams have wild boom-and-bust cycles, while low volatility indicates more steady and consistent performance.
+
+\subsubsection{Dynasty Score}
+
+As a measure of sustained dominance, I calculated a Dynasty Score defined as the sum of ELO above a threshold (1150 points) across all games in a season, normalized by 100.
+\[
+\text{DynastyScore} = \frac{1}{100} \sum \max(0, \text{ELO}_{\text{post}} - 1150).
+\]
+This captures teams that maintain elite ratings throughout a season rather than just those with peaks of performance.
+
+\subsubsection{Forecast Sharpness}
+
+The standard deviation of predicted win probabilities measures how confident the model is in its own predictions:
+\[
+\text{Sharpness} = \sigma(\text{Predicted}).
+\]
+High sharpness indicates the model makes strong calls (win probabilities are spread out). Combined with calibration, this evaluates whether forecasts are both confident and accurate.
+
+\newpage
+
+\section{Case Study: Detroit Lions vs. San Francisco 49ers, 12/30/24}
+
+It is a cold day at the end of December when the Detroit Lions emerge onto enemy territory at the 49ers’ Levi's Stadium. The crowd roars in anticipation of the game’s intensity. But more important than a late-season clash between two contenders, this matchup offers something even more exciting: a chance to apply the ELO engine to a live game scenario.
+
+\subsection{Game Setup}
+
+\textbf{Pre-Game State:} SFO (home): 1051 ELO, 6--9 record; DET (away): 1172 ELO, 13--2 record.\\
+\\
+
+To compute each team's win probability, I first apply the 55-point home-field advantage bonus to San Francisco's rating:
+\[
+R_{\text{SFO}}^{\ast} = R_{\text{SFO}} + 55 = 1051 + 55 = 1106, 
+\quad
+\]
+The difference in effective ratings is then
+\[
+\Delta R = R_{\text{DET}} - R_{\text{SFO}}^{\ast} = 1172 - 1106 = 66.
+\]
+Using the standard Elo win-probability formula,
+\[
+P_{\text{DET}} = \frac{1}{1 + 10^{-\Delta R / 400}},
+\]
+we obtain
+\[
+P_{\text{DET}} = \frac{1}{1 + 10^{-66/400}} \approx 0.594,
+\]
+\[
+P_{\text{SFO}} = 1 - P_{\text{DET}} \approx 0.406. \quad
+\]
+
+Therefore, Detroit is predicted to win the game with a \textbf{59\%} likelihood. 
+
+\textbf{Game Result:} DET wins 40--34 (6-point margin).
+
+\subsection{Updating ELO Scores}
+
+\textbf{Margin of Victory Factor}
+\[
+\text{MOV factor} = \min\left\{\ln(7) \times \frac{2.2}{0.001 \times 66 + 2.2},\ 2.0\right\} = 1.946 \times \frac{2.2}{2.266} = 1.889.
+\]
+This game had a 6-point margin in a close game (66 ELO difference), and it produces a high MOV factor, which amplifies the rating changes significantly. 
+
+\textbf{Step 4: Rating Updates}
+\[
+\Delta_{\text{DET}} = 20 \times 1.889 \times (1.0 - 0.594) = 15.35,\qquad \Delta_{\text{SFO}} = -15.35,
+\]
+\[
+R'_{\text{DET}} = 1172 + 15.35 = 1187.35,\qquad R'_{\text{SFO}} = 1051 - 15.35 = 1035.65.
+\]
+
+Therefore, even though DET was the favorite to win the game, the close margin of 6 points combined with the high MOV factor produced a large rating movement (nearly double that of a non-MOV model).
+
+\subsection{Metric Updates}
+
+\subsubsection{Luck Index}
+
+\textbf{DET:} Before: 13 actual wins, 11 expected regular-season wins. After: 14 actual wins, Luck Index: $+3$ (lucky).\\
+
+\textbf{SFO:} Before: 6 actual wins, 10 expected wins. After: 6 actual wins, Luck Index: $-4$ (unlucky).
+
+\subsubsection{Pythagorean Expectation}
+
+\[
+\begin{aligned}
+&\textbf{DET:}\quad PF^{\text{post}} = 435,\quad PA^{\text{post}} = 364,\\
+&\text{PythWinPct}
+   = \frac{435^{2.37}}{435^{2.37} + 364^{2.37}}
+   \approx 0.604,\\
+&\text{ExpWins} = 0.604 \times 16 = 9.66,\quad
+\text{ActualWins} = 13,\\
+&\text{PythLuck} = 13 - 9.66 = +3.34.\\[10pt]
+&\textbf{SFO:}\quad PF^{\text{post}} = 338,\quad PA^{\text{post}} = 388,\\
+&\text{PythWinPct}
+   = \frac{338^{2.37}}{338^{2.37} + 388^{2.37}}
+   \approx 0.419,\\
+&\text{ExpWins} = 0.419 \times 16 = 6.70,\quad
+\text{ActualWins} = 6,\\
+&\text{PythLuck} = 6 - 6.70 = -0.70. 
+\end{aligned}
+\]
+
+Detroit's Pythagorean overperformance of +3.3 wins is higher than their ELO luck for the season. That indicates that their point differential suggests a weaker performance than what their season record implies. San Francisco, meanwhile, underperformed relative to their scoring margin.
+
+\subsubsection{Volatility}
+
+Both teams' volatility scores increase this game as a 15.35-point change adds to the distribution of game-to-game ELO changes.
+
+\subsubsection{Dynasty Score}
+
+DET's dynasty score increases because their final ELO (1187.35) is above the dynasty classification threshold of 1150, thereby contributing to sustained dominance metrics. SFO's score remains unchanged.
+
+\subsubsection{Strength of Schedule}
+
+For both DET and SFO, this matchup raises their average opponent strength. 
+
+\subsubsection{Upset Analysis}
+
+Because this game was not an upset -- the favorite won -- this game contributes to ``favorites won'' statistics for games with $\sim 60$-point ELO differences. This helps measure the ``Any Given Sunday'' effect.
+
+\subsubsection{Parity Metrics}
+
+At season end, this game affects:  
+(i) \textbf{Dispersion:} DET's ELO increases, SFO's decreases, widening the spread (reducing parity);  
+(ii) \textbf{Rank Stability:} If both teams were mid-ranked, the gap widens, affecting correlation;  
+(iii) \textbf{Upset Gap:} Contributes to ``fewer upsets'' if many favorites win across a given season.
+
+\subsection{Key Takeaways from the Case Study}
+
+(i) \textbf{Close games matter:} Even expected wins can cause large ELO changes if the game is close (high MOV factor).  
+(ii) \textbf{Home-field advantage is significant:} The 55-point HFA made SFO’s effective rating 1106 vs. DET’s 1172, significantly affecting win probability.  
+(iii) \textbf{Luck vs. execution:} DET’s Pythagorean luck being higher than ELO luck suggests good execution in close games, not just favorable circumstances.  
+(iv) \textbf{Cascading effects:} One game affects multiple metrics, data structures, and visualizations throughout the system.  
+
+Overall, this case study demonstrates some of the connections between different metrics and how they all build upon each other.
+
+\newpage{}
+
+\section{Visualizations}
+\subsection{League-Wide Visualizations}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/league_tapestry.png}
+    \caption{League ELO Tapestry. Smoothed ELO trajectories for all franchises with league mean highlighted. Rolling 3-month averages. Data: 1970--2024.}
+    \label{fig:placeholder}
+\end{figure}
+Figure 1 is a broad view of franchise Elo ratings from 1970 to 2024. As would be expected, the average Elo remains steady at 1000, demonstrating that when one team gains points, it corresponds with a direct loss from another team. It also demonstrates that volatility is an ever-present force in the NFL, and no team has ever been universally bad or good in the modern era, though the Cleveland Browns would be the closest to consistently poor performance.
+
+\newpage
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/team_small_multiples.png}
+    \caption{Individual Team ELO Tapestry, Small Multiples. Per-team histories for side-by-side comparisons of trends, peaks, and plateaus. Data: 1970--2024.}
+    \label{fig:placeholder}
+\end{figure}
+Figure 2 breaks down Figure 1 into its composite parts by franchise and reveals many distinct patterns. Teams like the Patriots, Steelers, and 49ers show long periods of sustained above-average ratings with low volatility, pointing to true dynasty formation rather than fluke seasons. Many other teams show clear boom-and-bust cycles of success and rebuilding, like the Lions' new turn of form in 2023 and 2024.
+
+High volatility at a given time could mean many different things for a team, including coaching changes, roster turnover, or the impact of injuries. Additionally, we see that there has been no single dominant dynasty that has been consistently good over the last 50 years—what goes up must eventually come down. Expansion teams like the Baltimore Ravens or Carolina Panthers reveal how new franchises deal with their entrance to the league. While Baltimore reached competitive form quickly, the Houston Texans took longer. Regardless, Figure 2 provides an easy way to analyze a team's historical performance cycles.
+
+\newpage
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/team_summary_stats.png}
+    \caption{Team summary statistics: multi-panel dashboard showing current (2024) rankings, win percentage relationships, ELO ranges, and historical participation. Data: 1970-2024}
+    \label{fig:placeholder}
+\end{figure}
+
+Figure 3 provides an additional breakdown of historical team performance. In the top left are the current ELO rankings for teams as of the end of the 2024 regular season—currently the Chiefs and Lions, which is unsurprising after their fantastic 2024 records. The bottom left shows the teams with the largest ELO ranges, calculated by subtracting their minimum ELO from their maximum ELO. The top right graphs a team's historical win percentage against its end-of-2024 ELO rating—hence why teams that have historically done poorly, like Detroit, are graphed in the top left. Finally, the bottom right presents the teams with the highest average ELO of all time—Steelers fans can be excited about this one.
+
+
+
+
+
+
+\newpage
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/conference_balance.png}
+    \caption{Conference Balance Measure. AFC--NFC balance by season. Data: 1970--2024.}
+    \label{fig:placeholder}
+\end{figure}
+
+Figure 4 shows the difference between the average NFC and AFC Elo rating. Conference-mean gaps can reveal long waves of dominance, typically corroborated by interconference records and Super Bowl results. During the 1980s and late 2000s, the AFC dominated the NFC, with an average difference of around 50 Elo points. That domination was balanced out by several strong NFC periods in the 1970s, 1990s, and 2010s. This visualization shows the shifts in dominance clearly, with the difference line crossing zero multiple times.
+
+
+\newpage
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/combined_parity.png}
+    \caption{Combined parity index (0--1090) anchored to a 1970 baseline. The top panel shows individual components as z-scores (where higher scores = more parity); the bottom panel shows the weighted composite index over time. Weights: dispersion = .35, rank stability = .25, upset gap = .25, and entropy = .15. Data: 1970--2024.}
+    \label{fig:placeholder}
+\end{figure}
+
+Figure 5 shows both the individual and combined parity index developed for this project. The combined index reveals that, generally, the league has done a good job maintaining competitiveness year over year. There are a few periods of lower parity, such as during the Patriots' and Chiefs' respective dynasties, but the overall variance in parity remains relatively small.
+
+\newpage
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/luck_timelines.png}
+    \caption{Luck timeline: each team's Luck Index over time, with league-wide average highlighted. Data: 1970--2024.}
+    \label{fig:placeholder}
+\end{figure}
+
+Like Figure 1, Figure 6 is a broad view of franchise Luck Index scores from 1970 to 2024. This index is centered around zero games, as one team's perceived luck is another's misfortune, as with ELO scores (i.e., one team cannot be lucky without another being ``unlucky''). Some teams have experienced fantastically unlucky seasons, while the majority tend to be within two games of their expected value.
+
+Additionally, Table 5 shows the luck index for all teams teams from 1970 to 2024:
+
+\begin{table}[htbp]
+\centering
+\caption{NFL Team Luck Summary Statistics, 1970--2024}
+\label{tab:luck_summary_stats}
+\begin{tabular}{p{1.2cm}p{1.3cm}p{1.8cm}p{1.8cm}p{2.0cm}p{2.2cm}p{1.8cm}}
+\hline
+\textbf{Team} & \textbf{Seasons} & \textbf{Avg Luck Index} & \textbf{Avg Luck / Game} & \textbf{Avg Close-Game Luck} & \textbf{Avg Pythagorean Luck} & \textbf{Overall Luck / Game} \\
+\hline
+PIT & 55 & 0.198 & 0.0138 & -0.243 & 0.148 & 0.0127 \\
+MIA & 55 & 0.158 & 0.0114 & 0.066 & 0.267 & 0.0101 \\
+DAL & 55 & 0.146 & 0.0098 & 0.005 & 0.115 & 0.0094 \\
+SEA & 49 & 0.141 & 0.0085 & 0.104 & 0.097 & 0.0089 \\
+BAL & 29 & 0.136 & 0.0084 & -0.302 & -0.430 & 0.0084 \\
+MIN & 55 & 0.109 & 0.0084 & 0.020 & 0.165 & 0.0070 \\
+IND & 55 & 0.091 & 0.0051 & 0.290 & 0.393 & 0.0058 \\
+NWE & 55 & 0.083 & 0.0066 & -0.105 & 0.111 & 0.0053 \\
+KAN & 55 & 0.079 & 0.0027 & -0.125 & 0.052 & 0.0051 \\
+DEN & 55 & 0.053 & 0.0012 & -0.159 & 0.158 & 0.0034 \\
+PHI & 55 & 0.044 & -0.0003 & -0.062 & -0.005 & 0.0028 \\
+WAS & 55 & 0.023 & 0.0045 & 0.045 & 0.038 & 0.0015 \\
+GNB & 55 & 0.022 & 0.0010 & -0.310 & 0.130 & 0.0014 \\
+LVR & 55 & 0.021 & 0.0050 & 0.039 & 0.324 & 0.0014 \\
+BUF & 55 & 0.011 & -0.0011 & 0.058 & 0.056 & 0.0007 \\
+SFO & 55 & -0.008 & -0.0026 & -0.443 & -0.301 & -0.0005 \\
+LAR & 55 & -0.017 & -0.0024 & -0.025 & 0.010 & -0.0011 \\
+HOU & 23 & -0.036 & -0.0025 & 0.300 & -0.032 & -0.0023 \\
+CHI & 55 & -0.071 & -0.0053 & 0.107 & 0.021 & -0.0046 \\
+CIN & 55 & -0.084 & -0.0039 & 0.143 & -0.251 & -0.0053 \\
+LAC & 55 & -0.107 & -0.0071 & -0.301 & -0.399 & -0.0069 \\
+TEN & 55 & -0.129 & -0.0102 & 0.196 & 0.155 & -0.0082 \\
+NOR & 55 & -0.165 & -0.0099 & -0.007 & -0.035 & -0.0106 \\
+DET & 55 & -0.167 & -0.0124 & -0.234 & -0.491 & -0.0107 \\
+NYG & 55 & -0.172 & -0.0117 & 0.056 & 0.057 & -0.0110 \\
+ARI & 55 & -0.177 & -0.0098 & 0.209 & 0.125 & -0.0113 \\
+ATL & 55 & -0.187 & -0.0129 & -0.189 & 0.002 & -0.0120 \\
+NYJ & 55 & -0.211 & -0.0137 & -0.093 & -0.185 & -0.0135 \\
+CLE & 52 & -0.243 & -0.0146 & -0.055 & -0.087 & -0.0156 \\
+TAM & 49 & -0.252 & -0.0159 & -0.019 & -0.321 & -0.0159 \\
+CAR & 30 & -0.274 & -0.0166 & 0.041 & -0.178 & -0.0170 \\
+JAX & 30 & -0.322 & -0.0202 & -0.006 & -0.477 & -0.0200 \\
+\hline
+\multicolumn{7}{l}{\textit{Notes: Luck Index measured in wins relative to expectation. Positive values indicate overperformance.}} \\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/any_given_sunday_meter.png}
+    \caption{Any Given Sunday Meter. Season-level upset frequency versus expectation. Positive values indicate more upsets than expected. Data: 1970--2024.}
+    \label{fig:placeholder}
+\end{figure}
+
+Figure 7 is a line plot showing the ``upset gap,'' computed as actual minus expected upsets over time. This measures league-wide unpredictability, the strength of the ``Any Given Sunday'' effect, and eras of relative chaos and stability. Positive values indicate more chaotic seasons, characterized by more upsets than expected. While there are a few chaotic eras—particularly in the 1980s and 2000s—the upset gap remains relatively close to zero games.
+
+
+
+\newpage
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/reliability_curve.png}
+    \caption{Probability calibration curve with a perfect calibration line. Data: 1970--2024.}
+    \label{fig:placeholder}
+\end{figure}
+
+Figure 8 shows how well-calibrated the model's probabilities are. Points near the perfect calibration line indicate that the model has done a good job predicting outcomes. Generally, the model is well-calibrated, with predicted probabilities closely matching actual outcomes across most probability ranges. Each bin contains a minimum of 50 games.
+
+\newpage
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/murphy_diagram.png}
+    \caption{Murphy Diagram: seasons plotted by sharpness versus reliability of predictions. Data: 1970--2024.}
+    \label{fig:placeholder}
+\end{figure}
+
+Figure 9 presents a Murphy Diagram, which plots each season by the sharpness and reliability of the model’s predictions. The objective is to balance confidence and calibration, with high sharpness and low reliability error representing the most desirable predictive performance (reliability here corresponds to calibration error, so lower values are better). As shown in the diagram, the model performs well across most seasons, delivering predictions that are both confident and appropriately calibrated.
+
+\newpage
+
+\subsection{2024-Specific Visualizations}
+
+While not the main focus of this study, a review of several 2024-specific visualizations provides insight into how many metrics function within a given season.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/sos_vs_elo_2024.png}
+    \caption{Strength of Season Calculator for the 2024 Regular Season. Data: 2024.}
+    \label{fig:placeholder}
+\end{figure}
+
+Figure 10 demonstrates the use of the strength-of-season metric as an additional measure of a team's performance. As discussed earlier, the Lions' ELO took off during 2024, which is made even more impressive by their high strength-of-season opponents. We would expect teams with high end-of-season ELOs and strong strength-of-season values to be the strongest teams in the league—those that can perform consistently against the best competition. Alternatively, teams with low ending ELOs and easier schedules may have reason to be concerned about their performance heading into the 2025 season.
+
+
+\newpage
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=.75\linewidth]{Outputs/delta_normalized_2024.png}
+    \caption{ELO Changes in the 2024 Regular Season. Data: 2024.}
+    \label{fig:placeholder}
+\end{figure}
+
+Figure 11 shows some of the ELO rating changes throughout the 2024 season. Some teams, like the 49ers, struggled, while others, like the Commanders, took advantage of their schedules to increase their ELO dramatically.
+
+\newpage
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{Outputs/season_ladder_2024.png}
+    \caption{2024 Final Rankings by ELO. Data: 2024.}
+    \label{fig:placeholder}
+\end{figure}
+
+Figure 12 is interesting in hindsight because many of the teams in the top part of the ELO distribution performed well in the postseason, including the two eventual Super Bowl contenders: the Chiefs and the Eagles. It is another compelling way of validating the predictions made by the ELO system, and further research could incorporate postseason results.
+
+\newpage
+\section{Major Findings}
+Several key findings emerge from my analysis. The ELO rating system, along with the suite of metrics I developed, provides accurate and well-calibrated forecasts. Analysis of the model’s sharpness and reliability finds it to be an appropriate tool for analyzing and predicting NFL regular-season outcomes.
+
+League parity shows significant variation over time, with no clear long-term trend. There is evidence of dynastic formation during periods of low parity and low variation, but the overall analysis fails to reveal any persistent one-way pattern. Ultimately, this is a positive outcome for viewers: seasons with high parity tend to produce more exciting games, while periods of low parity are typically balanced out by competitive forces within a few years.
+
+Most teams fall within two wins of expectation per season, suggesting that while luck plays a role, it is not a primary determinant of regular-season outcomes. However, in certain cases, large luck values (three wins or more) can meaningfully affect a team’s playoff probability, making luck analysis valuable for identifying which teams are most likely to reach the postseason.
+
+\subsection{Further Research}
+
+This research has many areas for future exploration. Namely, work could be done to identify how close ELO Ratings and my suite of metrics tie to betting-market probabilties, and which one is an overall better predictor of game outcomes. Further, post season mechanisms could be added to the model to show if the playoffs influence any of the metrics in a way unseen in the regular season (ie. is a lucky team more likely to continue their performance streak into the post-season?).
+
+There was also limited consideration of the element that ultimately makes the NFL possible: the players themselves. Future work could develop an aggregate framework that assigns individual ELO-style ratings to players, allowing those ratings to move with them as they change teams. Under such a model, teams would no longer be treated as singular, static entities, but instead as dynamic systems composed of interacting player-level skills whose combinations drive performance.
+
+\subsection{Recognition}
+I would like to thank:
+
+\begin{itemize}
+    \item Alexander Hoecherl and Henry Dipple for lending me their subject-matter expertise for this paper. They were generous with thier time and helped me better understand the NFL not just as an interesting source of data, but as a social tool for connection and compeititon.
+    \item Emily Vedaa for her endless support.
+\end{itemize}
+
+
+\end{document}

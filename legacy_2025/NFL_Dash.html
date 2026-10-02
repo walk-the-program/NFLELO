@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL ELO Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #0f0f0f;
+            --bg-tertiary: #141414;
+            --surface: #1a1a1a;
+            --surface-elevated: #202020;
+            --surface-glass: rgba(26, 26, 26, 0.8);
+            --border: #2a2a2a;
+            --border-light: #3a3a3a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #707070;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-light: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --shadow-lg: rgba(0, 0, 0, 0.7);
+            --shadow-glow: rgba(99, 102, 241, 0.2);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-surface: linear-gradient(145deg, #1a1a1a 0%, #202020 100%);
+            --gradient-glass: linear-gradient(145deg, rgba(26, 26, 26, 0.9) 0%, rgba(32, 32, 32, 0.8) 100%);
+            --blur: blur(20px);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --surface: #ffffff;
+            --surface-elevated: #f8fafc;
+            --surface-glass: rgba(255, 255, 255, 0.8);
+            --border: #e2e8f0;
+            --border-light: #cbd5e1;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-lg: rgba(0, 0, 0, 0.15);
+            --shadow-glow: rgba(99, 102, 241, 0.1);
+            --gradient-surface: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            --gradient-glass: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+            --blur: blur(20px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 60% 60%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        [data-theme="light"] body {
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem 2rem 4rem 2rem;
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            position: relative;
+            padding: 2rem 0 3rem 0;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 250px;
+            height: 250px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            z-index: -1;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 180px;
+            background: var(--gradient-accent);
+            border-radius: 50%;
+            filter: blur(50px);
+            opacity: 0.15;
+            z-index: -1;
+            animation: pulse 4s ease-in-out infinite 2s;
+        }
+
+        .header h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            position: relative;
+            animation: fadeInUp 0.8s ease-out;
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 4px;
+            background: var(--gradient-accent);
+            border-radius: 2px;
+            opacity: 0.8;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.3rem;
+            font-weight: 400;
+            line-height: 1.7;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0.4;
+            }
+            50% {
+                transform: translateX(-50%) scale(1.1);
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .controls {
+            background: var(--gradient-glass);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 
+                0 20px 40px var(--shadow),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: var(--blur);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .controls::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .view-toggle {
+            display: flex;
+            background: var(--bg-tertiary);
+            border-radius: 18px;
+            padding: 6px;
+            border: 1px solid var(--border);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .view-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-surface);
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .view-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+            font-size: 0.95rem;
+        }
+
+        .view-btn:hover:not(.active) {
+            color: var(--text-primary);
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .view-btn.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 
+                0 12px 30px var(--shadow-glow),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .filters {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .filter-group select {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            min-width: 140px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 25px var(--shadow);
+            transform: translateY(-1px);
+        }
+
+        .filter-group select:hover {
+            border-color: var(--border-light);
+            transform: translateY(-1px);
+        }
+
+        .team-selection {
+            background: var(--gradient-glass);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 
+                0 12px 24px var(--shadow),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+            backdrop-filter: var(--blur);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-selection::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-surface);
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .team-selection h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .team-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 0.75rem;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .team-option {
+            padding: 14px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 6px solid var(--border);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.95rem;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .team-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-accent);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .team-option:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 12px 30px var(--shadow-glow),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .team-option:hover::before {
+            left: 0;
+        }
+
+        .team-option.selected {
+            background: var(--gradient-primary);
+            border-color: var(--accent);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 
+                0 15px 35px var(--shadow-glow),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 28px;
+            padding: 4rem;
+            text-align: center;
+            background: var(--gradient-glass);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 16px 32px var(--shadow),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: var(--blur);
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-surface);
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.05);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px var(--shadow-lg);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+            box-shadow: 0 20px 60px var(--shadow-lg);
+        }
+
+        .upload-icon {
+            font-size: 4.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px var(--accent-glow));
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .upload-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-subtext {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-card {
+            background: var(--gradient-glass);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 
+                0 16px 32px var(--shadow),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: var(--blur);
+        }
+
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-surface);
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 
+                0 24px 48px var(--shadow-lg),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                0 0 30px var(--shadow-glow);
+            border-color: var(--border-light);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .chart-canvas {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Apple-esque Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient-glass);
+            padding: 0.5rem 0.75rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 
+                0 8px 24px var(--shadow),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+            backdrop-filter: var(--blur);
+        }
+
+        .theme-toggle-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .theme-switch {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            background: var(--border);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .theme-switch:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px var(--shadow-lg);
+        }
+
+        .theme-switch::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-switch::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+
+        [data-theme="light"] .theme-switch {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        [data-theme="light"] .theme-switch::before {
+            left: 30px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .theme-switch::after {
+            content: '';
+            opacity: 1;
+        }
+
+        /* Theme transition animations */
+        * {
+            transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                       border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                       color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                       box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Chart theme adjustments */
+        [data-theme="light"] .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 16px var(--shadow);
+        }
+
+        [data-theme="light"] .chart-card:hover {
+            box-shadow: 0 8px 32px var(--shadow-lg);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .loading i {
+            margin-right: 0.5rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: var(--error);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .error i {
+            margin-right: 0.5rem;
+        }
+
+        .success {
+            color: var(--success);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success i {
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+                gap: 2rem;
+            }
+            
+            .container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+                padding-bottom: 6rem;
+            }
+            
+            .header {
+                margin-bottom: 2rem;
+                padding: 1rem 0 2rem 0;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            
+            .filters {
+                justify-content: center;
+                gap: 1rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .chart-card {
+                padding: 1.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.4rem 0.6rem;
+            }
+            
+            .team-selector {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 0.5rem;
+            }
+            
+            .upload-area {
+                padding: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NFL ELO Dashboard</h1>
+            <p>Interactive NFL team performance analysis with ELO ratings</p>
+        </div>
+
+        <!-- Apple-esque Theme Toggle -->
+        <div class="theme-toggle">
+            <span class="theme-toggle-label">Theme</span>
+            <div class="theme-switch" onclick="toggleTheme()"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="view-toggle">
+                <button id="leagueViewBtn" class="view-btn active">League View</button>
+                <button id="teamViewBtn" class="view-btn">Team View</button>
+            </div>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="seasonFilter">Season</label>
+                    <select id="seasonFilter">
+                        <option value="all">All Seasons</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="conferenceFilter">Conference</label>
+                    <select id="conferenceFilter">
+                        <option value="all">All Conferences</option>
+                        <option value="AFC">AFC</option>
+                        <option value="NFC">NFC</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Selection (Team View Only) -->
+        <div id="teamSelectionSection" class="team-selection" style="display: none;">
+            <h3>Select Teams</h3>
+            <div id="teamSelector" class="team-selector">
+                <!-- Teams will be populated here -->
+            </div>
+        </div>
+
+        <!-- Upload Area -->
+        <div id="uploadArea" class="upload-area">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <div class="upload-text">Upload Your NFL Data</div>
+            <div class="upload-subtext">Drag and drop your Excel file here or click the upload button</div>
+            <div class="upload-subtext">Expected format: Date, Team, Opp, Result, Hosting columns</div>
+            <input type="file" id="dataFile" accept=".xlsx,.xls" style="display: none;">
+            <button onclick="document.getElementById('dataFile').click()" style="
+                background: var(--gradient-primary);
+                color: white;
+                border: none;
+                padding: 16px 32px;
+                border-radius: 16px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+                position: relative;
+                overflow: hidden;
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 35px rgba(99, 102, 241, 0.4)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(99, 102, 241, 0.3)'">Choose File</button>
+        </div>
+
+        <!-- League View Charts -->
+        <div class="dashboard-grid" id="leagueView" style="display: none;">
+            <!-- League Tapestry -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div class="chart-info">
+                        <div class="chart-title">League Tapestry</div>
+                        <div class="chart-subtitle">ELO ratings over time for all teams</div>
+                    </div>
+                </div>
+                <div class="chart-canvas">
+                    <canvas id="leagueTapestryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Season Ladder -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-info">
+                        <div class="chart-title">Season Ladder</div>
+                        <div class="chart-subtitle">Current team rankings</div>
+                    </div>
+                </div>
+                <div class="chart-canvas">
+                    <canvas id="seasonLadderChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Biggest ELO Swings -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-info">
+                        <div class="chart-title">Biggest ELO Swings</div>
+                        <div class="chart-subtitle">Games with largest rating changes</div>
+                    </div>
+                </div>
+                <div class="chart-canvas">
+                    <canvas id="biggestSwingsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- League Parity -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-info">
+                        <div class="chart-title">League Parity</div>
+                        <div class="chart-subtitle">Competitive balance over time</div>
+                    </div>
+                </div>
+                <div class="chart-canvas">
+                    <canvas id="parityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Luck Index -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-info">
+                        <div class="chart-title">Luck Index</div>
+                        <div class="chart-subtitle">Teams with most/least luck</div>
+                    </div>
+                </div>
+                <div class="chart-canvas">
+                    <canvas id="luckIndexChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team View Charts -->
+        <div class="dashboard-grid" id="teamView" style="display: none;">
+            <!-- Team Trajectory -->
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div class="chart-info">
+                        <div class="chart-title">Team Trajectory</div>
+                        <div class="chart-subtitle">ELO progression over time</div>
+                    </div>
+                </div>
+                <div class="chart-canvas">
+                    <canvas id="teamTrajectoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Team Performance -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-info">
+                        <div class="chart-title">Team Performance</div>
+                        <div class="chart-subtitle">Win/Loss breakdown</div>
+                    </div>
+                </div>
+                <div class="chart-canvas">
+                    <canvas id="teamPerformanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Team vs League Average -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-info">
+                        <div class="chart-title">Team vs League Average</div>
+                        <div class="chart-subtitle">How team compares to league average</div>
+                    </div>
+                </div>
+                <div class="chart-canvas">
+                    <canvas id="teamVsLeagueChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Head-to-Head Comparison Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-info">
+                        <div class="chart-title">Head-to-Head Comparison</div>
+                        <div class="chart-subtitle">Direct comparison of selected teams</div>
+                    </div>
+                </div>
+                <div class="chart-canvas">
+                    <canvas id="headToHeadChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let rawData = null;
+        let processedData = null;
+        let selectedTeams = new Set();
+        let charts = {};
+
+        // Official NFL Team Colors (from NFL_ELO_organized.py)
+        const teamColors = {
+            'ARI': '#97233f', 'ATL': '#a71930', 'BAL': '#241773', 'BUF': '#00338d',
+            'CAR': '#0085ca', 'CHI': '#0b162a', 'CIN': '#fb4f14', 'CLE': '#311d00',
+            'DAL': '#003594', 'DEN': '#fb4f14', 'DET': '#0076b6', 'GNB': '#203731',
+            'HOU': '#03202f', 'IND': '#002c5f', 'JAX': '#006778', 'KAN': '#e31837',
+            'LVR': '#000000', 'LAC': '#0080c6', 'LAR': '#003594', 'MIA': '#008e97',
+            'MIN': '#4f2683', 'NWE': '#002244', 'NOR': '#d3bc8d', 'NYG': '#0b2265',
+            'NYJ': '#125740', 'PHI': '#004c54', 'PIT': '#ffb612', 'SFO': '#aa0000',
+            'SEA': '#002244', 'TAM': '#d50a0a', 'TEN': '#0c2340', 'WAS': '#5a1414'
+        };
+
+        // Fallback colors for teams not in the official mapping
+        const fallbackColors = [
+            '#1a365d', '#e53e3e', '#38a169', '#d69e2e', '#805ad5',
+            '#dd6b20', '#319795', '#c53030', '#2f855a', '#b7791f',
+            '#553c9a', '#c05621', '#667eea', '#764ba2', '#f093fb',
+            '#f5576c', '#4facfe', '#00f2fe', '#a8edea', '#fed6e3'
+        ];
+
+        function getTeamColor(teamCode, alpha = 1) {
+            let color;
+            
+            // If teamCode is a number (index), use fallback colors
+            if (typeof teamCode === 'number') {
+                color = fallbackColors[teamCode % fallbackColors.length];
+            } else {
+                // Convert to string and uppercase
+                const teamStr = String(teamCode).toUpperCase().trim();
+                
+                // Direct match first
+                if (teamColors[teamStr]) {
+                    color = teamColors[teamStr];
+                } else {
+                    // Try common variations
+                    let foundColor = null;
+                    
+                    // Try without spaces or special characters
+                    const cleanTeam = teamStr.replace(/[^A-Z]/g, '');
+                    if (teamColors[cleanTeam]) {
+                        foundColor = teamColors[cleanTeam];
+                    }
+                    
+                    // Try partial matches
+                    if (!foundColor) {
+                        for (const [key, value] of Object.entries(teamColors)) {
+                            if (key.includes(teamStr) || teamStr.includes(key)) {
+                                foundColor = value;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    color = foundColor || fallbackColors[0];
+                    
+                    if (!foundColor) {
+                        console.warn(`No color found for team: "${teamCode}" (tried: "${teamStr}"), using fallback: ${color}`);
+                    }
+                }
+            }
+            
+            // Handle alpha transparency
+            if (alpha < 1) {
+                // Convert hex to RGB
+                const hex = color.replace('#', '');
+                const r = parseInt(hex.substr(0, 2), 16);
+                const g = parseInt(hex.substr(2, 2), 16);
+                const b = parseInt(hex.substr(4, 2), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+            
+            return color;
+        }
+
+        // Custom tooltip functions
+        function showCustomTooltip(x, y, teamName, eloValue) {
+            // Remove existing tooltip if any
+            hideCustomTooltip();
+            
+            // Create tooltip element
+            const tooltip = document.createElement('div');
+            tooltip.id = 'custom-tooltip';
+            tooltip.style.cssText = `
+                position: fixed;
+                left: ${x + 10}px;
+                top: ${y - 10}px;
+                background: rgba(30, 30, 30, 0.95);
+                color: #ffffff;
+                padding: 12px 16px;
+                border-radius: 12px;
+                border: 1px solid #6366f1;
+                font-family: 'Inter', sans-serif;
+                font-size: 13px;
+                font-weight: 600;
+                z-index: 1000;
+                pointer-events: none;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+                backdrop-filter: blur(10px);
+            `;
+            
+            tooltip.innerHTML = `
+                <div style="font-weight: 700; margin-bottom: 4px;">${teamName}</div>
+                <div style="color: #a0a0a0; font-weight: 500;">ELO: ${eloValue.toFixed(1)}</div>
+            `;
+            
+            document.body.appendChild(tooltip);
+        }
+
+        function hideCustomTooltip() {
+            const existingTooltip = document.getElementById('custom-tooltip');
+            if (existingTooltip) {
+                existingTooltip.remove();
+            }
+        }
+
+        function interpolateEloValue(chart, datasetIndex, mouseX) {
+            try {
+                const dataset = chart.data.datasets[datasetIndex];
+                const meta = chart.getDatasetMeta(datasetIndex);
+                
+                // Find the closest point to the mouse position
+                let closestPoint = null;
+                let minDistance = Infinity;
+                
+                for (let i = 0; i < dataset.data.length; i++) {
+                    if (dataset.data[i] !== null && meta.data[i]) {
+                        const point = meta.data[i];
+                        const distance = Math.abs(mouseX - point.x);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestPoint = dataset.data[i];
+                        }
+                    }
+                }
+                
+                return closestPoint ? closestPoint.y : null;
+                
+            } catch (error) {
+                console.error('Error in interpolateEloValue:', error);
+                return null;
+            }
+        }
+        let currentView = 'league';
+        let currentTheme = 'dark';
+
+        // Theme toggle function
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            
+            if (isDark) {
+                body.setAttribute('data-theme', 'light');
+                currentTheme = 'light';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                currentTheme = 'dark';
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            // Update chart colors if charts exist
+            updateChartThemes();
+        }
+
+        // Initialize theme from localStorage
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            currentTheme = savedTheme;
+        }
+
+        // Update chart themes
+        function updateChartThemes() {
+            if (!charts.leagueTapestry) return;
+            
+            const chart = charts.leagueTapestry;
+            const isLight = currentTheme === 'light';
+            
+            // Update chart options
+            chart.options.scales.x.grid.color = isLight ? 'rgba(226, 232, 240, 0.5)' : 'rgba(45, 55, 72, 0.5)';
+            chart.options.scales.x.ticks.color = isLight ? '#64748b' : '#a0aec0';
+            chart.options.scales.y.grid.color = isLight ? 'rgba(226, 232, 240, 0.5)' : 'rgba(45, 55, 72, 0.5)';
+            chart.options.scales.y.ticks.color = isLight ? '#64748b' : '#a0aec0';
+            
+            // Update tooltip colors
+            chart.options.plugins.tooltip.backgroundColor = isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(30, 30, 30, 0.95)';
+            chart.options.plugins.tooltip.titleColor = isLight ? '#1e293b' : '#ffffff';
+            chart.options.plugins.tooltip.bodyColor = isLight ? '#1e293b' : '#ffffff';
+            chart.options.plugins.tooltip.borderColor = '#6366f1';
+            
+            chart.update('none');
+        }
+
+        // ELO calculation constants
+        const START_ELO = 1000.0;
+        const K_FACTOR = 100.0;
+        const HOME_FIELD_ADVANTAGE = 55.0;
+
+        // NFL Conference mapping (based on current 32 franchises)
+        const TEAM_CONFERENCES = {
+            // AFC Teams
+            'BUF': 'AFC', 'MIA': 'AFC', 'NWE': 'AFC', 'NYJ': 'AFC',  // AFC East
+            'BAL': 'AFC', 'CIN': 'AFC', 'CLE': 'AFC', 'PIT': 'AFC',  // AFC North
+            'HOU': 'AFC', 'IND': 'AFC', 'JAX': 'AFC', 'TEN': 'AFC',  // AFC South
+            'DEN': 'AFC', 'KAN': 'AFC', 'LVR': 'AFC', 'LAC': 'AFC',  // AFC West
+            
+            // NFC Teams
+            'DAL': 'NFC', 'NYG': 'NFC', 'PHI': 'NFC', 'WAS': 'NFC',  // NFC East
+            'CHI': 'NFC', 'DET': 'NFC', 'GNB': 'NFC', 'MIN': 'NFC',  // NFC North
+            'ATL': 'NFC', 'CAR': 'NFC', 'NOR': 'NFC', 'TAM': 'NFC',  // NFC South
+            'ARI': 'NFC', 'LAR': 'NFC', 'SFO': 'NFC', 'SEA': 'NFC'   // NFC West
+        };
+
+        // Canonical franchise mapping (from Python script)
+        // Maps historical team codes to current 32 franchises
+        function canonicalFranchise(code, date) {
+            if (!code) return code;
+            code = code.toString().trim().toUpperCase();
+            
+            // Static mappings for relocations
+            const staticMap = {
+                "SDG": "LAC", "LAC": "LAC",
+                "OAK": "LVR", "RAI": "LVR", "LVR": "LVR", 
+                "RAM": "LAR",  // Note: LAR and STL handled separately with date logic
+                "PHO": "ARI", "ARI": "ARI",
+                "BOS": "NWE", "NWE": "NWE",
+                "OTI": "TEN"
+            };
+            
+            if (staticMap[code]) {
+                return staticMap[code];
+            }
+            
+            // Handle Los Angeles - Rams vs Raiders
+            // Los Angeles Rams: 1946-1994 (LA), 1995-2015 (St. Louis), 2016+ (LA)
+            // Los Angeles Raiders: 1982-1994 (LA), then back to Oakland, then Las Vegas
+            if (code === "LAR") {
+                const gameDate = new Date(date);
+                // 1982-1994: Los Angeles Raiders → Las Vegas Raiders
+                if (gameDate >= new Date("1982-01-01") && gameDate < new Date("1995-01-01")) {
+                    return "LVR";
+                }
+                // All other times: Los Angeles Rams
+                else {
+                    return "LAR";
+                }
+            }
+            
+            // Handle St. Louis - Cardinals (1960-1987) vs Rams (1995-2015)
+            // Cardinals were in St. Louis 1960-1987, then moved to Phoenix
+            // Rams were in St. Louis 1995-2015, then moved back to LA
+            if (code === "STL") {
+                const gameDate = new Date(date);
+                // Before 1995: St. Louis Cardinals → Arizona Cardinals
+                if (gameDate < new Date("1995-01-01")) {
+                    return "ARI";
+                }
+                // 1995-2015: St. Louis Rams → Los Angeles Rams
+                else {
+                    return "LAR";
+                }
+            }
+            
+            // Handle Houston Oilers/Texans special case
+            if (code === "HOU") {
+                const gameDate = new Date(date);
+                return gameDate < new Date("1999-01-01") ? "TEN" : "HOU";
+            }
+            
+            // Handle Baltimore - Colts (pre-1984) vs Ravens (1996+)
+            // Baltimore Colts moved to Indianapolis in 1984
+            // Baltimore Ravens created in 1996 (from Browns relocation)
+            // Gap: 1984-1995 (no team in Baltimore)
+            if (code === "BAL") {
+                const gameDate = new Date(date);
+                if (gameDate < new Date("1984-01-01")) {
+                    return "IND";  // Baltimore Colts → Indianapolis Colts
+                } else if (gameDate < new Date("1996-01-01")) {
+                    // Gap period - no team in Baltimore (1984-1995)
+                    // If BAL appears here, it's likely an error, but map to IND for continuity
+                    return "IND";
+                } else {
+                    return "BAL";  // Baltimore Ravens (1996+)
+                }
+            }
+            
+            // Handle Dallas - Cowboys vs Chiefs (Dallas Texans 1960-1962)
+            // Since data starts in 1970, DAL is always Cowboys
+            // No mapping needed for 1970+ data
+            if (code === "DAL") {
+                return "DAL";  // No change needed for 1970+ data
+            }
+            
+            return code;
+        }
+
+        // Simple team color mapping function
+        function getSimpleTeamColor(teamName, index) {
+            // First try to get official color
+            const officialColor = teamColors[teamName];
+            if (officialColor) {
+                return officialColor;
+            }
+            
+            // If not found, use fallback based on index
+            return fallbackColors[index % fallbackColors.length];
+        }
+
+        function getContrastColor(hexColor) {
+            // Convert hex to RGB
+            const hex = hexColor.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            
+            // Calculate luminance
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            
+            // Return white for dark colors, black for light colors
+            return luminance > 0.5 ? '#000000' : '#ffffff';
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            initializeEventListeners();
+            setupDragAndDrop();
+            
+            // Test team colors
+            console.log('Testing team colors:');
+            console.log('DAL:', getTeamColor('DAL'));
+            console.log('GB:', getTeamColor('GB'));
+            console.log('KC:', getTeamColor('KC'));
+            console.log('PIT:', getTeamColor('PIT'));
+        });
+
+        function initializeEventListeners() {
+            // File upload
+            document.getElementById('dataFile').addEventListener('change', handleFileUpload);
+            
+            // View toggle
+            document.getElementById('leagueViewBtn').addEventListener('click', () => switchView('league'));
+            document.getElementById('teamViewBtn').addEventListener('click', () => switchView('team'));
+            
+            // Filters
+            document.getElementById('seasonFilter').addEventListener('change', () => {
+                updateCharts();
+            });
+            document.getElementById('conferenceFilter').addEventListener('change', () => {
+                updateTeamSelector();
+                updateCharts();
+            });
+        }
+
+        function setupDragAndDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload({ target: { files: files } });
+                }
+            });
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.match(/\.(xlsx|xls)$/)) {
+                showError('Please select an Excel file (.xlsx or .xls)');
+                return;
+            }
+
+            showLoading();
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { 
+                        type: 'array',
+                        cellDates: true,  // Parse dates as Date objects
+                        dateNF: 'mm/dd/yyyy'  // Date format
+                    });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    rawData = XLSX.utils.sheet_to_json(worksheet, {
+                        raw: false,  // Don't use raw values
+                        dateNF: 'mm/dd/yyyy'
+                    });
+                    
+                    console.log('Excel data loaded:', rawData.length, 'rows');
+                    console.log('Sample raw data with dates:', rawData.slice(0, 3).map(r => ({ 
+                        Date: r.Date, 
+                        DateType: typeof r.Date,
+                        Team: r.Team,
+                        Opp: r.Opp 
+                    })));
+                    processData();
+                    
+                } catch (error) {
+                    console.error('Error reading Excel file:', error);
+                    showError('Error reading Excel file. Please check the format.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processData() {
+            if (!rawData || rawData.length === 0) {
+                showError('No data found in Excel file');
+                return;
+            }
+
+            console.log('Processing data...');
+            console.log('Sample raw data:', rawData.slice(0, 3));
+            
+            // Parse and clean the data
+            const cleanedData = rawData.map(row => {
+                // Parse game results
+                const resultMatch = row.Result ? row.Result.toString().match(/^([WLT])\s+(\d+)-(\d+)$/) : null;
+                
+                // Fix date parsing - handle Excel date numbers and string dates
+                let parsedDate;
+                if (typeof row.Date === 'number') {
+                    // Excel date number (days since 1900-01-01, but Excel thinks 1900 is a leap year)
+                    // Excel's epoch is 1900-01-01, but it incorrectly treats 1900 as a leap year
+                    const excelEpoch = new Date(1900, 0, 1);
+                    parsedDate = new Date(excelEpoch.getTime() + (row.Date - 2) * 24 * 60 * 60 * 1000);
+                } else if (typeof row.Date === 'string') {
+                    // Try to parse string date - handle various formats
+                    if (row.Date.includes('/')) {
+                        // Handle MM/DD/YYYY or DD/MM/YYYY
+                        const parts = row.Date.split('/');
+                        if (parts.length === 3) {
+                            // Assume MM/DD/YYYY format
+                            parsedDate = new Date(parts[2], parts[0] - 1, parts[1]);
+                        }
+                    } else {
+                        parsedDate = new Date(row.Date);
+                    }
+                } else if (row.Date instanceof Date) {
+                    parsedDate = row.Date;
+                } else {
+                    console.warn('Unknown date format:', row.Date, typeof row.Date);
+                    parsedDate = new Date();
+                }
+                
+                // Validate date and check if it's reasonable (not 1969)
+                if (isNaN(parsedDate.getTime()) || parsedDate.getFullYear() < 1970) {
+                    console.warn('Invalid or old date:', row.Date, 'parsed as:', parsedDate);
+                    // Try alternative parsing
+                    if (typeof row.Date === 'string') {
+                        // Try parsing as ISO date
+                        const isoDate = new Date(row.Date + 'T00:00:00');
+                        if (!isNaN(isoDate.getTime()) && isoDate.getFullYear() >= 1970) {
+                            parsedDate = isoDate;
+                        }
+                    }
+                }
+                
+                return {
+                    Date: parsedDate,
+                    Team: row.Team,
+                    Opp: row.Opp,
+                    Team_FR: canonicalFranchise(row.Team, parsedDate),
+                    Opp_FR: canonicalFranchise(row.Opp, parsedDate),
+                    Result: resultMatch ? resultMatch[1] : null,
+                    TeamPoints: resultMatch ? parseInt(resultMatch[2]) : null,
+                    OppPoints: resultMatch ? parseInt(resultMatch[3]) : null,
+                    Hosting: row.Hosting
+                };
+            }).filter(row => row.Result && row.Team && row.Opp);
+
+            console.log('Cleaned data:', cleanedData.length, 'games');
+            console.log('Sample cleaned dates:', cleanedData.slice(0, 5).map(d => ({ 
+                original: rawData.find(r => r.Team === d.Team && r.Opp === d.Opp)?.Date,
+                parsed: d.Date.toISOString().split('T')[0]
+            })));
+            
+            // Show franchise mapping examples
+            const franchiseExamples = cleanedData.slice(0, 10).map(d => ({
+                original: d.Team,
+                franchise: d.Team_FR,
+                date: d.Date.toISOString().split('T')[0]
+            }));
+            console.log('Franchise mapping examples:', franchiseExamples);
+
+            // Calculate ELO ratings
+            const eloData = calculateELORatings(cleanedData);
+            
+            // Process into dashboard format
+            processedData = {
+                timeline: eloData.timeline,
+                monthlyElo: calculateMonthlyElo(eloData.timeline),
+                summaryStats: calculateSummaryStats(eloData.timeline),
+                biggestSwings: findBiggestSwings(eloData.timeline),
+                parityMetrics: calculateParityMetrics(eloData.timeline),
+                luckIndex: calculateLuckIndex(eloData.timeline),
+                metadata: {
+                    totalGames: eloData.timeline.length,
+                    teams: [...new Set(eloData.timeline.map(g => g.Team))].sort(),
+                    seasons: [...new Set(eloData.timeline.map(g => g.Season))].sort(),
+                    dateRange: {
+                        start: new Date(Math.min(...eloData.timeline.map(g => new Date(g.Date)))),
+                        end: new Date(Math.max(...eloData.timeline.map(g => new Date(g.Date))))
+                    }
+                }
+            };
+
+            console.log('Data processed successfully:', processedData);
+            
+            showSuccess();
+            populateFilters();
+            updateCharts();
+            
+            // Show dashboard and default to league view
+            // Use setTimeout to ensure DOM is ready
+            setTimeout(() => {
+                switchView('league');
+            }, 100);
+        }
+
+        function calculateELORatings(games) {
+            const ratings = {};
+            const timeline = [];
+
+            // Initialize all teams with starting ELO
+            const allTeams = new Set();
+            games.forEach(game => {
+                allTeams.add(game.Team_FR);
+                allTeams.add(game.Opp_FR);
+            });
+            
+            allTeams.forEach(team => {
+                ratings[team] = START_ELO;
+            });
+
+            function getElo(team) {
+                return ratings[team] || START_ELO;
+            }
+
+            // Sort games by date
+            games.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+
+            // Filter out data after July 1, 2025
+            const cutoffDate = new Date('2025-07-01');
+            const filteredGames = games.filter(game => {
+                const gameDate = new Date(game.Date);
+                return gameDate <= cutoffDate;
+            });
+
+            console.log(`Filtered out data after July 1, 2025: ${games.length} -> ${filteredGames.length} games`);
+
+            filteredGames.forEach(game => {
+                const teamA = game.Team_FR;  // Use canonical franchise
+                const teamB = game.Opp_FR;   // Use canonical franchise
+                const ra = getElo(teamA);
+                const rb = getElo(teamB);
+
+                // Home field advantage
+                const hfaA = (game.Hosting === 'H' || game.Hosting === '1') ? HOME_FIELD_ADVANTAGE : 0;
+                const hfaB = (game.Hosting === '@' || game.Hosting === '0') ? HOME_FIELD_ADVANTAGE : 0;
+                
+                // Expected scores
+                const ea = 1 / (1 + Math.pow(10, (rb + hfaB - ra - hfaA) / 400));
+                const eb = 1 - ea;
+                
+                // Actual scores
+                const sa = game.Result === 'W' ? 1 : game.Result === 'L' ? 0 : 0.5;
+                const sb = 1 - sa;
+                
+                // ELO changes
+                const deltaA = K_FACTOR * (sa - ea);
+                const deltaB = K_FACTOR * (sb - eb);
+
+                // Update ratings
+                ratings[teamA] = ra + deltaA;
+                ratings[teamB] = rb + deltaB;
+
+                // Add to timeline
+                const season = new Date(game.Date).getFullYear();
+                
+                timeline.push({
+                    Date: game.Date.toISOString().split('T')[0],
+                    Season: season,
+                    Team: teamA,
+                    Opp: teamB,
+                    Original_Team: game.Team,  // Keep original team code for reference
+                    Original_Opp: game.Opp,    // Keep original opponent code for reference
+                    ELO_Pre: ra,
+                    ELO_Post: ratings[teamA],
+                    ELO_Change: deltaA,
+                    Outcome: game.Result,
+                    TeamPoints: game.TeamPoints,
+                    OppPoints: game.OppPoints,
+                    Expected: ea,
+                    Actual: sa
+                });
+
+                timeline.push({
+                    Date: game.Date.toISOString().split('T')[0],
+                    Season: season,
+                    Team: teamB,
+                    Opp: teamA,
+                    Original_Team: game.Opp,   // Keep original team code for reference
+                    Original_Opp: game.Team,   // Keep original opponent code for reference
+                    ELO_Pre: rb,
+                    ELO_Post: ratings[teamB],
+                    ELO_Change: deltaB,
+                    Outcome: game.Result === 'W' ? 'L' : game.Result === 'L' ? 'W' : 'T',
+                    TeamPoints: game.OppPoints,
+                    OppPoints: game.TeamPoints,
+                    Expected: eb,
+                    Actual: sb
+                });
+            });
+
+            return { timeline, ratings };
+        }
+
+        function calculateMonthlyElo(timeline) {
+            const monthly = {};
+            
+            timeline.forEach(game => {
+                const date = new Date(game.Date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                const team = game.Team;
+                
+                if (!monthly[team]) monthly[team] = {};
+                if (!monthly[team][monthKey]) monthly[team][monthKey] = [];
+                
+                monthly[team][monthKey].push(game.ELO_Post);
+            });
+
+            const result = [];
+            Object.keys(monthly).forEach(team => {
+                // Sort months for each team chronologically
+                const sortedMonths = Object.keys(monthly[team]).sort();
+                sortedMonths.forEach(month => {
+                    const avgElo = monthly[team][month].reduce((a, b) => a + b, 0) / monthly[team][month].length;
+                    result.push({
+                        Team: team,
+                        Month: month,
+                        ELO: avgElo
+                    });
+                });
+            });
+
+            // Sort the entire result by month, then by team for consistent ordering
+            return result.sort((a, b) => {
+                if (a.Month !== b.Month) {
+                    return a.Month.localeCompare(b.Month);
+                }
+                return a.Team.localeCompare(b.Team);
+            });
+        }
+
+        function calculateSummaryStats(timeline) {
+            const stats = {};
+            
+            timeline.forEach(game => {
+                if (!stats[game.Team]) {
+                    stats[game.Team] = {
+                        Team: game.Team,
+                        Current_ELO: game.ELO_Post,
+                        Games: 0,
+                        Wins: 0,
+                        Losses: 0,
+                        Ties: 0
+                    };
+                }
+                
+                stats[game.Team].Games++;
+                if (game.Outcome === 'W') stats[game.Team].Wins++;
+                else if (game.Outcome === 'L') stats[game.Team].Losses++;
+                else stats[game.Team].Ties++;
+                
+                // Update current ELO to the latest value
+                stats[game.Team].Current_ELO = game.ELO_Post;
+            });
+
+            return Object.values(stats).sort((a, b) => b.Current_ELO - a.Current_ELO);
+        }
+
+        function findBiggestSwings(timeline) {
+            console.log('Finding biggest swings from timeline:', timeline.length, 'entries');
+            
+            // Group timeline entries by game (same date, same teams)
+            const gameGroups = {};
+            
+            timeline.forEach(game => {
+                // Use canonical franchise codes for grouping
+                const gameKey = `${game.Date}_${[game.Team, game.Opp].sort().join('_')}`;
+                if (!gameGroups[gameKey]) {
+                    gameGroups[gameKey] = [];
+                }
+                gameGroups[gameKey].push(game);
+            });
+            
+            console.log('Game groups created:', Object.keys(gameGroups).length);
+            
+            // Calculate total swing per game and create unique entries
+            const gameSwings = [];
+            
+            Object.values(gameGroups).forEach(games => {
+                if (games.length >= 2) {
+                    // Find the two entries that represent the same game
+                    const game1 = games.find(g => g.Team === games[0].Team);
+                    const game2 = games.find(g => g.Team === games[0].Opp);
+                    
+                    if (game1 && game2) {
+                        // Calculate total ELO change for this game
+                        const totalSwing = Math.abs(game1.ELO_Change) + Math.abs(game2.ELO_Change);
+                        
+                        // Create a single entry representing this game
+                        gameSwings.push({
+                            Date: game1.Date,
+                            Season: game1.Season,
+                            Team1: game1.Team,
+                            Team2: game1.Opp,
+                            Team1_ELO_Change: game1.ELO_Change,
+                            Team2_ELO_Change: game2.ELO_Change,
+                            Total_Swing: totalSwing,
+                            Team1_Points: game1.TeamPoints,
+                            Team2_Points: game1.OppPoints,
+                            Winner: game1.Outcome === 'W' ? game1.Team : game1.Outcome === 'L' ? game1.Opp : 'Tie'
+                        });
+                    }
+                } else {
+                    console.log('Game with unexpected number of entries:', games.length, games);
+                }
+            });
+            
+            console.log('Game swings calculated:', gameSwings.length);
+            
+            // Sort by total swing and return top 20
+            const result = gameSwings
+                .sort((a, b) => b.Total_Swing - a.Total_Swing)
+                .slice(0, 20);
+                
+            console.log('Final biggest swings result:', result);
+            return result;
+        }
+
+        function calculateParityMetrics(timeline) {
+            const seasonData = {};
+            
+            timeline.forEach(game => {
+                if (!seasonData[game.Season]) seasonData[game.Season] = [];
+                seasonData[game.Season].push(game.ELO_Post);
+            });
+
+            return Object.keys(seasonData).map(season => {
+                const elos = seasonData[season];
+                const mean = elos.reduce((a, b) => a + b, 0) / elos.length;
+                const variance = elos.reduce((sum, elo) => sum + Math.pow(elo - mean, 2), 0) / elos.length;
+                const stdDev = Math.sqrt(variance);
+                
+                return {
+                    Season: parseInt(season),
+                    Mean_ELO: mean,
+                    StdDev: stdDev,
+                    Coefficient_of_Variation: stdDev / mean
+                };
+            }).sort((a, b) => a.Season - b.Season);
+        }
+
+        function calculateLuckIndex(timeline) {
+            const teamLuck = {};
+            
+            timeline.forEach(game => {
+                if (!teamLuck[game.Team]) {
+                    teamLuck[game.Team] = { wins: 0, expectedWins: 0 };
+                }
+                
+                if (game.Outcome === 'W') teamLuck[game.Team].wins++;
+                teamLuck[game.Team].expectedWins += game.Expected;
+            });
+
+            return Object.keys(teamLuck).map(team => ({
+                Team: team,
+                Expected_Wins: teamLuck[team].expectedWins,
+                Actual_Wins: teamLuck[team].wins,
+                Luck: teamLuck[team].wins - teamLuck[team].expectedWins
+            })).sort((a, b) => b.Luck - a.Luck);
+        }
+
+        function populateFilters() {
+            if (!processedData) return;
+
+            // Populate season filter (including 2025 but only up to July 1st)
+            const seasonFilter = document.getElementById('seasonFilter');
+            seasonFilter.innerHTML = '<option value="all">All Seasons</option>';
+            processedData.metadata.seasons.forEach(season => {
+                const option = document.createElement('option');
+                option.value = season;
+                option.textContent = season;
+                seasonFilter.appendChild(option);
+            });
+
+            // Populate team selector
+            updateTeamSelector();
+        }
+
+        function updateTeamSelector() {
+            if (!processedData) return;
+
+            const teamSelector = document.getElementById('teamSelector');
+            const conferenceFilter = document.getElementById('conferenceFilter').value;
+            
+            teamSelector.innerHTML = '';
+            
+            // Filter teams by conference if a conference is selected
+            let teamsToShow = processedData.metadata.teams;
+            if (conferenceFilter !== 'all') {
+                teamsToShow = teamsToShow.filter(team => TEAM_CONFERENCES[team] === conferenceFilter);
+            }
+            
+            teamsToShow.forEach(team => {
+                const option = document.createElement('div');
+                option.className = 'team-option';
+                const conference = TEAM_CONFERENCES[team] || 'Unknown';
+                option.textContent = `${team} (${conference})`;
+                option.dataset.team = team;
+                
+                // Apply team color as border
+                const teamColor = getSimpleTeamColor(team, 0);
+                option.style.borderLeftWidth = '4px';
+                option.style.borderLeftColor = teamColor;
+                
+                // Show selected state if team is currently selected
+                if (selectedTeams.has(team)) {
+                    option.classList.add('selected');
+                    // Apply team color as background when selected
+                    option.style.background = `linear-gradient(135deg, ${teamColor}20, ${teamColor}40)`;
+                    option.style.borderColor = teamColor;
+                    option.style.color = getContrastColor(teamColor);
+                }
+                
+                option.addEventListener('click', () => toggleTeamSelection(team));
+                teamSelector.appendChild(option);
+            });
+        }
+
+        function toggleTeamSelection(team) {
+            const option = document.querySelector(`[data-team="${team}"]`);
+            const teamColor = getSimpleTeamColor(team, 0);
+            
+            if (selectedTeams.has(team)) {
+                selectedTeams.delete(team);
+                option.classList.remove('selected');
+                // Reset to default styling
+                option.style.background = '';
+                option.style.borderColor = '';
+                option.style.borderLeftWidth = '4px';
+                option.style.color = '';
+            } else {
+                // Allow multiple team selection in team view
+                if (currentView === 'team') {
+                    selectedTeams.add(team);
+                    option.classList.add('selected');
+                    // Apply team color styling
+                    option.style.background = `linear-gradient(135deg, ${teamColor}20, ${teamColor}40)`;
+                    option.style.borderColor = teamColor;
+                    option.style.color = getContrastColor(teamColor);
+                } else {
+                    // In league view, only allow one team selection
+                    // Clear previous selection
+                    selectedTeams.forEach(prevTeam => {
+                        const prevOption = document.querySelector(`[data-team="${prevTeam}"]`);
+                        if (prevOption) {
+                            prevOption.classList.remove('selected');
+                            // Reset previous team styling
+                            prevOption.style.background = '';
+                            prevOption.style.borderColor = '';
+                            prevOption.style.borderLeftWidth = '4px';
+                            prevOption.style.color = '';
+                        }
+                    });
+                    selectedTeams.clear();
+                    selectedTeams.add(team);
+                    option.classList.add('selected');
+                    // Apply team color styling
+                    option.style.background = `linear-gradient(135deg, ${teamColor}20, ${teamColor}40)`;
+                    option.style.borderColor = teamColor;
+                    option.style.color = getContrastColor(teamColor);
+                }
+            }
+            updateCharts();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            
+            // Update button states
+            document.getElementById('leagueViewBtn').classList.toggle('active', view === 'league');
+            document.getElementById('teamViewBtn').classList.toggle('active', view === 'team');
+            
+            // Show/hide sections
+            document.getElementById('leagueView').style.display = view === 'league' ? 'grid' : 'none';
+            document.getElementById('teamView').style.display = view === 'team' ? 'grid' : 'none';
+            document.getElementById('teamSelectionSection').style.display = view === 'team' ? 'block' : 'none';
+            
+            // Update team selector to show current selections
+            updateTeamSelector();
+            
+            // Update charts
+            updateCharts();
+            
+            console.log(`Switched to ${view} view`);
+        }
+
+        function updateCharts() {
+            if (!processedData) return;
+
+            // Get current filter values
+            const seasonFilter = document.getElementById('seasonFilter').value;
+            const conferenceFilter = document.getElementById('conferenceFilter').value;
+
+            // Filter data based on selections
+            const filteredData = getFilteredData(seasonFilter, conferenceFilter);
+
+            if (currentView === 'league') {
+                updateLeagueTapestry(filteredData);
+                updateSeasonLadder(filteredData);
+                updateBiggestSwings(filteredData);
+                updateParityChart(filteredData);
+                updateLuckIndex(filteredData);
+            } else {
+                updateTeamTrajectory(filteredData);
+                updateTeamPerformance(filteredData);
+                updateTeamVsLeague(filteredData);
+                updateHeadToHead(filteredData);
+            }
+        }
+
+        function getFilteredData(seasonFilter, conferenceFilter) {
+            if (!processedData) return null;
+
+            let filteredTimeline = processedData.timeline;
+
+            // Apply season filter
+            if (seasonFilter !== 'all') {
+                const selectedSeason = parseInt(seasonFilter);
+                const cutoffDate = new Date('2025-07-01');
+                filteredTimeline = filteredTimeline.filter(game => {
+                    if (game.Season === selectedSeason) {
+                        // For 2025, also check if the game is before July 1st
+                        if (selectedSeason === 2025) {
+                            const gameDate = new Date(game.Date);
+                            return gameDate <= cutoffDate;
+                        }
+                        return true;
+                    }
+                    return false;
+                });
+            }
+
+            // Apply conference filter (using canonical franchise codes)
+            if (conferenceFilter !== 'all') {
+                const beforeCount = filteredTimeline.length;
+                filteredTimeline = filteredTimeline.filter(game => {
+                    const teamConference = TEAM_CONFERENCES[game.Team];
+                    return teamConference === conferenceFilter;
+                });
+                console.log(`Conference filter (${conferenceFilter}): ${beforeCount} -> ${filteredTimeline.length} games`);
+            }
+
+            // Recalculate derived data with filtered timeline
+            return {
+                timeline: filteredTimeline,
+                monthlyElo: calculateMonthlyElo(filteredTimeline),
+                summaryStats: calculateSummaryStats(filteredTimeline),
+                biggestSwings: findBiggestSwings(filteredTimeline),
+                parityMetrics: calculateParityMetrics(filteredTimeline),
+                luckIndex: calculateLuckIndex(filteredTimeline),
+                metadata: {
+                    totalGames: filteredTimeline.length,
+                    teams: [...new Set(filteredTimeline.map(g => g.Team))].sort(),
+                    seasons: [...new Set(filteredTimeline.map(g => g.Season))].sort(),
+                    dateRange: {
+                        start: filteredTimeline.length > 0 ? new Date(Math.min(...filteredTimeline.map(g => new Date(g.Date)))) : null,
+                        end: filteredTimeline.length > 0 ? new Date(Math.max(...filteredTimeline.map(g => new Date(g.Date)))) : null
+                    }
+                }
+            };
+        }
+
+        function updateLeagueTapestry(data = null) {
+            const ctx = document.getElementById('leagueTapestryChart').getContext('2d');
+            
+            if (charts.leagueTapestry) {
+                charts.leagueTapestry.destroy();
+            }
+
+            const chartData = data || processedData;
+            if (!chartData || !chartData.monthlyElo) return;
+
+            const monthlyData = chartData.monthlyElo;
+            console.log('Monthly data sample:', monthlyData.slice(0, 10));
+            console.log('All unique months:', [...new Set(monthlyData.map(d => d.Month))].sort());
+            const datasets = [];
+
+            // Use all teams for the league tapestry
+            const teams = chartData.metadata.teams;
+            console.log('League Tapestry teams:', teams);
+            console.log('Team colors for League Tapestry:', teams.map(team => ({ team, color: getTeamColor(team) })));
+            
+            teams.forEach((team, index) => {
+                const teamData = monthlyData.filter(d => d.Team === team);
+                if (teamData.length > 0) {
+                    // Data should already be sorted from calculateMonthlyElo, but let's ensure it
+                    const sortedTeamData = teamData.sort((a, b) => a.Month.localeCompare(b.Month));
+                    
+                    console.log(`Team ${team} data:`, sortedTeamData.map(d => d.Month));
+                    
+                    const teamColor = getSimpleTeamColor(team, index);
+                    const bgColor = teamColor + '1A'; // Add alpha for background
+                    
+                    datasets.push({
+                        label: team,
+                        data: sortedTeamData.map(d => ({ x: d.Month, y: d.ELO })),
+                        borderColor: teamColor,
+                        backgroundColor: bgColor,
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    });
+                    
+                    console.log(`League Tapestry - Team ${team}: color=${teamColor}`);
+                }
+            });
+
+            // Get all unique months and sort them properly
+            const allMonths = [...new Set(monthlyData.map(d => d.Month))].sort();
+            console.log('All months for x-axis:', allMonths);
+
+
+            charts.leagueTapestry = new Chart(ctx, {
+                type: 'line',
+                data: { 
+                    labels: allMonths,
+                    datasets: datasets.map(dataset => ({
+                        ...dataset,
+                        data: allMonths.map(month => {
+                            const point = dataset.data.find(d => d.x === month);
+                            return point ? point.y : null;
+                        })
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(30, 30, 30, 0.95)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#6366f1',
+                            borderWidth: 1,
+                            cornerRadius: 12,
+                            displayColors: false,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            padding: 12,
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].dataset.label;
+                                },
+                                label: function(context) {
+                                    const elo = context.parsed.y;
+                                    return `ELO: ${elo.toFixed(1)}`;
+                                }
+                            }
+                        }
+                    },
+                    onHover: (event, activeElements) => {
+                        const chart = charts.leagueTapestry;
+                        
+                        // Store original colors if not already stored
+                        if (!chart.originalColors) {
+                            chart.originalColors = chart.data.datasets.map((dataset, index) => ({
+                                borderColor: getSimpleTeamColor(dataset.label, index),
+                                backgroundColor: getSimpleTeamColor(dataset.label, index) + '1A'
+                            }));
+                        }
+                        
+                        if (activeElements.length > 0) {
+                            const hoveredIndex = activeElements[0].datasetIndex;
+                            
+                            if (chart.currentHighlight !== hoveredIndex) {
+                                chart.currentHighlight = hoveredIndex;
+                                
+                                chart.data.datasets.forEach((dataset, index) => {
+                                    if (index === hoveredIndex) {
+                                        // Highlighted line - make it prominent
+                                        dataset.borderWidth = 4;
+                                        dataset.pointRadius = 6;
+                                        dataset.pointHoverRadius = 8;
+                                        dataset.borderColor = chart.originalColors[index].borderColor;
+                                    } else {
+                                        // Non-highlighted lines - fade them but keep colors visible
+                                        dataset.borderWidth = 1;
+                                        dataset.pointRadius = 0;
+                                        dataset.pointHoverRadius = 4;
+                                        // Keep the original color but make it more transparent
+                                        const originalColor = chart.originalColors[index].borderColor;
+                                        if (originalColor.startsWith('#')) {
+                                            const hex = originalColor.replace('#', '');
+                                            const r = parseInt(hex.substr(0, 2), 16);
+                                            const g = parseInt(hex.substr(2, 2), 16);
+                                            const b = parseInt(hex.substr(4, 2), 16);
+                                            dataset.borderColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
+                                        } else {
+                                            dataset.borderColor = originalColor;
+                                        }
+                                    }
+                                });
+                                chart.update('none');
+                            }
+                        } else {
+                            // Always reset when no elements are hovered
+                            chart.currentHighlight = null;
+                            chart.data.datasets.forEach((dataset, index) => {
+                                // Reset to original colors and styling
+                                dataset.borderWidth = 2;
+                                dataset.pointRadius = 0;
+                                dataset.pointHoverRadius = 4;
+                                dataset.borderColor = chart.originalColors[index].borderColor;
+                                dataset.backgroundColor = chart.originalColors[index].backgroundColor;
+                            });
+                            chart.update('none');
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'category',
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0', maxTicksLimit: 15 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0' }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            spanGaps: true  // Connect points even if some are missing
+                        }
+                    }
+                }
+            });
+
+            // Add mouse leave event to reset the chart when mouse leaves the canvas
+            const canvas = ctx.canvas;
+            canvas.addEventListener('mouseleave', () => {
+                const chart = charts.leagueTapestry;
+                if (chart && chart.currentHighlight !== null) {
+                    chart.currentHighlight = null;
+                    chart.data.datasets.forEach((dataset, index) => {
+                        // Reset to original colors and styling
+                        dataset.borderWidth = 2;
+                        dataset.pointRadius = 0;
+                        dataset.pointHoverRadius = 4;
+                        dataset.borderColor = chart.originalColors[index].borderColor;
+                        dataset.backgroundColor = chart.originalColors[index].backgroundColor;
+                    });
+                    chart.update('none');
+                }
+            });
+        }
+
+        function updateSeasonLadder(data = null) {
+            const ctx = document.getElementById('seasonLadderChart').getContext('2d');
+            
+            if (charts.seasonLadder) {
+                charts.seasonLadder.destroy();
+            }
+
+            const chartData = data || processedData;
+            if (!chartData || !chartData.summaryStats) return;
+
+            const stats = chartData.summaryStats.slice(0, 16);
+            
+            // Debug: Log team names and colors
+            console.log('Season Ladder teams:', stats.map(s => s.Team));
+            
+            // Create color arrays - SIMPLE APPROACH
+            const backgroundColors = [];
+            const borderColors = [];
+            
+            stats.forEach((stat, index) => {
+                const teamColor = getSimpleTeamColor(stat.Team, index);
+                const bgColor = teamColor + 'CC'; // Add alpha for background
+                backgroundColors.push(bgColor);
+                borderColors.push(teamColor);
+                console.log(`Team ${stat.Team}: color=${teamColor}`);
+            });
+            
+            charts.seasonLadder = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: stats.map(s => s.Team),
+                    datasets: [{
+                        label: 'Current ELO',
+                        data: stats.map(s => s.Current_ELO),
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0aec0', maxRotation: 45 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBiggestSwings(data = null) {
+            const ctx = document.getElementById('biggestSwingsChart').getContext('2d');
+            
+            if (charts.biggestSwings) {
+                charts.biggestSwings.destroy();
+            }
+
+            const chartData = data || processedData;
+            if (!chartData || !chartData.biggestSwings) {
+                console.log('No biggestSwings data available');
+                return;
+            }
+
+            const swings = chartData.biggestSwings.slice(0, 10);
+            console.log('Biggest swings data:', swings);
+            
+            if (swings.length === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#a0aec0';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('No ELO swing data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+            
+            charts.biggestSwings = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: swings.map(s => `${s.Team1} vs ${s.Team2}`),
+                    datasets: [
+                        {
+                            label: 'Winner ELO Gain',
+                            data: swings.map(s => {
+                                const winner = s.Winner;
+                                if (winner === s.Team1) {
+                                    return Math.max(0, s.Team1_ELO_Change);
+                                } else if (winner === s.Team2) {
+                                    return Math.max(0, s.Team2_ELO_Change);
+                                } else {
+                                    // Tie - no gain
+                                    return 0;
+                                }
+                            }),
+                            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                            borderColor: '#22c55e',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Loser ELO Loss',
+                            data: swings.map(s => {
+                                const winner = s.Winner;
+                                if (winner === s.Team1) {
+                                    return Math.min(0, s.Team2_ELO_Change);
+                                } else if (winner === s.Team2) {
+                                    return Math.min(0, s.Team1_ELO_Change);
+                                } else {
+                                    // Tie - show both losses as negative
+                                    return Math.min(0, s.Team1_ELO_Change) + Math.min(0, s.Team2_ELO_Change);
+                                }
+                            }),
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderColor: '#ef4444',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#a0aec0',
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const swing = swings[context[0].dataIndex];
+                                    return `${swing.Team1} vs ${swing.Team2} (${swing.Date})`;
+                                },
+                                label: function(context) {
+                                    const swing = swings[context.dataIndex];
+                                    const datasetLabel = context.dataset.label;
+                                    const value = context.parsed.y;
+                                    
+                                    if (datasetLabel === 'Winner ELO Gain') {
+                                        return [
+                                            `Winner Gain: +${value.toFixed(1)}`,
+                                            `${swing.Team1}: ${swing.Team1_ELO_Change > 0 ? '+' : ''}${swing.Team1_ELO_Change.toFixed(1)}`,
+                                            `${swing.Team2}: ${swing.Team2_ELO_Change > 0 ? '+' : ''}${swing.Team2_ELO_Change.toFixed(1)}`,
+                                            `Score: ${swing.Team1_Points}-${swing.Team2_Points}`,
+                                            `Winner: ${swing.Winner}`
+                                        ];
+                                    } else {
+                                        return [
+                                            `Loser Loss: ${value.toFixed(1)}`,
+                                            `${swing.Team1}: ${swing.Team1_ELO_Change > 0 ? '+' : ''}${swing.Team1_ELO_Change.toFixed(1)}`,
+                                            `${swing.Team2}: ${swing.Team2_ELO_Change > 0 ? '+' : ''}${swing.Team2_ELO_Change.toFixed(1)}`,
+                                            `Score: ${swing.Team1_Points}-${swing.Team2_Points}`,
+                                            `Winner: ${swing.Winner}`
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0aec0', maxRotation: 45 }
+                        },
+                        y: {
+                            beginAtZero: false,
+                            grid: { 
+                                color: 'rgba(45, 55, 72, 0.5)',
+                                drawBorder: false
+                            },
+                            ticks: { 
+                                color: '#a0aec0',
+                                callback: function(value) {
+                                    return value > 0 ? '+' + value : value;
+                                }
+                            },
+                            zeroLineColor: 'rgba(160, 174, 192, 0.8)',
+                            zeroLineWidth: 2
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateParityChart(data = null) {
+            const ctx = document.getElementById('parityChart').getContext('2d');
+            
+            if (charts.parity) {
+                charts.parity.destroy();
+            }
+
+            const chartData = data || processedData;
+            if (!chartData || !chartData.parityMetrics) return;
+
+            const parity = chartData.parityMetrics;
+            
+            charts.parity = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: parity.map(p => p.Season),
+                    datasets: [{
+                        label: 'Coefficient of Variation',
+                        data: parity.map(p => p.Coefficient_of_Variation),
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateLuckIndex(data = null) {
+            const ctx = document.getElementById('luckIndexChart').getContext('2d');
+            
+            if (charts.luckIndex) {
+                charts.luckIndex.destroy();
+            }
+
+            const chartData = data || processedData;
+            if (!chartData || !chartData.luckIndex) return;
+
+            const luck = chartData.luckIndex.slice(0, 16);
+            
+            charts.luckIndex = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: luck.map(l => l.Team),
+                    datasets: [{
+                        label: 'Luck Index',
+                        data: luck.map(l => l.Luck),
+                        backgroundColor: luck.map(l => l.Luck > 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
+                        borderColor: luck.map(l => l.Luck > 0 ? '#22c55e' : '#ef4444'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0aec0', maxRotation: 45 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTeamTrajectory(data = null) {
+            const ctx = document.getElementById('teamTrajectoryChart').getContext('2d');
+            
+            if (charts.teamTrajectory) {
+                charts.teamTrajectory.destroy();
+            }
+
+            const chartData = data || processedData;
+            if (!chartData || !chartData.monthlyElo) return;
+
+            if (selectedTeams.size === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#a0aec0';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Select teams to view trajectory', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            // Get all unique months across selected teams
+            const allMonths = [...new Set(chartData.monthlyElo
+                .filter(d => selectedTeams.has(d.Team))
+                .map(d => d.Month)
+            )].sort();
+
+            const datasets = [];
+            const selectedTeamsArray = Array.from(selectedTeams);
+
+            selectedTeamsArray.forEach((team, index) => {
+                const teamData = chartData.monthlyElo.filter(d => d.Team === team);
+                const sortedTeamData = teamData.sort((a, b) => a.Month.localeCompare(b.Month));
+                
+                const teamColor = getSimpleTeamColor(team, index);
+                const bgColor = teamColor + '1A'; // Add alpha for background
+                
+                datasets.push({
+                    label: `${team} ELO`,
+                    data: allMonths.map(month => {
+                        const point = sortedTeamData.find(d => d.Month === month);
+                        return point ? point.ELO : null;
+                    }),
+                    borderColor: teamColor,
+                    backgroundColor: bgColor,
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointHoverRadius: 6
+                });
+                
+                console.log(`Team Trajectory - Team ${team}: color=${teamColor}`);
+            });
+            
+            charts.teamTrajectory = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: allMonths,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: selectedTeams.size > 1,
+                            position: 'top',
+                            labels: {
+                                color: '#a0aec0',
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'category',
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0', maxTicksLimit: 15 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0' }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            spanGaps: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTeamPerformance(data = null) {
+            const ctx = document.getElementById('teamPerformanceChart').getContext('2d');
+            
+            if (charts.teamPerformance) {
+                charts.teamPerformance.destroy();
+            }
+
+            const chartData = data || processedData;
+            if (!chartData || !chartData.summaryStats) return;
+
+            const selectedTeam = Array.from(selectedTeams)[0];
+            if (!selectedTeam) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#a0aec0';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Select a team to view performance', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            const teamStats = chartData.summaryStats.find(s => s.Team === selectedTeam);
+            if (!teamStats) return;
+
+            charts.teamPerformance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Wins', 'Losses', 'Ties'],
+                    datasets: [{
+                        data: [teamStats.Wins, teamStats.Losses, teamStats.Ties],
+                        backgroundColor: ['#22c55e', '#ef4444', '#6b7280'],
+                        borderColor: ['#16a34a', '#dc2626', '#4b5563'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#a0aec0',
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTeamVsLeague(data = null) {
+            const ctx = document.getElementById('teamVsLeagueChart').getContext('2d');
+            
+            if (charts.teamVsLeague) {
+                charts.teamVsLeague.destroy();
+            }
+
+            const chartData = data || processedData;
+            if (!chartData || !chartData.summaryStats) return;
+
+            const selectedTeamsArray = Array.from(selectedTeams);
+            if (selectedTeamsArray.length === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#a0aec0';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Select teams to compare', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            const leagueAvg = chartData.summaryStats.reduce((sum, s) => sum + s.Current_ELO, 0) / chartData.summaryStats.length;
+            
+            // Prepare data for selected teams
+            const teamData = [];
+            const teamColors = [];
+            const teamBorderColors = [];
+            const labels = [];
+
+            selectedTeamsArray.forEach(team => {
+                const teamStats = chartData.summaryStats.find(s => s.Team === team);
+                if (teamStats) {
+                    teamData.push(teamStats.Current_ELO);
+                    const teamColor = getSimpleTeamColor(team, 0);
+                    teamColors.push(teamColor);
+                    teamBorderColors.push(teamColor);
+                    labels.push(team);
+                }
+            });
+
+            // Add league average
+            teamData.push(leagueAvg);
+            teamColors.push('#6b7280');
+            teamBorderColors.push('#4b5563');
+            labels.push('League Average');
+
+            charts.teamVsLeague = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'ELO Rating',
+                        data: teamData,
+                        backgroundColor: teamColors,
+                        borderColor: teamBorderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0aec0' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateHeadToHead(data = null) {
+            const ctx = document.getElementById('headToHeadChart').getContext('2d');
+            
+            if (charts.headToHead) {
+                charts.headToHead.destroy();
+            }
+
+            const chartData = data || processedData;
+            if (!chartData || !chartData.timeline) return;
+
+            if (selectedTeams.size < 2) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#a0aec0';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Select 2+ teams for head-to-head comparison', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            const selectedTeamsArray = Array.from(selectedTeams);
+            
+            // Find head-to-head games between selected teams
+            const headToHeadGames = chartData.timeline.filter(game => {
+                return selectedTeams.has(game.Team) && selectedTeams.has(game.Opp);
+            });
+
+            if (headToHeadGames.length === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.fillStyle = '#a0aec0';
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('No head-to-head games found between selected teams', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            // Calculate head-to-head records
+            const records = {};
+            selectedTeamsArray.forEach(team => {
+                records[team] = { wins: 0, losses: 0, ties: 0, totalGames: 0 };
+            });
+
+            headToHeadGames.forEach(game => {
+                const team = game.Team;
+                const opp = game.Opp;
+                
+                if (selectedTeams.has(team) && selectedTeams.has(opp)) {
+                    records[team].totalGames++;
+                    if (game.Outcome === 'W') {
+                        records[team].wins++;
+                    } else if (game.Outcome === 'L') {
+                        records[team].losses++;
+                    } else {
+                        records[team].ties++;
+                    }
+                }
+            });
+
+            // Create comparison data
+            const labels = selectedTeamsArray;
+            const winsData = labels.map(team => records[team].wins);
+            const lossesData = labels.map(team => records[team].losses);
+            const tiesData = labels.map(team => records[team].ties);
+
+            charts.headToHead = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Wins',
+                            data: winsData,
+                            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Losses',
+                            data: lossesData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Ties',
+                            data: tiesData,
+                            backgroundColor: 'rgba(156, 163, 175, 0.8)',
+                            borderColor: 'rgba(156, 163, 175, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#a0aec0',
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const team = context.label;
+                                    const record = records[team];
+                                    return [
+                                        `Total Games: ${record.totalGames}`,
+                                        `Win %: ${record.totalGames > 0 ? ((record.wins / record.totalGames) * 100).toFixed(1) : 0}%`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(45, 55, 72, 0.5)' },
+                            ticks: { color: '#a0aec0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getTeamColor(index, alpha = 1) {
+            const colors = [
+                `rgba(59, 130, 246, ${alpha})`,   // Blue
+                `rgba(16, 185, 129, ${alpha})`,   // Green
+                `rgba(245, 158, 11, ${alpha})`,   // Yellow
+                `rgba(239, 68, 68, ${alpha})`,    // Red
+                `rgba(139, 92, 246, ${alpha})`,   // Purple
+                `rgba(236, 72, 153, ${alpha})`,   // Pink
+                `rgba(6, 182, 212, ${alpha})`,    // Cyan
+                `rgba(34, 197, 94, ${alpha})`,    // Emerald
+                `rgba(251, 146, 60, ${alpha})`,   // Orange
+                `rgba(168, 85, 247, ${alpha})`    // Violet
+            ];
+            return colors[index % colors.length];
+        }
+
+        function showLoading() {
+            document.getElementById('uploadArea').innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    Processing Excel file...
+                </div>
+            `;
+        }
+
+        function showSuccess() {
+            // Just hide the upload area - the switchView call will handle showing the correct view
+            document.getElementById('uploadArea').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('uploadArea').innerHTML = `
+                <div class="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    ${message}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

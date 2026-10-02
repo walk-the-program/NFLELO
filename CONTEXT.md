@@ -1,0 +1,101 @@
+# NFL Elo Project: General Context
+
+This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
+
+Last updated: 2026-10-02
+
+## What this project is
+
+Walker Tracy wrote an NFL Elo analysis in fall 2025, covering regular seasons from 1970 to 2024 and later extended through 2025. It includes a paper, a Python pipeline, and about 20 charts. The goal now has two parts:
+
+1. **Elo website.** Publish the Elo ratings and the best stats from the paper on a public site that updates automatically every Wednesday.
+2. **Machine learning.** Use the much richer nflverse data (play-by-play, players, rosters, betting lines) to build models that can also go on the site.
+
+Hard constraints: the data must be **free**, and it must be **safe for commercial use**. No paid or metered APIs.
+
+## What exists today (as of 2026-10-02)
+
+| Path | What it is |
+|---|---|
+| `NFL_ELO_organized.py` | The entire pipeline in one file (~4,500 lines): data load, Elo, metrics, and plots. Configured through the `NFLConfig` class. |
+| `NFLELO_data.xlsx` | Hand-built game log, 26,214 team-game rows from 1970 to 2025. Columns: GameID, Team, Date, Day, Game Number, Week, Hosting, Opp, Result. |
+| `NFL Elo Analysis 1970-2024.pdf`, `LaTeX Files/main.tex` | The paper. |
+| `Outputs/`, `Outputs_Addendum/` | PNG charts and CSVs for 2024 and for the 2025 addendum. |
+| `NFL_Dash.html` | An earlier static dashboard. |
+| `Markdowns/` | Notes on documentation, the 2002 realignment, and team mapping fixes. |
+| `README.md` | Usage notes for the script. |
+
+No machine learning code exists yet; the grep came back empty. The ML work starts from scratch.
+
+### Current Elo model
+
+- Start rating 1000. K = 20. Home-field advantage (HFA) = 55 Elo points, set to 0 for international games.
+- Margin-of-victory multiplier in the 538 style.
+- Between seasons, ratings regress 15% toward the mean (λ = 0.15).
+- Regular season only, with no playoffs.
+- Extra metrics: luck index (actual wins minus Elo-expected wins), close-game luck, parity, calibration (Brier score, log loss, Murphy diagram), strength of schedule, and upsets.
+- Sensitivity grid: the best Brier score is about **0.2201** (log loss 0.6326) across 13,107 games. The top results are nearly tied, and the best one uses λ = 0.2, which is the edge of the grid that was searched.
+
+## Findings from the 2026-10-02 review
+
+1. **The 2025 rows in the spreadsheet have two columns swapped.** In all 544 rows from 2025-09-04 to 2026-01-04, `Day` holds the season year and `Game Number` holds the weekday. Moving to nflverse removes the hand-maintained file and fixes this.
+2. **The fixed home-field advantage is too high for the modern NFL.** With 55 points, two equal teams give the home side about a 57.8% win chance. Actual home win rates in the nflverse data run 59.7% for 1999 and earlier, about 57% for 2000 to 2014, 56% for 2015 to 2019, and **53.1% for 2020 to 2024**. HFA should change by era, or be learned on a rolling basis.
+3. **Season regression is probably too small.** The best grid result sits at the grid's edge (λ = 0.2). 538 used about a third. The grid should be wider, and tuning should use held-out seasons rather than the same games the model is scored on.
+4. **The market benchmark exists now.** Betting-market closing moneylines, with the vig removed, score a Brier of **0.211** on 5,100 regular-season games from 2006 to 2026. Our Elo scores 0.220, but over 1970 to 2025, so the two aren't directly comparable yet. The paper's "Further Research" asks how Elo compares to betting markets, and this data answers that.
+5. **The paper's own future-work list fits nflverse well.** Playoffs are in the schedule data. Player-level ratings can be built from rosters, snap counts, and play-by-play. The starting QB for every game since 1999 is in the schedule file.
+
+## Data source: nflverse
+
+- Site: https://nflverse.nflverse.com/. Python access through `nflreadpy` (MIT license), e.g. `import nflreadpy as nfl; nfl.load_schedules()`. Files are also plain GitHub releases at `github.com/nflverse/nflverse-data/releases`, with no key and no account required.
+- **Cost:** free.
+- **License:** most nflverse data is **CC-BY 4.0**, which allows commercial use as long as we credit the source. **FTN charting data is CC-BY-SA 4.0** (share-alike), which means anything we build from it must be released under the same license, so we avoid it for any paid product. The code is MIT.
+- **Caveat:** nflverse states that the underlying NFL data "belong to their respective owners." In practice, credit nflverse on the site. Don't use NFL or team logos, and don't put "NFL" in the site's name or branding. Plain team names and scores are fine as facts. Get real legal advice before charging money.
+- **Coverage:** the schedule and results file `games.csv` runs from **1999 to the present** (46 columns). It includes scores, game type (REG and playoffs), location, rest days, roof, surface, temperature, wind, spread, total, moneylines, starting QB IDs and names, coaches, referee, and stadium. Play-by-play also starts in 1999.
+- **Gap:** nflverse has no data before 1999. For 1970 to 1998, either keep the existing spreadsheet or use FiveThirtyEight's `nfl_elo` game file (CC-BY 4.0, which covers those years). **Open question:** where did the original 1970 to 1998 spreadsheet data come from? If it came from Pro-Football-Reference, their terms of use need a check before commercial use.
+- Data dictionaries are at https://nflreadr.nflverse.com/articles/. Datasets include pbp, player stats, team stats, rosters, depth charts, injuries, snap counts, participation, Next Gen Stats, ESPN QBR, draft picks, combine, contracts, trades, and FTN charting.
+
+## Proposed direction (not yet approved by Walker)
+
+### Elo site
+
+- **Pipeline.** A scheduled GitHub Action runs every Wednesday. It pulls nflverse with `nflreadpy`, reruns Elo, and writes JSON. A static site reads the JSON. Hosting is free on GitHub Pages or Cloudflare Pages, with no server and no database.
+- **Model fixes,** in this order:
+  1. Switch the data source.
+  2. Make HFA era-dependent.
+  3. Widen the λ grid and tune on held-out seasons.
+  4. Add playoffs.
+  5. Add a starting-QB adjustment.
+  6. Show Elo against the betting market on the site.
+- **Site features:**
+  - Weekly power ladder with movement since last week.
+  - Playoff odds from a Monte Carlo season simulation.
+  - Luck leaderboard.
+  - Team history explorer covering 1970 to now.
+  - Picks of the week vs. the betting line.
+  - A running scoreboard of Elo vs. the market.
+  - Upset tracker and the "any given Sunday" meter.
+
+### Machine learning candidates, ranked by value per effort
+
+1. **Game prediction model.** Combine Elo, efficiency from play-by-play (EPA), QB, rest, and weather, then score it against the market Brier of 0.211.
+2. **QB-adjusted and player-aware ratings.** Team strength comes from the players who actually suit up, and ratings follow players when they change teams. This is the paper's own future-work idea.
+3. **Explained luck.** Break the luck index into measurable pieces: fumble recovery rate, opponent kicking, one-score games, and turnovers.
+4. **Excitement index.** Rank games by how much the win probability swings. nflverse play-by-play already includes win probability.
+5. **Draft and contract value.** Predict career outcomes from the combine and draft slot, and estimate value relative to contract.
+
+## Open questions for Walker
+
+- Where did the 1970 to 1998 game data come from?
+- Will the site ever charge money or run ads? The answer decides whether FTN data is usable and how careful we need to be with licensing.
+- Site name and domain.
+
+## Decision log
+
+| Date | Decision |
+|---|---|
+| 2026-10-02 | This file is the single general context doc. Sub-project context goes in `context/*.md`, each linked below. |
+
+## Context file index
+
+- `CONTEXT.md`: this file, for the general project.
+- `context/`: the folder for sub-project files once that work starts. Planned files are `context/data-pipeline.md`, `context/elo-site.md`, and `context/ml.md`.

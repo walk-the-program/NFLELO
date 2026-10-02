@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 NFL ELO Rating System Analysis Tool
 
@@ -67,6 +68,13 @@ class NFLConfig:
     """Configuration class for NFL ELO analysis with plot toggles."""
     
     def __init__(self):
+        # =====================================================================
+        # 2025 MODE TOGGLE - Set to True for 2025 season analysis
+        # =====================================================================
+        # When True: Removes date filters, uses 2025 season, outputs to Outputs_Addendum
+        # When False: Original behavior (2024 and before, outputs to Outputs)
+        self.USE_2025_MODE = True  # Toggle this to True for 2025 season analysis
+        
         # Core ELO parameters
         self.START_ELO = 1000.0
         self.K_FACTOR = 20.0
@@ -210,7 +218,7 @@ class NFLConfig:
                 'fig_cell_h': 1.7,
             },
             'season_ladder': {
-                'season': 2024,
+                'season': 2025 if self.USE_2025_MODE else 2024,
                 'top_n': None,
             },
             'team_summary': {
@@ -218,7 +226,7 @@ class NFLConfig:
                 'top_n': 16,
             },
             'delta_normalized': {
-                'season': 2024,
+                'season': 2025 if self.USE_2025_MODE else 2024,
                 'top_n': None,
             },
             'division_heatmap': {
@@ -286,12 +294,12 @@ class NFLConfig:
             },
             'presentation': {
                 'subway': {
-                    'season': 2024,
+                    'season': 2025 if self.USE_2025_MODE else 2024,
                     'label_top_k_swings': 3,
                     'week_ending': None,
                 },
                 'story_card': {
-                    'season': 2024,
+                    'season': 2025 if self.USE_2025_MODE else 2024,
                     'team': None,
                     'export_path': 'team_story_card.png',
                 },
@@ -313,8 +321,11 @@ class NFLConfig:
         # File paths
         self.DATA_FILE = 'NFLELO_data.xlsx'
         
-        # Output directory - create "Outputs" folder
-        self.OUTPUT_DIR = Path("Outputs")
+        # Output directory - use "Outputs_Addendum" when in 2025 mode, "Outputs" otherwise
+        if self.USE_2025_MODE:
+            self.OUTPUT_DIR = Path("Outputs_Addendum")
+        else:
+            self.OUTPUT_DIR = Path("Outputs")
         self.OUTPUT_DIR.mkdir(exist_ok=True)  # Create the folder if it doesn't exist
         
         # Display settings
@@ -458,8 +469,11 @@ def canonical_franchise(team_code: str, game_date: pd.Timestamp) -> str:
     Returns:
         The canonical franchise code (e.g., "LAR", "LVR", "LAC")
     """
-    # Clean up the input
-    team_code = (team_code or "").strip().upper()
+    # Clean up the input - handle NaN, None, and empty values
+    if pd.isna(team_code) or team_code is None:
+        team_code = ""
+    else:
+        team_code = str(team_code).strip().upper()
     
     # Static mappings for relocations
     static_map = {
@@ -608,7 +622,17 @@ def load_nfl_data(file_path: str = None) -> pd.DataFrame:
     df = df.drop(columns=["Day", "Game Number", "Week"], errors="ignore")
     df["Result"] = df["Result"].str.replace(" (OT)", "", regex=False)
     df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%y", errors="coerce")
-    df = df[df["Date"] <= "2025-07-01"].copy()
+    
+    # Apply date filter only if NOT in 2025 mode (original behavior)
+    if not config.USE_2025_MODE:
+        df = df[df["Date"] <= "2025-07-01"].copy()
+    # In 2025 mode, no date filter - show all data
+    
+    # Remove rows with missing essential data (Team, Opp, Date, Result)
+    initial_count = len(df)
+    df = df.dropna(subset=["Team", "Opp", "Date", "Result"]).copy()
+    if len(df) < initial_count:
+        print(f"  [INFO] Removed {initial_count - len(df)} rows with missing Team/Opp/Date/Result data")
     
     # Add GameID if not present
     if "GameID" not in df.columns:
@@ -3661,7 +3685,7 @@ def plot_season_delta_normalized(season_team_summary: pd.DataFrame, season: int 
     
     Args:
         season_team_summary: DataFrame with season team summaries
-        season: Season to plot (default: 2024)
+        season: Season to plot (default: from config, 2024 or 2025 based on USE_2025_MODE)
         top_n: Number of teams to show (default: all)
     """
     if not config.is_plot_enabled('delta_normalized'):
