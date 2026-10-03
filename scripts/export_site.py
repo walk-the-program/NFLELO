@@ -4,7 +4,7 @@
 
 Reads outputs/elo_games.csv, outputs/ratings_current.json, outputs/model_report.md
 and the cached nflverse schedule data/raw/schedules.csv (upcoming games and lines).
-Writes meta, ladder, upcoming, history, luck, tapestry, records and scorecard JSON.
+Writes meta, ladder, upcoming, history, luck, tapestry, records, scorecard and headlines JSON.
 Output is deterministic (no timestamps; same inputs give identical bytes).
 `scripts/build.py` calls export() at the end of every run.
 
@@ -365,6 +365,150 @@ def build_records(elo: pd.DataFrame, ends: pd.DataFrame, partial_season: int | N
             "swings": swings}
 
 
+# --------------------------------------------------------------------------- headlines
+# One short, computed sentence per section (headlines.json). Nothing here is hard-coded
+# to a team or number; each function falls back gracefully when its input is empty.
+
+def subj(team: str) -> str:
+    return team_meta.subject(team)
+
+
+def cap(text: str) -> str:
+    return text[0].upper() + text[1:]
+
+
+def verb(team: str, singular: str, plural: str) -> str:
+    return plural if team_meta.is_shared_city(team) else singular
+
+
+def points(x: float) -> str:
+    return f"{x:.1f} " + ("point" if f"{x:.1f}" == "1.0" else "points")
+
+
+def games(x: float) -> str:
+    return f"{x:.1f} " + ("game" if f"{x:.1f}" == "1.0" else "games")
+
+
+def headline_ladder(teams: list[dict]) -> str:
+    first, second = sorted(teams, key=lambda t: t["rank"])[:2]
+    gap = round(first["rating"] - second["rating"], 1)
+    a, b = first["team"], second["team"]
+    if gap == 0:
+        return f"{cap(subj(a))} and {subj(b)} are level at the top, both at {first['rating']:.1f}."
+    if gap < 5:
+        return f"{cap(subj(a))} {verb(a, 'edges', 'edge')} {subj(b)} by {points(gap)} at the top."
+    return f"{cap(subj(a))} {verb(a, 'leads', 'lead')} {subj(b)} by {points(gap)} at the top."
+
+
+def headline_week(upcoming: dict) -> str:
+    games_ = upcoming["games"]
+    if not games_:
+        return "No games are left on the schedule, so there are no picks this week."
+    by_id = {g["game_id"]: g for g in games_}
+    if upcoming["flagged"]:
+        g = by_id[upcoming["flagged"][0]]
+        game = f"{subj(g['away'])} at {subj(g['home'])}"
+        elo_home, vegas_home = g["elo_spread"] > 0, g["vegas_spread"] > 0
+        if elo_home != vegas_home and abs(g["elo_spread"]) >= 0.05 and abs(g["vegas_spread"]) >= 0.05:
+            return f"Elo and Vegas split on {game}."
+        return f"Elo and Vegas are {points(abs(g['diff']))} apart on {game}."
+    g = max(games_, key=lambda x: (abs(x["p_home"] - 0.5), x["game_id"]))
+    fav, dog = (g["home"], g["away"]) if g["p_home"] >= 0.5 else (g["away"], g["home"])
+    return f"Elo's strongest pick is {subj(fav)} over {subj(dog)}, at {max(g['p_home'], 1 - g['p_home']) * 100:.0f}%."
+
+
+MIN_STRETCH_GAMES = 10   # "highest since" needs at least this many games of history behind it
+
+
+def headline_explorer(item: dict, season: int, rank: int) -> str:
+    """Where the team's current rating sits against its own history.
+
+    "Highest (lowest) rating since X" when the rating has not been beaten for a real stretch of
+    games; otherwise the distance from average and the league rank.
+    """
+    team = item["team"]
+    r, seasons, weeks = item["r"], item["s"], item["w"]
+    now = r[-1]
+    high = now >= 1500
+    beaten = [i for i in range(len(r) - 1) if (r[i] > now if high else r[i] < now)]
+    plural = team_meta.is_shared_city(team)
+    be, its = ("are", "their") if plural else ("is", "its")
+    word = "highest" if high else "lowest"
+    if not beaten and len(r) > MIN_STRETCH_GAMES:
+        return f"{cap(subj(team))} {be} at {its} {word} rating since 1970, at {now:.1f}."
+    if beaten and len(r) - 1 - beaten[-1] >= MIN_STRETCH_GAMES:
+        i = beaten[-1]
+        since = f"Week {weeks[i]} of {seasons[i]}" if seasons[i] == season else str(seasons[i])
+        return f"{cap(subj(team))} {be} at {its} {word} rating since {since}, at {now:.1f}."
+    side = "above" if high else "below"
+    return f"{cap(subj(team))} {be} {points(abs(now - 1500))} {side} average, {ordinal(rank)} of 32."
+
+
+def ordinal(n: int) -> str:
+    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
+def headline_luck(season_block: dict, current: bool) -> str:
+    rows = season_block["teams"]
+    top = round(rows[0]["luck"], 1)
+    if top <= 0:
+        return "Nobody has won more games than Elo expected."
+    leaders = [r["team"] for r in rows if round(r["luck"], 1) == top]
+    names = [subj(t) for t in leaders]
+    year = season_block["season"]
+    if len(leaders) > 1:
+        who = ", ".join(names[:-1]) + " and " + names[-1]
+        tail = "so far" if current else f"in {year}"
+        return f"{cap(who)} each {'have won' if current else 'won'} {games(top).replace('game', 'more game')} than expected {tail}."
+    t = leaders[0]
+    have = ("have" if team_meta.is_shared_city(t) else "has") if current else None
+    more = games(top).replace("game", "more game")
+    if current:
+        return f"{cap(subj(t))} {have} won {more} than expected."
+    return f"{cap(subj(t))} won {more} than expected in {year}."
+
+
+def headline_history(tapestry: dict) -> str:
+    partial = tapestry["partial_season"]
+    pairs = [(y, p) for y, p in zip(tapestry["seasons"], tapestry["parity"]) if y != partial]
+    most = min(pairs, key=lambda x: (x[1], x[0]))     # ties go to the earlier season
+    least = max(pairs, key=lambda x: (x[1], -x[0]))
+    first = pairs[0][0]
+    if most[0] == least[0]:
+        return f"Every season since {first} looks the same on parity."
+    return f"{most[0]} was the most balanced season since {first}; {least[0]} was the least."
+
+
+def headline_records(records: dict) -> str:
+    best = records["best_seasons"][0]
+    t = best["team"]
+    return f"The {best['season']} {team_meta.nickname(t)} still own the top rating, {best['rating']:.0f}."
+
+
+def headline_scorecard(card: dict) -> str:
+    gap = card["brier_gap_vs_market"]
+    if gap > 0:
+        return f"Vegas still wins, by {gap:.4f} Brier."
+    if gap < 0:
+        return f"Elo beats Vegas, by {abs(gap):.4f} Brier."
+    return "Elo and Vegas are level on Brier."
+
+
+def build_headlines(ladder: list[dict], upcoming: dict, history: dict, luck: dict, tapestry: dict,
+                    records: dict, card: dict, season: int, partial: bool) -> dict:
+    ranks = {t["team"]: t["rank"] for t in ladder}
+    return {
+        "ladder": headline_ladder(ladder),
+        "week": headline_week(upcoming),
+        "explorer": {t["team"]: headline_explorer(t, season, ranks[t["team"]]) for t in history["teams"]},
+        "luck": {k: headline_luck(v, partial and v["season"] == season) for k, v in luck["seasons"].items()},
+        "history": headline_history(tapestry),
+        "records": headline_records(records),
+        "scorecard": headline_scorecard(card),
+    }
+
+
 # --------------------------------------------------------------------------- main
 
 def export() -> dict[str, int]:
@@ -387,6 +531,9 @@ def export() -> dict[str, int]:
         "records.json": build_records(elo, ends, partial_season),
         "scorecard.json": scorecard,
     }
+    files["headlines.json"] = build_headlines(
+        files["ladder.json"]["teams"], upcoming, files["history.json"], files["luck.json"], files["tapestry.json"],
+        files["records.json"], headline, season, partial)
     sizes = {name: write_json(name, obj) for name, obj in files.items()}
     total = sum(sizes.values())
     print(f"site/data: {len(sizes)} files, {total / 1024:.0f} KB total "

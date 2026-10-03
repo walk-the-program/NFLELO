@@ -10,11 +10,12 @@ Sub-project context for the static NFLELO website in `site/`. General project co
 
 ## Exporter (`scripts/export_site.py`)
 
-Reads `outputs/elo_games.csv`, `outputs/ratings_current.json`, `outputs/model_report.md` (legacy Brier only) and the cached `data/raw/schedules.csv`. Writes eight deterministic JSON files (about 0.42 MB total; `history.json` is 0.38 MB of it): `meta`, `ladder`, `upcoming`, `history`, `luck`, `tapestry`, `records`, `scorecard`. `build.py` calls `export()` at the end. Display names, conference and division live in `nflelo/meta.py`.
+Reads `outputs/elo_games.csv`, `outputs/ratings_current.json`, `outputs/model_report.md` (legacy Brier only) and the cached `data/raw/schedules.csv`. Writes nine deterministic JSON files (about 0.43 MB total; `history.json` is 0.38 MB of it): `meta`, `ladder`, `upcoming`, `history`, `luck`, `tapestry`, `records`, `scorecard`, `headlines`. `build.py` calls `export()` at the end. Display names, conference and division live in `nflelo/meta.py`.
 
 - **History is not downsampled.** One point per team per regular-season game week since 1970 (about 30k points). Playoff games do not update ratings, so they add nothing. If the file ever matters, drop to season-end points for pre-2000 seasons.
 - **Spread sign.** nflverse `spread_line` is positive when the home team is favored (checked: games with `spread_line` above 7 average a home margin near +11). Elo spread is `(home + hfa - away) / 25` with the same sign, so the gap is `elo_spread - vegas_spread`. The site shows both as "FAVORITE -points".
 - **This week** is the earliest week of the current season that still has unplayed games, so a Thursday `as_of` shows the rest of that week (the Thursday game is already in the ratings). The three largest absolute Elo-vs-Vegas gaps are flagged. If no lines exist, picks still show and the Vegas fields are null.
+- **Headlines (`headlines.json`).** One computed sentence per section, one small function each in the exporter (`headline_ladder`, `headline_week`, `headline_explorer`, `headline_luck`, `headline_history`, `headline_records`, `headline_scorecard`). The explorer has one per team and luck one per season; the page swaps them on selection. Teams are named by city, or by nickname where two teams share the city (New York, Los Angeles; see `nflelo/meta.py`). Edge cases handled: a tie at the top of the ladder, no games left or no Vegas lines in the week, a tie for luckiest team, an unchanged parity year. Explorer lines say "highest/lowest rating since X" only when the rating has gone at least 10 games without being beaten, otherwise distance from average and league rank.
 - **Partial season.** The season in progress is left out of season-end records, best/worst seasons and the scorecard; the tapestry keeps its column and marks it (`partial_season`).
 - **Luck** is actual wins minus the sum of pre-game win probabilities, for last season and the current season to date.
 - **Scorecard** headline numbers are recomputed from `elo_games.csv` on the held-out 2010-2025 window (Elo 0.2201 Brier, 64.0% accuracy; market 0.2104 and 66.6% on the 4,174 games with moneylines; legacy 0.2244 parsed from the report). Per-season Brier uses games with moneylines (2006 on).
@@ -29,6 +30,13 @@ Reads `outputs/elo_games.csv`, `outputs/ratings_current.json`, `outputs/model_re
 - Chart colors follow the `dataviz` skill; every chart has a legend or direct label where it has two series, a tooltip on hover and keyboard focus, and a table view.
 - Deviations from `design-taste-frontend` (written for landing pages, not data pages): it prefers self-hosted fonts over a Google Fonts link, and asks for real imagery; this site uses the Google Fonts link and no imagery or logos. Records tables keep a hairline under each row because they are data tables. Rounded bar ends from the dataviz mark spec were dropped to honor radius 0.
 - No em or en dashes anywhere in the page copy.
+
+## Layout and motion (round 2)
+
+- Content width is 1600px with fluid gutters (`clamp(20px, 4.2vw, 56px)`); running prose stays at 70ch. At 1280px and up: This Week is 4 cards per row, the explorer is chart (2/3) plus a stat column (1/3), luck is chart plus a luckiest/unluckiest column, records stay 2x2, the two scorecard charts stay side by side. The ladder uses the width for longer bars and a 168px sparkline.
+- The hero is a full-bleed block (`--primary` in light, `--accent` in dark, `--on-primary` text). Each section has a 6px rule, a numbered kicker ("01 / POWER LADDER", uppercase on request) and the computed headline; every other section sits on a faint neutral tint.
+- Ladder: top three rows are larger, bars are 14px, a filled tag marks the week's biggest riser and faller. This Week: the biggest Elo-vs-Vegas gap is a wide feature card, the other games follow as the grid.
+- Motion, only without `prefers-reduced-motion`: ladder and luck bars grow from 1500 over 400ms the first time their section scrolls into view (IntersectionObserver, once), and the hero numerals count up once on load. Nothing else animates.
 
 ## Open items
 

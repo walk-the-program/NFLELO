@@ -4,7 +4,7 @@
 (function () {
   'use strict';
 
-  var FILES = ['meta', 'ladder', 'upcoming', 'history', 'luck', 'tapestry', 'records', 'scorecard'];
+  var FILES = ['meta', 'ladder', 'upcoming', 'history', 'luck', 'tapestry', 'records', 'scorecard', 'headlines'];
   var SVGNS = 'http://www.w3.org/2000/svg';
   var BG_DARK = [28, 33, 38], BG_LIGHT = [245, 247, 249];   // --neutral-dark, --neutral-light
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -314,6 +314,39 @@
 
   function name(code) { return byTeam[code] ? byTeam[code].name : code; }
 
+  // ------------------------------------------------------------------ headlines, motion helpers
+
+  function setHeadline(id, text) { var n = $('#' + id); if (n && text) n.textContent = text; }
+
+  // Counts a number up from zero once (skipped under prefers-reduced-motion). The final text is
+  // always what assistive tech reads: the animated span is hidden and a plain copy is added.
+  function countUp(to, dec, pre, suf) {
+    var finalText = pre + to.toFixed(dec) + suf;
+    var live = h('span', { 'aria-hidden': 'true', text: finalText });
+    var wrap = h('span', {}, live, h('span', { class: 'sr', text: finalText }));
+    if (REDUCED) return wrap;
+    live.textContent = pre + (0).toFixed(dec) + suf;
+    var t0 = null, dur = 900;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      live.textContent = p < 1 ? pre + (to * e).toFixed(dec) + suf : finalText;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+    return wrap;
+  }
+
+  // Bars grow once, when their section first scrolls into view (CSS does the easing).
+  function initReveal() {
+    if (REDUCED || !('IntersectionObserver' in window)) return;
+    document.documentElement.classList.add('anim');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.04 });
+    document.querySelectorAll('main > .sec').forEach(function (sec) { io.observe(sec); });
+  }
+
   // ------------------------------------------------------------------ header
 
   function renderHeader() {
@@ -331,13 +364,16 @@
     var tiles = $('#tiles');
     clear(tiles);
     tiles.append(
-      tile('#1 team', [top.team, h('small', { text: f1(top.rating) })], top.name + ', ' + ordinalSpots(top.rank_change) + ' this week.'),
-      tile('Biggest riser this week', [riser.team, h('small', { class: 'up', text: '▲ ' + f1(riser.rating_change) })],
+      tile('#1 team', [top.team, h('small', {}, countUp(top.rating, 1, '', ''))], top.name + ', ' + ordinalSpots(top.rank_change) + ' this week.'),
+      tile('Biggest riser this week', [riser.team, h('small', {}, '\u25b2 ', countUp(riser.rating_change, 1, '', ''))],
         riser.name + ', now #' + riser.rank + ' (' + ordinalSpots(riser.rank_change) + ').'),
-      tile('Home-field edge now', [f1(meta.hfa_pts), h('small', { text: 'Elo pts' })],
+      tile('Home-field edge now', [countUp(meta.hfa_pts, 1, '', ''), h('small', { text: 'Elo pts' })],
         'Worth ' + pct(meta.hfa_win_pct, 1) + ' to the home team in a game between equal teams.'),
-      tile('Elo vs Vegas pick accuracy', [pct(sc.elo_accuracy_market_games, 1), h('span', { class: 'slash', text: '/' }), pct(sc.market_accuracy, 1)],
-        'Elo, then Vegas moneyline. ' + sc.test_seasons[0] + '-' + sc.test_seasons[1] + ' regular seasons, ' + sc.n_market.toLocaleString('en-US') + ' games.', true)
+      tile('Elo vs Vegas pick accuracy', [
+        h('span', { class: 'duo' }, countUp(sc.elo_accuracy_market_games * 100, 1, '', '%'), h('small', { text: 'Elo' })),
+        h('span', { class: 'slash', text: '/' }),
+        h('span', { class: 'duo' }, countUp(sc.market_accuracy * 100, 1, '', '%'), h('small', { text: 'Vegas' }))],
+        sc.test_seasons[0] + '-' + sc.test_seasons[1] + ' regular seasons, ' + sc.n_market.toLocaleString('en-US') + ' games with a moneyline.', true)
     );
     document.title = 'NFLELO: ' + top.team + ' leads at ' + f1(top.rating) + ', through ' + meta.season + ' Week ' + meta.week;
     $('#credit').textContent = meta.credit;
@@ -346,7 +382,7 @@
   function tile(label, big, sub, dual) {
     return h('div', { class: 'tile' },
       h('h3', { text: label }),
-      h('div', { class: 'big', style: dual ? 'font-size:clamp(1.6rem,2.6vw,2rem);flex-wrap:nowrap;white-space:nowrap' : null }, big),
+      h('div', { class: 'big' + (dual ? ' dual' : '') }, big),
       h('p', { class: 'sub', text: sub }));
   }
 
@@ -367,6 +403,8 @@
     var step = R <= 150 ? 50 : 100;
     var sparkAll = [].concat.apply([], teams.map(function (t) { return t.spark; }));
 
+    var riser = teams.reduce(function (a, t) { return t.rating_change > a.rating_change ? t : a; }, teams[0]);
+    var faller = teams.reduce(function (a, t) { return t.rating_change < a.rating_change ? t : a; }, teams[0]);
     var chips = $('#ladder-filters');
     var body = $('#ladder-body');
 
@@ -387,7 +425,7 @@
     function spark(t) {
       var vals = t.spark, lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
       if (hi - lo < 60) { var mid = (hi + lo) / 2; lo = mid - 30; hi = mid + 30; }
-      var w = 92, hh = 24, px = function (i) { return 4 + i * (w - 8) / Math.max(1, vals.length - 1); };
+      var w = 168, hh = 28, px = function (i) { return 4 + i * (w - 8) / Math.max(1, vals.length - 1); };
       var py = function (v) { return hh - 4 - (v - lo) / (hi - lo) * (hh - 8); };
       var from = Math.max(0, t.spark_from - 1);
       var path = function (a, b) { var s = ''; for (var i = a; i <= b; i++) s += (i === a ? 'M' : 'L') + px(i).toFixed(1) + ' ' + py(vals[i]).toFixed(1); return s; };
@@ -405,9 +443,12 @@
       var up = t.rating_change > 0, flat = t.rating_change === 0;
       var label = t.name + ', rank ' + t.rank + ', rating ' + f1(t.rating) + ', ' + (flat ? 'no change' : (up ? 'up ' : 'down ') + f1(Math.abs(t.rating_change))) +
         ' this week, record ' + rec(t.w, t.l, t.t) + '. Open in the team explorer.';
-      return h('li', {}, h('button', { class: 'lrow', type: 'button', 'aria-label': label, onclick: function () { pick(t.team, true); } },
+      var tagText = t === riser && riser.rating_change > 0 ? 'Biggest rise' : t === faller && faller.rating_change < 0 ? 'Biggest fall' : '';
+      if (tagText) label = tagText + '. ' + label;
+      return h('li', {}, h('button', { class: 'lrow' + (t.rank <= 3 ? ' top' : '') + (tagText ? ' has-tag' : ''), type: 'button', 'aria-label': label, onclick: function () { pick(t.team, true); } },
         h('span', { class: 'rank', text: t.rank }),
-        h('span', { class: 'team' }, h('span', { class: 'abbr', text: t.team }), h('span', { class: 'nm', text: t.name }), h('span', { class: 'rec-m', text: rec(t.w, t.l, t.t) })),
+        h('span', { class: 'team' }, h('span', { class: 'abbr', text: t.team }), h('span', { class: 'nm', text: t.name }), h('span', { class: 'rec-m', text: rec(t.w, t.l, t.t) }),
+          tagText ? h('span', { class: 'tag-fill' + (tagText === 'Biggest fall' ? ' fall' : '') }, h('span', { class: 'full', text: tagText }), h('span', { class: 'short', text: tagText === 'Biggest fall' ? 'Fall' : 'Rise' })) : null),
         h('span', { class: 'bar' }, fill),
         h('span', { class: 'val', text: f1(t.rating) }),
         h('span', { class: 'chg ' + (flat ? 'flat' : up ? 'up' : 'down'), text: flat ? '-' : (up ? '▲ ' : '▼ ') + f1(Math.abs(t.rating_change)) }),
@@ -424,7 +465,7 @@
         h('div', { class: 'lhead', 'aria-hidden': 'true' },
           h('span', { text: '#' }), h('span', { text: 'Team' }), axis(),
           h('span', { class: 'r', text: 'Rating' }), h('span', { class: 'r', text: 'Week' }),
-          h('span', { class: 'r hide-m', text: 'Rank' }), h('span', { class: 'r hide-m', text: 'W-L' }), h('span', { class: 'hide-m', text: 'Last 17' })),
+          h('span', { class: 'r hide-m', text: 'Rank' }), h('span', { class: 'r hide-m', text: 'W-L' }), h('span', { class: 'hide-m sp', text: 'Last 17' })),
         h('ol', {}, list.map(row))));
       body.appendChild(h('p', { class: 'fnote', text: 'Week is the rating change over the last 7 days; Rank is places gained or lost. The trend line covers each team\'s last 17 games, with this season in blue.' }));
     }
@@ -441,6 +482,26 @@
     return spread > 0 ? home + ' -' + f1(spread) : away + ' -' + f1(-spread);
   }
 
+  function featureCard(g, byGap) {
+    var home = g.p_home, away = 1 - g.p_home;
+    var hasVegas = g.vegas_spread != null;
+    var differ = hasVegas && (g.elo_spread > 0) !== (g.vegas_spread > 0) && Math.abs(g.elo_spread) >= 0.05 && Math.abs(g.vegas_spread) >= 0.05;
+    var label = (byGap ? 'Biggest gap between Elo and Vegas' : 'Strongest Elo pick');
+    var f = function (dt, val, cls) { return h('div', {}, h('dt', { text: dt }), h('dd', { class: 'f-big ' + (cls || ''), text: val })); };
+    return h('article', { class: 'feature', 'aria-label': label + ': ' + g.away + ' at ' + g.home },
+      h('div', { class: 'f-top' }, h('span', { class: 'tag', text: label + (byGap && differ ? ', opposite sides' : '') }),
+        h('span', { text: shortDay(g.date) + (g.time ? ', ' + clock(g.time) : '') + (g.neutral ? ', neutral site' : '') })),
+      h('div', { class: 'f-vs' }, g.away, h('span', { class: 'at', text: 'at' }), g.home),
+      h('div', { class: 'pbar', 'aria-hidden': 'true' },
+        h('i', { class: 'mk', style: markVars(byTeam[g.away].color) + ';width:' + (away * 100).toFixed(1) + '%' }),
+        h('i', { class: 'mk', style: markVars(byTeam[g.home].color) + ';width:' + (home * 100).toFixed(1) + '%' })),
+      h('div', { class: 'plabels' }, h('span', {}, g.away + ' ', h('b', { text: pct(away) })), h('span', {}, h('b', { text: pct(home) }), ' ' + g.home)),
+      h('dl', { class: 'f-lines' },
+        f('Elo line', lineText(g.home, g.away, g.elo_spread)),
+        f('Vegas line', hasVegas ? lineText(g.home, g.away, g.vegas_spread) : 'None yet'),
+        g.diff != null ? f('Gap', f1(Math.abs(g.diff)), 'gapv') : f('Elo win chance', pct(Math.max(home, away)), 'gapv')));
+  }
+
   function renderWeek() {
     var u = D.upcoming, body = $('#week-body');
     clear(body);
@@ -450,28 +511,18 @@
       return;
     }
     var left = u.games.length;
+
     $('#week-deck').textContent = 'Week ' + u.week + (u.played ? ': ' + plural(left, 'game', 'games') + ' still to play, ' + u.played + ' already in the ratings' : ': ' + plural(left, 'game', 'games')) +
       '. Elo win chance and point spread next to the Vegas line.';
 
+    // The feature card is the game with the biggest Elo vs Vegas gap (or the strongest Elo pick if there are no lines).
     var byId = {};
     u.games.forEach(function (g) { byId[g.game_id] = g; });
-    var flagged = u.flagged.map(function (id) { return byId[id]; }).filter(Boolean);
-    if (flagged.length) {
-      var box = h('div', { class: 'callouts' }, h('h3', { text: 'Biggest gaps between Elo and Vegas' }));
-      flagged.forEach(function (g) {
-        var e = lineText(g.home, g.away, g.elo_spread), v = lineText(g.home, g.away, g.vegas_spread);
-        var diffSide = (g.elo_spread > 0) !== (g.vegas_spread > 0) && Math.abs(g.elo_spread) >= 0.05 && Math.abs(g.vegas_spread) >= 0.05;
-        box.appendChild(h('div', { class: 'callout' },
-          h('span', { class: 'gap num', text: f1(Math.abs(g.diff)) }),
-          h('div', {},
-            h('div', { class: 't', text: g.away + ' at ' + g.home }),
-            h('div', { class: 'd', text: 'Elo: ' + e + '. Vegas: ' + v + '.' + (diffSide ? ' Different sides.' : ' Same side, different size.') }))));
-      });
-      body.appendChild(box);
-    }
+    var feat = u.flagged.length ? byId[u.flagged[0]] : u.games.reduce(function (a, g) { return Math.abs(g.p_home - 0.5) > Math.abs(a.p_home - 0.5) ? g : a; }, u.games[0]);
+    body.appendChild(featureCard(feat, u.flagged.length > 0));
 
     var grid = h('div', { class: 'games' });
-    u.games.forEach(function (g) {
+    u.games.filter(function (g) { return g !== feat; }).forEach(function (g) {
       var home = g.p_home, away = 1 - g.p_home;
       var tag = g.flagged ? 'Gap ' + f1(Math.abs(g.diff)) : (g.neutral ? 'Neutral site' : '');
       var label = g.away + ' at ' + g.home + '. Elo gives ' + g.home + ' ' + pct(home) + '. Elo line ' + lineText(g.home, g.away, g.elo_spread) +
@@ -517,12 +568,15 @@
       var host = h('div', { class: 'chart' });
       var style = markVars(t.color);
       var bestIdx = lastIndexOfSeason(t, t.best.season), worstIdx = lastIndexOfSeason(t, t.worst.season);
-      body.appendChild(host);
+      var left = h('div', {}), split = h('div', { class: 'split' }, left);
+      left.appendChild(host);
+      body.appendChild(split);
+      setHeadline('explorer-h', D.headlines.explorer[code]);
       watch(host, function () {
         lineChart(host, {
           series: [{ id: code, label: t.name, cls: 'mk', style: style, pts: pts }],
           x: [1970, xMax], y: [yLo, yHi],
-          height: function (w) { return w < 560 ? 280 : 380; },
+          height: function (w) { return w < 560 ? 280 : w > 900 ? 460 : 380; },
           xTicks: YEAR_TICKS, yTicks: ticksFor(yLo, yHi, 6),
           xFmt: String, yFmt: String,
           ref: { y: 1500, label: '1500 average' },
@@ -539,15 +593,15 @@
       });
 
       var cur = L;
-      body.appendChild(h('dl', { class: 'facts' },
+      split.appendChild(h('dl', { class: 'facts' },
         fact('Rating now', f1(cur.rating), 'Rank ' + cur.rank + ' of 32'),
         fact('Best season', String(t.best.season), f1(t.best.rating) + ', ' + rec(t.best.w, t.best.l, t.best.t)),
         fact('Worst season', String(t.worst.season), f1(t.worst.rating) + ', ' + rec(t.worst.w, t.worst.l, t.worst.t)),
         fact('All-time record', rec(t.all_time.w, t.all_time.l, t.all_time.t), winPct(t.all_time.w, t.all_time.l, t.all_time.t) + ' of ' + t.all_time.games.toLocaleString('en-US') + ' games')));
       var notes = 'The horizontal line is the 1500 league average. Regular season only. Season-end ratings exclude ' + D.meta.season + (D.meta.season_partial ? ', which is still in progress.' : '.');
       if (t.first_season > 1970) notes += ' ' + t.name + ' first played in ' + t.first_season + ' and started at ' + D.meta.config.expansion_start + '.';
-      body.appendChild(h('p', { class: 'fnote', text: notes }));
-      body.appendChild(tableView('View season-end ratings as a table', [{ t: 'Season' }, { t: 'Rating', r: 1, n: 1 }, { t: 'Vs 1500', r: 1, n: 1 }], function () {
+      left.appendChild(h('p', { class: 'fnote', text: notes }));
+      left.appendChild(tableView('View season-end ratings as a table', [{ t: 'Season' }, { t: 'Rating', r: 1, n: 1 }, { t: 'Vs 1500', r: 1, n: 1 }], function () {
         var rows = [], seen = {};
         for (var i = t.s.length - 1; i >= 0; i--) {
           var s = t.s[i];
@@ -584,6 +638,20 @@
   }
 
   // ------------------------------------------------------------------ luck
+
+  // Three luckiest and three unluckiest teams for the selected season (from the same JSON rows as the chart).
+  function luckyBox(s) {
+    var rows = s.teams;
+    var lucky = rows.filter(function (r) { return r.luck > 0; }).slice(0, 3);
+    var unlucky = rows.filter(function (r) { return r.luck < 0; }).slice(-3).reverse();
+    function list(title, items, cls) {
+      return h('div', {}, h('h3', { text: title }), h('ol', {}, items.map(function (r) {
+        return h('li', {}, h('span', { class: 't' }, h('b', { text: r.team }), byTeam[r.team].name),
+          h('span', { class: 'v ' + cls, text: signed(r.luck) }));
+      })));
+    }
+    return h('div', { class: 'lucky' }, list('Luckiest, wins above expected', lucky, 'up'), list('Unluckiest, wins below expected', unlucky, 'down'));
+  }
 
   function renderLuck() {
     var body = $('#luck-body'), toggle = $('#luck-toggle');
@@ -622,9 +690,10 @@
         });
         list.appendChild(item);
       });
-      body.appendChild(h('div', { class: 'lk' }, head, list));
-      body.appendChild(h('p', { class: 'fnote', text: D.luck.note + ' Both seasons share one scale.' }));
-      body.appendChild(tableView('View luck as a table', [{ t: 'Team' }, { t: 'Games', r: 1, n: 1 }, { t: 'Actual wins', r: 1, n: 1 }, { t: 'Expected wins', r: 1, n: 1 }, { t: 'Luck', r: 1, n: 1 }], function () {
+      setHeadline('luck-h', D.headlines.luck[active]);
+      var left = h('div', {}, h('div', { class: 'lk' }, head, list), h('p', { class: 'fnote', text: D.luck.note + ' Both seasons share one scale.' }));
+      body.appendChild(h('div', { class: 'split' }, left, luckyBox(s)));
+      left.appendChild(tableView('View luck as a table', [{ t: 'Team' }, { t: 'Games', r: 1, n: 1 }, { t: 'Actual wins', r: 1, n: 1 }, { t: 'Expected wins', r: 1, n: 1 }, { t: 'Luck', r: 1, n: 1 }], function () {
         return s.teams.map(function (r) { return [r.team, String(r.games), String(r.actual), f1(r.expected), signed(r.luck)]; });
       }));
     }
@@ -658,17 +727,22 @@
 
     var nT = T.teams.length, nS = T.seasons.length;
     var CH = 14, LBL = 38, TOP = 22, GAP_DIV = 6, GAP_CONF = 12;
-    var rowY = [], y = TOP;
-    T.teams.forEach(function (code, i) {
-      if (i > 0) y += (i % 16 === 0) ? GAP_CONF : (i % 4 === 0 ? GAP_DIV : 0);
-      rowY.push(y); y += CH;
-    });
-    var totalH = y + 4;
+    var rowY = [], totalH = 0;
+    function layout() {
+      rowY = []; var y = TOP;
+      T.teams.forEach(function (code, i) {
+        if (i > 0) y += (i % 16 === 0) ? GAP_CONF : (i % 4 === 0 ? GAP_DIV : 0);
+        rowY.push(y); y += CH;
+      });
+      totalH = y + 4;
+    }
 
     function draw() {
       clear(heat);
       var avail = wrap.clientWidth - LBL;
       var cw = Math.max(13, Math.floor(avail / nS));
+      CH = Math.min(24, Math.max(14, Math.round(cw * 0.6)));   // cells grow with the width
+      layout();
       var W = LBL + cw * nS;
       var svg = sv('svg', { viewBox: '0 0 ' + W + ' ' + totalH, width: W, height: totalH, role: 'img', tabindex: 0,
         'aria-label': 'Heatmap of end-of-season Elo ratings, ' + nT + ' franchises by ' + nS + ' seasons from ' + T.seasons[0] + ' to ' + T.seasons[nS - 1] + '. Use the arrow keys to move between cells.' }, heat);
@@ -830,7 +904,7 @@
           { id: 'elo', label: 'Elo v2', short: 'Elo', cls: 's1', pts: mk.map(function (r) { return { x: r.season, y: r.elo_brier }; }) },
           { id: 'mkt', label: 'Vegas market', short: 'Vegas', cls: 's2', pts: mk.map(function (r) { return { x: r.season, y: r.market_brier }; }) }],
         x: [mk[0].season, mk[mk.length - 1].season], y: [0.19, 0.25], endLabels: true,
-        height: function (w) { return w < 560 ? 240 : 300; },
+        height: function (w) { return w < 560 ? 240 : w > 1300 ? 360 : 300; },
         xTicks: [2006, 2010, 2015, 2020, 2025], yTicks: [0.19, 0.2, 0.21, 0.22, 0.23, 0.24, 0.25], xFmt: String, yFmt: function (v) { return v.toFixed(2); },
         aria: 'Line chart of Brier score by season, Elo against the Vegas market, ' + mk[0].season + ' to ' + mk[mk.length - 1].season + '. The market is lower in most seasons. Use the table below for exact values.',
         tip: function (x, rows) { return { title: String(x), rows: rows.map(function (r) { return { value: r.p.y == null ? 'No lines' : r.p.y.toFixed(4), label: r.s.label, cls: r.s.cls }; }) }; }
@@ -842,7 +916,7 @@
           { id: 'hfa', label: 'Elo learned edge', short: 'Elo', cls: 's1', pts: S.map(function (r) { return { x: r.season, y: r.hfa_win_pct * 100, pts: r.hfa_pts }; }) },
           { id: 'act', label: 'Actual home win rate', short: 'Actual', cls: 'sm', dotsOnly: true, pts: S.map(function (r) { return { x: r.season, y: r.home_win_rate * 100 }; }) }],
         x: [S[0].season, S[S.length - 1].season], y: [48, 64], endLabels: true,
-        height: function (w) { return w < 560 ? 240 : 300; },
+        height: function (w) { return w < 560 ? 240 : w > 1300 ? 360 : 300; },
         xTicks: [1970, 1980, 1990, 2000, 2010, 2020], yTicks: [48, 52, 56, 60, 64], xFmt: String, yFmt: function (v) { return v + '%'; },
         aria: 'Line chart of home-field edge by season from ' + S[0].season + ' to ' + S[S.length - 1].season + ', falling from about ' + pct(S[0].hfa_win_pct) + ' to about ' + pct(S[S.length - 1].hfa_win_pct) + '. Use the table below for exact values.',
         tip: function (x, rows) {
@@ -915,6 +989,7 @@
     FILES.forEach(function (f, i) { D[f] = all[i]; });
     D.ladder.teams.forEach(function (t) { byTeam[t.team] = t; });
     D.history.teams.forEach(function (t) { histBy[t.team] = t; });
+    initReveal();
     renderHeader();
     renderLadder();
     renderWeek();
@@ -923,6 +998,11 @@
     renderHistory();
     renderRecords();
     renderScorecard();
+    setHeadline('ladder-h', D.headlines.ladder);
+    setHeadline('week-h', D.headlines.week);
+    setHeadline('history-h', D.headlines.history);
+    setHeadline('records-h', D.headlines.records);
+    setHeadline('scorecard-h', D.headlines.scorecard);
     initNav();
   }).catch(fail);
 })();

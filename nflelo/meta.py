@@ -57,3 +57,33 @@ def conference(team: str) -> str:
 def division(team: str) -> str:
     """e.g. 'AFC East'."""
     return f"{TEAM_META[team][1]} {TEAM_META[team][2]}"
+
+
+# City (or region) names, longest first so "New York" wins over "New".
+_CITIES = sorted([
+    "Arizona", "Atlanta", "Baltimore", "Buffalo", "Carolina", "Chicago", "Cincinnati", "Cleveland", "Dallas",
+    "Denver", "Detroit", "Green Bay", "Houston", "Indianapolis", "Jacksonville", "Kansas City", "Las Vegas",
+    "Los Angeles", "Miami", "Minnesota", "New England", "New Orleans", "New York", "Philadelphia", "Pittsburgh",
+    "San Francisco", "Seattle", "Tampa Bay", "Tennessee", "Washington",
+], key=len, reverse=True)
+
+# Two franchises share each of these, so headlines use the nickname instead.
+_SHARED_CITIES = {"New York", "Los Angeles"}
+
+
+def city(team: str) -> str:
+    name = full_name(team)
+    return next(c for c in _CITIES if name.startswith(c + " "))
+
+
+def nickname(team: str) -> str:
+    return full_name(team)[len(city(team)) + 1:]
+
+
+def is_shared_city(team: str) -> bool:
+    return city(team) in _SHARED_CITIES
+
+
+def subject(team: str) -> str:
+    """How headlines name a team: 'Buffalo', but 'the Giants' where two teams share the city."""
+    return f"the {nickname(team)}" if is_shared_city(team) else city(team)

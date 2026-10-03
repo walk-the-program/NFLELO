@@ -33,61 +33,84 @@
   </div>
 </nav>
 
-<header class="head wrap" id="top">
-  <div class="head-top">
-    <h1 class="wordmark">NFL<span>ELO</span></h1>
-    <p class="status" id="status" aria-live="polite">Loading ratings</p>
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-top">
+      <h1 class="wordmark">NFL<span>ELO</span></h1>
+      <p class="status" id="status" aria-live="polite">Loading ratings</p>
+    </div>
+    <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
   </div>
-  <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
 </header>
 
 <main>
-  <section class="sec wrap" id="ladder" aria-labelledby="ladder-h" tabindex="-1">
-    <h2 id="ladder-h">Power ladder</h2>
+  <section class="sec" id="ladder" aria-labelledby="ladder-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">01 / Power ladder</p>
+    <h2 class="headline" id="ladder-h">Power ladder</h2>
     <p class="deck">All 32 teams by Elo rating. Bars show distance from the 1500 league average. Select a team to open it in the explorer.</p>
     <div class="chips" id="ladder-filters" role="group" aria-label="Filter the ladder"></div>
     <div id="ladder-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </section>
 
-  <section class="sec wrap" id="week" aria-labelledby="week-h" tabindex="-1">
-    <h2 id="week-h">This week</h2>
+  <section class="sec" id="week" aria-labelledby="week-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">02 / This week</p>
+    <h2 class="headline" id="week-h">This week</h2>
     <p class="deck" id="week-deck">Elo picks for the games still to play, next to the Vegas line.</p>
     <div id="week-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </section>
 
-  <section class="sec wrap" id="explorer" aria-labelledby="explorer-h" tabindex="-1">
-    <h2 id="explorer-h">Team explorer</h2>
+  <section class="sec" id="explorer" aria-labelledby="explorer-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">03 / Team explorer</p>
+    <h2 class="headline" id="explorer-h">Team explorer</h2>
     <p class="deck">One line per franchise, every regular-season game since 1970. Hover or use the arrow keys to read a game week.</p>
     <div class="field">
       <label for="team-select">Team</label>
       <div class="sel"><select id="team-select"></select></div>
     </div>
     <div id="explorer-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </section>
 
-  <section class="sec wrap" id="luck" aria-labelledby="luck-h" tabindex="-1">
-    <h2 id="luck-h">Luck board</h2>
+  <section class="sec" id="luck" aria-labelledby="luck-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">04 / Luck board</p>
+    <h2 class="headline" id="luck-h">Luck board</h2>
     <p class="deck">Actual wins minus expected wins, where expected wins adds up Elo's pre-game win chance in every game.</p>
     <div class="chips" id="luck-toggle" role="group" aria-label="Season"></div>
     <div id="luck-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </section>
 
-  <section class="sec wrap" id="history" aria-labelledby="history-h" tabindex="-1">
-    <h2 id="history-h">League history</h2>
+  <section class="sec" id="history" aria-labelledby="history-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">05 / League history</p>
+    <h2 class="headline" id="history-h">League history</h2>
     <p class="deck">End-of-season rating for every franchise since 1970, then how tightly the league was bunched each year.</p>
     <div id="history-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </section>
 
-  <section class="sec wrap" id="records" aria-labelledby="records-h" tabindex="-1">
-    <h2 id="records-h">Records</h2>
+  <section class="sec" id="records" aria-labelledby="records-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">06 / Records</p>
+    <h2 class="headline" id="records-h">Records</h2>
     <p class="deck">Extremes since 1970, from the same ratings.</p>
     <div id="records-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </section>
 
-  <section class="sec wrap" id="scorecard" aria-labelledby="scorecard-h" tabindex="-1">
-    <h2 id="scorecard-h">Model scorecard</h2>
+  <section class="sec" id="scorecard" aria-labelledby="scorecard-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">07 / Model scorecard</p>
+    <h2 class="headline" id="scorecard-h">Model scorecard</h2>
     <p class="deck">How well Elo predicts games, scored against the betting market, and how its home-field estimate has moved.</p>
     <div id="scorecard-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </section>
 </main>
 
