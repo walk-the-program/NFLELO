@@ -100,10 +100,11 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 | 2026-10-02 | Added the NFLELO demo site: a static page in `site/` fed by JSON from `scripts/export_site.py`, which `build.py` runs. It is not hosted yet; publishing it publicly on GitHub Pages needs Walker's OK. |
 | 2026-10-02 | Elo v2 default: K 20, λ 0.40, online HFA (init 65, k_hfa 0.5), expansion start 1300, no playoff updates. It ties the fixed-HFA-65 winner on the tune window and was chosen because fixed HFA can't track the decline in home-field advantage. |
 | 2026-10-03 | Removed Pro-Football-Reference-derived game data (`legacy_2025/NFLELO_data.xlsx`, both `comprehensive_nfl_data.csv` exports, and the original root `NFLELO_data.xlsx`) from the public repo and its entire git history, with Walker's approval. The files stay local and are gitignored. Old commit SHAs may stay reachable by direct link on GitHub until GitHub support purges its cache. |
+| 2026-10-03 | ML plan written in `context/ml.md`. The ML work happens in its own chat, built together with Walker: game model first, and personnel models later under CC BY-SA. |
 
 ## Context file index
 
 - `CONTEXT.md`: this file, for the general project.
 - `context/data-and-elo.md`: the data pipeline, franchise mapping, the Elo v2 config, and evaluation results.
 - `context/elo-site.md`: the NFLELO one-page site (`site/`, data exported by `scripts/export_site.py`).
-- Planned: `context/ml.md`.
+- `context/ml.md`: the machine learning plan and living record (game model, then player value, play model, and personnel decision support), with milestones M1-M7 and open decisions.
