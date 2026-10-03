@@ -2,9 +2,9 @@
 
 Elo ratings for every NFL franchise from 1970 to the present, built from open game data and tuned on held-out seasons. The current version is Elo v2. It predicts each game's home win probability and is scored against the betting market (Brier score).
 
-The original 2025 paper, charts, and single-file script are preserved in [`legacy_2025/`](legacy_2025/).
+The original 2025 paper, charts, and single-file script are preserved in [`legacy_2025/`](legacy_2025/). That folder is an archive, not a pipeline input; its spreadsheet is used only to cross-check the 1970 to 1998 data.
 
-Data: nflverse (CC-BY 4.0). Seasons before 1999 come from a hand-built game log in `legacy_2025/` whose original source is still an open question.
+Data: nflverse (CC BY 4.0); 1970–1998 results: FiveThirtyEight (CC BY 4.0). The 1970 to 1998 games are vendored in [`data/sources/`](data/sources/README.md) with source, license, and checksum. Everything the pipeline reads is free and licensed for commercial use with attribution.
 
 ## Run it
 
@@ -20,10 +20,11 @@ python3.13 -m venv .venv
 
 ## Outputs
 
-- `data/games.csv`: one row per game, 1970 to now.
+- `data/games.csv`: one row per game (regular season and playoffs), 1970 to now.
+- `data/sources/`: the vendored FiveThirtyEight game file for 1970 to 1998 and its license notes.
 - `outputs/elo_games.csv`: pre-game ratings, win probability, post-game ratings, and the home-field advantage used, per game.
 - `outputs/ratings_current.json`: current rating, rank, and 7-day change per franchise.
-- `outputs/model_report.md`: data validation, tuning, and the held-out test against the legacy model and the betting market.
+- `outputs/model_report.md`: data validation (FiveThirtyEight vs the legacy spreadsheet and vs nflverse), tuning, and the held-out test against the legacy model and the betting market.
 - `outputs/dashboards/team_summary.png`: the Team Summary dashboard (see below).
 
 ## Dashboard

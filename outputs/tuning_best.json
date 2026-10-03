@@ -11,7 +11,7 @@
     "mov_mode": "winner",
     "mov_cap": null,
     "expansion_start": 1300.0,
-    "include_playoffs": false
+    "include_playoffs": true
   },
   "tune_window": [
     1980,
@@ -19,10 +19,10 @@
   ],
   "tune_metrics": {
     "n": 7000,
-    "brier": 0.21990105392773093,
-    "logloss": 0.6303333081353639,
-    "accuracy": 0.6425708559977097
+    "brier": 0.2198185292973415,
+    "logloss": 0.6301731378220572,
+    "accuracy": 0.6422845691382766
   },
   "n_configs": 3072,
-  "runtime_seconds": 32.661646127700806
+  "runtime_seconds": 31.15672016143799
 }

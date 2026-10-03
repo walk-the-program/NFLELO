@@ -8,11 +8,15 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
 OUT_DIR = ROOT / "outputs"
+SOURCES_DIR = DATA_DIR / "sources"
+ELO538_CSV = SOURCES_DIR / "fivethirtyeight_nfl_elo.csv"
+# Archived 2025 spreadsheet. Not a pipeline input: it is only used to validate
+# the FiveThirtyEight file and for the legacy-reproduction check.
 LEGACY_XLSX = ROOT / "legacy_2025" / "NFLELO_data.xlsx"
 GAMES_CSV = DATA_DIR / "games.csv"
 
-# Seasons 1970-1998 come from the legacy spreadsheet, 1999+ from nflverse.
-LEGACY_LAST_SEASON = 1998
+# Seasons 1970-1998 come from FiveThirtyEight's game file (CC BY 4.0), 1999+ from nflverse.
+FIVETHIRTYEIGHT_LAST_SEASON = 1998
 NFLVERSE_FIRST_SEASON = 1999
 
 # Held-out protocol. Ratings warm up from 1970; tuning is scored on

@@ -37,7 +37,7 @@ from nflelo.evaluate import market_prob, metrics  # noqa: E402
 SITE_DATA = config.ROOT / "site" / "data"
 SCHEDULES_CSV = config.RAW_DIR / "schedules.csv"
 REPORT_MD = config.OUT_DIR / "model_report.md"
-CREDIT = "Data: nflverse (CC-BY 4.0)"
+CREDIT = "Data: nflverse (CC BY 4.0); 1970–1998 results: FiveThirtyEight (CC BY 4.0)."
 REPO_URL = "https://github.com/walk-the-program/NFLELO"
 SPARK_GAMES = 17          # ladder sparkline length (last N regular-season games)
 TOP_N = 10

@@ -264,7 +264,7 @@ def panel_avg_elo(ax, avg_elo: pd.DataFrame) -> None:
 def footer_text(ratings: dict) -> str:
     cfg = ratings["config"]
     hfa = "learned home-field advantage" if cfg["hfa_mode"] == "online" else "fixed home-field advantage"
-    return (f"Data: nflverse (CC-BY 4.0), 1970–98 from legacy dataset · Model: Elo v2 "
+    return (f"Data: nflverse (CC BY 4.0); 1970–1998 results: FiveThirtyEight (CC BY 4.0) · Model: Elo v2 "
             f"(K {cfg['k']:g}, λ {cfg['lam']:.2f}, {hfa}, currently {ratings['hfa_current']:g} pts) "
             f"· github.com/walk-the-program/NFLELO")
 

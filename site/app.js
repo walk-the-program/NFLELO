@@ -907,13 +907,15 @@
         h('p', {}, h('b', { text: 'Ratings. ' }), 'Every team starts at 1500, the league average. After each game the winner takes points from the loser. The bigger the surprise and the bigger the margin, the more points move. The base size is K = ' + cfg.k + '.'),
         h('p', {}, h('b', { text: 'Offseason. ' }), 'Between seasons every rating moves ' + Math.round(cfg.lam * 100) + '% of the way back to 1500 (lambda = ' + cfg.lam.toFixed(2) + ') because rosters turn over.'),
         h('p', {}, h('b', { text: 'Home field. ' }), 'The home team gets a rating bonus before each prediction, none at neutral sites. The bonus is learned: it started at ' + cfg.hfa_init + ' points in 1970, moves up or down as home teams win more or less than expected, and is ' + f1(D.meta.hfa_pts) + ' now. Elo spread is the rating gap divided by 25.'),
+        h('p', {}, h('b', { text: 'Data. ' }), 'Game results from 1999 on come from nflverse. Results for 1970 to 1998, including playoffs, come from the FiveThirtyEight NFL Elo game file. Both are CC BY 4.0.'),
         h('p', {}, h('b', { text: 'New teams. ' }), 'Franchises that join after 1970 start at ' + cfg.expansion_start + '. The model was tuned on ' + sc.tune_seasons[0] + '-' + sc.tune_seasons[1] + ' and scored on ' + span + '.'),
         h('p', {}, h('b', { text: 'Limits. ' }), 'The Vegas line is still better: a Brier gap of ' + sc.brier_gap_vs_market.toFixed(4) + '. Elo does not know about injuries, starting quarterbacks, or weather.')),
       h('div', {},
         h('h3', { text: 'Links' }),
         h('ul', {},
           h('li', {}, h('a', { href: D.meta.repo, text: 'Code and method on GitHub' }), h('small', { text: 'github.com/walk-the-program/NFLELO' })),
-          h('li', {}, h('a', { href: 'https://nflverse.nflverse.com/', text: 'nflverse' }), h('small', { text: D.meta.credit })),
+          h('li', {}, h('a', { href: 'https://nflverse.nflverse.com/', text: 'nflverse' }), h('small', { text: 'Schedules, scores, and betting lines, 1999 on. CC BY 4.0.' })),
+          h('li', {}, h('a', { href: 'https://github.com/fivethirtyeight/data', text: 'FiveThirtyEight' }), h('small', { text: 'NFL game results 1970\u20131998: FiveThirtyEight, CC BY 4.0.' })),
           h('li', {}, h('a', { href: 'data/ladder.json', text: 'Ladder data (JSON)' }), h('small', { text: 'Rebuilt every Wednesday' }))))));
   }
 

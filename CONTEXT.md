@@ -2,7 +2,7 @@
 
 This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
 
-Last updated: 2026-10-02 (Elo v2 round)
+Last updated: 2026-10-02 (538 data switch)
 
 ## What this project is
 
@@ -17,12 +17,12 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 
 **Elo v2, the current system.** `scripts/build.py` pulls nflverse, rebuilds `data/games.csv` (1970 onward), runs Elo, and writes `outputs/` (per-game ratings, current ratings JSON, model report). Details are in `context/data-and-elo.md`.
 
-**Legacy 2025 analysis.** Everything below now lives in `legacy_2025/`. The pipeline still reads the 1970-1998 games from its spreadsheet, so the folder must stay.
+**Legacy 2025 analysis.** Everything below lives in `legacy_2025/`, an archive and not a pipeline input. The pipeline takes 1970-1998 games from FiveThirtyEight's CC BY 4.0 file in `data/sources/`; the spreadsheet is read only to cross-check it.
 
 | Path (inside `legacy_2025/`) | What it is |
 |---|---|
 | `NFL_ELO_organized.py` | The entire pipeline in one file (~4,500 lines): data load, Elo, metrics, and plots. Configured through the `NFLConfig` class. |
-| `NFLELO_data.xlsx` | Still the source for 1970-1998. Hand-built game log, 26,214 team-game rows from 1970 to 2025. Columns: GameID, Team, Date, Day, Game Number, Week, Hosting, Opp, Result. |
+| `NFLELO_data.xlsx` | Validation only, not a source (it came from Pro-Football-Reference; see `context/data-and-elo.md`). Game log, 26,214 team-game rows from 1970 to 2025. Columns: GameID, Team, Date, Day, Game Number, Week, Hosting, Opp, Result. |
 | `NFL Elo Analysis 1970-2024.pdf`, `LaTeX Files/main.tex` | The paper. |
 | `Outputs/`, `Outputs_Addendum/` | PNG charts and CSVs for 2024 and for the 2025 addendum. |
 | `NFL_Dash.html` | An earlier static dashboard. |
@@ -56,7 +56,7 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 - **License:** most nflverse data is **CC-BY 4.0**, which allows commercial use as long as we credit the source. **FTN charting data is CC-BY-SA 4.0** (share-alike), which means anything we build from it must be released under the same license, so we avoid it for any paid product. The code is MIT.
 - **Caveat:** nflverse states that the underlying NFL data "belong to their respective owners." In practice, credit nflverse on the site. Don't use NFL or team logos, and don't put "NFL" in the site's name or branding. Plain team names and scores are fine as facts. Get real legal advice before charging money.
 - **Coverage:** the schedule and results file `games.csv` runs from **1999 to the present** (46 columns). It includes scores, game type (REG and playoffs), location, rest days, roof, surface, temperature, wind, spread, total, moneylines, starting QB IDs and names, coaches, referee, and stadium. Play-by-play also starts in 1999.
-- **Gap:** nflverse has no data before 1999. For 1970 to 1998, either keep the existing spreadsheet or use FiveThirtyEight's `nfl_elo` game file (CC-BY 4.0, which covers those years). **Open question:** where did the original 1970 to 1998 spreadsheet data come from? If it came from Pro-Football-Reference, their terms of use need a check before commercial use.
+- **Gap, now filled:** nflverse has no data before 1999. 1970 to 1998 comes from FiveThirtyEight's `nfl_elo` game file (CC BY 4.0), vendored in `data/sources/` with REG and playoff games. Credit line: "Data: nflverse (CC BY 4.0); 1970–1998 results: FiveThirtyEight (CC BY 4.0)."
 - Data dictionaries are at https://nflreadr.nflverse.com/articles/. Datasets include pbp, player stats, team stats, rosters, depth charts, injuries, snap counts, participation, Next Gen Stats, ESPN QBR, draft picks, combine, contracts, trades, and FTN charting.
 
 ## Direction
@@ -86,7 +86,6 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 
 ## Open questions for Walker
 
-- Where did the 1970 to 1998 game data come from?
 - Will the site ever charge money or run ads? The answer decides whether FTN data is usable and how careful we need to be with licensing.
 - Site name and domain. "NFLELO" is the working name for the demo. Before a public or commercial launch, consider a name without "NFL" (trademark).
 
@@ -96,7 +95,8 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 |---|---|
 | 2026-10-02 | This file is the single general context doc. Sub-project context goes in `context/*.md`, each linked below. |
 | 2026-10-02 | Old work was moved to `legacy_2025/`. GitHub repo `walk-the-program/NFLELO` (public) is restructured to match. Claude handles all git and GitHub work, committing to main. |
-| 2026-10-02 | Data: 1970-1998 from the legacy spreadsheet, 1999+ from nflverse. The overlap check matched 6,967 of 6,967 games. |
+| 2026-10-02 | Data: 1970-1998 from the legacy spreadsheet, 1999+ from nflverse. The overlap check matched 6,967 of 6,967 games. Superseded the same day by the next row. |
+| 2026-10-02 | Data licensing: the legacy spreadsheet came from Pro-Football-Reference, whose terms restrict substitute databases and ML use. 1970-1998 now comes from FiveThirtyEight's NFL Elo game file (CC BY 4.0), vendored in `data/sources/`, REG and playoffs. It matches the legacy spreadsheet on 6,140 of 6,140 REG games and nflverse on 6,151 of 6,151 (1999-2022). Ratings and test Brier (0.2201) are unchanged; `DEFAULT_CONFIG` kept after a re-tune. |
 | 2026-10-02 | Added the NFLELO demo site: a static page in `site/` fed by JSON from `scripts/export_site.py`, which `build.py` runs. It is not hosted yet; publishing it publicly on GitHub Pages needs Walker's OK. |
 | 2026-10-02 | Elo v2 default: K 20, λ 0.40, online HFA (init 65, k_hfa 0.5), expansion start 1300, no playoff updates. It ties the fixed-HFA-65 winner on the tune window and was chosen because fixed HFA can't track the decline in home-field advantage. |
 
