@@ -482,26 +482,6 @@
     return spread > 0 ? home + ' -' + f1(spread) : away + ' -' + f1(-spread);
   }
 
-  function featureCard(g, byGap) {
-    var home = g.p_home, away = 1 - g.p_home;
-    var hasVegas = g.vegas_spread != null;
-    var differ = hasVegas && (g.elo_spread > 0) !== (g.vegas_spread > 0) && Math.abs(g.elo_spread) >= 0.05 && Math.abs(g.vegas_spread) >= 0.05;
-    var label = (byGap ? 'Biggest gap between Elo and Vegas' : 'Strongest Elo pick');
-    var f = function (dt, val, cls) { return h('div', {}, h('dt', { text: dt }), h('dd', { class: 'f-big ' + (cls || ''), text: val })); };
-    return h('article', { class: 'feature', 'aria-label': label + ': ' + g.away + ' at ' + g.home },
-      h('div', { class: 'f-top' }, h('span', { class: 'tag', text: label + (byGap && differ ? ', opposite sides' : '') }),
-        h('span', { text: shortDay(g.date) + (g.time ? ', ' + clock(g.time) : '') + (g.neutral ? ', neutral site' : '') })),
-      h('div', { class: 'f-vs' }, g.away, h('span', { class: 'at', text: 'at' }), g.home),
-      h('div', { class: 'pbar', 'aria-hidden': 'true' },
-        h('i', { class: 'mk', style: markVars(byTeam[g.away].color) + ';width:' + (away * 100).toFixed(1) + '%' }),
-        h('i', { class: 'mk', style: markVars(byTeam[g.home].color) + ';width:' + (home * 100).toFixed(1) + '%' })),
-      h('div', { class: 'plabels' }, h('span', {}, g.away + ' ', h('b', { text: pct(away) })), h('span', {}, h('b', { text: pct(home) }), ' ' + g.home)),
-      h('dl', { class: 'f-lines' },
-        f('Elo line', lineText(g.home, g.away, g.elo_spread)),
-        f('Vegas line', hasVegas ? lineText(g.home, g.away, g.vegas_spread) : 'None yet'),
-        g.diff != null ? f('Gap', f1(Math.abs(g.diff)), 'gapv') : f('Elo win chance', pct(Math.max(home, away)), 'gapv')));
-  }
-
   function renderWeek() {
     var u = D.upcoming, body = $('#week-body');
     clear(body);
@@ -515,14 +495,8 @@
     $('#week-deck').textContent = 'Week ' + u.week + (u.played ? ': ' + plural(left, 'game', 'games') + ' still to play, ' + u.played + ' already in the ratings' : ': ' + plural(left, 'game', 'games')) +
       '. Elo win chance and point spread next to the Vegas line.';
 
-    // The feature card is the game with the biggest Elo vs Vegas gap (or the strongest Elo pick if there are no lines).
-    var byId = {};
-    u.games.forEach(function (g) { byId[g.game_id] = g; });
-    var feat = u.flagged.length ? byId[u.flagged[0]] : u.games.reduce(function (a, g) { return Math.abs(g.p_home - 0.5) > Math.abs(a.p_home - 0.5) ? g : a; }, u.games[0]);
-    body.appendChild(featureCard(feat, u.flagged.length > 0));
-
     var grid = h('div', { class: 'games' });
-    u.games.filter(function (g) { return g !== feat; }).forEach(function (g) {
+    u.games.forEach(function (g) {
       var home = g.p_home, away = 1 - g.p_home;
       var tag = g.flagged ? 'Gap ' + f1(Math.abs(g.diff)) : (g.neutral ? 'Neutral site' : '');
       var label = g.away + ' at ' + g.home + '. Elo gives ' + g.home + ' ' + pct(home) + '. Elo line ' + lineText(g.home, g.away, g.elo_spread) +
@@ -531,7 +505,7 @@
         h('div', {}, h('dt', { text: 'Elo line' }), h('dd', { text: lineText(g.home, g.away, g.elo_spread) })),
         g.vegas_spread != null ? h('div', {}, h('dt', { text: 'Vegas line' }), h('dd', { text: lineText(g.home, g.away, g.vegas_spread) })) : h('div', {}, h('dt', { text: 'Vegas line' }), h('dd', { text: 'None yet' })),
         g.diff != null ? h('div', {}, h('dt', { text: 'Gap' }), h('dd', { text: f1(Math.abs(g.diff)) })) : null);
-      var card = h('article', { class: 'game' + (g.flagged ? ' flag' : ''), 'aria-label': label },
+      var card = h('article', { class: 'game', 'aria-label': label },
         h('div', { class: 'when' }, h('span', { text: shortDay(g.date) + (g.time ? ', ' + clock(g.time) : '') }),
           tag ? h('span', { class: g.flagged ? 'tag' : '', text: tag }) : null),
         h('div', { class: 'vs' }, g.away, h('span', { class: 'at', text: 'at' }), g.home),
