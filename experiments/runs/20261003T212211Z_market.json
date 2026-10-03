@@ -24,9 +24,9 @@
     "data/games.csv": "280f50e1ce727d5803cbeb9cef31a54f13eb11e941b0b00c1f57bb72c3028aa1"
   },
   "git": {
-    "sha": "1157ad303b4392e51ebe065851ada9f0486f228c",
-    "dirty": true
+    "sha": "a12737beec518efb91d4f6b986ec0516a906763c",
+    "dirty": false
   },
-  "timestamp": "2026-10-03T21:21:52+00:00",
+  "timestamp": "2026-10-03T21:22:11+00:00",
   "notes": "Vig-removed moneyline probability. Benchmark only, never a feature (D3). Scored on games with moneylines. Reference: evaluate.compare_on_test Brier 0.210426, n 4174."
 }
