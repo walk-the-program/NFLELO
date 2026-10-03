@@ -2,7 +2,7 @@
 
 This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
 
-Last updated: 2026-10-02 (538 data switch)
+Last updated: 2026-10-03 (ML M1 and M2 built)
 
 ## What this project is
 
@@ -30,7 +30,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | `README.md` | Usage notes for the legacy script. |
 | `Other/` | Word drafts. Kept out of git because the repo is public. |
 
-No machine learning code exists yet; the grep came back empty. The ML work starts from scratch.
+**ML foundations (M1 and M2, built 2026-10-03).** `nflelo/ml/` caches nflverse play-by-play for 1999-2025 into the gitignored `data/raw/ml/`, builds leak-proof team-efficiency features, and scores models in a walk-forward harness with a locked 2020-2025 holdout. Runs are logged to `experiments/runs/`. No predictive ML model has been trained yet; that is M3. Details are in `context/ml.md`.
 
 ### Legacy Elo model (2025)
 
@@ -101,6 +101,8 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 | 2026-10-02 | Elo v2 default: K 20, λ 0.40, online HFA (init 65, k_hfa 0.5), expansion start 1300, no playoff updates. It ties the fixed-HFA-65 winner on the tune window and was chosen because fixed HFA can't track the decline in home-field advantage. |
 | 2026-10-03 | Removed Pro-Football-Reference-derived game data (`legacy_2025/NFLELO_data.xlsx`, both `comprehensive_nfl_data.csv` exports, and the original root `NFLELO_data.xlsx`) from the public repo and its entire git history, with Walker's approval. The files stay local and are gitignored. Old commit SHAs may stay reachable by direct link on GitHub until GitHub support purges its cache. |
 | 2026-10-03 | ML plan written in `context/ml.md`. The ML work happens in its own chat, built together with Walker: game model first, and personnel models later under CC BY-SA. |
+| 2026-10-03 | ML decisions D2-D6 (see `context/ml.md`): 2020-2025 holdout locked; pure model only, with betting lines as a benchmark and never a feature; walkthrough notebooks; ML packages in `requirements-ml.txt`. M1 and M2 start together. |
+| 2026-10-03 | ML M1 and M2 done. The harness reproduces Elo v2 (0.220075) and the market (0.210426) exactly on 2010-2025. On DEV 2006-2019 (3,450 games), Elo minus the market is +0.0072 Brier (95% CI +0.0044 to +0.0101). Every ML agent runs on Opus, at Walker's request. |
 
 ## Context file index
 

@@ -2,7 +2,7 @@
 
 This is the ML sub-project's context file. Read `CONTEXT.md` first, then this file. It is both the plan and the living record: when a decision gets made or a milestone is finished, update the status table and the decision log at the bottom.
 
-Written 2026-10-03. Status: plan drafted, D1 decided, nothing built yet. Current scope: Stage A (M1-M4) and M5a, all on CC BY data.
+Written 2026-10-03. Status: plan drafted, D1-D6 decided, M1 and M2 in progress. Current scope: Stage A (M1-M4) and M5a, all on CC BY data.
 
 ---
 
@@ -116,6 +116,7 @@ These are boring but decisive. Most sports-ML projects fail here through leakage
   - Elo v2, which must reproduce 0.2201 on 2010 to 2025
   - The market, which must reproduce 0.2104
   If the harness can't reproduce known numbers, nothing else it says is trustworthy.
+- **Market lines are never features** (D3). The harness keeps them in a separate benchmark column so they can't slip into a feature matrix.
 - **Experiment registry:** `experiments/runs/*.json` plus a small script that prints a leaderboard.
 - **Concept checkpoint:**
   - Proper scoring rules (why Brier and log loss reward honest probabilities and accuracy doesn't).
@@ -162,10 +163,9 @@ These are boring but decisive. Most sports-ML projects fail here through leakage
 4. **Bayesian state-space model.** This is the sophisticated comparison: team strengths drift week to week as a random walk (the Glickman-Stern style). It is principled about uncertainty and naturally handles early-season priors. It's slower, but valuable for understanding.
 5. **Stacking and calibration.** Combine the best models (including Elo) with a simple meta-model fit on out-of-fold predictions, then apply isotonic or Platt calibration if the reliability curve shows bias.
 
-### Two separate products
+### Pure model only (D3)
 
-- **Pure model:** no betting-market inputs. This is the honest test of whether our football features know something.
-- **Market-aware model:** the spread as a feature. It is useful for the site's "where we disagree with Vegas" angle, but it can't claim credit for knowledge the market already had.
+No model uses betting-market inputs (spread, total, or moneylines) as features. The market is a benchmark only: we score against it and can show it on the site, but our predictions must come from football data. This is the honest test of whether our features know something. A market-aware model was considered and declined on 2026-10-03.
 
 ### Milestone acceptance
 
@@ -287,8 +287,8 @@ No paid APIs, no cloud.
 
 | ID | Milestone | Depends on | Status |
 |---|---|---|---|
-| M1 | Data layer and leak-proof features | none | Not started |
-| M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Not started |
+| M1 | Data layer and leak-proof features | none | Built 2026-10-03, awaiting Walker's review |
+| M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Built 2026-10-03 (reproduces both exactly), awaiting Walker's review |
 | M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | Not started |
 | M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Not started |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Not started |
@@ -296,18 +296,46 @@ No paid APIs, no cloud.
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | Not started |
 | M7 | Personnel decision support (causal) | M6 | Not started |
 
+### M1/M2 build notes (2026-10-03)
+
+**Where things are.** `nflelo/ml/data.py` (cache, manifest, schema checks; `python -m nflelo.ml.data status|fetch|refresh`), `asof.py` (as-of rule and `leakage_check`), `features/team_efficiency.py` (plus `features/leaky_demo.py`, the deliberate leak used as a test control), `eval/` (`windows`, `walk_forward`, `metrics`, `bootstrap`, `calibration`, `baselines`), and `registry.py`. Scripts: `scripts/ml_baselines.py` and `scripts/ml_leaderboard.py --window dev|holdout|reproduction`. Walkthrough: `notebooks/01_data_tour_and_leakage.ipynb`. Tests in `tests/ml/` run offline on synthetic frames.
+
+**Data.** Play-by-play for 1999-2025 is cached: 1,279,628 rows (about 45,000 to 50,000 per season; 2021 onward is higher with 17 games), 306 MB on disk in `data/raw/ml/` (gitignored). Schedules are cached for 1999-2026. Every season passes the schema checks: required columns and types, 99-171 scrimmage plays per game, and every team code maps through `nflelo/teams.py`. Unmapped codes are reported as errors and never dropped. Gaps: one played 1999 game and two 2000 games have no play-by-play. Every 1999 game is missing its kickoff time.
+
+**As-of rule.** A game's `as_of` is the earliest REG or POST kickoff in its (season, week), in Eastern time. A missing kickoff time counts as 00:00 ET on game day. Features use only games that kicked off strictly before `as_of`, so Thursday's result never reaches that week's Sunday games. The leakage test scrambles everything at or after `as_of` (plays, outcomes, and scores, including later games in the same week) and requires identical features. A full-season-average builder must fail the same test, and it does.
+
+**Features.** Offensive and defensive EPA per play (all, pass, and rush), success rate, and play counts per team, pooled as (this season to date + w × last season), with w = 0.5 by default. The features count real snaps only: `play_type` pass or run, an EPA value, and no two-point tries. Pass versus rush follows nflfastR's `pass` and `rush` flags, so scrambles count as dropbacks. Plays with win probability below 0.05 or above 0.95 are dropped. Market columns are removed when the data loads, and a test fails if any feature name matches spread, total_line, moneyline, or vegas.
+
+**Harness results.**
+- Reproduction (REG 2010-2025, `allow_holdout=True`, labelled "reproduction"): Elo v2 0.220075 on n = 4,175, and on the 4,174 games with moneylines, Elo 0.220116 and market 0.210426. All three match `compare_on_test` exactly (difference 0).
+- DEV baselines (REG 2006-2019, the 3,450 of 3,584 games with moneylines, identical for all four):
+
+  | Model | Brier | Log loss | Accuracy | ECE |
+  |---|---|---|---|---|
+  | Market (benchmark) | 0.2106 | 0.6096 | 0.663 | 0.018 |
+  | Elo v2 | 0.2178 | 0.6255 | 0.641 | 0.015 |
+  | Home-win rate (trailing 10 seasons) | 0.2451 | 0.6847 | 0.566 | 0.007 |
+  | 50/50 | 0.2493 | 0.6931 | 0.434 | 0.066 |
+
+  Elo minus market Brier is +0.0072, with a 95% paired bootstrap CI of [+0.0044, +0.0101] (2,000 reps, seed 20261003).
+
+**Caveats.**
+- Elo v2 was tuned on 1980-2009, so 2006-2009 are in-sample for Elo, which makes its DEV score slightly optimistic.
+- Elo updates game by game, so its Sunday predictions do see that week's Thursday result. The ML features use the stricter weekly as-of rule.
+- nflfastR's EP and WP models were trained on data that includes seasons after the ones we predict. This is an accepted limitation shared by all public EPA work.
+- The 50/50 baseline's accuracy (0.434) is just the away-win rate, because a 0.5 prediction counts as picking the away team.
+- Registry runs record the git commit and a dirty flag. The first runs were logged before this code was committed.
+
 ---
 
 ## 10. Open decisions for Walker (start the ML chat here)
 
 - **D1. Share-alike data: DECIDED 2026-10-03.** Accepted. Personnel-based work (M5b, M6, M7) will be released under CC BY-SA. Stages A and M5a use only CC BY data, so they stay unrestricted and are done first. This can be revisited later (for example, by licensing play-level data directly) without touching A or M5a.
-- **D2. Holdout discipline.** Lock 2020 to 2025 as a holdout we only score at milestone sign-off. (Recommended.)
-- **D3. Pure versus market-aware.** Build both, with the pure model as the headline. (Recommended.)
-- **D4. Notebook depth.** How hands-on should the notebooks be?
-  - Walkthroughs you read and run.
-  - Exercises where you fill in pieces.
-- **D5. Python environment.** Keep the single `.venv` and add ML packages to `requirements.txt`, or keep a separate `requirements-ml.txt` so the weekly site build stays light. (Recommended: the separate file.)
-- **D6. First-week scope.** Start M1 and M2 together, since they're small and coupled, and finish with a notebook that tours the play-by-play data and demonstrates a leakage bug on purpose.
+- **D2. Holdout: DECIDED 2026-10-03.** 2020 to 2025 is locked. Tuning uses 2006 to 2019 only. The holdout is scored once per milestone sign-off, with the metrics fixed in advance.
+- **D3. Pure versus market-aware: DECIDED 2026-10-03.** Pure only. Betting lines are a benchmark, never a feature.
+- **D4. Notebook depth: DECIDED 2026-10-03.** Walkthroughs: finished notebooks Walker reads and runs cell by cell.
+- **D5. Python environment: DECIDED 2026-10-03.** Same `.venv`, with ML packages in a separate `requirements-ml.txt`. The weekly site build installs only `requirements.txt`.
+- **D6. First-week scope: DECIDED 2026-10-03.** Start M1 and M2 together, and finish with a notebook that tours the play-by-play data and demonstrates a leakage bug on purpose.
 
 ---
 
@@ -317,3 +345,4 @@ No paid APIs, no cloud.
 |---|---|
 | 2026-10-03 | Plan written. Order: game model, then player value, then play model, then decision support. Avoid Pro-Football-Reference-derived nflverse datasets (snap counts, PFR advanced stats) for all ML because of their terms. Big Data Bowl tracking data is out of scope. |
 | 2026-10-03 | D1 accepted: personnel-based models (M5b, M6, M7) will be CC BY-SA. The first scope is the game model (M1-M4) plus M5a (QB and box-score player value), which use only CC BY data. Player value is split into M5a (CC BY) and M5b (participation, CC BY-SA). |
+| 2026-10-03 | D2-D6 decided. D2: 2020-2025 locked as holdout, tuning on 2006-2019. D3: pure model only; betting lines are a benchmark, never a feature (the market-aware model was dropped). D4: notebooks are walkthroughs. D5: separate `requirements-ml.txt`. D6: M1 and M2 built together, ending with a data-tour and leakage-demo notebook. |
