@@ -47,7 +47,7 @@
   --focus: var(--mark);
   --hover-wash: color-mix(in srgb, var(--ink) 6%, transparent);
   --font-display: var(--font-heading);
-  --gutter: clamp(20px, 4.2vw, 56px);
+  --gutter: clamp(20px, 3vw, 64px);
   --nav-h: 44px;
   --tint: color-mix(in srgb, var(--ink) 4.5%, var(--bg));            /* every other section band */
   --rule-accent: var(--mark);                                          /* 6px rule above each kicker */
@@ -122,7 +122,7 @@ button, select { font: inherit; letter-spacing: inherit; color: inherit; border-
 h1, h2, h3, .big, .fact dd, .abbr, .vs, .nav-mark, .score .row b, .sub-h, .kicker, .tag-fill, .lucky .v { font-family: var(--font-heading); font-weight: var(--heading-weight); text-transform: var(--heading-transform); }
 h1, h2, h3, p, ul, ol, figure, dl, dd { margin: 0; padding: 0; }
 ul, ol { list-style: none; }
-.wrap { width: 100%; max-width: 1600px; margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
+.wrap { width: 100%; max-width: 2400px; margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
 .num { font-variant-numeric: tabular-nums; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .skip { position: absolute; left: var(--gutter); top: -60px; background: var(--fill); color: var(--on-fill); padding: 8px 12px; z-index: 30; }
@@ -264,6 +264,7 @@ main > .sec:nth-child(even) { --surface: var(--tint); }
 @media (min-width: 720px) { .games { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 1000px) { .games { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 1280px) { .games { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1800px) { .games { grid-template-columns: repeat(5, 1fr); } }
 .game { display: flex; flex-direction: column; padding: 18px 0 20px; border-top: 1px solid var(--rule-strong); position: relative; }
 .game .when { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink-3); }
 .game .when .tag { color: var(--accent-ink); font-weight: 700; }
