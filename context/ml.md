@@ -2,7 +2,7 @@
 
 This is the ML sub-project's context file. Read `CONTEXT.md` first, then this file. It is both the plan and the living record: when a decision gets made or a milestone is finished, update the status table and the decision log at the bottom.
 
-Written 2026-10-03. Status: plan drafted, nothing built yet.
+Written 2026-10-03. Status: plan drafted, D1 decided, nothing built yet. Current scope: Stage A (M1-M4) and M5a, all on CC BY data.
 
 ---
 
@@ -191,6 +191,9 @@ These are boring but decisive. Most sports-ML projects fail here through leakage
 
 ### M5. Player value
 
+Split by license (decision 2026-10-03). **M5a** uses only CC BY data (play-by-play, player stats): the QB composite and box-score player value. That's everything the game model needs. **M5b** is the on-field adjusted plus-minus, which needs CC BY-SA participation data, so it comes after M5a.
+
+
 - **QB first:** the composite from Stage A, extended with era adjustment and aging curves.
 - **Adjusted plus-minus on plays (2016+).** This is the bridge to personnel.
   - Each play becomes a row, with +1 for each offensive player on the field and -1 for each defender (from participation), plus situation controls. The target is the play's EPA.
@@ -288,15 +291,16 @@ No paid APIs, no cloud.
 | M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Not started |
 | M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | Not started |
 | M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Not started |
-| M5 | Player value: QB composite and adjusted plus-minus | M2 | Not started |
-| M6 | Play outcome distribution model | M1, M5 | Not started |
+| M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Not started |
+| M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Not started |
+| M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | Not started |
 | M7 | Personnel decision support (causal) | M6 | Not started |
 
 ---
 
 ## 10. Open decisions for Walker (start the ML chat here)
 
-- **D1. Share-alike data.** Are we OK keeping personnel-based models (M5 adjusted plus-minus, M6, M7) open under CC BY-SA? That rules out selling those specific models closed-source. Game models (M3, M4) stay unrestricted either way.
+- **D1. Share-alike data: DECIDED 2026-10-03.** Accepted. Personnel-based work (M5b, M6, M7) will be released under CC BY-SA. Stages A and M5a use only CC BY data, so they stay unrestricted and are done first. This can be revisited later (for example, by licensing play-level data directly) without touching A or M5a.
 - **D2. Holdout discipline.** Lock 2020 to 2025 as a holdout we only score at milestone sign-off. (Recommended.)
 - **D3. Pure versus market-aware.** Build both, with the pure model as the headline. (Recommended.)
 - **D4. Notebook depth.** How hands-on should the notebooks be?
@@ -312,3 +316,4 @@ No paid APIs, no cloud.
 | Date | Decision |
 |---|---|
 | 2026-10-03 | Plan written. Order: game model, then player value, then play model, then decision support. Avoid Pro-Football-Reference-derived nflverse datasets (snap counts, PFR advanced stats) for all ML because of their terms. Big Data Bowl tracking data is out of scope. |
+| 2026-10-03 | D1 accepted: personnel-based models (M5b, M6, M7) will be CC BY-SA. The first scope is the game model (M1-M4) plus M5a (QB and box-score player value), which use only CC BY data. Player value is split into M5a (CC BY) and M5b (participation, CC BY-SA). |
