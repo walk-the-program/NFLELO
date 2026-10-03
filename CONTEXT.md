@@ -105,6 +105,7 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 ## Context file index
 
 - `CONTEXT.md`: this file, for the general project.
+- `HANDOFF.md`: append-only session handoff log, newest first.
 - `context/data-and-elo.md`: the data pipeline, franchise mapping, the Elo v2 config, and evaluation results.
 - `context/elo-site.md`: the NFLELO one-page site (`site/`, data exported by `scripts/export_site.py`).
 - `context/ml.md`: the machine learning plan and living record (game model, then player value, play model, and personnel decision support), with milestones M1-M7 and open decisions.
