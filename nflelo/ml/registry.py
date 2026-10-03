@@ -31,7 +31,7 @@ def git_commit(root: Path = config.ROOT) -> dict:
         except (OSError, subprocess.CalledProcessError):
             return None
     sha = run("rev-parse", "HEAD")
-    dirty = run("status", "--porcelain")
+    dirty = run("status", "--porcelain", "--", ".", ":!experiments/runs")  # the run files themselves don't count
     return {"sha": sha, "dirty": bool(dirty) if dirty is not None else None}
 
 
