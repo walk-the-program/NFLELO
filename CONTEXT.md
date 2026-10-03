@@ -111,3 +111,4 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 - `context/data-and-elo.md`: the data pipeline, franchise mapping, the Elo v2 config, and evaluation results.
 - `context/elo-site.md`: the NFLELO one-page site (`site/`, data exported by `scripts/export_site.py`).
 - `context/ml.md`: the machine learning plan and living record (game model, then player value, play model, and personnel decision support), with milestones M1-M7 and open decisions.
+- `context/ml-m3-method.md`: the M3 game-model method (logistic regression on Elo, opponent-adjusted EPA, and a QB adjustment) and decisions M3-D1 to M3-D3, awaiting Walker.

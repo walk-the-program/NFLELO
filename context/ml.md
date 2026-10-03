@@ -167,6 +167,8 @@ These are boring but decisive. Most sports-ML projects fail here through leakage
 
 No model uses betting-market inputs (spread, total, or moneylines) as features. The market is a benchmark only: we score against it and can show it on the site, but our predictions must come from football data. This is the honest test of whether our features know something. A market-aware model was considered and declined on 2026-10-03.
 
+The full M3 method, with its math, experiment ladder, pre-registered holdout run, and decisions M3-D1 to M3-D3, is in `context/ml-m3-method.md`.
+
 ### Milestone acceptance
 
 - **M3 (first ML game model):** on the development window, the pure model beats Elo v2 on Brier with a paired 95% interval that excludes zero, and its expected calibration error is below 0.02. Then it gets one sign-off run on the holdout.
