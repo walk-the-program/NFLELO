@@ -33,7 +33,7 @@ The legacy config (`LEGACY_CONFIG`) uses the legacy script's actual MOV rule: ab
 
 ## Evaluation protocol (`nflelo/evaluate.py`, `scripts/tune.py`)
 
-Ratings warm up from 1970. Tuning scores REG games in 1980 to 2009 and sees no later games. The test window is 2010 to 2025 REG games; the partial 2026 season is excluded. Metrics: Brier (primary), log loss, accuracy. The market is the vig-removed closing moneyline, scored on the test games that have moneylines (4,174 of 4,175), the same games for every model.
+Ratings warm up from 1970. Tuning scores REG games in 1980 to 2009 and sees no later games. The test window is 2010 to 2025 REG games; the partial 2026 season is excluded. Metrics: Brier (primary), log loss, accuracy. The market is the vig-removed moneyline from the nflverse schedule file (Lee Sharpe's nfldata; it does not document which sportsbook or whether lines are opening or closing), scored on the test games that have moneylines (4,174 of 4,175), the same games for every model.
 
 Grid (3,072 configs, 33 seconds): K {15, 20, 25, 30}; lambda {0.10 to 0.50, 8 values}; HFA fixed {35, 45, 55, 65} or online with k_hfa {0.5, 1, 2, 4} (init 65), with and without MOV scaling of the HFA update; include_playoffs on or off; expansion start {1300, 1500}; MOV cap none or 2.0.
 
