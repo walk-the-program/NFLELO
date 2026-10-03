@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c2126" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7f9" media="(prefers-color-scheme: light)">
 <title>NFLELO: Elo ratings and stats</title>
 <meta name="description" content="Elo ratings for every NFL franchise since 1970, the weekly power ladder, picks against the Vegas line, luck, and league history.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="styles.css">
 <script src="app.js" defer></script>
 </head>
@@ -60,7 +60,7 @@
     <p class="deck">One line per franchise, every regular-season game since 1970. Hover or use the arrow keys to read a game week.</p>
     <div class="field">
       <label for="team-select">Team</label>
-      <select id="team-select"></select>
+      <div class="sel"><select id="team-select"></select></div>
     </div>
     <div id="explorer-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </section>

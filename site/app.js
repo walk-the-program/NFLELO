@@ -6,7 +6,7 @@
 
   var FILES = ['meta', 'ladder', 'upcoming', 'history', 'luck', 'tapestry', 'records', 'scorecard'];
   var SVGNS = 'http://www.w3.org/2000/svg';
-  var BG_DARK = [17, 17, 16], BG_LIGHT = [250, 250, 248];
+  var BG_DARK = [28, 33, 38], BG_LIGHT = [245, 247, 249];   // --neutral-dark, --neutral-light
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ------------------------------------------------------------------ dom helpers
@@ -197,9 +197,13 @@
         d += (pen ? 'L' : 'M') + sx(p.x).toFixed(1) + ' ' + sy(p.y).toFixed(1);
         pen = true;
       });
-      sv('path', { class: 'line ' + s.cls, style: s.style, d: d }, svg);
+      if (s.dotsOnly) {
+        s.pts.forEach(function (p) { if (p.y != null) sv('circle', { class: 'dot ' + s.cls + ' plain', cx: sx(p.x), cy: sy(p.y), r: 3 }, svg); });
+      } else {
+        sv('path', { class: 'line ' + s.cls, style: s.style, d: d }, svg);
+      }
       var last = s.pts.filter(function (p) { return p.y != null; }).pop();
-      sv('circle', { class: 'dot ' + s.cls, style: s.style, cx: sx(last.x), cy: sy(last.y), r: 4 }, svg);
+      if (!s.dotsOnly) sv('circle', { class: 'dot ' + s.cls, style: s.style, cx: sx(last.x), cy: sy(last.y), r: 4 }, svg);
       if (o.endLabels) {
         sv('text', { class: 'lbl', x: sx(last.x) + 10, y: sy(last.y) + 4, text: s.short || s.label }, svg);
       }
@@ -812,7 +816,7 @@
         });
       })));
     pair.appendChild(h('div', {}, h('h3', { text: 'Home-field edge by season' }), h('p', { class: 'sub', text: 'Chance the home team wins between equal teams, from Elo\'s learned edge, next to how often home teams actually won.' }),
-      legend([['s1', 'Elo learned edge'], ['sm', 'Actual home win rate']]), hfaHost,
+      legend([['s1', 'Elo learned edge'], ['sm dot', 'Actual home win rate']]), hfaHost,
       tableView('View home-field edge as a table', [{ t: 'Season' }, { t: 'Elo edge (pts)', r: 1, n: 1 }, { t: 'Implied win %', r: 1, n: 1 }, { t: 'Actual win %', r: 1, n: 1 }], function () {
         return S.slice().reverse().map(function (r) { return [String(r.season), f1(r.hfa_pts), pct(r.hfa_win_pct, 1), pct(r.home_win_rate, 1)]; });
       })));
@@ -836,7 +840,7 @@
       lineChart(hfaHost, {
         series: [
           { id: 'hfa', label: 'Elo learned edge', short: 'Elo', cls: 's1', pts: S.map(function (r) { return { x: r.season, y: r.hfa_win_pct * 100, pts: r.hfa_pts }; }) },
-          { id: 'act', label: 'Actual home win rate', short: 'Actual', cls: 'sm', pts: S.map(function (r) { return { x: r.season, y: r.home_win_rate * 100 }; }) }],
+          { id: 'act', label: 'Actual home win rate', short: 'Actual', cls: 'sm', dotsOnly: true, pts: S.map(function (r) { return { x: r.season, y: r.home_win_rate * 100 }; }) }],
         x: [S[0].season, S[S.length - 1].season], y: [48, 64], endLabels: true,
         height: function (w) { return w < 560 ? 240 : 300; },
         xTicks: [1970, 1980, 1990, 2000, 2010, 2020], yTicks: [48, 52, 56, 60, 64], xFmt: String, yFmt: function (v) { return v + '%'; },
