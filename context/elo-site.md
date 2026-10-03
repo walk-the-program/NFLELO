@@ -33,7 +33,7 @@ Reads `outputs/elo_games.csv`, `outputs/ratings_current.json`, `outputs/model_re
 
 ## Layout and motion (round 2)
 
-- Content width is 1600px with fluid gutters (`clamp(20px, 4.2vw, 56px)`); running prose stays at 70ch. At 1280px and up: This Week is 4 cards per row, the explorer is chart (2/3) plus a stat column (1/3), luck is chart plus a luckiest/unluckiest column, records stay 2x2, the two scorecard charts stay side by side. The ladder uses the width for longer bars and a 168px sparkline.
+- Content width is up to 2400px with fluid gutters (`clamp(20px, 3vw, 64px)`); running prose stays at 70ch. At 1280px and up: This Week is 4 cards per row (5 at 1800px and up), the explorer is chart (2/3) plus a stat column (1/3), luck is chart plus a luckiest/unluckiest column, records stay 2x2, the two scorecard charts stay side by side. The ladder uses the width for longer bars and a 168px sparkline.
 - The hero is a full-bleed block (`--primary` in light, `--accent` in dark, `--on-primary` text). Each section has a 6px rule, a numbered kicker ("01 / POWER LADDER", uppercase on request) and the computed headline; every other section sits on a faint neutral tint.
 - Ladder: top three rows are larger, bars are 14px, a filled tag marks the week's biggest riser and faller. This Week: the biggest Elo-vs-Vegas gap is a wide feature card, the other games follow as the grid.
 - Motion, only without `prefers-reduced-motion`: ladder and luck bars grow from 1500 over 400ms the first time their section scrolls into view (IntersectionObserver, once), and the hero numerals count up once on load. Nothing else animates.
