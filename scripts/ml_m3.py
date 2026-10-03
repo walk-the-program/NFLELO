@@ -2,6 +2,8 @@
 
     python scripts/ml_m3.py            # build features, run the ladder, log every step, print the table
     python scripts/ml_m3.py --no-log   # same, without writing run files
+    python scripts/ml_m3.py --signoff-dry-run   # sign-off code path on DEV (no holdout, no logging)
+    python scripts/ml_m3.py --signoff  # the ONE pre-registered holdout run of A4s (section 6 of the spec)
 
 Spec: context/ml-m3-method.md (sections 6 and 8). Every step is scored on the
 same games as scripts/ml_baselines.py: the 3,450 DEV (2006-2019) REG games that
@@ -23,7 +25,7 @@ The final model is picked by the one-standard-error rule (M3-D3): among steps
 whose DEV Brier is within one paired-bootstrap standard error of the best,
 take the simplest (fewest features; trees count as most complex).
 
-The holdout (2020-2025) is never loaded: data stops at 2019.
+The ladder never loads the holdout: data stops at 2019. Only `--signoff` loads 2020-2025.
 
 Outputs: one registry run per step (experiments/runs/), and the feature frame
 with every step's predictions in data/raw/ml/m3/ (gitignored) for notebook 03.
@@ -66,10 +68,11 @@ MONOTONE = {"elo_logit": 1, "adj_epa_margin": 1, "adj_pass_margin": 1, "adj_rush
 
 # --------------------------------------------------------------------------- data and features
 
-def load_inputs():
+def load_inputs(last_season: int = DEV[1]):
+    """games.csv, play-by-play, and schedules through `last_season` (default 2019: nothing from the holdout)."""
     games = elo_data.load_games()
-    games = games[games["season"] <= DEV[1]].reset_index(drop=True)  # nothing from the holdout
-    years = range(DATA_SEASONS[0], DATA_SEASONS[1] + 1)
+    games = games[games["season"] <= last_season].reset_index(drop=True)
+    years = range(DATA_SEASONS[0], last_season + 1)
     pbp = mldata.load_pbp(years, columns=PBP_COLUMNS)
     sched = asof.add_asof(mldata.load_schedules(years))
     return games, pbp, sched
@@ -80,10 +83,11 @@ def data_key(years) -> str:
     return registry.games_hash([f"{k}:{v}" for k, v in h.items()])
 
 
-def build_frame(games: pd.DataFrame, pbp: pd.DataFrame, sched: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """One row per REG game 2001-2019: outcome plus every ladder feature. Returns (frame, timings)."""
+def build_frame(games: pd.DataFrame, pbp: pd.DataFrame, sched: pd.DataFrame,
+                last_season: int = DEV[1]) -> tuple[pd.DataFrame, dict]:
+    """One row per REG game 2001..last_season: outcome plus every ladder feature. Returns (frame, timings)."""
     t = {}
-    reg = sched[(sched["game_type"] == "REG") & sched["season"].between(TRAIN_START, DEV[1])]
+    reg = sched[(sched["game_type"] == "REG") & sched["season"].between(TRAIN_START, last_season)]
     reg = reg[reg["home_score"].notna()].reset_index(drop=True)
     frame = reg[["game_id", "season", "week", "home_team", "away_team"]].copy()
     frame["y"] = outcome(reg)
@@ -106,7 +110,7 @@ def build_frame(games: pd.DataFrame, pbp: pd.DataFrame, sched: pd.DataFrame) -> 
     tab = oa.rating_table(pbp, sched, oa.TUNED)
     keys = sorted(set(zip(reg["season"].astype(int), reg["week"].astype(int))))
     ratings = oa.cached_ratings(tab, sched, keys, oa.TUNED, ("all", "pass", "rush"),
-                                data_key(range(DATA_SEASONS[0], DATA_SEASONS[1] + 1)))
+                                data_key(range(DATA_SEASONS[0], last_season + 1)))
     for kind in ("all", "pass", "rush"):
         frame[oa.FEATURES[kind]] = oa.matchup_margin(ratings, reg, kind)
     t["ratings"] = time.perf_counter() - t0
@@ -210,12 +214,127 @@ def time_weekly_update(games, pbp, sched, frame, spec, season=2019, week=10) -> 
             "p_mean": float(p.mean())}
 
 
+# --------------------------------------------------------------------------- holdout sign-off
+
+SIGNOFF_STEPS = {  # frozen: the chosen model and its Wednesday-only twin (M3-D1)
+    "A4s": ["elo_logit", "adj_epa_margin", "qb_delta_diff"],
+    "A4bs": ["elo_logit", "adj_epa_margin", "qb_last_delta_diff"],
+}
+
+
+def signoff(window: tuple[int, int], allow_holdout: bool, log: bool) -> int:
+    """The pre-registered sign-off run (context/ml-m3-method.md, section 6): A4s frozen, scored once on `window`.
+
+    With window = DEV and no logging it is a dry run of the same code path, which
+    must reproduce the ladder's DEV numbers for A4s and A4bs.
+    """
+    lo, hi = window
+    windows.check(window, allow_holdout)
+    games, pbp, sched = load_inputs(last_season=hi)
+    base = baselines.baseline_frame(games, window, allow_holdout=allow_holdout, require_market=True)
+    frame, ft = build_frame(games, pbp, sched, last_season=hi)
+    ft.pop("ratings_obj")
+    frame = frame.merge(base[["game_id", "p_elo_v2", baselines.MARKET_COL]], on="game_id", how="left")
+    mask = frame["game_id"].isin(base["game_id"]).to_numpy()
+    if mask.sum() != len(base):
+        raise SystemExit(f"only {mask.sum()} of {len(base)} scored games found in the feature frame")
+    sub = frame[mask]
+    y = sub["y"].to_numpy()
+    if not np.allclose(y, base.set_index("game_id").loc[sub["game_id"], "y"].to_numpy()):
+        raise SystemExit("outcomes disagree between the schedule and data/games.csv")
+    preds, coefs = {}, {}
+    for step, feats in SIGNOFF_STEPS.items():
+        p, c = logistic.walk_forward(frame, feats, window, train_start=TRAIN_START)
+        preds[step], coefs[step] = p[mask].to_numpy(), c
+    cols = {"A4s": preds["A4s"], "elo_v2": sub["p_elo_v2"].to_numpy(),
+            "market": sub[baselines.MARKET_COL].to_numpy(), "A4bs": preds["A4bs"]}
+    res = {k: score(y, v) for k, v in cols.items()}
+    ci = {"A4s_minus_elo_brier": bootstrap.paired_bootstrap(y, cols["A4s"], cols["elo_v2"], "brier"),
+          "A4s_minus_elo_logloss": bootstrap.paired_bootstrap(y, cols["A4s"], cols["elo_v2"], "logloss"),
+          "A4s_minus_market_brier": bootstrap.paired_bootstrap(y, cols["A4s"], cols["market"], "brier"),
+          "A4s_minus_market_logloss": bootstrap.paired_bootstrap(y, cols["A4s"], cols["market"], "logloss"),
+          "A4s_minus_A4bs_brier": bootstrap.paired_bootstrap(y, cols["A4s"], cols["A4bs"], "brier")}
+    gh = registry.games_hash(sub["game_id"])
+    label = "holdout" if windows.touches_holdout(window) else "dev"
+    print(f"== M3 sign-off, REG {lo}-{hi} ({label}), games with moneylines: n = {len(sub)}, games hash {gh} ==")
+    print(f"{'model':<8}{'n':>6}{'brier':>9}{'logloss':>9}{'acc':>8}{'ece':>8}")
+    for k, m in res.items():
+        print(f"{k:<8}{m['n']:>6}{m['brier']:>9.4f}{m['logloss']:>9.4f}{m['accuracy']:>8.3f}{m['ece']:>8.4f}")
+    print("\nPaired bootstrap 95% CIs (2,000 reps, seed 20261003), negative = A4s better:")
+    for k, c in ci.items():
+        print(f"  {k:<26}{c['diff']:+.4f} [{c['ci_low']:+.4f}, {c['ci_high']:+.4f}]  "
+              f"{'excludes' if c['excludes_zero'] else 'includes'} zero")
+    a = ci["A4s_minus_elo_brier"]
+    passed = a["excludes_zero"] and a["diff"] < 0 and res["A4s"]["ece"] < 0.02
+    print(f"M3 bar on this window (beats Elo, CI excludes 0, ECE < 0.02): {'PASS' if passed else 'FAIL'}")
+
+    per = pd.DataFrame({"season": sub["season"].to_numpy(), "y": y, **cols})
+    seasons = []
+    print("\nPer season (descriptive):")
+    print(f"{'season':<8}{'n':>5}{'A4s':>9}{'Elo':>9}{'A4s-Elo':>9}{'market':>9}")
+    for S, g in per.groupby("season"):
+        b = {k: float(((g["y"] - g[k]) ** 2).mean()) for k in ("A4s", "elo_v2", "market")}
+        seasons.append({"season": int(S), "n": int(len(g)), **{f"brier_{k}": v for k, v in b.items()}})
+        print(f"{int(S):<8}{len(g):>5}{b['A4s']:>9.4f}{b['elo_v2']:>9.4f}{b['A4s'] - b['elo_v2']:>+9.4f}{b['market']:>9.4f}")
+
+    changed = ((sub["qb_delta_home"] != sub["qb_last_delta_home"])
+               | (sub["qb_delta_away"] != sub["qb_last_delta_away"])).to_numpy()
+    split = {}
+    print("\nA4s minus Elo Brier by starter change (descriptive; starter differs from the team's previous game):")
+    for name, m in (("changed", changed), ("unchanged", ~changed)):
+        c = bootstrap.paired_bootstrap(y[m], cols["A4s"][m], cols["elo_v2"][m], "brier")
+        split[name] = {**c, "brier_A4s": float(((y[m] - cols["A4s"][m]) ** 2).mean()),
+                       "brier_elo": float(((y[m] - cols["elo_v2"][m]) ** 2).mean()),
+                       "brier_A4bs": float(((y[m] - cols["A4bs"][m]) ** 2).mean()),
+                       "brier_market": float(((y[m] - cols["market"][m]) ** 2).mean())}
+        print(f"  {name:<10} n {c['n']:>5}  A4s {split[name]['brier_A4s']:.4f}  Elo {split[name]['brier_elo']:.4f}  "
+              f"diff {c['diff']:+.4f} [{c['ci_low']:+.4f}, {c['ci_high']:+.4f}]  "
+              f"(A4bs {split[name]['brier_A4bs']:.4f}, market {split[name]['brier_market']:.4f})")
+    last = coefs["A4s"].iloc[-1]
+    print(f"\nA4s coefficients, {int(last['season'])} fit: " + ", ".join(
+        f"{k} {last[k]:+.3f}" for k in ["intercept", *SIGNOFF_STEPS["A4s"]]))
+
+    if log:
+        fp = registry.data_fingerprint(games_csv=True, ml_datasets=("pbp", "schedules"),
+                                       seasons=range(DATA_SEASONS[0], hi + 1))
+        params = {"ratings": oa.TUNED.to_dict(), "qb": qb.tuned_config().to_dict(), "train_start": TRAIN_START,
+                  "season_half_life": logistic.SEASON_HALF_LIFE, "ties": "two half-weight rows",
+                  "elo_config": config.DEFAULT_CONFIG.to_dict(), "model": "logistic",
+                  "hfa": "Elo online HFA frozen before the week's first game",
+                  "protocol": "context/ml-m3-method.md section 6, pre-registered; one run"}
+        feats = {"A4s": SIGNOFF_STEPS["A4s"], "A4bs": SIGNOFF_STEPS["A4bs"], "elo_v2": [], "market": []}
+        notes = {"A4s": "M3 sign-off, primary: the frozen chosen model.",
+                 "A4bs": "M3 sign-off, secondary: Wednesday-only starter (M3-D1). Not a selection candidate.",
+                 "elo_v2": "M3 sign-off reference: Elo v2 DEFAULT_CONFIG.",
+                 "market": "M3 sign-off benchmark: vig-removed moneyline. Never a feature (D3)."}
+        for k, m in res.items():
+            registry.log_run(
+                f"m3_signoff_{k}", label=label, seasons=window, game_ids=sub["game_id"],
+                metrics={x: m[x] for x in ("n", "brier", "logloss", "accuracy", "ece")},
+                features=feats[k], params=params if k in SIGNOFF_STEPS else {}, data=fp, notes=notes[k],
+                extra={"signoff": "m3_signoff", "comparisons": ci if k == "A4s" else {},
+                       "per_season": seasons if k == "A4s" else None,
+                       "starter_split": split if k == "A4s" else None,
+                       "coefficients": coefs[k].to_dict("records") if k in coefs else None,
+                       "m3_bar_pass": passed if k == "A4s" else None})
+        print(f"\n{len(res)} runs written to {registry.RUNS_DIR.relative_to(config.ROOT)}/")
+    return 0
+
+
 # --------------------------------------------------------------------------- main
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--no-log", action="store_true", help="print results without writing run files")
+    ap.add_argument("--signoff", action="store_true",
+                    help="the ONE pre-registered holdout run (2020-2025) of the frozen A4s model; logs runs")
+    ap.add_argument("--signoff-dry-run", action="store_true",
+                    help="the sign-off code path on DEV 2006-2019, no logging (must match the ladder)")
     a = ap.parse_args()
+    if a.signoff:
+        return signoff(windows.HOLDOUT, allow_holdout=True, log=not a.no_log)
+    if a.signoff_dry_run:
+        return signoff(DEV, allow_holdout=False, log=False)
     t_start = time.perf_counter()
 
     games, pbp, sched = load_inputs()

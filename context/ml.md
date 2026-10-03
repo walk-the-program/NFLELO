@@ -2,7 +2,7 @@
 
 This is the ML sub-project's context file. Read `CONTEXT.md` first, then this file. It is both the plan and the living record: when a decision gets made or a milestone is finished, update the status table and the decision log at the bottom.
 
-Written 2026-10-03. Status: plan drafted, D1-D6 decided, M1 and M2 built, M3 built on DEV (holdout pending). Current scope: Stage A (M1-M4) and M5a, all on CC BY data.
+Written 2026-10-03. Status: plan drafted, D1-D6 decided, M1 and M2 built, M3 built; holdout run 2026-10-03 (beats Elo, misses the ECE bar). Current scope: Stage A (M1-M4) and M5a, all on CC BY data.
 
 ---
 
@@ -291,7 +291,7 @@ No paid APIs, no cloud.
 |---|---|---|---|
 | M1 | Data layer and leak-proof features | none | Built 2026-10-03, awaiting Walker's review |
 | M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Built 2026-10-03 (reproduces both exactly), awaiting Walker's review |
-| M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | Built 2026-10-03. Passes on DEV (A4s: -0.0027 Brier vs Elo, CI excludes 0, ECE 0.011). Holdout run waits for Walker's OK |
+| M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | Holdout run 2026-10-03: A4s beats Elo (-0.0035 Brier, CI [-0.0063, -0.0007]) but ECE is 0.028, over the 0.02 bar, so the strict bar is not met. ECE at n = 1,615 is noisy (see sign-off notes). Verdict for Walker |
 | M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Not started |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Not started |
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Not started |
@@ -372,11 +372,57 @@ No paid APIs, no cloud.
 **Timing.** Tuning 28 s. Full ladder (load, all features, 10 walk-forward steps with bootstraps) about 19 s; ratings are cached, but a cold build adds under 1 s. One weekly update (2019 week 10: Elo, ratings, QB values, predict 13 games) 0.6 s; the once-a-season refit is a few milliseconds.
 
 **Caveats and open items.**
-- Holdout (2020-2025) not run. Pre-registered in `context/ml-m3-method.md` section 6; waits for Walker's OK.
+- Holdout (2020-2025): run once on 2026-10-03; see "M3 holdout sign-off" below.
 - A6 used scikit-learn's `HistGradientBoostingClassifier` (same monotonic constraints, fixed untuned settings) as a stand-in for LightGBM, which can't load here because its `libomp.dylib` is missing. The stand-in is accepted for M3; LightGBM is not being pursued.
 - Pass and rush ratings (A3) reuse the combined fit's knobs; they were not tuned separately.
 - The registry runs were logged from an uncommitted working tree (`git.dirty` true). Re-log after committing, as was done for M2.
 - The `starter="last"` rule uses the previous game's starter even across the off-season, so week 1 counts as a "changed starter" whenever last season's finale had a different QB.
+
+### M3 holdout sign-off (2026-10-03)
+
+Walker approved the run. `python scripts/ml_m3.py --signoff` ran once, following `context/ml-m3-method.md` section 6. The model was frozen: A4s (`elo_logit`, `adj_epa_margin`, `qb_delta_diff`), with the knobs tuned on 2000-2005 (lambda 100, half-life 48, rho 0.25, QB k 100), season-decay training weights, and a walk-forward fit for each season S in 2020-2025 on REG 2001..S-1. Starter identity was treated as a pre-game fact (M3-D1). Before the real run, `--signoff-dry-run` put the same code path through DEV and reproduced the ladder's A4s and A4bs numbers exactly. Runs are `experiments/runs/20261003T215950Z_m3_signoff_{A4s,elo_v2,market,A4bs}.json`, labelled holdout and flagged `holdout: true`.
+
+Games: REG 2020-2025 with moneylines, n = 1,615 (every REG game in the window has one), games hash `1b27abff81bddb2c`, identical for all rows.
+
+| Model | Brier | Log loss | Acc | ECE |
+|---|---|---|---|---|
+| **A4s (primary)** | **0.2195** | **0.6310** | **0.643** | **0.028** |
+| Elo v2 | 0.2231 | 0.6392 | 0.637 | 0.040 |
+| Market (benchmark) | 0.2096 | 0.6081 | 0.669 | 0.025 |
+| A4bs (Wednesday-only, secondary) | 0.2216 | 0.6360 | 0.637 | 0.031 |
+
+Paired bootstrap 95% CIs (2,000 reps, seed 20261003):
+- A4s minus Elo: Brier **-0.0035 [-0.0063, -0.0007]**, log loss -0.0082 [-0.0147, -0.0016]. Both exclude zero.
+- A4s minus market: Brier +0.0099 [+0.0061, +0.0137], log loss +0.0229 [+0.0144, +0.0314].
+- A4s minus A4bs: Brier -0.0020 [-0.0042, +0.0002]. Includes zero (on DEV it excluded zero).
+
+Per season, Brier (descriptive):
+
+| Season | n | A4s | Elo | A4s - Elo | Market |
+|---|---|---|---|---|---|
+| 2020 | 256 | 0.2125 | 0.2155 | -0.0030 | 0.2011 |
+| 2021 | 272 | 0.2244 | 0.2308 | -0.0064 | 0.2163 |
+| 2022 | 271 | 0.2200 | 0.2232 | -0.0032 | 0.2095 |
+| 2023 | 272 | 0.2334 | 0.2337 | -0.0003 | 0.2187 |
+| 2024 | 272 | 0.2072 | 0.2124 | -0.0052 | 0.2002 |
+| 2025 | 272 | 0.2192 | 0.2223 | -0.0030 | 0.2116 |
+
+Starter split, A4s minus Elo Brier (descriptive):
+- Starter changed from the team's previous game (374 games): 0.2190 vs 0.2266, a diff of -0.0076 [-0.0156, +0.0011]. A4bs 0.2269, market 0.1994.
+- Unchanged (1,241 games): 0.2197 vs 0.2220, a diff of -0.0023 [-0.0048, +0.0002]. A4bs 0.2200, market 0.2127.
+
+The A4s coefficients for the 2025 fit were intercept +0.011, elo_logit +0.79, adj_epa_margin +1.28, and qb_delta_diff +3.72. All signs are as expected. Every coefficient is inside its DEV range except the intercept, which is below the DEV minimum of +0.021. That fits a home-field edge that kept shrinking.
+
+**Verdict as pre-registered.** A4s beats Elo out of sample, in all six seasons and over the window, with an interval that excludes zero. Its ECE (0.028) is above the 0.02 bar, so the strict M3 bar is **not met**. Context, not a re-scoring:
+- Elo (0.040) and the market (0.025) are also above 0.02 on this window.
+- A simulation in notebook 03, section 6, sets up a perfectly calibrated model at n = 1,615, with its predictions resampled from A4s on DEV. Its ECE has a median of 0.024 and a 5th-95th percentile range of 0.014 to 0.038. At n = 3,450 the median is 0.017. So 0.028 is no clear evidence of miscalibration, and the 0.02 bar is too tight for a window this size.
+- A fixed-n calibration test, such as a reliability-curve slope and intercept or a calibration bootstrap, belongs in the M4 plan.
+
+Nothing was retuned.
+
+Other observations:
+- The market is about as good as on DEV (0.2096 vs 0.2106), while A4s and Elo both scored worse (0.2195 and 0.2231), so the gap to the market widened.
+- The QB news gain (A4s vs A4bs) is about the same size as on DEV (-0.0020), but no longer significant. Starter changes were 23% of games, against 19% on DEV.
 
 ## 10. Open decisions for Walker (start the ML chat here)
 
