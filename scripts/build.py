@@ -4,7 +4,7 @@
     python scripts/build.py --offline  # reuse data/raw/schedules.csv
 
 Writes data/games.csv, outputs/elo_games.csv, outputs/ratings_current.json,
-outputs/model_report.md, outputs/dashboards/team_summary.png.
+outputs/model_report.md, outputs/dashboards/team_summary.png, site/data/*.json.
 """
 import argparse
 import json
@@ -216,6 +216,8 @@ def main() -> None:
           f"wrote outputs/elo_games.csv, ratings_current.json, model_report.md")
     import dashboard  # noqa: E402  (scripts/ is on sys.path when run as a script)
     dashboard.render()
+    import export_site  # noqa: E402  (writes site/data/*.json for the website)
+    export_site.export()
 
 
 if __name__ == "__main__":

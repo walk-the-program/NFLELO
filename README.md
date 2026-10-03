@@ -34,4 +34,15 @@ python3.13 -m venv .venv
 .venv/bin/python scripts/dashboard.py --show-tables
 ```
 
+## Website
+
+`site/` is a static one-page site (no build step, no server code) that shows the power ladder, this week's picks against the Vegas line, a team explorer, the luck board, league history, records, and the model scorecard. It reads `site/data/*.json`, which `scripts/export_site.py` writes from `outputs/` and the cached schedule; `build.py` runs the exporter at the end of every run.
+
+```
+.venv/bin/python scripts/export_site.py                 # refresh site/data/ only
+python3 -m http.server 8765 --directory site            # then open http://localhost:8765
+```
+
+The same server is configured as `nflelo-site` in `.claude/launch.json`. Any static host works, including GitHub Pages (publish the `site/` folder). Fonts load from Google Fonts; the charts are hand-built SVG with no other external requests. Details are in [`context/elo-site.md`](context/elo-site.md).
+
 Project notes are in [`CONTEXT.md`](CONTEXT.md) and [`context/data-and-elo.md`](context/data-and-elo.md).

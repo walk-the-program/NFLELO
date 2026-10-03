@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)">
+<title>NFLELO: Elo ratings and stats</title>
+<meta name="description" content="Elo ratings for every NFL franchise since 1970, the weekly power ladder, picks against the Vegas line, luck, and league history.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#ladder">Skip to the power ladder</a>
+
+<nav class="nav" aria-label="Sections">
+  <div class="wrap nav-inner">
+    <a class="nav-mark" href="#top" aria-label="NFLELO, back to top">NFL<span>ELO</span></a>
+    <ul class="nav-links">
+      <li><a href="#ladder">Ladder</a></li>
+      <li><a href="#week">This week</a></li>
+      <li><a href="#explorer">Explorer</a></li>
+      <li><a href="#luck">Luck</a></li>
+      <li><a href="#history">History</a></li>
+      <li><a href="#records">Records</a></li>
+      <li><a href="#scorecard">Scorecard</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="head wrap" id="top">
+  <div class="head-top">
+    <h1 class="wordmark">NFL<span>ELO</span></h1>
+    <p class="status" id="status" aria-live="polite">Loading ratings</p>
+  </div>
+  <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
+</header>
+
+<main>
+  <section class="sec wrap" id="ladder" aria-labelledby="ladder-h" tabindex="-1">
+    <h2 id="ladder-h">Power ladder</h2>
+    <p class="deck">All 32 teams by Elo rating. Bars show distance from the 1500 league average. Select a team to open it in the explorer.</p>
+    <div class="chips" id="ladder-filters" role="group" aria-label="Filter the ladder"></div>
+    <div id="ladder-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </section>
+
+  <section class="sec wrap" id="week" aria-labelledby="week-h" tabindex="-1">
+    <h2 id="week-h">This week</h2>
+    <p class="deck" id="week-deck">Elo picks for the games still to play, next to the Vegas line.</p>
+    <div id="week-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </section>
+
+  <section class="sec wrap" id="explorer" aria-labelledby="explorer-h" tabindex="-1">
+    <h2 id="explorer-h">Team explorer</h2>
+    <p class="deck">One line per franchise, every regular-season game since 1970. Hover or use the arrow keys to read a game week.</p>
+    <div class="field">
+      <label for="team-select">Team</label>
+      <select id="team-select"></select>
+    </div>
+    <div id="explorer-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </section>
+
+  <section class="sec wrap" id="luck" aria-labelledby="luck-h" tabindex="-1">
+    <h2 id="luck-h">Luck board</h2>
+    <p class="deck">Actual wins minus expected wins, where expected wins adds up Elo's pre-game win chance in every game.</p>
+    <div class="chips" id="luck-toggle" role="group" aria-label="Season"></div>
+    <div id="luck-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </section>
+
+  <section class="sec wrap" id="history" aria-labelledby="history-h" tabindex="-1">
+    <h2 id="history-h">League history</h2>
+    <p class="deck">End-of-season rating for every franchise since 1970, then how tightly the league was bunched each year.</p>
+    <div id="history-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </section>
+
+  <section class="sec wrap" id="records" aria-labelledby="records-h" tabindex="-1">
+    <h2 id="records-h">Records</h2>
+    <p class="deck">Extremes since 1970, from the same ratings.</p>
+    <div id="records-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </section>
+
+  <section class="sec wrap" id="scorecard" aria-labelledby="scorecard-h" tabindex="-1">
+    <h2 id="scorecard-h">Model scorecard</h2>
+    <p class="deck">How well Elo predicts games, scored against the betting market, and how its home-field estimate has moved.</p>
+    <div id="scorecard-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <p id="credit">Data: nflverse (CC-BY 4.0)</p>
+  <p>Independent project, not affiliated with the NFL or any team.</p>
+  <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
+</footer>
+
+<div id="tip" class="tip" role="presentation" hidden></div>
+<div id="live" class="sr" aria-live="polite"></div>
+</body>
+</html>

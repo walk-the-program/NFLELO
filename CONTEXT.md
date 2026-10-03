@@ -88,7 +88,7 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 
 - Where did the 1970 to 1998 game data come from?
 - Will the site ever charge money or run ads? The answer decides whether FTN data is usable and how careful we need to be with licensing.
-- Site name and domain.
+- Site name and domain. "NFLELO" is the working name for the demo. Before a public or commercial launch, consider a name without "NFL" (trademark).
 
 ## Decision log
 
@@ -97,10 +97,12 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 | 2026-10-02 | This file is the single general context doc. Sub-project context goes in `context/*.md`, each linked below. |
 | 2026-10-02 | Old work was moved to `legacy_2025/`. GitHub repo `walk-the-program/NFLELO` (public) is restructured to match. Claude handles all git and GitHub work, committing to main. |
 | 2026-10-02 | Data: 1970-1998 from the legacy spreadsheet, 1999+ from nflverse. The overlap check matched 6,967 of 6,967 games. |
+| 2026-10-02 | Added the NFLELO demo site: a static page in `site/` fed by JSON from `scripts/export_site.py`, which `build.py` runs. It is not hosted yet; publishing it publicly on GitHub Pages needs Walker's OK. |
 | 2026-10-02 | Elo v2 default: K 20, λ 0.40, online HFA (init 65, k_hfa 0.5), expansion start 1300, no playoff updates. It ties the fixed-HFA-65 winner on the tune window and was chosen because fixed HFA can't track the decline in home-field advantage. |
 
 ## Context file index
 
 - `CONTEXT.md`: this file, for the general project.
 - `context/data-and-elo.md`: the data pipeline, franchise mapping, the Elo v2 config, and evaluation results.
-- Planned: `context/elo-site.md` and `context/ml.md`.
+- `context/elo-site.md`: the NFLELO one-page site (`site/`, data exported by `scripts/export_site.py`).
+- Planned: `context/ml.md`.
