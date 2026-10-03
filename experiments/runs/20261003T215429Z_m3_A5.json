@@ -1,0 +1,333 @@
+{
+  "name": "m3_A5",
+  "label": "dev",
+  "window": {
+    "seasons": [
+      2006,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 3450,
+  "games_hash": "52b8194df3a2ebf4",
+  "metrics": {
+    "n": 3450,
+    "brier": 0.2149842280234736,
+    "logloss": 0.6194239981243531,
+    "accuracy": 0.6501017146178436,
+    "ece": 0.008723155950773597
+  },
+  "features": [
+    "elo_logit",
+    "adj_epa_margin",
+    "qb_delta_home",
+    "qb_delta_away",
+    "rest_diff",
+    "neutral"
+  ],
+  "params": {
+    "ratings": {
+      "lam": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "qb": {
+      "k": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "rookie_dropbacks": 100,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "train_start": 2001,
+    "season_half_life": 8.0,
+    "ties": "two half-weight rows",
+    "elo_config": {
+      "start": 1500.0,
+      "k": 20.0,
+      "lam": 0.4,
+      "hfa_mode": "online",
+      "hfa": 55.0,
+      "hfa_init": 65.0,
+      "k_hfa": 0.5,
+      "hfa_mov": false,
+      "mov_mode": "winner",
+      "mov_cap": null,
+      "expansion_start": 1300.0,
+      "include_playoffs": false
+    },
+    "hfa": "Elo online HFA frozen before the week's first game",
+    "model": "logistic"
+  },
+  "data": {
+    "data/games.csv": "280f50e1ce727d5803cbeb9cef31a54f13eb11e941b0b00c1f57bb72c3028aa1",
+    "data/raw/ml/pbp/1999": "6263ca0dcafed4110f1da80be5126eedc2fba948b3de111dc2e8dd94165ce595",
+    "data/raw/ml/pbp/2000": "29a0904f123de7fe9c10ff07e7605bb29d753ff87f2026659605e60b2c0aa243",
+    "data/raw/ml/pbp/2001": "7b34b78901915ca98449190a1a911308275cc764eb3e565376c3d44667933dc1",
+    "data/raw/ml/pbp/2002": "46fe8b49e4f94e479cf8e5dbb87d90b577d76d0a503d6bf4f2191902f95391a2",
+    "data/raw/ml/pbp/2003": "c45fa61ddb3eba8c316f8c680362284ed01174728ca6e22bdfdba6083d5ec707",
+    "data/raw/ml/pbp/2004": "c95a80bffc740d438965320a6014f9cb839fa57e92e114b2783fc76d8acce653",
+    "data/raw/ml/pbp/2005": "c7e4b4984af805df9719a23004a967593e7d503025b1c301973606e0e4f7cc61",
+    "data/raw/ml/pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+    "data/raw/ml/pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+    "data/raw/ml/pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+    "data/raw/ml/pbp/2009": "5bfb6559343c04092d1ad66c1479782d085d9f390e6806be0a7ca7ec37124806",
+    "data/raw/ml/pbp/2010": "74ad605fea53c27afd00eee71c53b86b5cfbf7133d1a7b5b8f0067d817e55785",
+    "data/raw/ml/pbp/2011": "26727f9d2b0e4f9f616e746b87b9a29359f37a4b484f66f7312baf883d85e958",
+    "data/raw/ml/pbp/2012": "3277aded9792c419cc853cf307f2206c3fb0908d91750b4e1d3d66b567407c66",
+    "data/raw/ml/pbp/2013": "2a31a7cd0e7e2306f626a0f1f4bb96679e5b3e92a8729695858adca35d8b2686",
+    "data/raw/ml/pbp/2014": "c6910558e235dac664b1b7f02654d47ea8d51904ef9ace5d4f015165604e0b12",
+    "data/raw/ml/pbp/2015": "b3314a52b781a00417528b2e3388d2596098cdbe7b565d3c962d7171a98ae70f",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/1999": "b590c0c595ae702489068ed30d25460a1da2f129ce47c4143c8c28618fbb2749",
+    "data/raw/ml/schedules/2000": "d11ca64a246a9b9ce98beb15af6a337887f1a31658a1271d510ef62e094fd927",
+    "data/raw/ml/schedules/2001": "59deb3483354d8e24a55eef5e508f4824a3cdfff44936adea6d02af34c64fffd",
+    "data/raw/ml/schedules/2002": "b394de36fc6286647bdfa1a82383b0fec5f83a5e0aeaefc010336c72f1365545",
+    "data/raw/ml/schedules/2003": "70b3c8a10df7a205ee8bc446fa40dca4f7408f3900d063f1881860119de4834c",
+    "data/raw/ml/schedules/2004": "64d26bdf22af5736b507a04b82c73b17ded7765ad2940c02d880abbe5779d978",
+    "data/raw/ml/schedules/2005": "3535ab82c2c6b866d94623aba9f37eac3b7497fd5ff61898904e03420d80795a",
+    "data/raw/ml/schedules/2006": "04e8c1a0394137e8493db6bf228a75ab1e0e8104eca4056380c13168174fca98",
+    "data/raw/ml/schedules/2007": "ed35269017c5342a04e621717760da8ccdc68421f7a38685eaa355af90d875b2",
+    "data/raw/ml/schedules/2008": "76a274f12d0efbdc6220870e083597fe6669f33bf5f94d30ade9d11efbc3423d",
+    "data/raw/ml/schedules/2009": "b720c554d58f8e8bc4ef4fe3ada0528f1f4065bde6926395f5c4ed46f6c19579",
+    "data/raw/ml/schedules/2010": "c6eb6d6390b8808ab6fe7a1c177d45b2d31c4dc3f7b5ccf3a9ff525c9afe758f",
+    "data/raw/ml/schedules/2011": "367cd43a9a9499d875a00dc12d2476ea3bfabc36dfbb82399a695f5230618232",
+    "data/raw/ml/schedules/2012": "94fd313c6126390c47c936cc04c986ec6a2526cad776f078e61c8e740171ceb0",
+    "data/raw/ml/schedules/2013": "48b55301b46a4acc55b1263555b01d62475fce5196f943176cf5bb23b5b979b6",
+    "data/raw/ml/schedules/2014": "56c8544f26975a429dd1dcd67996b28cb3680c742c79c2367bfea1e35ae93940",
+    "data/raw/ml/schedules/2015": "68c3bf6df90e969fe80aa46eb3351ad624e5e7c3f85c664644811508bbb647c3",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56"
+  },
+  "git": {
+    "sha": "6c4e0eaabab0339179ff76c87444b04e4dbee207",
+    "dirty": false
+  },
+  "timestamp": "2026-10-03T21:54:29+00:00",
+  "notes": "",
+  "comparisons": {
+    "vs_elo_brier": {
+      "n": 3450,
+      "diff": -0.0028330134573182914,
+      "ci_low": -0.004596752210722278,
+      "ci_high": -0.001108199397458669,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.0008781249457384477,
+      "metric": "brier"
+    },
+    "vs_elo_logloss": {
+      "n": 3450,
+      "diff": -0.006099888986550141,
+      "ci_low": -0.010092494535809618,
+      "ci_high": -0.002216426272317862,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.0019643606609591694,
+      "metric": "logloss"
+    },
+    "vs_market_brier": {
+      "n": 3450,
+      "diff": 0.004385995318711549,
+      "ci_low": 0.0019496431835864677,
+      "ci_high": 0.00691143921423169,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.0012931644856278692,
+      "metric": "brier"
+    },
+    "vs_best_brier": {
+      "n": 3450,
+      "diff": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.0,
+      "metric": "brier"
+    }
+  },
+  "one_se": {
+    "best": "A5",
+    "within": true,
+    "chosen": false,
+    "eligible": [
+      "A4",
+      "A4s",
+      "A5"
+    ]
+  },
+  "coefficients": [
+    {
+      "season": 2006,
+      "n_train": 1272,
+      "intercept": 0.08636648947370809,
+      "elo_logit": 0.7206795749813067,
+      "adj_epa_margin": 1.4487557676236742,
+      "qb_delta_home": 2.5615495235417125,
+      "qb_delta_away": -3.497361289930565,
+      "rest_diff": 0.0020047782987330726,
+      "neutral": 0.6034738852806029
+    },
+    {
+      "season": 2007,
+      "n_train": 1528,
+      "intercept": 0.03801455914592116,
+      "elo_logit": 0.704975185106991,
+      "adj_epa_margin": 1.271894779721193,
+      "qb_delta_home": 2.4201248701680385,
+      "qb_delta_away": -3.6821929729137577,
+      "rest_diff": 0.01384324566534635,
+      "neutral": 0.6367118623887389
+    },
+    {
+      "season": 2008,
+      "n_train": 1784,
+      "intercept": 0.03721941040425221,
+      "elo_logit": 0.7340268382583421,
+      "adj_epa_margin": 1.3305551635829753,
+      "qb_delta_home": 3.2671361827726466,
+      "qb_delta_away": -3.0792669353858075,
+      "rest_diff": 0.03106530626851459,
+      "neutral": -0.015081205217905956
+    },
+    {
+      "season": 2009,
+      "n_train": 2040,
+      "intercept": 0.05170281700948357,
+      "elo_logit": 0.7162242524075301,
+      "adj_epa_margin": 1.5594578535351575,
+      "qb_delta_home": 3.50138677039242,
+      "qb_delta_away": -3.5092785646251157,
+      "rest_diff": 0.043508457748960984,
+      "neutral": 0.20047475147101393
+    },
+    {
+      "season": 2010,
+      "n_train": 2296,
+      "intercept": 0.05972666409116162,
+      "elo_logit": 0.7147927006454632,
+      "adj_epa_margin": 1.693310467726129,
+      "qb_delta_home": 3.365133080443823,
+      "qb_delta_away": -3.4071255669245133,
+      "rest_diff": 0.037109665434284206,
+      "neutral": -0.011102967081875033
+    },
+    {
+      "season": 2011,
+      "n_train": 2552,
+      "intercept": 0.07494255480723981,
+      "elo_logit": 0.6508410740646946,
+      "adj_epa_margin": 1.8885001320263373,
+      "qb_delta_home": 2.8006642752524273,
+      "qb_delta_away": -2.7405910441989607,
+      "rest_diff": 0.04778271100752006,
+      "neutral": 0.0069012296286531175
+    },
+    {
+      "season": 2012,
+      "n_train": 2808,
+      "intercept": 0.07831329196258079,
+      "elo_logit": 0.6485644075491337,
+      "adj_epa_margin": 2.0423661589745965,
+      "qb_delta_home": 3.1717224292887702,
+      "qb_delta_away": -2.4982512669151915,
+      "rest_diff": 0.04063528179281182,
+      "neutral": -0.3055025570607739
+    },
+    {
+      "season": 2013,
+      "n_train": 3064,
+      "intercept": 0.09684393796422554,
+      "elo_logit": 0.6126623777102399,
+      "adj_epa_margin": 2.2636329867735188,
+      "qb_delta_home": 3.2561540464400047,
+      "qb_delta_away": -2.6195362734866556,
+      "rest_diff": 0.0370955584938883,
+      "neutral": -0.44837933348029513
+    },
+    {
+      "season": 2014,
+      "n_train": 3320,
+      "intercept": 0.07790337247976885,
+      "elo_logit": 0.7187390890140164,
+      "adj_epa_margin": 1.7210999814105805,
+      "qb_delta_home": 3.9676059399786845,
+      "qb_delta_away": -2.6247796975664084,
+      "rest_diff": 0.03521782158320223,
+      "neutral": -0.3782060528653184
+    },
+    {
+      "season": 2015,
+      "n_train": 3576,
+      "intercept": 0.059799456173539677,
+      "elo_logit": 0.7704584481085959,
+      "adj_epa_margin": 1.5500442719599503,
+      "qb_delta_home": 3.9066795034434407,
+      "qb_delta_away": -2.5910769247966217,
+      "rest_diff": 0.022056603238587668,
+      "neutral": -0.3909177170129981
+    },
+    {
+      "season": 2016,
+      "n_train": 3832,
+      "intercept": 0.03446495558904371,
+      "elo_logit": 0.8017701544087918,
+      "adj_epa_margin": 1.2890166782267198,
+      "qb_delta_home": 3.89416750093064,
+      "qb_delta_away": -2.668897804210515,
+      "rest_diff": 0.026044688809536507,
+      "neutral": -0.07758563224655267
+    },
+    {
+      "season": 2017,
+      "n_train": 4088,
+      "intercept": 0.0194941040692279,
+      "elo_logit": 0.8723529220092947,
+      "adj_epa_margin": 0.8913384428249599,
+      "qb_delta_home": 3.925355352660677,
+      "qb_delta_away": -2.649575200757909,
+      "rest_diff": 0.03167861035941186,
+      "neutral": 0.08224690514390341
+    },
+    {
+      "season": 2018,
+      "n_train": 4344,
+      "intercept": 0.03170983740053286,
+      "elo_logit": 0.8502058331321226,
+      "adj_epa_margin": 1.093725337761526,
+      "qb_delta_home": 4.339769149173633,
+      "qb_delta_away": -3.0805375190690163,
+      "rest_diff": 0.026639605806461204,
+      "neutral": 0.11990972142414283
+    },
+    {
+      "season": 2019,
+      "n_train": 4600,
+      "intercept": 0.046755979280773845,
+      "elo_logit": 0.8437378897722515,
+      "adj_epa_margin": 1.0999546627529186,
+      "qb_delta_home": 4.737727887572887,
+      "qb_delta_away": -2.2908482345076253,
+      "rest_diff": 0.028822066561630603,
+      "neutral": 0.008737728278808383
+    }
+  ],
+  "timing": null
+}
