@@ -2,7 +2,7 @@
 
 Written 2026-10-03, for Walker to read and approve before anything is built. It covers what the model is, the math behind each piece, how we'll test it without fooling ourselves, and the three decisions that are yours (section 9). Read `context/ml.md` first for the overall plan.
 
-Status: **draft, awaiting Walker's decisions.**
+Status: **approved 2026-10-03** (M3-D1 (a), M3-D2 yes, M3-D3 yes). Build in progress.
 
 ---
 
@@ -214,7 +214,7 @@ All of it is built by an Opus agent, then reviewed by me before it's committed.
 
 ---
 
-## 9. Decisions for Walker
+## 9. Decisions for Walker (all decided 2026-10-03: D1 (a), D2 yes, D3 yes)
 
 - **M3-D1. When is the starting QB "known"?**
   - **(a)** Treat the starter's identity as a pre-game fact, the one exception to the week-start rule. The market prices it too, and for the live site we'd refresh predictions once starters are announced. A4b still measures how much of the gain needs that late information.
