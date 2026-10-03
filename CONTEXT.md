@@ -99,6 +99,7 @@ No machine learning code exists yet; the grep came back empty. The ML work start
 | 2026-10-02 | Data licensing: the legacy spreadsheet came from Pro-Football-Reference, whose terms restrict substitute databases and ML use. 1970-1998 now comes from FiveThirtyEight's NFL Elo game file (CC BY 4.0), vendored in `data/sources/`, REG and playoffs. It matches the legacy spreadsheet on 6,140 of 6,140 REG games and nflverse on 6,151 of 6,151 (1999-2022). Ratings and test Brier (0.2201) are unchanged; `DEFAULT_CONFIG` kept after a re-tune. |
 | 2026-10-02 | Added the NFLELO demo site: a static page in `site/` fed by JSON from `scripts/export_site.py`, which `build.py` runs. It is not hosted yet; publishing it publicly on GitHub Pages needs Walker's OK. |
 | 2026-10-02 | Elo v2 default: K 20, λ 0.40, online HFA (init 65, k_hfa 0.5), expansion start 1300, no playoff updates. It ties the fixed-HFA-65 winner on the tune window and was chosen because fixed HFA can't track the decline in home-field advantage. |
+| 2026-10-03 | Removed Pro-Football-Reference-derived game data (`legacy_2025/NFLELO_data.xlsx`, both `comprehensive_nfl_data.csv` exports, and the original root `NFLELO_data.xlsx`) from the public repo and its entire git history, with Walker's approval. The files stay local and are gitignored. Old commit SHAs may stay reachable by direct link on GitHub until GitHub support purges its cache. |
 
 ## Context file index
 
