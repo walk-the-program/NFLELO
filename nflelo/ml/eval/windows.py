@@ -7,6 +7,9 @@
 - REPRODUCTION, 2010-2025: the Elo v2 test window from `nflelo.config`, used
   only to prove the harness reproduces the known Elo and market numbers. It
   overlaps the holdout, so it needs `allow_holdout=True` too.
+- TUNE, 2000-2005: where the M3 rating knobs are tuned (decision M3-D2), on
+  next-week EPA rather than game outcomes. Runs labelled "tune" carry a tuning
+  loss, not a Brier.
 """
 from __future__ import annotations
 
@@ -17,8 +20,9 @@ from ... import config
 DEV = (2006, 2019)
 HOLDOUT = (2020, 2025)
 REPRODUCTION = tuple(config.TEST_SEASONS)
+TUNE = (2000, 2005)
 
-LABELS = {"dev": DEV, "holdout": HOLDOUT, "reproduction": REPRODUCTION}
+LABELS = {"dev": DEV, "holdout": HOLDOUT, "reproduction": REPRODUCTION, "tune": TUNE}
 
 
 class HoldoutError(RuntimeError):

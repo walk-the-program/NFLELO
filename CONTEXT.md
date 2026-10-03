@@ -2,7 +2,7 @@
 
 This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
 
-Last updated: 2026-10-03 (ML M1 and M2 built)
+Last updated: 2026-10-03 (ML M3 built)
 
 ## What this project is
 
@@ -30,7 +30,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | `README.md` | Usage notes for the legacy script. |
 | `Other/` | Word drafts. Kept out of git because the repo is public. |
 
-**ML foundations (M1 and M2, built 2026-10-03).** `nflelo/ml/` caches nflverse play-by-play for 1999-2025 into the gitignored `data/raw/ml/`, builds leak-proof team-efficiency features, and scores models in a walk-forward harness with a locked 2020-2025 holdout. Runs are logged to `experiments/runs/`. No predictive ML model has been trained yet; that is M3. Details are in `context/ml.md`.
+**ML foundations (M1 and M2, built 2026-10-03).** `nflelo/ml/` caches nflverse play-by-play for 1999-2025 into the gitignored `data/raw/ml/`, builds leak-proof team-efficiency features, and scores models in a walk-forward harness with a locked 2020-2025 holdout. Runs are logged to `experiments/runs/`. **M3 game model (built 2026-10-03, passes on DEV, holdout not yet run).** Logistic regression on Elo log-odds, opponent-adjusted EPA margin, and a starting-QB delta. DEV 2006-2019 Brier 0.2151 vs Elo 0.2178 (CI excludes zero). Details are in `context/ml.md`.
 
 ### Legacy Elo model (2025)
 
@@ -103,6 +103,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-03 | ML plan written in `context/ml.md`. The ML work happens in its own chat, built together with Walker: game model first, and personnel models later under CC BY-SA. |
 | 2026-10-03 | ML decisions D2-D6 (see `context/ml.md`): 2020-2025 holdout locked; pure model only, with betting lines as a benchmark and never a feature; walkthrough notebooks; ML packages in `requirements-ml.txt`. M1 and M2 start together. |
 | 2026-10-03 | ML M1 and M2 done. The harness reproduces Elo v2 (0.220075) and the market (0.210426) exactly on 2010-2025. On DEV 2006-2019 (3,450 games), Elo minus the market is +0.0072 Brier (95% CI +0.0044 to +0.0101). Every ML agent runs on Opus, at Walker's request. |
+| 2026-10-03 | ML M3 passes on DEV 2006-2019 (3,450 games). Chosen model A4s, by the one-SE rule: logistic regression on elo_logit, adj_epa_margin, and qb_delta_diff. Brier 0.2151 vs Elo 0.2178, a difference of -0.0027 (95% CI -0.0043 to -0.0011), ECE 0.011. Market 0.2106. Nearly all of the gain is the QB term, and it needs the confirmed starter: the Wednesday-only version is not significant. Tuned on 2000-2005: lambda 100, half-life 48 weeks, rho 0.25, QB k 100. The home/away QB asymmetry was checked and is noise in the data, not a bug. The holdout run awaits Walker's OK. |
 
 ## Context file index
 

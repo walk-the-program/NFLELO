@@ -85,13 +85,21 @@ def games_before(games: pd.DataFrame, as_of) -> pd.DataFrame:
 # Numeric play-level columns that carry outcome information and get scrambled.
 _PLAY_NOISE_COLS = ("epa", "wp", "success", "yards_gained", "wpa")
 _SCHED_NOISE_COLS = ("home_score", "away_score", "result", "total")
+# Who threw the ball on late plays is outcome information too; shuffled among late plays.
+_PLAY_ID_COLS = ("passer_id", "passer_player_id")
+# The schedule's starting QBs. Kept by default: decision M3-D1 treats the starter's
+# identity as known before kickoff. `scramble_starters=True` removes that exception.
+_STARTER_COLS = ("home_qb_id", "away_qb_id")
 
 
-def corrupt_from(pbp: pd.DataFrame, sched: pd.DataFrame, as_of, seed: int = 0) -> tuple[pd.DataFrame, pd.DataFrame]:
+def corrupt_from(pbp: pd.DataFrame, sched: pd.DataFrame, as_of, seed: int = 0,
+                 scramble_starters: bool = False) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Copies of (pbp, sched) with everything from games kicking off at or after `as_of` scrambled.
 
     Play outcomes (EPA, win probability, success, yards) are replaced with
-    noise, pass and run labels are shuffled, and scores are randomized. Games
+    noise, pass and run labels are shuffled, passer IDs are shuffled among the
+    late plays, and scores are randomized. With `scramble_starters`, the
+    schedule's starting-QB IDs of late games are shuffled as well. Games
     before `as_of` are untouched. `sched` must have a `kickoff` column.
     """
     rng = np.random.default_rng(seed)
@@ -120,23 +128,35 @@ def corrupt_from(pbp: pd.DataFrame, sched: pd.DataFrame, as_of, seed: int = 0) -
             p.loc[m, "pass"] = (p.loc[m, "play_type"] == "pass").astype(float).to_numpy()
         if "rush" in p.columns:
             p.loc[m, "rush"] = (p.loc[m, "play_type"] == "run").astype(float).to_numpy()
+        for c in _PLAY_ID_COLS:
+            if c in p.columns:
+                p[c] = p[c].astype(object)
+                p.loc[m, c] = rng.permutation(p.loc[m, c].to_numpy(object))
     s = sched.copy()
     sm = s["game_id"].isin(late_games).to_numpy()
     for c in _SCHED_NOISE_COLS:
         if c in s.columns and sm.any():
             s[c] = s[c].astype(float)
             s.loc[sm, c] = rng.integers(0, 60, int(sm.sum())).astype(float)
+    if scramble_starters and sm.any():
+        cols = [c for c in _STARTER_COLS if c in s.columns]
+        if cols:
+            pool = rng.permutation(np.concatenate([s.loc[sm, c].to_numpy(object) for c in cols]))
+            for i, c in enumerate(cols):
+                s[c] = s[c].astype(object)
+                s.loc[sm, c] = pool[i * int(sm.sum()):(i + 1) * int(sm.sum())]
     return p, s
 
 
 def leakage_check(builder: Callable[..., pd.DataFrame], pbp: pd.DataFrame, sched: pd.DataFrame,
-                  game_ids, seed: int = 0) -> pd.DataFrame:
+                  game_ids, seed: int = 0, scramble_starters: bool = False) -> pd.DataFrame:
     """For each game, rebuild features after corrupting all data at or after its as_of.
 
     `builder(pbp, sched, games)` must return a frame indexed by game_id. Returns
     one row per game: game_id, as_of, the number of feature values that
     changed, and `leak_free` (True when nothing changed). An honest builder is
-    leak-free for every game.
+    leak-free for every game. Starting-QB IDs are kept unless
+    `scramble_starters` (see `corrupt_from` and decision M3-D1).
     """
     if "as_of" not in sched.columns:
         sched = add_asof(sched)
@@ -147,7 +167,7 @@ def leakage_check(builder: Callable[..., pd.DataFrame], pbp: pd.DataFrame, sched
             raise ValueError(f"game {gid!r} is not in the schedule exactly once")
         as_of = game["as_of"].iloc[0]
         clean = builder(pbp, sched, game).loc[[gid]]
-        p2, s2 = corrupt_from(pbp, sched, as_of, seed)
+        p2, s2 = corrupt_from(pbp, sched, as_of, seed, scramble_starters)
         dirty = builder(p2, s2, s2[s2["game_id"] == gid]).loc[[gid]]
         a, b = clean.to_numpy(float), dirty.loc[:, clean.columns].to_numpy(float)
         same = np.isclose(a, b, rtol=0, atol=1e-12) | (np.isnan(a) & np.isnan(b))

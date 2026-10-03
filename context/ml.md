@@ -2,7 +2,7 @@
 
 This is the ML sub-project's context file. Read `CONTEXT.md` first, then this file. It is both the plan and the living record: when a decision gets made or a milestone is finished, update the status table and the decision log at the bottom.
 
-Written 2026-10-03. Status: plan drafted, D1-D6 decided, M1 and M2 in progress. Current scope: Stage A (M1-M4) and M5a, all on CC BY data.
+Written 2026-10-03. Status: plan drafted, D1-D6 decided, M1 and M2 built, M3 built on DEV (holdout pending). Current scope: Stage A (M1-M4) and M5a, all on CC BY data.
 
 ---
 
@@ -291,7 +291,7 @@ No paid APIs, no cloud.
 |---|---|---|---|
 | M1 | Data layer and leak-proof features | none | Built 2026-10-03, awaiting Walker's review |
 | M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Built 2026-10-03 (reproduces both exactly), awaiting Walker's review |
-| M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | Not started |
+| M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | Built 2026-10-03. Passes on DEV (A4s: -0.0027 Brier vs Elo, CI excludes 0, ECE 0.011). Holdout run waits for Walker's OK |
 | M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Not started |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Not started |
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Not started |
@@ -329,6 +329,54 @@ No paid APIs, no cloud.
 - Registry runs record the git commit and a dirty flag. The first runs were logged before this code was committed.
 
 ---
+
+### M3 build notes (2026-10-03)
+
+**Where things are.** `nflelo/ml/features/opponent_adjust.py` (weighted ridge ratings per (season, week), cached in `data/raw/ml/ratings/`), `features/qb.py` (QB value, replacement prior, `qb_delta`), `features/context.py` (`rest_diff`, `neutral`, and the `elo_logit` feature), `models/logistic.py` (walk-forward fit, ties as two half rows, season-decay weights). Scripts: `scripts/ml_tune_ratings.py` and `scripts/ml_m3.py`. Walkthroughs: `notebooks/02_opponent_adjusted_epa.ipynb` and `notebooks/03_m3_results.ipynb`. Tests: `tests/ml/test_m3_features.py` and `tests/ml/test_m3_models.py`.
+
+**Small edits to existing modules.** `asof.corrupt_from` now also shuffles passer IDs on late plays, and takes `scramble_starters` (default off, because M3-D1 treats the starter's identity as known); `leakage_check` passes it through. `eval/windows.py` gained a `tune` label (2000-2005) for the tuning run. The synthetic test frames gained `location`, rest days, starting-QB IDs, `qb_dropback`, `passer_id`, and `play_id`, drawn from separate random streams so the M1 values are unchanged.
+
+**Implementation choices worth knowing.**
+- The ridge fit runs on one row per (game, offense) with weight w x plays. That gives exactly the same answer as the play-level fit (a test checks it) and takes about 1 ms per week.
+- `weeks_ago` counts game weeks on a timeline that skips the off-season; the most recent week has weight 1. Only this season and last season enter a team fit. QB values use the same weights over the QB's whole recorded career.
+- The QB is `passer_id` on `qb_dropback` plays (passes, sacks, scrambles). Replacement level for season S pools the first 100 career dropbacks of QBs who debuted after 1999, from seasons before S.
+- `elo_logit` uses Elo v2's pre-game ratings and the online HFA frozen before the week's first game.
+- The A1 raw margin is (home off + away def allowed) minus (away off + home def allowed), from the M1 features.
+
+**Tuning (M3-D2), 2000-2005 only.** 400 settings (lambda 25-3200, half-life 2-1000 weeks, rho 0.1-1). Chosen: **lambda 100, half-life 48 weeks, rho 0.25**, all interior to the grid (half-life is flat from about 12 weeks up). Next-week EPA-margin MSE 0.1304 vs 0.1482 for predicting zero (correlation 0.35, 1,518 games). QB **k = 100** pseudo-dropbacks (grid 25-3200; 3,036 starter-games). Lambda 100 implies a prior spread of team ratings of about 0.14 EPA per play. Run time 28 s.
+
+**Ladder, DEV 2006-2019, 3,450 REG games with moneylines** (paired bootstrap vs Elo, 2,000 reps, seed 20261003):
+
+| Step | Model | Brier | Log loss | Acc | ECE | vs Elo [95% CI] |
+|---|---|---|---|---|---|---|
+| | Elo v2 | 0.2178 | 0.6255 | 0.641 | 0.015 | |
+| A0 | elo_logit | 0.2178 | 0.6257 | 0.645 | 0.018 | +0.0000 [-0.0003, +0.0003] |
+| A1 | + raw EPA margin | 0.2180 | 0.6260 | 0.645 | 0.017 | +0.0001 [-0.0002, +0.0005] |
+| A2 | + adjusted EPA margin | 0.2177 | 0.6254 | 0.644 | 0.012 | -0.0002 [-0.0008, +0.0005] |
+| A3 | + adjusted pass and rush margins | 0.2180 | 0.6262 | 0.639 | 0.016 | +0.0002 [-0.0006, +0.0010] |
+| A4 | A2 + QB deltas, home and away (actual starter) | 0.2150 | 0.6195 | 0.647 | 0.012 | -0.0028 [-0.0045, -0.0011] |
+| **A4s** | **A2 + qb_delta_diff (home minus away; actual starter)** | **0.2151** | **0.6197** | **0.647** | **0.011** | **-0.0027 [-0.0043, -0.0011]** |
+| A4b | A2 + QB deltas, home and away (last game's starter) | 0.2171 | 0.6244 | 0.647 | 0.011 | -0.0007 [-0.0018, +0.0005] |
+| A4bs | A2 + qb_delta_diff (last game's starter) | 0.2172 | 0.6244 | 0.643 | 0.012 | -0.0006 [-0.0016, +0.0004] |
+| A5 | A4 + rest_diff + neutral | 0.2150 | 0.6194 | 0.650 | 0.009 | -0.0028 [-0.0046, -0.0011] |
+| A6 | boosted trees on A5 features | 0.2172 | 0.6253 | 0.652 | 0.020 | -0.0006 [-0.0032, +0.0020] |
+| | Market (benchmark) | 0.2106 | 0.6096 | 0.663 | 0.018 | |
+
+- A0 reproduces Elo (0.21783 vs 0.21782). No step scored below 0.213, the leak alarm.
+- One-SE rule (M3-D3): the best is A5 (0.21498). Within one SE: A4 (+0.00001, SE 0.0003), A4s (+0.00010, SE 0.0003), and A5. **A4s (3 features) is chosen**, and it passes the M3 bar on DEV. (Before A4s was added, the pick was A4.)
+- A4s coefficients, 2019 refit (trained 2001-2018; range over the 14 refits): intercept +0.048 [+0.021, +0.092], elo_logit +0.84 [+0.62, +0.87], adj_epa_margin +1.09 [+0.87, +2.21], qb_delta_diff +3.61 [+2.74, +3.76]. Every refit has the expected sign. In words: a backup 0.15 EPA per dropback worse than the QB play the team's rating remembers moves the game 0.54 log-odds against his team (60% to about 46% at home).
+- Home/away QB asymmetry in A4 (2019 fit: home +4.74, away -2.31) is **data, not a bug**. On DEV the two deltas have the same distribution (mean 0.0015 vs 0.0019, SD 0.046 vs 0.043, nonzero 91% vs 90%, starter changed 10.5% vs 10.2%). The code computes both sides identically: each side's own franchise's dropbacks feed its "remembered" value, there are no home/away swaps, and neutral sites don't enter the QB term. The schedule's `home_qb_id` is the home team's main passer in 97.0% of DEV games and the away team's in 0.0% (away: 97.7% and 0.0%). The asymmetry is in the outcomes: in the 128 games with a home delta below -0.1, the home team won 34.8% against 58.9% predicted without the QB term (-24 points); in the 127 with an away delta below -0.1, it won 66.9% against 57.8% (+9 points). The market moves about the same both ways (-12 and +10 points), so this is most likely sampling noise. A4s minus A4 is +0.00009 [-0.00016, +0.00034].
+- What the QB news is worth: A4s minus A4bs is -0.0021 [-0.0033, -0.0010] (A4 minus A4b: -0.0021 [-0.0035, -0.0008]). The gain sits in the 664 games where the starter differs from the team's previous game (Brier 0.226 to 0.215); when the starter is unchanged, the two score about the same. With Wednesday information only (A4b, A4bs), the gain over Elo is not significant.
+- Team efficiency adds almost nothing once Elo is in the model (A2 vs A0: -0.0002). Elo and the adjusted margin correlate 0.90.
+
+**Timing.** Tuning 28 s. Full ladder (load, all features, 10 walk-forward steps with bootstraps) about 19 s; ratings are cached, but a cold build adds under 1 s. One weekly update (2019 week 10: Elo, ratings, QB values, predict 13 games) 0.6 s; the once-a-season refit is a few milliseconds.
+
+**Caveats and open items.**
+- Holdout (2020-2025) not run. Pre-registered in `context/ml-m3-method.md` section 6; waits for Walker's OK.
+- A6 used scikit-learn's `HistGradientBoostingClassifier` (same monotonic constraints, fixed untuned settings) as a stand-in for LightGBM, which can't load here because its `libomp.dylib` is missing. The stand-in is accepted for M3; LightGBM is not being pursued.
+- Pass and rush ratings (A3) reuse the combined fit's knobs; they were not tuned separately.
+- The registry runs were logged from an uncommitted working tree (`git.dirty` true). Re-log after committing, as was done for M2.
+- The `starter="last"` rule uses the previous game's starter even across the off-season, so week 1 counts as a "changed starter" whenever last season's finale had a different QB.
 
 ## 10. Open decisions for Walker (start the ML chat here)
 
