@@ -5,3 +5,8 @@ __pycache__/
 .pytest_cache/
 data/raw/
 legacy_2025/Other/
+
+# Pro-Football-Reference-derived game data: kept locally, not published
+legacy_2025/NFLELO_data.xlsx
+legacy_2025/Outputs/comprehensive_nfl_data.csv
+legacy_2025/Outputs_Addendum/comprehensive_nfl_data.csv
