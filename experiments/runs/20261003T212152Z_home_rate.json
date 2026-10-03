@@ -1,0 +1,34 @@
+{
+  "name": "home_rate",
+  "label": "dev",
+  "window": {
+    "seasons": [
+      2006,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 3450,
+  "games_hash": "52b8194df3a2ebf4",
+  "metrics": {
+    "n": 3450,
+    "brier": 0.24513722001561072,
+    "logloss": 0.6847073381335214,
+    "accuracy": 0.5661145015983726,
+    "ece": 0.0069334146357192825
+  },
+  "features": [],
+  "params": {
+    "lookback_seasons": 10
+  },
+  "data": {
+    "data/games.csv": "280f50e1ce727d5803cbeb9cef31a54f13eb11e941b0b00c1f57bb72c3028aa1"
+  },
+  "git": {
+    "sha": "1157ad303b4392e51ebe065851ada9f0486f228c",
+    "dirty": true
+  },
+  "timestamp": "2026-10-03T21:21:52+00:00",
+  "notes": "Constant home-win rate (ties 0.5) from REG games of the 10 seasons before each season."
+}

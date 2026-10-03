@@ -1,0 +1,61 @@
+{
+  "name": "elo_v2",
+  "label": "dev",
+  "window": {
+    "seasons": [
+      2006,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 3450,
+  "games_hash": "52b8194df3a2ebf4",
+  "metrics": {
+    "n": 3450,
+    "brier": 0.2178172414807919,
+    "logloss": 0.6255238871109031,
+    "accuracy": 0.6410927056088347,
+    "ece": 0.015355587771890602
+  },
+  "features": [],
+  "params": {
+    "elo_config": {
+      "start": 1500.0,
+      "k": 20.0,
+      "lam": 0.4,
+      "hfa_mode": "online",
+      "hfa": 55.0,
+      "hfa_init": 65.0,
+      "k_hfa": 0.5,
+      "hfa_mov": false,
+      "mov_mode": "winner",
+      "mov_cap": null,
+      "expansion_start": 1300.0,
+      "include_playoffs": false
+    }
+  },
+  "data": {
+    "data/games.csv": "280f50e1ce727d5803cbeb9cef31a54f13eb11e941b0b00c1f57bb72c3028aa1"
+  },
+  "git": {
+    "sha": "1157ad303b4392e51ebe065851ada9f0486f228c",
+    "dirty": true
+  },
+  "timestamp": "2026-10-03T21:21:52+00:00",
+  "notes": "Elo v2 DEFAULT_CONFIG pre-game p_home. Its parameters were tuned on 1980-2009, so 2006-2009 are in-sample for Elo (slightly optimistic on DEV).",
+  "comparisons": {
+    "vs_market_brier": {
+      "n": 3450,
+      "diff": 0.00721900877602984,
+      "ci_low": 0.00437378554487835,
+      "ci_high": 0.010058484034211855,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.0014548485955047316,
+      "metric": "brier"
+    }
+  }
+}
