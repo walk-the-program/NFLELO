@@ -88,6 +88,12 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 
 - Will the site ever charge money or run ads? The answer decides whether FTN data is usable and how careful we need to be with licensing.
 
+## Parked until Walker picks them back up (2026-10-04)
+
+- **Hosting.** Recommended: Cloudflare Pages, connected to the repo, publishing `site/` with no build step. Walker creates the Cloudflare account and picks the domain; Claude does the rest.
+- **GitHub cache purge.** The support request is drafted in `context/pending/github-purge-request.txt` and needs Walker's signed-in Chrome to submit.
+- **M5 method write-up** (pregame-lineup player values), built on `context/m5-data-scope.md`.
+
 ## Decision log
 
 | Date | Decision |

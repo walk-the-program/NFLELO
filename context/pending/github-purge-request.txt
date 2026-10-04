@@ -1,0 +1,31 @@
+Subject: Remove cached views and unreferenced commits after history rewrite (walk-the-program/NFLELO)
+
+Hello GitHub Support,
+
+I rewrote the history of my public repository walk-the-program/NFLELO on 2026-10-03 (force-push to main at 14:43 UTC, before a4233624a23457b86f817433ab9fe19c739604bd, after dc9cea1df5bd) to remove third-party data files that I am not licensed to publish:
+- NFLELO_data.xlsx (repo root and legacy_2025/)
+- legacy_2025/Outputs/comprehensive_nfl_data.csv
+- legacy_2025/Outputs_Addendum/comprehensive_nfl_data.csv
+
+None of the current commits on main contain these files, but the old commits are still reachable by direct URL (for example https://github.com/walk-the-program/NFLELO/commit/596daea815b7970aac20e6673c95fb4cec3efca0).
+
+Please remove cached views and run garbage collection on the unreferenced commits. The repository has no forks, no pull requests, and no other branches. The 17 orphaned commits from the old history are:
+a4233624a23457b86f817433ab9fe19c739604bd
+1e3966767232d87932de6411c0471724453d526b
+d51a4e5b50481121b8bf37c9d6022edc8c5cb7d3
+45fd11c73cecf6a73a1710d1bdfe775d56806944
+89f20ef54aeb024bce22c9d83e7187f446e22df6
+42e5a5533032a04946dff239cf045bbe6d533113
+e5598cca4ed26bb35d718e08742c2da2a948e8fb
+144054aee9430cbb07aaaeec282a84c815dbf9b0
+6faed9d52a6f85087668e3fd4294a3c038f27eea
+824937f198197db9e9ce8a943ba1d193f1f21a44
+57acea1d7524f3a2d57e002a814d318c3191adb6
+bcc44badc09e6247939a1ce0700b58338252d6e2
+596daea815b7970aac20e6673c95fb4cec3efca0
+b2aa72d4d80993c623349bb879ee6648c82c24a7
+ddbf214360d68408bf2e44031deb98c7426e25da
+5bd901a34180d24be9c567b73d775dc7ef74d295
+b0c8d2ba7a3b71db351f5c8e0ddc4fdb84037347
+
+Thank you.
