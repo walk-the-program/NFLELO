@@ -87,7 +87,6 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 ## Open questions for Walker
 
 - Will the site ever charge money or run ads? The answer decides whether FTN data is usable and how careful we need to be with licensing.
-- Site name and domain. "NFLELO" is the working name for the demo. Before a public or commercial launch, consider a name without "NFL" (trademark).
 
 ## Decision log
 
@@ -106,6 +105,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-03 | ML M3 passes on DEV 2006-2019 (3,450 games). Chosen model A4s, by the one-SE rule: logistic regression on elo_logit, adj_epa_margin, and qb_delta_diff. Brier 0.2151 vs Elo 0.2178, a difference of -0.0027 (95% CI -0.0043 to -0.0011), ECE 0.011. Market 0.2106. Nearly all of the gain is the QB term, and it needs the confirmed starter: the Wednesday-only version is not significant. Tuned on 2000-2005: lambda 100, half-life 48 weeks, rho 0.25, QB k 100. The home/away QB asymmetry was checked and is noise in the data, not a bug. The holdout run awaits Walker's OK. |
 | 2026-10-03 | M3 holdout sign-off, run once with Walker's OK (2020-2025 REG, n 1,615). A4s Brier 0.2195 vs Elo 0.2231, a difference of -0.0035 (95% CI -0.0063 to -0.0007); market 0.2096. A4s beat Elo in every season. ECE 0.028 misses the pre-registered 0.02 bar. A simulation found that a perfectly calibrated model at n 1,615 has a median ECE of 0.024 (5th-95th percentile 0.014 to 0.038), so the bar was too tight for this sample size; Elo (0.040) and the market (0.025) also exceed it. The verdict on the calibration criterion is Walker's. Nothing was retuned. |
 | 2026-10-04 | Walker marked M3 passed. The 0.02 ECE bar is recorded as a flawed criterion (too tight for n 1,615), not quietly moved. The model was not recalibrated after seeing the holdout. From M4 on, the calibration check is sample-size-aware: ECE is compared with the distribution a perfectly calibrated model would produce at the same n. M4 started. |
+| 2026-10-04 | The name stays NFLELO, with "NFL" kept on purpose (Walker). The site will be public, hosted by Walker alongside his other websites, not on GitHub Pages. Claude owns everything on GitHub, including the support request to purge the cached pre-rewrite commits (17 orphaned commits ending at a4233624; three of them added the removed files). |
 
 ## Context file index
 
