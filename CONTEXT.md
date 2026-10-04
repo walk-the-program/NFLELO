@@ -116,3 +116,4 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 - `context/ml.md`: the machine learning plan and living record (game model, then player value, play model, and personnel decision support), with milestones M1-M7 and open decisions.
 - `context/ml-m3-method.md`: the M3 game-model method (logistic regression on Elo, opponent-adjusted EPA, and a QB adjustment) and decisions M3-D1 to M3-D3 (approved 2026-10-03).
 - `context/ml-m4-method.md`: the M4 method (live predictions, prediction ledger, margin model, playoff odds) and decisions M4-D1 to M4-D4 (all decided 2026-10-04).
+- `context/m5-data-scope.md`: what free data can support pregame-lineup player values (sources, depth-chart accuracy, injury-report reliability, OL sample sizes, risks).
