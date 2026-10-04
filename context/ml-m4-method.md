@@ -2,7 +2,7 @@
 
 Written 2026-10-04, for Walker to read and approve before anything is built. Read `context/ml-m3-method.md` first. M4 takes the M3 model (A4s), puts it on the site next to Elo and Vegas, adds a margin model and playoff odds, and starts a live 2026 scorecard that can't be faked.
 
-Status: **draft, awaiting Walker's decisions (section 8).**
+Status: **Phase 1 approved 2026-10-04.** D1 yes, D2 yes, D4 deferred to M4b. D3 (strength shocks) is pending Walker; it only affects Phase 2. Walker also asked for a rest-of-season prediction: Phase 1 publishes every remaining game's probability and each team's projected wins, and Phase 2 adds the full simulation.
 
 ---
 
