@@ -115,4 +115,4 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 - `context/elo-site.md`: the NFLELO one-page site (`site/`, data exported by `scripts/export_site.py`).
 - `context/ml.md`: the machine learning plan and living record (game model, then player value, play model, and personnel decision support), with milestones M1-M7 and open decisions.
 - `context/ml-m3-method.md`: the M3 game-model method (logistic regression on Elo, opponent-adjusted EPA, and a QB adjustment) and decisions M3-D1 to M3-D3 (approved 2026-10-03).
-- `context/ml-m4-method.md`: the M4 method (live predictions, prediction ledger, margin model, playoff odds) and decisions M4-D1 to M4-D4 (D1, D2, D4 decided 2026-10-04; D3 pending).
+- `context/ml-m4-method.md`: the M4 method (live predictions, prediction ledger, margin model, playoff odds) and decisions M4-D1 to M4-D4 (all decided 2026-10-04).
