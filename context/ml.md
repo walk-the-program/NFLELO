@@ -291,8 +291,8 @@ No paid APIs, no cloud.
 |---|---|---|---|
 | M1 | Data layer and leak-proof features | none | Built 2026-10-03, awaiting Walker's review |
 | M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Built 2026-10-03 (reproduces both exactly), awaiting Walker's review |
-| M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | Holdout run 2026-10-03: A4s beats Elo (-0.0035 Brier, CI [-0.0063, -0.0007]) but ECE is 0.028, over the 0.02 bar, so the strict bar is not met. ECE at n = 1,615 is noisy (see sign-off notes). Verdict for Walker |
-| M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Not started |
+| M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | **Passed 2026-10-04.** Holdout: A4s beats Elo by 0.0035 Brier (CI [-0.0063, -0.0007]). The ECE of 0.028 is within the noise range for n = 1,615; the 0.02 bar is recorded as flawed. |
+| M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Method write-up in progress |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Not started |
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Not started |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | Not started |
@@ -443,3 +443,4 @@ Other observations:
 | 2026-10-03 | D1 accepted: personnel-based models (M5b, M6, M7) will be CC BY-SA. The first scope is the game model (M1-M4) plus M5a (QB and box-score player value), which use only CC BY data. Player value is split into M5a (CC BY) and M5b (participation, CC BY-SA). |
 | 2026-10-03 | D2-D6 decided. D2: 2020-2025 locked as holdout, tuning on 2006-2019. D3: pure model only; betting lines are a benchmark, never a feature (the market-aware model was dropped). D4: notebooks are walkthroughs. D5: separate `requirements-ml.txt`. D6: M1 and M2 built together, ending with a data-tour and leakage-demo notebook. |
 | 2026-10-03 | M3 method approved (`context/ml-m3-method.md`). M3-D1: the starting QB's identity counts as a pre-game fact, and the Wednesday-only version (A4b) is always reported next to it. M3-D2: rating knobs (lambda, half-life, rho, QB k) are tuned on 2000-2005 with a next-week-EPA target. M3-D3: the one-standard-error rule picks the simplest model within noise. |
+| 2026-10-04 | M3 marked passed by Walker. The holdout ECE of 0.028 missed the 0.02 bar, but a simulation shows that is within the normal range for a perfectly calibrated model at n 1,615 (median 0.024, 5th-95th percentile 0.014 to 0.038). The bar is recorded as flawed and the model was not recalibrated. From M4 on, calibration acceptance is sample-size-aware. |
