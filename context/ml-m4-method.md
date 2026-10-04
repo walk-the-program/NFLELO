@@ -18,7 +18,7 @@ Totals (over/under) are proposed as a later follow-up (decision M4-D4).
 
 ### The clock
 
-The 2026 season is through week 4, and week 5 is being played today. Weeks 1 to 5 can only ever be a **backtest**, because nobody wrote predictions down before those games. They'll appear on the site shaded and labelled that way. **The live record starts with week 6** (Thursday 2026-10-08). So the work is split in two phases:
+The 2026 season is in week 4 (nflverse numbering; it runs through Monday 2026-10-05). Weeks 1 to 4 can only ever be a **backtest**, because nobody wrote predictions down before those games. They'll appear on the site shaded and labelled that way. **The live record starts with week 5** (Thursday 2026-10-08). So the work is split in two phases:
 
 - **Phase 1, live by Thursday 2026-10-08:** the prediction script, the ledger, the site columns, and the automated weekly run. These use the M3 model as is.
 - **Phase 2, after that:** the margin model, tiebreakers, the playoff simulation, the scorecard section, and the margin model's single holdout run.
@@ -100,7 +100,7 @@ Cost: 20,000 seasons × about 150 remaining games is a few seconds in vectorized
 
 - **This week:** each card gets a three-way row of **Elo · Model · Vegas** (win probability and spread). A small "QB change" tag appears when `qb_delta_diff` is large, with the starter's name. The "biggest disagreement" feature card switches to model vs Vegas.
 - **Playoff odds:** a new section with a table per conference showing the chances of making the playoffs, winning the division, the #1 seed, and winning the Super Bowl, plus each team's change since last week. It follows Walker's tokens and the `dataviz` rules, like the rest of the site.
-- **Scorecard:** a live 2026 block (model vs Elo vs market: Brier, accuracy, and record against the spread so far), with the backtest weeks 1 to 5 shaded and labelled. It includes the Wednesday-vs-final comparison.
+- **Scorecard:** a live 2026 block (model vs Elo vs market: Brier, accuracy, and record against the spread so far), with the backtest weeks 1 to 4 shaded and labelled. It includes the Wednesday-vs-final comparison.
 - **Methodology:** one plain-English paragraph on the model, linking to the ledger file on GitHub so anyone can check the timestamps.
 - **Unchanged:** the power ladder stays Elo. The ML model has no single "team rating" to rank by yet; that can come later.
 

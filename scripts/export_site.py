@@ -4,7 +4,8 @@
 
 Reads outputs/elo_games.csv, outputs/ratings_current.json, outputs/model_report.md
 and the cached nflverse schedule data/raw/schedules.csv (upcoming games and lines).
-Writes meta, ladder, upcoming, history, luck, tapestry, records, scorecard and headlines JSON.
+Writes meta, ladder, upcoming, history, luck, tapestry, records, scorecard and headlines JSON,
+plus ml.json when the ML prediction ledger (experiments/live/<season>.csv) exists.
 Output is deterministic (no timestamps; same inputs give identical bytes).
 `scripts/build.py` calls export() at the end of every run.
 
@@ -215,6 +216,15 @@ def build_ladder(ratings: dict, long: pd.DataFrame, season: int) -> list[dict]:
     return teams
 
 
+def current_elo(elo: pd.DataFrame) -> dict:
+    """Current ratings as stored in elo_games.csv: last post-game rating per team."""
+    long = pd.concat([
+        elo[["date", "game_id", "home", "home_post"]].set_axis(["date", "game_id", "team", "post"], axis=1),
+        elo[["date", "game_id", "away", "away_post"]].set_axis(["date", "game_id", "team", "post"], axis=1),
+    ]).sort_values(["date", "game_id"], kind="stable")
+    return long.groupby("team")["post"].last().to_dict()
+
+
 def elo_pick_table(sched: pd.DataFrame, ratings_by_team: dict, hfa: float) -> pd.DataFrame:
     """Add Elo win probability and spread (home-favored positive) to scheduled games."""
     s = sched.copy()
@@ -243,14 +253,7 @@ def build_upcoming(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame) -> 
     wk = sched[(sched["week"] == week)]
     todo = unplayed[unplayed["week"] == week].copy()
 
-    # Current ratings at full precision: last post-game rating per team.
-    long = pd.concat([
-        elo[["date", "game_id", "home", "home_post"]].set_axis(["date", "game_id", "team", "post"], axis=1),
-        elo[["date", "game_id", "away", "away_post"]].set_axis(["date", "game_id", "team", "post"], axis=1),
-    ]).sort_values(["date", "game_id"], kind="stable")
-    current = long.groupby("team")["post"].last().to_dict()
-
-    todo = elo_pick_table(todo, current, ratings["hfa_current"])
+    todo = elo_pick_table(todo, current_elo(elo), ratings["hfa_current"])
     todo["p_mkt"] = market_prob(todo)
     todo["vegas_spread"] = pd.to_numeric(todo["spread_line"], errors="coerce")
     todo["diff"] = todo["elo_spread"] - todo["vegas_spread"]
@@ -509,6 +512,124 @@ def build_headlines(ladder: list[dict], upcoming: dict, history: dict, luck: dic
     }
 
 
+# --------------------------------------------------------------------------- ML model (optional, M4 Phase 1)
+# Reads the prediction ledger (experiments/live/<season>.csv) and the latest run's
+# details (latest_<season>.json) when they exist, and writes ml.json. With no ledger
+# nothing here runs, a stale ml.json is removed, and every other file is unchanged.
+
+LIVE_DIR = config.ROOT / "experiments" / "live"
+
+
+def headline_week_ml(games_: list[dict], flagged: list[str]) -> str | None:
+    by_id = {g["game_id"]: g for g in games_}
+    if flagged:
+        g = by_id[flagged[0]]
+        game = f"{subj(g['away'])} at {subj(g['home'])}"
+        pm, pv = g["p_home_model"], g["p_market_home"]
+        if (pm - 0.5) * (pv - 0.5) < 0:
+            return f"The model and Vegas split on {game}."
+        gap = abs(g["gap"])
+        return f"The model and Vegas are {gap:.0f} percentage {'point' if f'{gap:.0f}' == '1' else 'points'} apart on {game}."
+    have = [g for g in games_ if g["p_home_model"] is not None]
+    if not have:
+        return None
+    g = max(have, key=lambda x: (abs(x["p_home_model"] - 0.5), x["game_id"]))
+    fav, dog = (g["home"], g["away"]) if g["p_home_model"] >= 0.5 else (g["away"], g["home"])
+    return f"The model's strongest pick is {subj(fav)} over {subj(dog)}, at {max(g['p_home_model'], 1 - g['p_home_model']) * 100:.0f}%."
+
+
+def headline_rest(teams: list[dict]) -> str | None:
+    if not teams:
+        return None
+    top = teams[0]
+    tied = [t["team"] for t in teams if round(t["proj_model"], 1) == round(top["proj_model"], 1)]
+    if len(tied) > 1:
+        who = ", ".join(subj(t) for t in tied[:-1]) + " and " + subj(tied[-1])
+        return f"{cap(who)} share the top projection, {top['proj_model']:.1f} wins."
+    t = top["team"]
+    return f"{cap(subj(t))} {verb(t, 'projects', 'project')} to {top['proj_model']:.1f} wins, the most in the league."
+
+
+def build_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming: dict, live_dir: Path) -> dict:
+    from nflelo.ml import live  # pandas-only module; no ML packages needed (decision D5)
+
+    season = ratings["season"]
+    ledger = live.read_ledger(live.ledger_path(season, live_dir), market=True)  # scoring only, never features
+    final = live.latest_before_kickoff(ledger).set_index("game_id")
+    latest = live.read_latest(season, live_dir)
+    latest_by = {g["game_id"]: g for g in (latest or {}).get("games", [])}
+    from_week = live.LIVE_FROM_WEEK.get(season, 1)
+
+    # this week: the ledger's scored row per game next to Elo and Vegas
+    week_games = []
+    for g in upcoming["games"]:
+        gid = g["game_id"]
+        pm = float(final.at[gid, "p_home_model"]) if gid in final.index else None
+        pv = g["p_market_home"]
+        lg = latest_by.get(gid)
+        week_games.append({
+            "game_id": gid, "away": g["away"], "home": g["home"], "p_home_model": pm, "p_market_home": pv,
+            "spread_model": None,
+            "run_at_utc": live.utc_iso(final.at[gid, "run_at_utc"]) if gid in final.index else None,
+            "gap": None if pm is None or pv is None else round(100 * (pm - pv), 1),
+            "qb_change": live.qb_change(lg) if lg and pm is not None else None,
+        })
+    gaps = [g for g in week_games if g["gap"] is not None]
+    flagged = [g["game_id"] for g in sorted(gaps, key=lambda g: (-abs(g["gap"]), g["game_id"]))[:DISAGREEMENTS]]
+    for g in week_games:
+        g["flagged"] = g["game_id"] in flagged
+
+    # rest of season: every unplayed REG game, model (latest run) and Elo (current ratings)
+    reg = schedule[(schedule["season"] == season) & (schedule["game_type"] == "REG")]
+    todo = reg[reg["home_score"].isna() | reg["away_score"].isna()]
+    p_elo = elo_pick_table(todo, current_elo(elo), ratings["hfa_current"]).set_index("game_id")["p_home"]
+    p_model = pd.Series({gid: latest_by[gid]["p_home_model"] for gid in todo["game_id"] if gid in latest_by}, dtype=float)
+    p_model = p_model.reindex(todo["game_id"])
+    from_ledger = p_model.isna() & p_model.index.isin(final.index)
+    p_model[from_ledger] = final.loc[p_model.index[from_ledger], "p_home_model"].astype(float)
+    fallback = p_model.isna()
+    p_model[fallback] = p_elo.reindex(p_model.index)[fallback]
+    proj = live.projected_wins(reg, p_model, p_elo)
+    teams = []
+    for r in proj.sort_values(["proj_model", "team"], ascending=[False, True]).itertuples():
+        teams.append({"team": r.team, "w": int(r.w), "l": int(r.l), "t": int(r.t), "remaining": int(r.remaining),
+                      "proj_model": float(r.proj_model), "proj_elo": float(r.proj_elo), "games": r.games})
+
+    first_live = reg[reg["week"] == from_week].sort_values(["gameday", "gametime"])
+    last_run = (latest or {}).get("run_at_utc") or live.utc_iso(ledger["run_at_utc"].max())
+    return {
+        "season": season,
+        "last_run_utc": last_run,
+        "model_version": (latest or {}).get("model_version") or str(ledger["model_version"].iloc[-1]),
+        "ledger_url": live.ledger_url(season),
+        "ledger_rows": int(len(ledger)),
+        "games_logged": int(ledger["game_id"].nunique()),
+        "live_from_week": from_week,
+        "live_from_date": None if first_live.empty else str(first_live["gameday"].iloc[0]),
+        "qb_change_threshold": live.QB_CHANGE_THRESHOLD,
+        "holdout": live.HOLDOUT,
+        "week": {"week": upcoming["week"], "games": week_games, "flagged": flagged,
+                 "headline": headline_week_ml(week_games, flagged)},
+        "rest": {"teams": teams, "games_left": int(len(todo)), "headline": headline_rest(teams), "model_fallback_to_elo": int(fallback.sum()),
+                 "note": "Projected wins = wins so far + half a win per tie + the sum of the team's win "
+                         "probabilities in its remaining games."},
+        "live": live.live_record(ledger, live.results_frame(reg), from_week),
+    }
+
+
+def export_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming: dict,
+              live_dir: Path | None = None) -> int | None:
+    """Write ml.json when the season's ledger exists; otherwise remove any stale ml.json and return None."""
+    live_dir = LIVE_DIR if live_dir is None else live_dir
+    path = live_dir / f"{ratings['season']}.csv"
+    if not path.exists():
+        stale = SITE_DATA / "ml.json"
+        if stale.exists():
+            stale.unlink()
+        return None
+    return write_json("ml.json", build_ml(schedule, ratings, elo, upcoming, live_dir))
+
+
 # --------------------------------------------------------------------------- main
 
 def export() -> dict[str, int]:
@@ -535,6 +656,9 @@ def export() -> dict[str, int]:
         files["ladder.json"]["teams"], upcoming, files["history.json"], files["luck.json"], files["tapestry.json"],
         files["records.json"], headline, season, partial)
     sizes = {name: write_json(name, obj) for name, obj in files.items()}
+    ml_size = export_ml(schedule, ratings, elo, upcoming)
+    if ml_size is not None:
+        sizes["ml.json"] = ml_size
     total = sum(sizes.values())
     print(f"site/data: {len(sizes)} files, {total / 1024:.0f} KB total "
           f"({', '.join(f'{n} {s / 1024:.0f}K' for n, s in sizes.items())})")

@@ -61,6 +61,7 @@
   /* ---- layer 3: data colors ---- */
   --series-1: var(--mark);                                          /* Elo */
   --series-2: #d95926;                                              /* market / Vegas, validated with the dataviz script */
+  --series-3: #a06ae8;                                              /* ML model, dark; validated with Elo and Vegas */
   --series-muted: color-mix(in srgb, var(--neutral-light) 55%, var(--neutral-dark));
   --up: #3cb04a;
   --down: #ef6b6b;
@@ -90,6 +91,7 @@
     --on-fill: var(--on-primary);
     --hover-wash: color-mix(in srgb, var(--ink) 5%, transparent);
     --series-muted: color-mix(in srgb, var(--neutral-dark) 58%, var(--neutral-light));
+    --series-3: #7b4fc9;
     --up: #0b7a1d;
     --down: #c0302f;
     --h-mid: #f0efec;
@@ -278,6 +280,49 @@ main > .sec:nth-child(even) { --surface: var(--tint); }
 .lines dt { color: var(--ink-3); font-size: 12px; font-weight: 600; }
 .lines dd { font-weight: 700; white-space: nowrap; }
 
+/* this week, with the ML model: Elo, Model, Vegas side by side */
+.tri { width: 100%; margin-top: auto; padding-top: 14px; border-collapse: collapse; font-size: 14px; table-layout: fixed; }
+.tri th, .tri td { border: 0; padding: 3px 4px 3px 0; white-space: nowrap; vertical-align: baseline; }
+.tri th { font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.tri thead th { padding-bottom: 4px; }
+.tri thead th:nth-child(1) { width: 17%; } .tri thead th:nth-child(2) { width: 31%; } .tri thead th:nth-child(3) { width: 19%; } .tri thead th:nth-child(4) { width: 33%; }
+.tri thead i { display: inline-block; width: 8px; height: 8px; margin-right: 5px; vertical-align: 0; }
+.tri td { font-weight: 700; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.2px; }
+.tri td.na { color: var(--ink-3); font-weight: 400; }
+.k-s1 { background: var(--series-1); } .k-s2 { background: var(--series-2); } .k-s3 { background: var(--series-3); }
+.game .qbtag { margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--accent-ink); }
+
+/* ---- rest of season ---- */
+.divs { display: grid; grid-template-columns: 1fr; gap: 44px clamp(40px, 4vw, 72px); margin-top: 8px; }
+@media (min-width: 760px) { .divs { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1280px) { .divs { grid-template-columns: repeat(4, 1fr); } }
+.dv h3 { font-family: var(--font-body); font-size: 14px; font-weight: 700; color: var(--ink-2); letter-spacing: var(--body-tracking); padding-bottom: 8px; border-bottom: 1px solid var(--rule-strong); display: flex; justify-content: space-between; }
+.dv h3 span { font-weight: 600; color: var(--ink-3); font-size: 12px; }
+.rs summary { list-style: none; display: grid; grid-template-columns: 44px minmax(0, 1fr) 64px 14px; column-gap: 12px; align-items: center; min-height: 58px; padding: 6px 0; cursor: pointer; border-bottom: 1px solid var(--rule); }
+.rs summary::-webkit-details-marker { display: none; }
+.rs summary:hover { background: var(--hover-wash); }
+.rs summary:focus-visible { outline-offset: -2px; }
+.rs summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid var(--ink-3); border-bottom: 2px solid var(--ink-3); transform: rotate(45deg); margin-top: -4px; justify-self: center; }
+.rs[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.rs .abbr { font-size: 19px; }
+.rs .mid { min-width: 0; }
+.wb { position: relative; display: block; height: 22px; }
+.wb::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--rule); }
+.wb i { position: absolute; top: 4px; height: 14px; display: block; }
+.wb .so { left: 0; background: var(--series-muted); }
+.wb .pj { background: var(--series-3); }
+.wb .et { top: 0; height: 22px; width: 2px; margin-left: -1px; background: var(--series-1); box-shadow: 0 0 0 1px var(--surface); }
+.rs .meta { display: block; font-size: 13px; color: var(--ink-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs .pv { text-align: right; line-height: 1.05; }
+.rs .pv b { display: block; font-family: var(--font-heading); font-size: 24px; letter-spacing: 1px; }
+.rs .pv small { display: block; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+.rs-games { padding: 6px 0 14px; }
+.rs-games table { font-size: 14px; }
+.rs-games td, .rs-games th { padding: 6px 8px 6px 0; }
+.legend i.blk { width: 14px; height: 10px; }
+.legend i.tk { width: 2px; height: 14px; background: var(--series-1); }
+.legend i.s3 { background: var(--series-3); }
+
 /* ---- explorer ---- */
 .split { display: grid; grid-template-columns: 1fr; gap: 32px; }
 @media (min-width: 1280px) { .split { grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr); gap: clamp(40px, 4vw, 72px); } }
@@ -385,6 +430,10 @@ td .w-sc { font-weight: 700; }
 .method ul li { padding: 10px 0; border-bottom: 1px solid var(--rule); }
 .method ul li:first-child { padding-top: 0; }
 .method ul li small { display: block; color: var(--ink-3); font-size: 14px; }
+.livebox { margin-top: 48px; }
+.livebox > h3 { font-size: 20px; letter-spacing: var(--heading-tracking); margin-bottom: 4px; }
+.livebox > .sub { font-size: 15px; color: var(--ink-2); max-width: 70ch; margin-bottom: 12px; }
+.livebox .score { margin-top: 12px; }
 
 /* ---- footer, tooltip ---- */
 .foot { padding-top: 24px; padding-bottom: 56px; display: flex; flex-wrap: wrap; gap: 6px 28px; font-size: 14px; color: var(--ink-3); }
@@ -396,6 +445,7 @@ td .w-sc { font-weight: 700; }
 .tip .tr span { color: var(--ink-2); }
 .tip .tr i { display: inline-block; width: 12px; height: 2px; align-self: center; flex: none; }
 .tip i.s1 { background: var(--series-1); } .tip i.s2 { background: var(--series-2); } .tip i.sm { background: var(--series-muted); } .tip i.mk { background: var(--c); }
+.tip i.s3 { background: var(--series-3); }
 
 /* ---- motion: bars grow from 1500 once, when their section scrolls into view ---- */
 .anim .fill { transform: scaleX(0); }

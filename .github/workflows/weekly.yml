@@ -1,0 +1,82 @@
+# Weekly update (M4-D1): rebuild Elo and the site data, then append the ML model's
+# predictions to the public ledger and commit. It does not host the site.
+#
+# Schedule. GitHub cron is fixed in UTC, so the Eastern time moves with daylight saving:
+#   Wednesday 14:00 UTC = 10:00 EDT (through Sat 2026-10-31) / 09:00 EST (from Sun 2026-11-01)
+#   Sunday    12:00 UTC = 08:00 EDT                           / 07:00 EST
+# Both stay ahead of every kickoff they cover: Thursday games are logged by the Wednesday
+# run, and the earliest Sunday kickoff (London, 9:30 ET) is 13:30 UTC in EDT, 14:30 UTC in EST.
+# GitHub can start scheduled runs late under load, which is why the Wednesday run carries
+# the whole week and the Sunday run only refreshes starters.
+#
+# A failing step stops the job before the commit step, so the job goes red and nothing
+# partial is committed. The nflverse cache speeds runs up but is never trusted for
+# correctness: build.py re-downloads the schedule file and ml_predict.py re-pulls this
+# season's schedule and play-by-play on every run.
+name: Weekly update
+
+on:
+  schedule:
+    - cron: "0 14 * * 3"
+    - cron: "0 12 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-ml.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-ml.txt
+
+      - name: Restore the nflverse cache (data/raw)
+        uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: nflverse-raw-${{ github.run_id }}
+          restore-keys: |
+            nflverse-raw-
+
+      - name: Rebuild Elo, outputs and site data
+        run: python scripts/build.py
+
+      - name: Predict unplayed games and append to the ledger
+        run: python scripts/ml_predict.py
+
+      - name: Export site data with the new ledger rows
+        run: python scripts/export_site.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add experiments/live site/data outputs data/games.csv
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          rows=$(git diff --cached --numstat -- experiments/live/*.csv | awk '{s += $1} END {print s + 0}')
+          git commit -m "Weekly update $(date -u +%Y-%m-%dT%H:%MZ): ${rows} ledger rows, site data refreshed"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main

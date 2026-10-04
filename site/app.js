@@ -491,24 +491,31 @@
       return;
     }
     var left = u.games.length;
+    var M = mlWeek(), mlBy = {};
+    if (M) M.games.forEach(function (x) { mlBy[x.game_id] = x; });
 
     $('#week-deck').textContent = 'Week ' + u.week + (u.played ? ': ' + plural(left, 'game', 'games') + ' still to play, ' + u.played + ' already in the ratings' : ': ' + plural(left, 'game', 'games')) +
-      '. Elo win chance and point spread next to the Vegas line.';
+      (M ? '. Win chance and point spread from Elo and the model, next to the Vegas line.' : '. Elo win chance and point spread next to the Vegas line.');
 
     var grid = h('div', { class: 'games' });
     u.games.forEach(function (g) {
-      var home = g.p_home, away = 1 - g.p_home;
-      var tag = g.flagged ? 'Gap ' + f1(Math.abs(g.diff)) : (g.neutral ? 'Neutral site' : '');
+      var home = g.p_home, away = 1 - g.p_home, mg = M ? mlBy[g.game_id] : null;
+      var tag = M ? (mg && mg.flagged ? 'Gap ' + Math.round(Math.abs(mg.gap)) + ' pts' : (g.neutral ? 'Neutral site' : ''))
+        : (g.flagged ? 'Gap ' + f1(Math.abs(g.diff)) : (g.neutral ? 'Neutral site' : ''));
+      var flagged = M ? !!(mg && mg.flagged) : g.flagged;
       var label = g.away + ' at ' + g.home + '. Elo gives ' + g.home + ' ' + pct(home) + '. Elo line ' + lineText(g.home, g.away, g.elo_spread) +
         (g.vegas_spread != null ? ', Vegas line ' + lineText(g.home, g.away, g.vegas_spread) : '') + '.';
-      var lines = h('dl', { class: 'lines' },
+      if (mg && mg.p_home_model != null) label += ' The model gives ' + g.home + ' ' + pct(mg.p_home_model) + '.';
+      if (mg && mg.qb_change) label += ' ' + qbText(mg.qb_change) + '.';
+      var lines = M ? tri(g, mg) : h('dl', { class: 'lines' },
         h('div', {}, h('dt', { text: 'Elo line' }), h('dd', { text: lineText(g.home, g.away, g.elo_spread) })),
         g.vegas_spread != null ? h('div', {}, h('dt', { text: 'Vegas line' }), h('dd', { text: lineText(g.home, g.away, g.vegas_spread) })) : h('div', {}, h('dt', { text: 'Vegas line' }), h('dd', { text: 'None yet' })),
         g.diff != null ? h('div', {}, h('dt', { text: 'Gap' }), h('dd', { text: f1(Math.abs(g.diff)) })) : null);
       var card = h('article', { class: 'game', 'aria-label': label },
         h('div', { class: 'when' }, h('span', { text: shortDay(g.date) + (g.time ? ', ' + clock(g.time) : '') }),
-          tag ? h('span', { class: g.flagged ? 'tag' : '', text: tag }) : null),
+          tag ? h('span', { class: flagged ? 'tag' : '', text: tag }) : null),
         h('div', { class: 'vs' }, g.away, h('span', { class: 'at', text: 'at' }), g.home),
+        mg && mg.qb_change ? h('p', { class: 'qbtag', text: qbText(mg.qb_change) }) : null,
         h('div', { class: 'pbar', role: 'img', 'aria-hidden': 'true' },
           h('i', { class: 'mk', style: markVars(byTeam[g.away].color) + ';width:' + (away * 100).toFixed(1) + '%' }),
           h('i', { class: 'mk', style: markVars(byTeam[g.home].color) + ';width:' + (home * 100).toFixed(1) + '%' })),
@@ -519,7 +526,140 @@
       grid.appendChild(card);
     });
     body.appendChild(grid);
-    body.appendChild(h('p', { class: 'fnote', text: 'Lines name the favorite and the points it is favored by. Elo spread is the rating gap (with home-field edge, none at neutral sites) divided by 25. Kickoff times are Eastern.' }));
+    body.appendChild(h('p', { class: 'fnote', text: M
+      ? 'Win chances are the home team\'s. Vegas is the moneyline with the bookmaker\'s margin removed. Lines name the favorite and the points it is favored by; the model has no point spread yet. Gap is how far the model\'s win chance is from Vegas, in percentage points, for the three biggest. A QB change tag marks a starter whose play the team\'s recent numbers do not reflect. Kickoff times are Eastern.'
+      : 'Lines name the favorite and the points it is favored by. Elo spread is the rating gap (with home-field edge, none at neutral sites) divided by 25. Kickoff times are Eastern.' }));
+  }
+
+  // ------------------------------------------------------------------ ML model (optional: only when data/ml.json exists)
+
+  function mlWeek() {
+    var M = D.ml && D.ml.week;
+    return M && M.week === D.upcoming.week ? M : null;
+  }
+
+  function qbText(q) {
+    return 'QB change: ' + (q.name || 'new starter') + ', ' + q.team;
+  }
+
+  function runTime(iso) {
+    return new Date(iso).toLocaleString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' ET';
+  }
+
+  function dayLong(iso) { return parseDate(iso).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }); }
+
+  // Elo, Model, Vegas side by side: the home team's win chance, then each line.
+  function tri(g, mg) {
+    var pm = mg && mg.p_home_model != null ? mg.p_home_model : null;
+    function td(text, na) { return h('td', { class: na ? 'na' : '', text: text }); }
+    function head(cls, text) { return h('th', { scope: 'col' }, h('i', { class: cls, 'aria-hidden': 'true' }), text); }
+    return h('table', { class: 'tri' },
+      h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, h('span', { class: 'sr', text: 'Measure' })), head('k-s1', 'Elo'), head('k-s3', 'Model'), head('k-s2', 'Vegas'))),
+      h('tbody', {},
+        h('tr', {}, h('th', { scope: 'row' }, g.home, h('span', { class: 'sr', text: ' win chance' })), td(pct(g.p_home)), pm != null ? td(pct(pm)) : td('None yet', true),
+          g.p_market_home != null ? td(pct(g.p_market_home)) : td('None yet', true)),
+        h('tr', {}, h('th', { scope: 'row', text: 'Line' }), td(lineText(g.home, g.away, g.elo_spread)), td('Not yet', true),
+          g.vegas_spread != null ? td(lineText(g.home, g.away, g.vegas_spread)) : td('None yet', true))));
+  }
+
+  var DIVS = ['AFC East', 'AFC North', 'AFC South', 'AFC West', 'NFC East', 'NFC North', 'NFC South', 'NFC West'];
+
+  // Builds the Rest of season section after This week, adds its nav link, and renumbers the kickers.
+  function renderRest() {
+    var R = D.ml && D.ml.rest;
+    if (!R || !R.teams.length) return;
+    var body = h('div', { id: 'rest-body', class: 'body' });
+    var sec = h('section', { class: 'sec', id: 'rest', 'aria-labelledby': 'rest-h', tabindex: '-1' },
+      h('div', { class: 'wrap' },
+        h('p', { class: 'kicker', text: 'Rest of season' }),
+        h('h2', { class: 'headline', id: 'rest-h', text: R.headline || 'Rest of season' }),
+        h('p', { class: 'deck', text: 'Projected final wins: wins so far plus the model\'s win chance in every game left, with Elo\'s projection beside it. Open a team for its remaining games.' }),
+        body));
+    var week = $('#week');
+    week.parentNode.insertBefore(sec, week.nextSibling);
+    var navWeek = document.querySelector('.nav-links a[href="#week"]');
+    if (navWeek) navWeek.parentNode.parentNode.insertBefore(h('li', {}, h('a', { href: '#rest', text: 'Rest of season' })), navWeek.parentNode.nextSibling);
+    document.querySelectorAll('main > .sec .kicker').forEach(function (k, i) {
+      k.textContent = (i < 9 ? '0' : '') + (i + 1) + ' / ' + k.textContent.replace(/^\d+\s*\/\s*/, '');
+    });
+
+    var MAXW = 17;
+    function x(v) { return (Math.max(0, Math.min(MAXW, v)) / MAXW * 100).toFixed(2) + '%'; }
+    function row(r) {
+      var t = byTeam[r.team], base = r.w + r.t / 2, record = rec(r.w, r.l, r.t);
+      var summary = h('summary', {},
+        h('span', { class: 'sr', text: t.name + ', ' + record + '. Projected ' + f1(r.proj_model) + ' wins by the model, ' + f1(r.proj_elo) + ' by Elo, ' + plural(r.remaining, 'game', 'games') + ' left. Show remaining games.' }),
+        h('span', { class: 'abbr', 'aria-hidden': 'true', text: r.team }),
+        h('span', { class: 'mid', 'aria-hidden': 'true' },
+          h('span', { class: 'wb' },
+            h('i', { class: 'so', style: 'width:' + x(base) }),
+            h('i', { class: 'pj', style: 'left:calc(' + x(base) + ' + 2px);width:max(0px, calc(' + x(r.proj_model - base) + ' - 2px))' }),
+            h('i', { class: 'et', style: 'left:' + x(r.proj_elo) })),
+          h('span', { class: 'meta', text: record + ', ' + r.remaining + ' left' })),
+        h('span', { class: 'pv', 'aria-hidden': 'true' }, h('b', { text: f1(r.proj_model) }), h('small', { text: 'Elo ' + f1(r.proj_elo) })));
+      bindTip(summary, function () {
+        return { title: t.name, rows: [
+          { value: f1(r.proj_model), label: 'model projection', cls: 's3' },
+          { value: f1(r.proj_elo), label: 'Elo projection', cls: 's1' },
+          { value: record, label: 'so far', cls: 'sm' },
+          { value: String(r.remaining), label: r.remaining === 1 ? 'game left' : 'games left' }] };
+      });
+      var games = h('div', { class: 'rs-games' }, h('table', {},
+        h('thead', {}, h('tr', {}, h('th', { scope: 'col', text: 'Week' }), h('th', { scope: 'col', text: 'Game' }),
+          h('th', { scope: 'col', class: 'r', text: 'Model' }), h('th', { scope: 'col', class: 'r', text: 'Elo' }))),
+        h('tbody', {}, r.games.map(function (g) {
+          return h('tr', {}, h('td', { class: 'n', text: String(g.week) }),
+            h('td', { text: (g.home ? 'vs ' : 'at ') + g.opp + (g.neutral ? ' (neutral)' : '') }),
+            h('td', { class: 'r n', text: pct(g.p_model) }), h('td', { class: 'r n', text: pct(g.p_elo) }));
+        }))));
+      return h('details', { class: 'rs' }, summary, games);
+    }
+
+    body.appendChild(legend([['sm blk', 'Wins so far'], ['s3 blk', 'Model projection'], ['tk', 'Elo projection']]));
+    var grid = h('div', { class: 'divs' });
+    DIVS.forEach(function (d) {
+      var teams = R.teams.filter(function (r) { return byTeam[r.team] && byTeam[r.team].div === d; });
+      teams.sort(function (a, b) { return b.proj_model - a.proj_model || (a.team < b.team ? -1 : 1); });
+      grid.appendChild(h('div', { class: 'dv' }, h('h3', {}, d, h('span', { text: 'Projected wins' })), teams.map(row)));
+    });
+    body.appendChild(grid);
+    body.appendChild(h('p', { class: 'fnote', text: R.note + ' Bars run from 0 to 17 wins. Model numbers are from the run on ' + runTime(D.ml.last_run_utc) + '.' }));
+    body.appendChild(tableView('View projected wins as a table', [{ t: 'Team' }, { t: 'Record', r: 1, n: 1 }, { t: 'Left', r: 1, n: 1 }, { t: 'Model', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }], function () {
+      return R.teams.map(function (r) { return [byTeam[r.team].name, rec(r.w, r.l, r.t), String(r.remaining), f1(r.proj_model), f1(r.proj_elo)]; });
+    }));
+  }
+
+  // Live record block for the scorecard: empty-state copy until the first live week is scored.
+  function liveBlock() {
+    var ml = D.ml, L = ml.live.final, W = ml.live.wednesday;
+    var box = h('div', { class: 'livebox' }, h('h3', { text: 'Live ' + ml.season + ' record' }));
+    var start = 'The live record starts with Week ' + ml.live_from_week + (ml.live_from_date ? ', ' + dayLong(ml.live_from_date) : '') + '.';
+    if (!L.n) {
+      box.appendChild(h('p', { class: 'sub', text: start + ' Each prediction is written to a public ledger before kickoff, and only those count. Weeks 1 to ' + (ml.live_from_week - 1) + ' were never predicted in advance, so they are left out. No live games have been scored yet.' }));
+    } else {
+      var mk = L.market_games;
+      box.appendChild(h('p', { class: 'sub', text: start + ' Scored on the last prediction made before each kickoff, ' + plural(L.n, 'game', 'games') + ' so far. That is a small sample, so treat the gaps as noise for now.' }));
+      box.appendChild(h('div', { class: 'score' },
+        h('div', {}, h('h3', { text: 'Brier score, lower is better' }),
+          h('div', { class: 'row' },
+            h('span', {}, h('b', { class: 'num', text: (mk ? mk.model.brier : L.model.brier).toFixed(4) }), 'Model'),
+            h('span', {}, h('b', { class: 'num', text: (mk ? mk.elo.brier : L.elo.brier).toFixed(4) }), 'Elo v2'),
+            mk ? h('span', {}, h('b', { class: 'num', text: mk.market.brier.toFixed(4) }), 'Vegas market') : null)),
+        h('div', {}, h('h3', { text: 'Correct picks' }),
+          h('div', { class: 'row' },
+            h('span', {}, h('b', { class: 'num', text: pct(L.model.accuracy, 1) }), 'Model'),
+            h('span', {}, h('b', { class: 'num', text: pct(L.elo.accuracy, 1) }), 'Elo v2'),
+            mk ? h('span', {}, h('b', { class: 'num', text: pct(mk.market.accuracy, 1) }), 'Vegas') : null)),
+        h('div', {}, h('h3', { text: 'Elo against the spread' }),
+          h('div', { class: 'row' }, h('span', {}, h('b', { class: 'num', text: L.ats_elo.w + '-' + L.ats_elo.l + (L.ats_elo.push ? '-' + L.ats_elo.push : '') }), 'Wins, losses' + (L.ats_elo.push ? ', pushes' : ''))))));
+      var notes = [];
+      if (mk && mk.n !== L.n) notes.push('Brier scores use the ' + mk.n + ' games with a moneyline; correct picks for the model and Elo use all ' + L.n + '.');
+      if (W.n) notes.push('Wednesday predictions alone: model ' + W.model.brier.toFixed(4) + ', Elo ' + W.elo.brier.toFixed(4) + ' Brier on ' + plural(W.n, 'game', 'games') + '. The gap to the final numbers is what late quarterback news was worth.');
+      notes.push('The model has no point spread yet, so only Elo has a record against the spread.');
+      box.appendChild(h('p', { class: 'fnote', text: notes.join(' ') }));
+    }
+    box.appendChild(h('p', { class: 'fnote' }, 'Last model run: ' + runTime(ml.last_run_utc) + '. ', h('a', { href: ml.ledger_url, text: 'See the prediction ledger' }), '.'));
+    return box;
   }
 
   // ------------------------------------------------------------------ explorer
@@ -852,6 +992,7 @@
           h('span', {}, h('b', { class: 'num', text: pct(sc.market_accuracy, 1) }), 'Vegas favorite'))),
       h('div', {}, h('h3', { text: 'Gap to the market' }),
         h('div', { class: 'row' }, h('span', {}, h('b', { class: 'num', text: '+' + sc.brier_gap_vs_market.toFixed(4) }), 'Brier, plus or minus ' + sc.brier_gap_se.toFixed(4))))));
+    if (D.ml) body.appendChild(liveBlock());
 
     var pair = h('div', { class: 'pair' });
     var brHost = h('div', { class: 'chart' }), hfaHost = h('div', { class: 'chart' });
@@ -909,14 +1050,16 @@
         h('p', {}, h('b', { text: 'Home field. ' }), 'The home team gets a rating bonus before each prediction, none at neutral sites. The bonus is learned: it started at ' + cfg.hfa_init + ' points in 1970, moves up or down as home teams win more or less than expected, and is ' + f1(D.meta.hfa_pts) + ' now. Elo spread is the rating gap divided by 25.'),
         h('p', {}, h('b', { text: 'Data. ' }), 'Game results from 1999 on come from nflverse. Results for 1970 to 1998, including playoffs, come from the FiveThirtyEight NFL Elo game file. Both are CC BY 4.0.'),
         h('p', {}, h('b', { text: 'New teams. ' }), 'Franchises that join after 1970 start at ' + cfg.expansion_start + '. The model was tuned on ' + sc.tune_seasons[0] + '-' + sc.tune_seasons[1] + ' and scored on ' + span + '.'),
-        h('p', {}, h('b', { text: 'Limits. ' }), 'The Vegas line is still better: a Brier gap of ' + sc.brier_gap_vs_market.toFixed(4) + '. Elo does not know about injuries, starting quarterbacks, or weather.')),
+        h('p', {}, h('b', { text: 'Limits. ' }), 'The Vegas line is still better: a Brier gap of ' + sc.brier_gap_vs_market.toFixed(4) + '. Elo does not know about injuries, starting quarterbacks, or weather.'),
+        D.ml ? h('p', {}, h('b', { text: 'Model. ' }), 'The second forecast is a logistic regression on three inputs: Elo\'s win chance, each team\'s play-by-play efficiency adjusted for its opponents, and how much better or worse this week\'s starting quarterback is than the passing the team\'s recent numbers reflect. It is fit on the 2001 to ' + (D.ml.season - 1) + ' regular seasons and never sees betting lines. On ' + D.ml.holdout.seasons[0] + ' to ' + D.ml.holdout.seasons[1] + ' games it had never seen, it scored a Brier of ' + D.ml.holdout.model_brier.toFixed(4) + ' against ' + D.ml.holdout.elo_brier.toFixed(4) + ' for Elo and ' + D.ml.holdout.market_brier.toFixed(4) + ' for Vegas. Every prediction is added to a ', h('a', { href: D.ml.ledger_url, text: 'public ledger' }), ' before kickoff, and the git history shows when. Last run: ' + runTime(D.ml.last_run_utc) + '.') : null),
       h('div', {},
         h('h3', { text: 'Links' }),
         h('ul', {},
           h('li', {}, h('a', { href: D.meta.repo, text: 'Code and method on GitHub' }), h('small', { text: 'github.com/walk-the-program/NFLELO' })),
           h('li', {}, h('a', { href: 'https://nflverse.nflverse.com/', text: 'nflverse' }), h('small', { text: 'Schedules, scores, and betting lines, 1999 on. CC BY 4.0.' })),
           h('li', {}, h('a', { href: 'https://github.com/fivethirtyeight/data', text: 'FiveThirtyEight' }), h('small', { text: 'NFL game results 1970\u20131998: FiveThirtyEight, CC BY 4.0.' })),
-          h('li', {}, h('a', { href: 'data/ladder.json', text: 'Ladder data (JSON)' }), h('small', { text: 'Rebuilt every Wednesday' }))))));
+          h('li', {}, h('a', { href: 'data/ladder.json', text: 'Ladder data (JSON)' }), h('small', { text: 'Rebuilt every Wednesday' })),
+          D.ml ? h('li', {}, h('a', { href: D.ml.ledger_url, text: 'Prediction ledger (CSV)' }), h('small', { text: 'Every model prediction, written before kickoff' })) : null))));
   }
 
   function legend(items) {
@@ -959,12 +1102,17 @@
     $('#status').textContent = 'Data unavailable';
   }
 
+  // ml.json is optional: it exists only once the ML prediction ledger does. Without it the page is unchanged.
+  var mlFile = fetch('data/ml.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+
   Promise.all(FILES.map(function (f) {
     return fetch('data/' + f + '.json').then(function (r) { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
-  })).then(function (all) {
+  }).concat([mlFile])).then(function (all) {
     FILES.forEach(function (f, i) { D[f] = all[i]; });
+    D.ml = all[FILES.length];
     D.ladder.teams.forEach(function (t) { byTeam[t.team] = t; });
     D.history.teams.forEach(function (t) { histBy[t.team] = t; });
+    renderRest();
     initReveal();
     renderHeader();
     renderLadder();
@@ -975,7 +1123,7 @@
     renderRecords();
     renderScorecard();
     setHeadline('ladder-h', D.headlines.ladder);
-    setHeadline('week-h', D.headlines.week);
+    setHeadline('week-h', (mlWeek() && mlWeek().headline) || D.headlines.week);
     setHeadline('history-h', D.headlines.history);
     setHeadline('records-h', D.headlines.records);
     setHeadline('scorecard-h', D.headlines.scorecard);

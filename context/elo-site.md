@@ -5,8 +5,8 @@ Sub-project context for the static NFLELO website in `site/`. General project co
 ## Shape
 
 - Static, no build step, no server. `site/index.html`, `site/styles.css`, `site/app.js` (plain JS, hand-built SVG charts, no CDN scripts) and `site/data/*.json`. Only external request: Google Fonts (Figtree for headings, Nunito Sans for body). Must be served over http (it fetches `./data/*.json`); `python3 -m http.server 8765 --directory site`, or `nflelo-site` in `.claude/launch.json`.
-- Hostable on GitHub Pages by publishing `site/`. The weekly GitHub Action (not built yet) only needs to run `scripts/build.py` and commit `site/data/`.
-- Sections, in order: header with four tiles, power ladder, this week, team explorer, luck board, league history (tapestry heatmap and parity), records, model scorecard with methodology.
+- Hostable on GitHub Pages by publishing `site/`. The weekly GitHub Action (`.github/workflows/weekly.yml`) runs `scripts/build.py`, `scripts/ml_predict.py` and `scripts/export_site.py`, then commits `experiments/live/`, `site/data/` and `outputs/`.
+- Sections, in order: header with four tiles, power ladder, this week, rest of season (only when `data/ml.json` exists), team explorer, luck board, league history (tapestry heatmap and parity), records, model scorecard with methodology.
 
 ## Exporter (`scripts/export_site.py`)
 
@@ -39,7 +39,13 @@ Reads `outputs/elo_games.csv`, `outputs/ratings_current.json`, `outputs/model_re
 - Ladder: top three rows are larger, bars are 14px, a filled tag marks the week's biggest riser and faller. This Week: the biggest Elo-vs-Vegas gap is a wide feature card, the other games follow as the grid.
 - Motion, only without `prefers-reduced-motion`: ladder and luck bars grow from 1500 over 400ms the first time their section scrolls into view (IntersectionObserver, once), and the hero numerals count up once on load. Nothing else animates.
 
+## ML model on the site (M4 Phase 1, 2026-10-04)
+
+- `site/data/ml.json` is written by `export_ml` in the exporter only when the ledger `experiments/live/<season>.csv` exists (a stale copy is deleted otherwise), and the nine other files are byte-identical with or without it (tested). The page fetches it optionally; without it nothing changes (the browser logs one 404 for the missing file).
+- With it: This week cards get an Elo, Model, Vegas table (home win chance and line); the gap tags and the week headline switch to model vs Vegas in percentage points; a "QB change" line shows when |qb_delta_diff| >= 0.08. JS inserts "Rest of season" after This week, adds its nav link and renumbers the kickers (01 to 08). Projected wins by division (4 columns from 1280px, 2 from 760px): grey wins so far, model bar in `--series-3`, Elo as a tick; each row is a `<details>` with the team's remaining games. The scorecard gets a "Live 2026 record" block and the methodology a Model paragraph with the ledger link and last run time.
+- `--series-3` (model): `#7b4fc9` light, `#a06ae8` dark, validated with the dataviz script against Elo and Vegas.
+
 ## Open items
 
-- The weekly GitHub Action and Pages deployment.
+- Pages deployment (the weekly Action exists since 2026-10-04; it commits data but does not host).
 - Playoff odds and starting-QB adjustment are not on the site yet.
