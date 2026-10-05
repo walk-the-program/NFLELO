@@ -2,7 +2,7 @@
 
 Written 2026-10-05, for Walker to read and approve before anything is built. Read `context/m5-data-scope.md` first (what the free data can and can't support), then `context/ml-m3-method.md` (the game model this extends).
 
-Status: **draft, awaiting Walker's decisions (section 9).**
+Status: **approved 2026-10-05** (M5-D1 (a) CC BY only; D2 yes; D3 yes; D4 yes). Build in progress: first player values and lineups, then the ladder on 2012-2019. The holdout, shadow wiring, and site work come after a review.
 
 ---
 
@@ -160,7 +160,7 @@ Built by Opus agents, reviewed by me, and committed only after the checks pass.
 
 ---
 
-## 9. Decisions for Walker
+## 9. Decisions for Walker (all decided 2026-10-05, as recommended)
 
 - **M5-D1. License for snap shares.** How much a rotational starter plays is only measured in participation data (CC BY-SA). Using it would make the game model itself share-alike. Using public usage stats instead keeps it CC BY.
   - **(a)** CC BY only, estimating playing time from carries, targets, and credited plays. Participation is used only to check how good that estimate is, never as an input.
