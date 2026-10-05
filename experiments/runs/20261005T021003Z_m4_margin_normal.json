@@ -1,0 +1,470 @@
+{
+  "name": "m4_margin_normal",
+  "label": "dev",
+  "window": {
+    "seasons": [
+      2006,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 3450,
+  "games_hash": "52b8194df3a2ebf4",
+  "metrics": {
+    "n": 3450,
+    "brier": 0.21512751348307832,
+    "logloss": 0.6199429498650083,
+    "accuracy": 0.6483580354548096,
+    "ece": 0.012949680060600358,
+    "crps": 7.662042986226664,
+    "mae": 10.66711613026829
+  },
+  "features": [
+    "elo_logit",
+    "adj_epa_margin",
+    "qb_delta_diff"
+  ],
+  "params": {
+    "mean": "WLS on A4s features",
+    "features": [
+      "elo_logit",
+      "adj_epa_margin",
+      "qb_delta_diff"
+    ],
+    "train_start": 2001,
+    "season_half_life": 8.0,
+    "sigma": "weighted residual SD of the training fit",
+    "ratings": {
+      "lam": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "keynum": {
+      "kmax": 20,
+      "r_abs": [
+        0.02718,
+        0.694703,
+        0.617269,
+        2.900444,
+        0.874558,
+        0.561775,
+        1.019698,
+        1.904056,
+        0.630959,
+        0.246165,
+        1.423749,
+        0.720542,
+        0.380101,
+        1.007243,
+        1.179909,
+        0.344291,
+        0.518119,
+        1.119087,
+        0.896209,
+        0.441202,
+        0.931893
+      ],
+      "fit_seasons": [
+        2001,
+        2005
+      ]
+    },
+    "shape": "normal"
+  },
+  "data": {
+    "data/games.csv": "fe6d83a49657593e5c0d0d7b0cc89b09e7acd24447cc8086f810de814497b8d0",
+    "data/raw/ml/pbp/1999": "6263ca0dcafed4110f1da80be5126eedc2fba948b3de111dc2e8dd94165ce595",
+    "data/raw/ml/pbp/2000": "29a0904f123de7fe9c10ff07e7605bb29d753ff87f2026659605e60b2c0aa243",
+    "data/raw/ml/pbp/2001": "7b34b78901915ca98449190a1a911308275cc764eb3e565376c3d44667933dc1",
+    "data/raw/ml/pbp/2002": "46fe8b49e4f94e479cf8e5dbb87d90b577d76d0a503d6bf4f2191902f95391a2",
+    "data/raw/ml/pbp/2003": "c45fa61ddb3eba8c316f8c680362284ed01174728ca6e22bdfdba6083d5ec707",
+    "data/raw/ml/pbp/2004": "c95a80bffc740d438965320a6014f9cb839fa57e92e114b2783fc76d8acce653",
+    "data/raw/ml/pbp/2005": "c7e4b4984af805df9719a23004a967593e7d503025b1c301973606e0e4f7cc61",
+    "data/raw/ml/pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+    "data/raw/ml/pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+    "data/raw/ml/pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+    "data/raw/ml/pbp/2009": "5bfb6559343c04092d1ad66c1479782d085d9f390e6806be0a7ca7ec37124806",
+    "data/raw/ml/pbp/2010": "74ad605fea53c27afd00eee71c53b86b5cfbf7133d1a7b5b8f0067d817e55785",
+    "data/raw/ml/pbp/2011": "26727f9d2b0e4f9f616e746b87b9a29359f37a4b484f66f7312baf883d85e958",
+    "data/raw/ml/pbp/2012": "3277aded9792c419cc853cf307f2206c3fb0908d91750b4e1d3d66b567407c66",
+    "data/raw/ml/pbp/2013": "2a31a7cd0e7e2306f626a0f1f4bb96679e5b3e92a8729695858adca35d8b2686",
+    "data/raw/ml/pbp/2014": "c6910558e235dac664b1b7f02654d47ea8d51904ef9ace5d4f015165604e0b12",
+    "data/raw/ml/pbp/2015": "b3314a52b781a00417528b2e3388d2596098cdbe7b565d3c962d7171a98ae70f",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/1999": "b590c0c595ae702489068ed30d25460a1da2f129ce47c4143c8c28618fbb2749",
+    "data/raw/ml/schedules/2000": "d11ca64a246a9b9ce98beb15af6a337887f1a31658a1271d510ef62e094fd927",
+    "data/raw/ml/schedules/2001": "59deb3483354d8e24a55eef5e508f4824a3cdfff44936adea6d02af34c64fffd",
+    "data/raw/ml/schedules/2002": "b394de36fc6286647bdfa1a82383b0fec5f83a5e0aeaefc010336c72f1365545",
+    "data/raw/ml/schedules/2003": "70b3c8a10df7a205ee8bc446fa40dca4f7408f3900d063f1881860119de4834c",
+    "data/raw/ml/schedules/2004": "64d26bdf22af5736b507a04b82c73b17ded7765ad2940c02d880abbe5779d978",
+    "data/raw/ml/schedules/2005": "3535ab82c2c6b866d94623aba9f37eac3b7497fd5ff61898904e03420d80795a",
+    "data/raw/ml/schedules/2006": "04e8c1a0394137e8493db6bf228a75ab1e0e8104eca4056380c13168174fca98",
+    "data/raw/ml/schedules/2007": "ed35269017c5342a04e621717760da8ccdc68421f7a38685eaa355af90d875b2",
+    "data/raw/ml/schedules/2008": "76a274f12d0efbdc6220870e083597fe6669f33bf5f94d30ade9d11efbc3423d",
+    "data/raw/ml/schedules/2009": "b720c554d58f8e8bc4ef4fe3ada0528f1f4065bde6926395f5c4ed46f6c19579",
+    "data/raw/ml/schedules/2010": "c6eb6d6390b8808ab6fe7a1c177d45b2d31c4dc3f7b5ccf3a9ff525c9afe758f",
+    "data/raw/ml/schedules/2011": "367cd43a9a9499d875a00dc12d2476ea3bfabc36dfbb82399a695f5230618232",
+    "data/raw/ml/schedules/2012": "94fd313c6126390c47c936cc04c986ec6a2526cad776f078e61c8e740171ceb0",
+    "data/raw/ml/schedules/2013": "48b55301b46a4acc55b1263555b01d62475fce5196f943176cf5bb23b5b979b6",
+    "data/raw/ml/schedules/2014": "56c8544f26975a429dd1dcd67996b28cb3680c742c79c2367bfea1e35ae93940",
+    "data/raw/ml/schedules/2015": "68c3bf6df90e969fe80aa46eb3351ad624e5e7c3f85c664644811508bbb647c3",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56"
+  },
+  "git": {
+    "sha": "0e22932c58494fb4d3db2f2b815fc223689f802e",
+    "dirty": true
+  },
+  "timestamp": "2026-10-05T02:10:03+00:00",
+  "notes": "M4 margin model, normal shape.",
+  "comparisons": {
+    "mae": {
+      "model": 10.66711613026829,
+      "elo": 10.731077846133225,
+      "market": 10.487391304347826,
+      "model_minus_elo": {
+        "n": 3450,
+        "diff": -0.06396171586493442,
+        "ci_low": -0.11814607673740392,
+        "ci_high": -0.00899145542721765,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.027652598359710436
+      },
+      "model_minus_market": {
+        "n": 3450,
+        "diff": 0.17972482592046413,
+        "ci_low": 0.09554776188286426,
+        "ci_high": 0.2683887757320855,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.044216121804442676
+      }
+    },
+    "minus_A4s_brier": {
+      "n": 3450,
+      "diff": 4.15842516881049e-05,
+      "ci_low": -0.00039339410767222393,
+      "ci_high": 0.0005071543791905946,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.00023342664120610984,
+      "metric": "brier"
+    },
+    "shape_rule": {
+      "best": "keynum",
+      "other_minus_best": {
+        "n": 3450,
+        "diff": 0.014067217212453388,
+        "ci_low": 0.006187498314443605,
+        "ci_high": 0.022087100283751993,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.004152423377919696
+      },
+      "within_1se": false,
+      "chosen": "keynum"
+    }
+  },
+  "calibration": {
+    "ece_null": {
+      "n": 3450,
+      "p05": 0.01004080262700302,
+      "median": 0.01617917608084543,
+      "p95": 0.025520504548055063,
+      "reps": 500
+    },
+    "cover_by_bin": [
+      {
+        "bin": "(-inf, -7]",
+        "n": 213,
+        "home_covers": 0.5446009389671361,
+        "p05": 0.4413145539906103,
+        "p95": 0.5586854460093896,
+        "inside": true
+      },
+      {
+        "bin": "(-7, -3]",
+        "n": 416,
+        "home_covers": 0.5240384615384616,
+        "p05": 0.45913461538461536,
+        "p95": 0.5408653846153846,
+        "inside": true
+      },
+      {
+        "bin": "(-3, 0]",
+        "n": 573,
+        "home_covers": 0.47469458987783597,
+        "p05": 0.46596858638743455,
+        "p95": 0.5340314136125655,
+        "inside": true
+      },
+      {
+        "bin": "(0, 3]",
+        "n": 689,
+        "home_covers": 0.5007256894049347,
+        "p05": 0.46879535558780844,
+        "p95": 0.5312046444121916,
+        "inside": true
+      },
+      {
+        "bin": "(3, 7]",
+        "n": 825,
+        "home_covers": 0.48727272727272725,
+        "p05": 0.4715151515151515,
+        "p95": 0.5284848484848484,
+        "inside": true
+      },
+      {
+        "bin": "(7, inf]",
+        "n": 734,
+        "home_covers": 0.4659400544959128,
+        "p05": 0.47002724795640327,
+        "p95": 0.5299727520435967,
+        "inside": false
+      }
+    ]
+  },
+  "coefficients": [
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.26403755489481545,
+      "coef": {
+        "elo_logit": 6.678757654497053,
+        "adj_epa_margin": 3.6094060051498458,
+        "qb_delta_diff": 28.056320198774635
+      },
+      "sigma": 13.303659607946548,
+      "n_train": 1272,
+      "season": 2006
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": -0.08269161820433113,
+      "coef": {
+        "elo_logit": 6.380714800103328,
+        "adj_epa_margin": 3.708515291268241,
+        "qb_delta_diff": 24.5800784417617
+      },
+      "sigma": 13.405255217351842,
+      "n_train": 1528,
+      "season": 2007
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.10678503297763287,
+      "coef": {
+        "elo_logit": 6.226610687112015,
+        "adj_epa_margin": 6.883913593541466,
+        "qb_delta_diff": 24.08905168077605
+      },
+      "sigma": 13.488413028968482,
+      "n_train": 1784,
+      "season": 2008
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.17289069995858006,
+      "coef": {
+        "elo_logit": 6.188240236374648,
+        "adj_epa_margin": 7.958704112102465,
+        "qb_delta_diff": 24.92968542753965
+      },
+      "sigma": 13.558541769919689,
+      "n_train": 2040,
+      "season": 2009
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.2680992052561006,
+      "coef": {
+        "elo_logit": 5.946655545540223,
+        "adj_epa_margin": 10.8357840496731,
+        "qb_delta_diff": 23.57019665287925
+      },
+      "sigma": 13.717132088098301,
+      "n_train": 2296,
+      "season": 2010
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.37729833755114833,
+      "coef": {
+        "elo_logit": 5.485423125152853,
+        "adj_epa_margin": 12.788195636866092,
+        "qb_delta_diff": 22.087283193755432
+      },
+      "sigma": 13.777566205209068,
+      "n_train": 2552,
+      "season": 2011
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.525193818357075,
+      "coef": {
+        "elo_logit": 5.4026908105096005,
+        "adj_epa_margin": 13.360065439205718,
+        "qb_delta_diff": 23.53074729224841
+      },
+      "sigma": 13.780974221072972,
+      "n_train": 2808,
+      "season": 2012
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.4516475433197505,
+      "coef": {
+        "elo_logit": 5.62615444373851,
+        "adj_epa_margin": 12.475726881951129,
+        "qb_delta_diff": 22.220939013411687
+      },
+      "sigma": 13.858243488956564,
+      "n_train": 3064,
+      "season": 2013
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.39339026280917333,
+      "coef": {
+        "elo_logit": 6.076299368698784,
+        "adj_epa_margin": 10.394689608492655,
+        "qb_delta_diff": 23.1744320917092
+      },
+      "sigma": 13.733725613247154,
+      "n_train": 3320,
+      "season": 2014
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.26462781881277897,
+      "coef": {
+        "elo_logit": 6.455787135150278,
+        "adj_epa_margin": 7.696216129592597,
+        "qb_delta_diff": 23.047484276502537
+      },
+      "sigma": 13.836554700144198,
+      "n_train": 3576,
+      "season": 2015
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.16391197676138125,
+      "coef": {
+        "elo_logit": 6.520009991032548,
+        "adj_epa_margin": 7.213701325632842,
+        "qb_delta_diff": 23.571266716529117
+      },
+      "sigma": 13.71921438514348,
+      "n_train": 3832,
+      "season": 2016
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.28443220275044917,
+      "coef": {
+        "elo_logit": 6.365194994337313,
+        "adj_epa_margin": 7.7245511563873075,
+        "qb_delta_diff": 24.73426159013314
+      },
+      "sigma": 13.519593625283743,
+      "n_train": 4088,
+      "season": 2017
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.44640008045597557,
+      "coef": {
+        "elo_logit": 5.984464526474654,
+        "adj_epa_margin": 9.287354703044992,
+        "qb_delta_diff": 27.508682567230153
+      },
+      "sigma": 13.523869110704739,
+      "n_train": 4344,
+      "season": 2018
+    },
+    {
+      "features": [
+        "elo_logit",
+        "adj_epa_margin",
+        "qb_delta_diff"
+      ],
+      "intercept": 0.4188042933890381,
+      "coef": {
+        "elo_logit": 5.962323019334672,
+        "adj_epa_margin": 9.088094715765832,
+        "qb_delta_diff": 27.004822732351638
+      },
+      "sigma": 13.516688744057472,
+      "n_train": 4600,
+      "season": 2019
+    }
+  ]
+}

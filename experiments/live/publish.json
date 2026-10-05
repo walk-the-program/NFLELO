@@ -1,0 +1,4 @@
+{
+  "publish_sim": false,
+  "note": "Site display gate for the season simulation (playoff odds and the 10th-90th percentile win range). The weekly job still runs the simulation and appends to sim_<season>.csv; scripts/export_site.py leaves the odds and win ranges out of site/data/ml.json until this is true. Set to true only after the M4 holdout sign-off passes and Walker approves (context/ml.md, M4 holdout pre-registration). Margin-model spreads are not gated."
+}

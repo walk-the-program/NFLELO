@@ -127,6 +127,51 @@ def test_scoring_brier_accuracy_and_ats(tmp_path):
     assert s["market_games"]["n"] == 1 and s["market_games"]["market"]["brier"] == pytest.approx(0.16, abs=1e-4)
     # A: Elo 5.0 > line 3.0 -> takes home; margin 3 == line -> push. B: Elo equals the line -> no pick.
     assert s["ats_elo"] == {"w": 0, "l": 0, "push": 1, "no_pick": 1}
+    assert s["ats_model"] == {"w": 0, "l": 0, "push": 0, "no_pick": 0, "games": 0}   # Phase 1 rows have no spread
+
+
+def test_model_ats_counts_only_rows_with_a_spread(tmp_path):
+    path = tmp_path / "ledger.csv"
+    r = rows(pd.Timestamp("2026-10-07T14:00:00Z"), KICK, spread_market=[3.0, -2.0])
+    r["spread_model"] = [6.5, np.nan]                              # A: model likes home more than Vegas
+    live.append_rows(r, path)
+    results = pd.DataFrame({"game_id": ["2026_05_A", "2026_05_B"], "season": 2026, "week": [5, 5],
+                            "y": [1.0, 0.0], "margin": [7.0, -10.0]})
+    s = live.live_record(live.read_ledger(path, market=True), results, from_week=5)["final"]
+    assert s["ats_model"] == {"w": 1, "l": 0, "push": 0, "no_pick": 0, "games": 1}   # 7 beats the 3-point line
+
+
+def sim_rows(run_at, val=0.5):
+    teams = ["KC", "BUF"]
+    df = pd.DataFrame({"run_at_utc": live.utc_iso(run_at), "team": teams})
+    for c in live.SIM_PROBS:
+        df[c] = val
+    df["wins_mean"], df["wins_p10"], df["wins_p90"] = 9.0, 7.0, 11.0
+    df["n_sims"], df["tau_rest"], df["shape"], df["seed"], df["model_version"] = 100, 0.5, "keynum", 1, "x"
+    return df[live.SIM_COLUMNS]
+
+
+def test_simulation_history_is_append_only(tmp_path):
+    path = tmp_path / "sim.csv"
+    live.append_sim(sim_rows(T0), path)
+    before = path.read_bytes()
+    live.append_sim(sim_rows(T0 + pd.Timedelta(days=4), 0.6), path)
+    assert path.read_bytes().startswith(before)
+    with pytest.raises(live.LedgerError):
+        live.append_sim(sim_rows(T0 + pd.Timedelta(days=1)), path)         # not later than the last run
+    bad = sim_rows(T0 + pd.Timedelta(days=9))
+    bad.loc[0, "playoffs"] = 1.2
+    with pytest.raises(live.LedgerError):
+        live.append_sim(bad, path)
+    assert len(live.read_sim(path)) == 4
+
+
+def test_simulation_baseline_is_the_previous_wednesday_run():
+    wed = pd.Timestamp("2026-10-14T14:00:00Z")                    # Wednesday 10:00 ET
+    runs = pd.Series([wed - pd.Timedelta(days=7), wed - pd.Timedelta(days=3), wed, wed + pd.Timedelta(days=4)])
+    assert live.sim_baseline(runs, wed) == wed - pd.Timedelta(days=7)          # Wednesday vs last Wednesday
+    assert live.sim_baseline(runs, wed + pd.Timedelta(days=4)) == wed          # Sunday vs this Wednesday
+    assert live.sim_baseline(runs[:1], runs[0]) is None                         # first run: nothing to compare
 
 
 def test_projected_wins_counts_ties_as_half():
@@ -268,4 +313,41 @@ def test_exporter_with_ledger_writes_valid_ml_json(tmp_path, monkeypatch):
     assert all(g["p_home_model"] is not None and g["qb_change"]["name"] == "Somebody" for g in wk["games"])
     assert len(wk["flagged"]) == min(3, len(wk["games"])) and wk["headline"]
     assert ml["live"]["final"]["n"] == 0                   # nothing from the live weeks is final yet
+    assert ml["playoff_odds"] is None                      # no simulation history in this directory
     json.dumps(ml, allow_nan=False)
+
+    # with two simulation runs: odds per conference, change since the earlier Wednesday run, win ranges
+    (live_dir / live.PUBLISH_FILE).write_text(json.dumps({"publish_sim": True}))
+    wed = run_at.floor("D") - pd.Timedelta(days=(run_at.dayofweek - 2) % 7) + pd.Timedelta(hours=14)
+    teams = sorted({t["team"] for t in ml["rest"]["teams"]})
+    for k, at in enumerate((wed - pd.Timedelta(days=7), wed)):
+        df = pd.DataFrame({"run_at_utc": live.utc_iso(at), "team": teams})
+        for c in live.SIM_PROBS:
+            df[c] = 0.25 + 0.25 * k
+        df["wins_mean"], df["wins_p10"], df["wins_p90"] = 8.5, 6.0, 11.0
+        df["n_sims"], df["tau_rest"], df["shape"], df["seed"], df["model_version"] = 20000, 0.5, "keynum", 1, "A4s+M"
+        live.append_sim(df[live.SIM_COLUMNS], live.sim_path(season, live_dir))
+    export_site.export_ml(schedule, ratings, elo, upcoming, live_dir)
+    ml = json.loads((out / "ml.json").read_text())
+    po = ml["playoff_odds"]
+    assert po["runs"] == 2 and po["baseline_run_utc"] == live.utc_iso(wed - pd.Timedelta(days=7))
+    assert sorted(po["conferences"]) == ["AFC", "NFC"] and sum(len(v) for v in po["conferences"].values()) == 32
+    row = po["conferences"]["AFC"][0]
+    assert row["playoffs"] == 0.5 and row["d_playoffs"] == pytest.approx(0.25) and row["div"].startswith("AFC")
+    assert all(t["wins_p10"] == 6.0 and t["wins_p90"] == 11.0 for t in ml["rest"]["teams"])
+    assert ml["sim_published"] is True
+    json.dumps(ml, allow_nan=False)
+
+    # gated: the simulation history is there, but publish_sim is false (the committed default) -> nothing shown
+    (live_dir / live.PUBLISH_FILE).write_text(json.dumps({"publish_sim": False}))
+    export_site.export_ml(schedule, ratings, elo, upcoming, live_dir)
+    ml = json.loads((out / "ml.json").read_text())
+    assert ml["sim_published"] is False and ml["playoff_odds"] is None
+    assert all(t["wins_p10"] is None and t["wins_p90"] is None for t in ml["rest"]["teams"])
+    (live_dir / live.PUBLISH_FILE).unlink()
+    export_site.export_ml(schedule, ratings, elo, upcoming, live_dir)
+    assert json.loads((out / "ml.json").read_text())["playoff_odds"] is None      # no file: not published
+
+
+def test_committed_publish_flag_keeps_the_simulation_off_the_site():
+    assert live.publish_flags()["publish_sim"] is False

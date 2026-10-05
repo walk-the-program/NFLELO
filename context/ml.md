@@ -292,7 +292,7 @@ No paid APIs, no cloud.
 | M1 | Data layer and leak-proof features | none | Built 2026-10-03, awaiting Walker's review |
 | M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Built 2026-10-03 (reproduces both exactly), awaiting Walker's review |
 | M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | **Passed 2026-10-04.** Holdout: A4s beats Elo by 0.0035 Brier (CI [-0.0063, -0.0007]). The ECE of 0.028 is within the noise range for n = 1,615; the 0.02 bar is recorded as flawed. |
-| M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Phase 1 built 2026-10-04 (weekly predictions, ledger, site, Action), awaiting Walker's review. Phase 2 not started. |
+| M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Phase 1 built 2026-10-04 (weekly predictions, ledger, site, Action), awaiting Walker's review. Phase 2 built 2026-10-04. The 2002-2005 tau_rest (0.5) failed on DEV; Walker had it re-tuned on DEV (4.5) and approved one holdout run for the margin model and playoff odds, pre-registered below. Holdout not run yet. Playoff odds gated off the site until sign-off. |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Not started |
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Not started |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | Not started |
@@ -445,6 +445,112 @@ Other observations:
 **Site.** This week shows Elo, Model and Vegas side by side (home win chance and line; the model's line says "None"). The three biggest model-vs-Vegas gaps (percentage points) are tagged and the headline follows them. A "QB change" tag shows when |qb_delta_diff| >= 0.08 EPA per dropback (`live.QB_CHANGE_THRESHOLD`; about 7 points of win chance in an even game, about 1.8 SD on DEV), naming the side with the larger delta. A new "03 / Rest of season" section (inserted by JS only when `ml.json` exists, kickers renumbered) shows projected wins by division, model bar plus Elo tick, each row expanding to its remaining games. The scorecard has a live 2026 block (empty-state copy until week 5 is scored) and the methodology a Model paragraph with the ledger link and last-run time. Model color: `--series-3`, `#7b4fc9` light and `#a06ae8` dark, checked with the dataviz validator against Elo and Vegas (all pairs pass CVD and normal-vision; Elo's known chroma-floor failure is unchanged).
 
 **Weekly Action.** Wednesday 14:00 UTC and Sunday 12:00 UTC plus manual runs: build.py, ml_predict.py, export_site.py, then commit `experiments/live`, `site/data` and `outputs` and push. Cold run: about 28 seasons of play-by-play (about 13 MB each, roughly 360 MB) plus the ML requirements; a few minutes. `data/games.csv` is rebuilt each run but not committed.
+
+### M4 Phase 2 build notes (2026-10-04)
+
+**Where things are.** `nflelo/ml/models/margin.py` (mean line, sigma, the two shapes, key-number fit, CRPS, sampling), `nflelo/ml/sim/tiebreak.py` (NFL tiebreakers and seeding), `nflelo/ml/sim/history.py` (actual fields and seeds from the bracket plus the public record), `nflelo/ml/sim/season.py` (the simulation), `nflelo/ml/sim/state.py` (simulation inputs from the live feature code; `as_of_view` rolls a past season back for backtests). Script: `scripts/ml_m4.py margin|tiebreak|tune|backtest|devcurve`. `eval/calibration.py` gained `ece_null_range` (the sample-size-aware check). Live: `scripts/ml_predict.py` (margin fit, `spread_model`, the simulation), `nflelo/ml/live.py` (`ats`, simulation history), `scripts/export_site.py` (`build_playoff_odds`). Reference data: `data/sources/playoff_seeds_2002_2025.csv` (see its README entry). Tests: `tests/ml/test_margin.py`, `test_tiebreak.py`, `test_sim.py`, additions to `test_live.py`. Saved outputs for the notebook: `data/raw/ml/m4/` (gitignored).
+
+**Walker's override of spec section 4 ("single source").** The 2026 live win probability stays A4s all season, since the live record has started. The margin model supplies `spread_model` and drives the simulation. `ml_predict.model_columns` computes `p_home_model` exactly as Phase 1; a test checks it bit for bit with and without the margin model, and another pins `model_2026.json` (`A4s-2026-c6b394e8`). New ledger rows carry `model_version` "A4s-2026-c6b394e8+M-2026-4aab0795"; old rows keep an empty `spread_model` (no backfill).
+
+**Margin model, DEV 2006-2019** (the 3,450 M3 games with moneylines, games hash 52b8194df3a2ebf4; walk-forward REG 2001..S-1, season half-life 8; registry runs `m4_margin_normal`, `m4_margin_keynum`):
+
+| | Value |
+|---|---|
+| MAE, model | 10.667 |
+| MAE, Elo spread (elo_diff/25) | 10.731 |
+| MAE, market spread (benchmark) | 10.487 |
+| Model minus Elo MAE | -0.064 [-0.118, -0.009], excludes zero |
+| Model minus market MAE | +0.180 [+0.096, +0.268] |
+| CRPS: continuous normal / rounded normal / key-number | 7.6638 / 7.6620 / 7.6480 |
+| Shape rule | normal minus key-number +0.0141, SE 0.0042: outside one SE, **key-number chosen** |
+
+| Implied win probability | Brier | Log loss | Acc | ECE | ECE null 5-95% | minus A4s Brier [95% CI] | within 1 SE |
+|---|---|---|---|---|---|---|---|
+| normal | 0.2151 | 0.6199 | 0.648 | 0.0129 | [0.010, 0.026] | +0.00004 [-0.00039, +0.00051] | yes |
+| key-number | 0.2153 | 0.6203 | 0.648 | 0.0141 | [0.009, 0.025] | +0.00018 [-0.00036, +0.00074] | yes |
+| A4s | 0.2151 | 0.6197 | 0.647 | 0.0114 | [0.010, 0.025] | | |
+
+- Home team beats our spread, by predicted spread (5-95% range of a fair coin at that n): (-inf, -7] 0.545 of 213 [0.441, 0.559]; (-7, -3] 0.524 of 416; (-3, 0] 0.475 of 573; (0, 3] 0.501 of 689; (3, 7] 0.487 of 825, all inside; **(7, inf] 0.466 of 734 [0.470, 0.530], just outside**: big home favorites cover a little less than half, so the spread runs about a point too high on them. One bin of six outside a 90% band is roughly what chance gives, so this is noted, not acted on.
+- 2019 fit: intercept +0.42, elo_logit +5.96, adj_epa_margin +9.09, qb_delta_diff +27.0, sigma 13.52. Key-number factors (2001-2005, |k| = 0..10): 0.03, 0.69, 0.62, 2.90, 0.87, 0.56, 1.02, 1.90, 0.63, 0.25, 1.42 (ties almost vanish: one tie in 1,270 games).
+- 2026 fit (`experiments/live/margin_2026.json`, M-2026-4aab0795, REG 2001-2025, n 6,471): intercept +0.36, elo_logit +5.72, adj_epa_margin +9.98, qb_delta_diff +25.87, sigma 13.26. Before saving, the script refits 2019 on the same frame and matches the logged DEV fit exactly (max |diff| 0).
+- Implementation: weighted least squares; sigma is the weighted residual SD with a degrees-of-freedom correction. The key-number shape multiplies the rounded normal by r(|k|) (|k| <= 20, else 1) and renormalizes; r is fit by iterative proportional fitting on 2001-2005 against an in-sample line on those seasons. Sampling is exact rejection sampling from the rounded normal.
+
+**Tiebreakers.** All 40 conference-seasons 2006-2025 reproduce the actual field and seeds exactly (and all 8 of 2002-2005). No seed in those 48 was decided by a points-based step or a coin toss, so nothing is excused. Truth: the bracket alone fixes 15 conference-seasons; in 33 it leaves some order open and the public seeds (nfldata `standings.csv`) decide, after a check that they are among the seedings the bracket allows. During the build the check caught one bug (common-games records were matched to the wrong clubs when a group wasn't in sorted order), which had produced three mismatches (2015 AFC, 2017 NFC, 2025 AFC); it is fixed. Rules follow nfl.com's page (read 2026-10-04): two-club and three-club lists for divisions and wild cards, step 0 for wild cards, restarts (two left: two-club step 1; three left: division step 1 or wild-card sweep), one club advances per application, division winners seeded with wild-card tiebreakers. In simulations both combined-ranking steps use net points (only margins exist); net touchdowns are never available, so the coin toss follows net points.
+
+**Simulation.** Vectorized draws and bracket; the tiebreakers run per simulated season in Python and are fast enough (about 0.25 ms per season). Team strength s_t = b1 c Elo_t + b2 adj_t + b3 qb_t with the listed starter carried forward; remaining REG means use each game's own features (the ledger's spread) with that QB term; playoff home edge = intercept + b1 c HFA; the Super Bowl drops it; playoff ties are a coin flip. Each simulated season draws one Normal(0, tau_rest) shock per team.
+
+**tau_rest tuning, 2002-2005** (2001 is left out: 31 teams and six divisions, which the 2002+ tiebreakers don't cover; 16 starts, 512 team-starts, 5,000 simulations per start, common random numbers). Made-playoffs Brier: 0: 0.1106, 0.5: 0.1103, 1: 0.1106, 2: 0.1104, 3: 0.1107, 4: 0.1109, 6: 0.1119, 8: 0.1144. **Chosen 0.5**, but the curve is flat from 0 to 3. By season it disagrees: 2002 (model fit on 2001 alone) keeps improving up to 8, 2004-2005 prefer 0 to 1.
+
+**Backtest, DEV 2006-2019** (56 starts, 1,792 team-starts, 10,000 simulations per start; tau 0.5 against 0 on the same random numbers):
+
+| Outcome | Brier tau 0.5 | Brier tau 0 | diff [95% CI, team-starts] | [95% CI, by season] | ECE | ECE null 5-95% |
+|---|---|---|---|---|---|---|
+| Made playoffs | 0.1214 | 0.1213 | +0.0001 [-0.0000, +0.0003] | [-0.0000, +0.0003] | **0.042** | [0.012, 0.026] |
+| Won division | 0.0881 | 0.0880 | +0.0001 [-0.0000, +0.0003] | [-0.0000, +0.0003] | 0.016 | [0.010, 0.024] |
+| #1 seed | 0.0317 | 0.0317 | -0.0000 [-0.0001, +0.0001] | | 0.009 | [0.006, 0.014] |
+| Reached SB | 0.0458 | 0.0458 | +0.0000 [-0.0001, +0.0002] | | 0.010 | [0.005, 0.015] |
+| Won SB | 0.0283 | 0.0283 | +0.0000 [-0.0000, +0.0001] | | 0.006 | [0.002, 0.010] |
+
+- **STOP condition met:** the tuned shock does not beat tau_rest = 0, and the made-playoffs odds fail the sample-size-aware calibration check. The reliability table shows overconfidence, as the spec predicted: predictions of 0.7-0.9 came true 64-75% of the time, 0.1-0.4 came true 21-45%. ECE by start week: 0.071 (week 4), 0.048, 0.035, 0.027 (week 16).
+- Descriptive only, not a selection (`ml_m4.py devcurve`, 5,000 simulations per start): DEV made-playoffs Brier and ECE by tau: 0: 0.1214 (0.039), 1: 0.1212 (0.039), 2: 0.1206 (0.034), 3: 0.1199 (0.025), 4: 0.1196 (0.020), 6: 0.1195 (0.015). So shocks of 4-6 points would help on DEV, but the pre-registered tuning window (four seasons) is too small and noisy to find that.
+- These 2002-2005 tuning and tau 0.5 backtest numbers were not logged; they are superseded by the DEV re-tune below.
+
+**Re-tune on DEV (Walker's decision, 2026-10-04).** Grid 0 to 8 by 0.5, 5,000 simulations per start with common random numbers, 56 starts (1,792 team-starts), made-playoffs Brier, smallest tau within one team-start bootstrap SE of the best (registry `m4_tau_rest_tune_dev`):
+
+| tau | 0 | 1 | 2 | 3 | 3.5 | 4 | **4.5** | 5 | 6 | 7 | 7.5 | 8 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Brier | 0.1214 | 0.1212 | 0.1206 | 0.1199 | 0.1199 | 0.1196 | **0.1194** | 0.1195 | 0.1195 | 0.1197 | 0.1200 | 0.1204 |
+| minus best (SE) | +0.0020 (0.0007) | +0.0018 (0.0006) | +0.0012 (0.0005) | +0.0005 (0.0003) | +0.0005 (0.0003) | +0.0002 (0.0002) | best | +0.0001 (0.0002) | +0.0001 (0.0003) | +0.0003 (0.0005) | +0.0006 (0.0006) | +0.0010 (0.0007) |
+
+Within one SE: 4.5 to 7.5. **Chosen: 4.5** (the best is also the smallest within one SE; 4.0 misses by a hair). ECE at 4.5 in the tuning sims (null 5-95%): made playoffs 0.016 [0.012, 0.028], division 0.023 [0.011, 0.025], #1 seed 0.012 [0.006, 0.015], reach SB 0.014 [0.004, 0.015] all inside; win SB 0.002 [0.002, 0.010] just under the band (a too-low ECE, not miscalibration: nearly every prediction is near 0).
+
+DEV backtest at 4.5 vs 0 (10,000 simulations per start; **in-sample for tau, so descriptive**; registry `m4_playoff_odds`, `m4_playoff_odds_tau0`):
+
+| Outcome | Brier 4.5 | Brier 0 | diff [95% CI, team-starts] | [95% CI, by season] | ECE | null 5-95% |
+|---|---|---|---|---|---|---|
+| Made playoffs | 0.1195 | 0.1213 | -0.0017 [-0.0031, -0.0004] | [-0.0044, +0.0008] | 0.018 | [0.012, 0.028] |
+| Won division | 0.0882 | 0.0880 | +0.0001 [-0.0011, +0.0013] | [-0.0017, +0.0022] | 0.021 | [0.011, 0.025] |
+| #1 seed | 0.0320 | 0.0317 | +0.0003 [-0.0005, +0.0010] | [-0.0008, +0.0014] | 0.012 | [0.006, 0.015] |
+| Reached SB | 0.0465 | 0.0458 | +0.0007 [-0.0001, +0.0016] | [-0.0004, +0.0019] | 0.014 | [0.004, 0.015] |
+| Won SB | 0.0281 | 0.0283 | -0.0002 [-0.0006, +0.0002] | [-0.0008, +0.0003] | 0.002 | [0.002, 0.010] (just under) |
+
+- Reliability at 4.5: predictions of 0.8-0.9 came true 86%, 0.9-1.0 98.6%; the largest gaps are +6 points at 0.3-0.4 and -7 at 0.7-0.8. At tau 0 the 0.8-0.9 bin came true only 74%.
+- Made playoffs by start week (Brier 4.5 / 0, ECE): week 4 0.1732 / 0.1764, 0.043; week 8 0.1383 / 0.1398, 0.032; week 12 0.1041 / 0.1056, 0.031; week 16 0.0625 / 0.0632, 0.026. Eight of 14 seasons improve, five get worse, one is level.
+- The shock helps "made playoffs" and leaves the other outcomes about level; reach-SB Brier is slightly worse (+0.0007, CI includes 0).
+
+**Timing.** Weekly run (`ml_predict.py --offline`, cache warm): 11.2 s end to end, of which the simulation is 1.0 s to build the state and 5.8 s for 20,000 seasons (tiebreakers 5.4 s). Tiebreaker reproduction 8.4 s for 24 seasons (mostly enumerating bracket-consistent seedings). 2002-2005 tuning 327 s; DEV tuning about 19 minutes (17 taus x 56 starts x 5,000 seasons); DEV backtest about 4 minutes; `ml_m4.py all` 1,373 s.
+
+**Site gate.** `experiments/live/publish.json` has `"publish_sim": false`: the weekly job keeps simulating (tau 4.5) and appending to `sim_2026.csv`, but the exporter leaves the odds and the win ranges out of `ml.json` until the sign-off. Margin spreads are published.
+
+**Sign-off code.** `ml_m4.py signoff-dry-run` runs the sign-off path on DEV without logging and compares every number with `margin_dev.json` and `backtest.json`; `ml_m4.py signoff` is the one holdout run (refuses if a holdout sign-off run already exists). Notebook: `notebooks/04_margin_and_playoff_odds.ipynb` (executed with tau 4.5).
+
+### M4 holdout pre-registration (written 2026-10-04, before any 2020-2025 margin or playoff-odds number was computed)
+
+Walker approved ONE holdout run covering the margin model and the playoff odds. This subsection is the protocol; it is committed before the run, and the result is recorded in this file whatever it shows. Nothing is retuned afterwards.
+
+**Frozen before the run** (all in committed code; the run refuses to start if a holdout sign-off run already exists in `experiments/runs/`):
+- Margin model: features `elo_logit`, `adj_epa_margin`, `qb_delta_diff`; weighted least squares fit walk-forward, season S fit on REG 2001..S-1 with weights 0.5 ** ((S - 1 - season) / 8); sigma = weighted residual SD of that fit (degrees-of-freedom corrected). Shape: **key-number** (`mm.CHOSEN_SHAPE`), factors fit on 2001-2005 only, |k| <= 20, symmetric. M3 rating knobs unchanged (lambda 100, half-life 48, rho 0.25, QB k 100).
+- Playoff simulation: **tau_rest = 4.5** points (`sim.TAU_REST`, tuned on DEV 2006-2019 by the one-SE rule; see the Phase 2 notes), the key-number shape, 10,000 simulated seasons per start, seed `20261004 + 1000 * season + start week` for both the frozen tau and tau = 0 (common random numbers), NFL tiebreakers as validated (`tiebreak.py`).
+- Bootstraps: 2,000 replicates, seed 20261003. ECE: 10 uniform bins; null range = 5th to 95th percentile of the ECE of a perfectly calibrated forecaster at the same n (500 draws, outcomes drawn from the predictions, seed 20261003, `calibration.ece_null_range`). Fair-coin bands for the spread bins: 20,000 binomial draws, seed 20261003.
+
+**Data and windows.**
+- Margin model: REG 2020-2025 games with a moneyline (the M3 sign-off game set: n = 1,615, games hash `1b27abff81bddb2c` expected); each must also have a market spread or the run stops. Walk-forward fits for each season 2020-2025.
+- Playoff odds: seasons 2020-2025 (the 7-seed era), simulated from weeks 4, 8, 12 and 16 (24 starts, 768 team-starts). Each start uses only what was available an hour before that week's first kickoff: the margin fit for that season (REG 2001..S-1), features and Elo as of that moment, starters listed only for the start week (`state.as_of_view`). Truth: actual playoff fields and seeds from the nflverse bracket plus `data/sources/playoff_seeds_2002_2025.csv`.
+
+**Pass rules (exact).**
+- Margin model, primary: with d = |margin - model spread| - |margin - Elo spread (elo_diff / 25)| per game, the upper end of the 95% paired bootstrap CI of mean(d) is below 0. **PASS iff ci_high < 0.**
+- Margin model, secondary (each reported pass or fail; they do not change the primary verdict):
+  - S1: implied win-probability Brier (key-number shape) minus A4s Brier on the same games is at most one bootstrap SE (diff <= boot_se). This informs a possible 2027 switch to one source.
+  - S2: ECE of the implied win probability is at or below the 95th percentile of its null.
+  - S3: the home team beats the model's spread inside the fair-coin 5-95% band in at least 5 of the 6 spread bins ((-inf,-7], (-7,-3], (-3,0], (0,3], (3,7], (7,inf)).
+  - Descriptive: market spread MAE, CRPS of key-number vs rounded normal, MAE by season.
+- Playoff odds, primary (both must hold): P1, the made-playoffs ECE at the frozen tau is at or below the 95th percentile of its null at n = 768; P2, with d = (p_tau - y)^2 - (p_0 - y)^2 per team-start, the upper end of the 95% team-start paired bootstrap CI of mean(d) is below +0.001. **PASS iff P1 and P2.**
+- Playoff odds, secondary: ECE at or below the 95th percentile of its null for won division, #1 seed, reached Super Bowl, won Super Bowl (each pass or fail).
+- Every ECE rule (margin S2, playoff P1 and the playoff secondaries) is **one-sided**: PASS iff ECE <= p95, the 95th percentile of the ECE of a perfectly calibrated forecaster at the same n. An ECE below the 5th percentile is not miscalibration. Whether each ECE also falls inside the two-sided [p05, p95] range is reported as a descriptive field only (`ece_in_null_range`, `info_two_sided_in_null_range`).
+- **Rule change, 2026-10-05:** the ECE rules were changed from two-sided (p05 <= ECE <= p95) to one-sided (ECE <= p95) before any holdout number was computed, because the two-sided version penalized better-than-null calibration (on DEV, won-Super-Bowl odds at tau 4.5 have ECE 0.002 against [0.002, 0.010], just under the band, because almost every prediction is near 0).
+- Descriptive: made-playoffs Brier (frozen tau and tau = 0) and ECE by start week and by season; the season-cluster bootstrap CI; reliability tables.
+
+**Procedure.** First `python scripts/ml_m4.py signoff-dry-run`: the same code path on DEV 2006-2019 without logging, which must reproduce the logged DEV margin numbers and the DEV backtest exactly (max |diff| 0). Then, once, `python scripts/ml_m4.py signoff`: runs on 2020-2025, prints every number and each rule's verdict, writes `data/raw/ml/m4/signoff_holdout.json`, and logs `m4_signoff_margin` and `m4_signoff_playoff_odds` to `experiments/runs/` with `holdout: true`. The site gate (`experiments/live/publish.json`) is opened only if the playoff-odds primary passes and Walker approves. The 2026 live win probability stays A4s whatever the margin result.
 
 ## 10. Open decisions for Walker (start the ML chat here)
 

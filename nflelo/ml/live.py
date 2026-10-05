@@ -194,8 +194,13 @@ def ats_elo(rows: pd.DataFrame) -> dict:
     """Elo's record against the market spread. Elo takes the home side when its spread is above
     the market's, the away side when below, and passes when equal. Positive spreads favor home,
     so the home side covers when the home margin beats the market spread; equal is a push."""
-    r = rows[rows["spread_elo"].notna() & rows["spread_market"].notna()]
-    side = np.sign(r["spread_elo"].to_numpy(float) - r["spread_market"].to_numpy(float))
+    return ats(rows, "spread_elo")
+
+
+def ats(rows: pd.DataFrame, col: str) -> dict:
+    """Record against the market spread for the spread in `col` (see `ats_elo`); rows without one are skipped."""
+    r = rows[rows[col].notna() & rows["spread_market"].notna()]
+    side = np.sign(r[col].to_numpy(float) - r["spread_market"].to_numpy(float))
     cover = np.sign(r["margin"].to_numpy(float) - r["spread_market"].to_numpy(float))
     picked = side != 0
     return {"w": int(((side == cover) & picked & (cover != 0)).sum()),
@@ -225,6 +230,9 @@ def score(selected: pd.DataFrame, results: pd.DataFrame, from_week: int) -> dict
                                "model": _m(ym, mk["p_home_model"].to_numpy(float)),
                                "elo": _m(ym, mk["p_home_elo"].to_numpy(float))}
     out["ats_elo"] = ats_elo(rows)
+    # The model's spread exists only for rows written after the margin model went live (M4 Phase 2).
+    with_spread = rows[rows["spread_model"].notna()] if "spread_model" in rows else rows.iloc[:0]
+    out["ats_model"] = {**ats(with_spread, "spread_model"), "games": int(len(with_spread))}
     out["weeks"] = sorted(int(w) for w in rows["week"].unique())
     return out
 
@@ -278,6 +286,71 @@ def projected_wins(games: pd.DataFrame, p_model: pd.Series, p_elo: pd.Series) ->
         base = x["w"] + 0.5 * x["t"]
         rows.append({**x, "proj_model": round(base + x["proj_model"], 2), "proj_elo": round(base + x["proj_elo"], 2)})
     return pd.DataFrame(rows)
+
+
+# --------------------------------------------------------------------------- playoff-odds history
+
+# experiments/live/sim_<season>.csv: append-only, one row per (simulation run, team).
+SIM_COLUMNS = ["run_at_utc", "team", "playoffs", "division", "seed1", "reach_sb", "win_sb", "wins_mean",
+               "wins_p10", "wins_p90", "n_sims", "tau_rest", "shape", "seed", "model_version"]
+SIM_PROBS = ("playoffs", "division", "seed1", "reach_sb", "win_sb")
+
+
+# Site display gate (experiments/live/publish.json, committed). Missing file or key means "don't publish".
+PUBLISH_FILE = "publish.json"
+
+
+def publish_flags(root: Path = LIVE_DIR) -> dict:
+    """{"publish_sim": bool}: whether the site may show the simulation (playoff odds, win ranges)."""
+    p = Path(root) / PUBLISH_FILE
+    d = json.loads(p.read_text()) if p.exists() else {}
+    return {"publish_sim": bool(d.get("publish_sim", False))}
+
+
+def sim_path(season: int, root: Path = LIVE_DIR) -> Path:
+    return root / f"sim_{int(season)}.csv"
+
+
+def append_sim(rows: pd.DataFrame, path: Path) -> int:
+    """Append one simulation run (32 rows sharing run_at_utc). Refuses a run not later than the last one."""
+    if rows.empty:
+        return 0
+    if list(rows.columns) != SIM_COLUMNS:
+        raise LedgerError(f"simulation rows need exactly these columns, in order: {SIM_COLUMNS}")
+    if rows["run_at_utc"].nunique() != 1 or rows["team"].duplicated().any():
+        raise LedgerError("one append is one simulation run: one run_at_utc, one row per team")
+    for c in SIM_PROBS:
+        if ((rows[c] < 0) | (rows[c] > 1)).any():
+            raise LedgerError(f"{c} outside [0, 1]")
+    path = Path(path)
+    if path.exists() and path.stat().st_size > 0:
+        with open(path) as f:
+            header = f.readline().rstrip("\n").split(",")
+        if header != SIM_COLUMNS:
+            raise LedgerError(f"{path} has columns {header}, expected {SIM_COLUMNS}")
+        prev = read_sim(path)
+        if len(prev) and to_utc(rows["run_at_utc"].iloc[0]) <= prev["run_at_utc"].max():
+            raise LedgerError(f"run_at {rows['run_at_utc'].iloc[0]} is not later than the last run in {path}")
+        rows.to_csv(path, mode="a", header=False, index=False, lineterminator="\n")
+    else:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        rows.to_csv(path, index=False, lineterminator="\n")
+    return int(len(rows))
+
+
+def read_sim(path: Path) -> pd.DataFrame:
+    df = pd.read_csv(path, dtype={"team": str, "shape": str, "model_version": str})
+    df["run_at_utc"] = to_utc(df["run_at_utc"])
+    return df
+
+
+def sim_baseline(runs: pd.Series, current) -> pd.Timestamp | None:
+    """The run to measure change against: the latest Wednesday (Eastern) run made more than a day before
+    `current` (so Wednesday compares with last Wednesday, and Sunday with the Wednesday before it)."""
+    cur = to_utc(current)
+    r = pd.Series(sorted(set(to_utc(runs))))
+    r = r[(r < cur - pd.Timedelta(days=1)) & (r.dt.tz_convert(ET).dt.dayofweek == 2)]
+    return None if r.empty else r.iloc[-1]
 
 
 # --------------------------------------------------------------------------- latest run

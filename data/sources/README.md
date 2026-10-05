@@ -18,3 +18,13 @@ Column notes (verified against nflverse and the legacy spreadsheet, see `outputs
 - `playoff` is blank for regular-season games and `w`, `d`, `c`, `s` for wild card, divisional, conference championship, and Super Bowl games. The pipeline maps these to `WC`, `DIV`, `CON`, `SB`.
 - Team codes are franchise-consistent: Oilers and Titans are `TEN`, Colts are `IND`, Ravens `BAL` (from 1996), Texans `HOU` (from 2002), Cardinals `ARI`, Rams `LAR`, Raiders `OAK`, Chargers `LAC`, Washington `WSH`.
 - The file has no week number; the pipeline derives it (see `nflelo/data.py`).
+
+## playoff_seeds_2002_2025.csv
+
+The actual playoff seeds of every conference, 2002 to 2025 (300 rows: `season, conf, seed, team`). Used only to validate the tiebreaker code (`nflelo/ml/sim/tiebreak.py`); it is never a model input.
+
+- **Source:** the `seed` column of `data/standings.csv` in nflverse's `nfldata` repository, `https://raw.githubusercontent.com/nflverse/nfldata/master/data/standings.csv`, retrieved 2026-10-04. Seeds are facts of public record (the NFL's playoff brackets).
+- **How it is used:** `nflelo/ml/sim/history.py` first derives every seeding consistent with that season's nflverse playoff games (bye teams, wild-card pairings, the #1 seed hosting the lowest remaining seed, higher seeds hosting). That fixes the seeds completely in 15 of the 48 conference-seasons. In the other 33 the bracket leaves some order open (usually #1 vs #2, or #3 vs #4), and this file decides it. The loader checks that every seeding in this file is one the bracket allows; all 48 are.
+- **Changes made:** rows cut to 2002-2025 (the current eight-division league) and to the four columns; team codes mapped to this project's franchise IDs (`OAK` to `LV`, `SD` to `LAC`, `STL` to `LA`).
+- **License:** the `nfldata` repository has no license file. What is vendored here is a list of facts (which team held which seed), not a creative work; it is used for testing only.
+- **SHA-256 of the vendored file:** `be14411861d8f9f068d167e52cba9c0b5714bfed86d975734d40e5c750377a9c`

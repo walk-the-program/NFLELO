@@ -117,6 +117,7 @@
   }
 
   function tipShow(x, y, title, rows) {
+    rows = rows.filter(Boolean);
     tipContent(title, rows);
     tipPlace(x, y);
     live.textContent = (title ? title + '. ' : '') + rows.map(function (r) { return (r.label ? r.label + ' ' : '') + r.value; }).join('. ');
@@ -505,7 +506,7 @@
       var flagged = M ? !!(mg && mg.flagged) : g.flagged;
       var label = g.away + ' at ' + g.home + '. Elo gives ' + g.home + ' ' + pct(home) + '. Elo line ' + lineText(g.home, g.away, g.elo_spread) +
         (g.vegas_spread != null ? ', Vegas line ' + lineText(g.home, g.away, g.vegas_spread) : '') + '.';
-      if (mg && mg.p_home_model != null) label += ' The model gives ' + g.home + ' ' + pct(mg.p_home_model) + '.';
+      if (mg && mg.p_home_model != null) label += ' The model gives ' + g.home + ' ' + pct(mg.p_home_model) + (mg.spread_model != null ? ', model line ' + lineText(g.home, g.away, mg.spread_model) : '') + '.';
       if (mg && mg.qb_change) label += ' ' + qbText(mg.qb_change) + '.';
       var lines = M ? tri(g, mg) : h('dl', { class: 'lines' },
         h('div', {}, h('dt', { text: 'Elo line' }), h('dd', { text: lineText(g.home, g.away, g.elo_spread) })),
@@ -526,8 +527,9 @@
       grid.appendChild(card);
     });
     body.appendChild(grid);
+    var anySpread = M && M.games.some(function (x) { return x.spread_model != null; });
     body.appendChild(h('p', { class: 'fnote', text: M
-      ? 'Win chances are the home team\'s. Vegas is the moneyline with the bookmaker\'s margin removed. Lines name the favorite and the points it is favored by; the model has no point spread yet. Gap is how far the model\'s win chance is from Vegas, in percentage points, for the three biggest. A QB change tag marks a starter whose play the team\'s recent numbers do not reflect. Kickoff times are Eastern.'
+      ? 'Win chances are the home team\'s. Vegas is the moneyline with the bookmaker\'s margin removed. Lines name the favorite and the points it is favored by' + (anySpread ? '; the model\'s line is the average final margin its score model expects, and it shows Not yet for games predicted before that model went live' : '; the model has no point spread yet') + '. Gap is how far the model\'s win chance is from Vegas, in percentage points, for the three biggest. A QB change tag marks a starter whose play the team\'s recent numbers do not reflect. Kickoff times are Eastern.'
       : 'Lines name the favorite and the points it is favored by. Elo spread is the rating gap (with home-field edge, none at neutral sites) divided by 25. Kickoff times are Eastern.' }));
   }
 
@@ -558,8 +560,23 @@
       h('tbody', {},
         h('tr', {}, h('th', { scope: 'row' }, g.home, h('span', { class: 'sr', text: ' win chance' })), td(pct(g.p_home)), pm != null ? td(pct(pm)) : td('None yet', true),
           g.p_market_home != null ? td(pct(g.p_market_home)) : td('None yet', true)),
-        h('tr', {}, h('th', { scope: 'row', text: 'Line' }), td(lineText(g.home, g.away, g.elo_spread)), td('Not yet', true),
+        h('tr', {}, h('th', { scope: 'row', text: 'Line' }), td(lineText(g.home, g.away, g.elo_spread)),
+          mg && mg.spread_model != null ? td(lineText(g.home, g.away, mg.spread_model)) : td('Not yet', true),
           g.vegas_spread != null ? td(lineText(g.home, g.away, g.vegas_spread)) : td('None yet', true))));
+  }
+
+  function winsText(v) { return Math.abs(v - Math.round(v)) < 0.01 ? String(Math.round(v)) : f1(v); }
+
+  // Inserts an optional section after the section `afterId`, adds its nav link after that section's link,
+  // and renumbers every kicker so the sequence stays 01, 02, ...
+  function insertSection(sec, afterId, navText) {
+    var after = $('#' + afterId);
+    after.parentNode.insertBefore(sec, after.nextSibling);
+    var navAfter = document.querySelector('.nav-links a[href="#' + afterId + '"]');
+    if (navAfter) navAfter.parentNode.parentNode.insertBefore(h('li', {}, h('a', { href: '#' + sec.id, text: navText })), navAfter.parentNode.nextSibling);
+    document.querySelectorAll('main > .sec .kicker').forEach(function (k, i) {
+      k.textContent = (i < 9 ? '0' : '') + (i + 1) + ' / ' + k.textContent.replace(/^\d+\s*\/\s*/, '');
+    });
   }
 
   var DIVS = ['AFC East', 'AFC North', 'AFC South', 'AFC West', 'NFC East', 'NFC North', 'NFC South', 'NFC West'];
@@ -575,25 +592,22 @@
         h('h2', { class: 'headline', id: 'rest-h', text: R.headline || 'Rest of season' }),
         h('p', { class: 'deck', text: 'Projected final wins: wins so far plus the model\'s win chance in every game left, with Elo\'s projection beside it. Open a team for its remaining games.' }),
         body));
-    var week = $('#week');
-    week.parentNode.insertBefore(sec, week.nextSibling);
-    var navWeek = document.querySelector('.nav-links a[href="#week"]');
-    if (navWeek) navWeek.parentNode.parentNode.insertBefore(h('li', {}, h('a', { href: '#rest', text: 'Rest of season' })), navWeek.parentNode.nextSibling);
-    document.querySelectorAll('main > .sec .kicker').forEach(function (k, i) {
-      k.textContent = (i < 9 ? '0' : '') + (i + 1) + ' / ' + k.textContent.replace(/^\d+\s*\/\s*/, '');
-    });
+    insertSection(sec, 'week', 'Rest of season');
 
     var MAXW = 17;
+    function hasRange(r) { return r.wins_p10 != null && r.wins_p90 != null; }
+    function rangeText(r) { return winsText(r.wins_p10) + ' to ' + winsText(r.wins_p90); }
     function x(v) { return (Math.max(0, Math.min(MAXW, v)) / MAXW * 100).toFixed(2) + '%'; }
     function row(r) {
       var t = byTeam[r.team], base = r.w + r.t / 2, record = rec(r.w, r.l, r.t);
       var summary = h('summary', {},
-        h('span', { class: 'sr', text: t.name + ', ' + record + '. Projected ' + f1(r.proj_model) + ' wins by the model, ' + f1(r.proj_elo) + ' by Elo, ' + plural(r.remaining, 'game', 'games') + ' left. Show remaining games.' }),
+        h('span', { class: 'sr', text: t.name + ', ' + record + '. Projected ' + f1(r.proj_model) + ' wins by the model, ' + f1(r.proj_elo) + ' by Elo' + (hasRange(r) ? ', likely range ' + rangeText(r) + ' wins' : '') + ', ' + plural(r.remaining, 'game', 'games') + ' left. Show remaining games.' }),
         h('span', { class: 'abbr', 'aria-hidden': 'true', text: r.team }),
         h('span', { class: 'mid', 'aria-hidden': 'true' },
           h('span', { class: 'wb' },
             h('i', { class: 'so', style: 'width:' + x(base) }),
             h('i', { class: 'pj', style: 'left:calc(' + x(base) + ' + 2px);width:max(0px, calc(' + x(r.proj_model - base) + ' - 2px))' }),
+            hasRange(r) ? h('i', { class: 'rg', style: 'left:' + x(r.wins_p10) + ';width:' + x(r.wins_p90 - r.wins_p10) }) : null,
             h('i', { class: 'et', style: 'left:' + x(r.proj_elo) })),
           h('span', { class: 'meta', text: record + ', ' + r.remaining + ' left' })),
         h('span', { class: 'pv', 'aria-hidden': 'true' }, h('b', { text: f1(r.proj_model) }), h('small', { text: 'Elo ' + f1(r.proj_elo) })));
@@ -601,6 +615,7 @@
         return { title: t.name, rows: [
           { value: f1(r.proj_model), label: 'model projection', cls: 's3' },
           { value: f1(r.proj_elo), label: 'Elo projection', cls: 's1' },
+          hasRange(r) ? { value: rangeText(r), label: 'likely range (10th to 90th percentile)', cls: 'rg' } : null,
           { value: record, label: 'so far', cls: 'sm' },
           { value: String(r.remaining), label: r.remaining === 1 ? 'game left' : 'games left' }] };
       });
@@ -615,7 +630,8 @@
       return h('details', { class: 'rs' }, summary, games);
     }
 
-    body.appendChild(legend([['sm blk', 'Wins so far'], ['s3 blk', 'Model projection'], ['tk', 'Elo projection']]));
+    var ranged = R.teams.some(hasRange);
+    body.appendChild(legend([['sm blk', 'Wins so far'], ['s3 blk', 'Model projection'], ['tk', 'Elo projection']].concat(ranged ? [['rg', 'Likely range, 10th to 90th percentile']] : [])));
     var grid = h('div', { class: 'divs' });
     DIVS.forEach(function (d) {
       var teams = R.teams.filter(function (r) { return byTeam[r.team] && byTeam[r.team].div === d; });
@@ -623,11 +639,128 @@
       grid.appendChild(h('div', { class: 'dv' }, h('h3', {}, d, h('span', { text: 'Projected wins' })), teams.map(row)));
     });
     body.appendChild(grid);
-    body.appendChild(h('p', { class: 'fnote', text: R.note + ' Bars run from 0 to 17 wins. Model numbers are from the run on ' + runTime(D.ml.last_run_utc) + '.' }));
-    body.appendChild(tableView('View projected wins as a table', [{ t: 'Team' }, { t: 'Record', r: 1, n: 1 }, { t: 'Left', r: 1, n: 1 }, { t: 'Model', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }], function () {
-      return R.teams.map(function (r) { return [byTeam[r.team].name, rec(r.w, r.l, r.t), String(r.remaining), f1(r.proj_model), f1(r.proj_elo)]; });
+    body.appendChild(h('p', { class: 'fnote', text: R.note + ' Bars run from 0 to 17 wins. Model numbers are from the run on ' + runTime(D.ml.last_run_utc) + '.' + (ranged ? ' The thin line is the likely range of final wins from the season simulation: in 8 of 10 simulated seasons the team lands inside it.' : '') }));
+    body.appendChild(tableView('View projected wins as a table', [{ t: 'Team' }, { t: 'Record', r: 1, n: 1 }, { t: 'Left', r: 1, n: 1 }, { t: 'Model', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }].concat(ranged ? [{ t: 'Likely range', r: 1, n: 1 }] : []), function () {
+      return R.teams.map(function (r) { return [byTeam[r.team].name, rec(r.w, r.l, r.t), String(r.remaining), f1(r.proj_model), f1(r.proj_elo)].concat(ranged ? [hasRange(r) ? rangeText(r) : ''] : []); });
     }));
   }
+
+  // ------------------------------------------------------------------ playoff odds (optional: ml.json with a simulation run)
+
+  function oddsPct(p) {
+    if (p <= 0) return '0%';
+    if (p >= 1) return '100%';
+    if (p < 0.005) return '<1%';
+    if (p > 0.995) return '>99%';
+    return Math.round(p * 100) + '%';
+  }
+
+  function oddsChange(d) {
+    if (d == null) return null;
+    var v = Math.round(d * 100);
+    return { v: v, text: v === 0 ? '0' : (v > 0 ? '+' : '-') + Math.abs(v), sr: v === 0 ? 'no change' : (v > 0 ? 'up ' : 'down ') + plural(Math.abs(v), 'point', 'points') };
+  }
+
+  function shortRun(iso) {
+    return new Date(iso).toLocaleDateString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  function renderOdds() {
+    var O = D.ml && D.ml.playoff_odds;
+    if (!O || !O.conferences) return;
+    var hasBase = !!O.baseline_run_utc;
+    var body = h('div', { id: 'odds-body', class: 'body' });
+    var sec = h('section', { class: 'sec', id: 'odds', 'aria-labelledby': 'odds-h', tabindex: '-1' },
+      h('div', { class: 'wrap' },
+        h('p', { class: 'kicker', text: 'Playoff odds' }),
+        h('h2', { class: 'headline', id: 'odds-h', text: O.headline || 'Playoff odds' }),
+        h('p', { class: 'deck', text: 'Each team\'s chances from ' + O.n_sims.toLocaleString('en-US') + ' simulations of the rest of the season, seeded with the NFL\'s tiebreakers. ' +
+          (hasBase ? 'Change is in percentage points since the run on ' + runTime(O.baseline_run_utc) + '.' : 'Change since last week appears after the next Wednesday run.') + ' Select a column to sort.' }),
+        body));
+    insertSection(sec, $('#rest') ? 'rest' : 'week', 'Playoff odds');
+
+    var COLS = [
+      { k: 'team', t: 'Team' },
+      { k: 'playoffs', t: 'Playoffs', bar: 1 },
+      { k: 'd_playoffs', t: 'Change', chg: 1 },
+      { k: 'division', t: 'Division' },
+      { k: 'seed1', t: '#1 seed' },
+      { k: 'win_sb', t: 'Win SB' }
+    ].filter(function (c) { return hasBase || !c.chg; });
+
+    function block(conf) {
+      var rows = O.conferences[conf].slice(), sortKey = 'playoffs', desc = true;
+      var tbody = h('tbody'), heads = [];
+      function draw() {
+        rows.sort(function (a, b) {
+          var x = a[sortKey], y = b[sortKey];
+          if (sortKey === 'team') { x = byTeam[a.team].name; y = byTeam[b.team].name; return (x < y ? -1 : x > y ? 1 : 0) * (desc ? -1 : 1); }
+          if (x == null) x = -Infinity; if (y == null) y = -Infinity;
+          return (desc ? y - x : x - y) || b.playoffs - a.playoffs || (a.team < b.team ? -1 : 1);
+        });
+        clear(tbody);
+        rows.forEach(function (r) {
+          var t = byTeam[r.team], ch = oddsChange(r.d_playoffs);
+          var cells = COLS.map(function (c) {
+            if (c.k === 'team') return h('th', { scope: 'row', class: 'tm' }, h('span', { class: 'abbr', text: r.team }), h('span', { class: 'nm', text: t.name }));
+            if (c.chg) return h('td', { class: 'r n chg ' + (ch && ch.v > 0 ? 'up' : ch && ch.v < 0 ? 'down' : '') },
+              ch ? [h('span', { 'aria-hidden': 'true', text: (ch.v > 0 ? '▲ ' : ch.v < 0 ? '▼ ' : '') + ch.text }), h('span', { class: 'sr', text: ch.sr })] : h('span', { class: 'na', text: 'New' }));
+            if (c.bar) return h('td', { class: 'r n pc' }, h('span', { class: 'ob', 'aria-hidden': 'true' }, h('i', { style: 'width:' + (r[c.k] * 100).toFixed(1) + '%' })), h('b', { text: oddsPct(r[c.k]) }));
+            return h('td', { class: 'r n', text: oddsPct(r[c.k]) });
+          });
+          var tr = h('tr', { tabindex: '0' }, cells);
+          bindTip(tr, function () {
+            return { title: t.name + ', ' + r.div, rows: [
+              { value: oddsPct(r.playoffs), label: 'make the playoffs', cls: 's3' },
+              { value: oddsPct(r.division), label: 'win the division' },
+              { value: oddsPct(r.seed1), label: 'get the #1 seed' },
+              { value: oddsPct(r.reach_sb), label: 'reach the Super Bowl' },
+              { value: oddsPct(r.win_sb), label: 'win the Super Bowl' },
+              { value: f1(r.wins_mean), label: 'wins on average, likely ' + winsText(r.wins_p10) + ' to ' + winsText(r.wins_p90) },
+              ch ? { value: ch.text, label: 'points of playoff chance since ' + shortRun(O.baseline_run_utc) } : null] };
+          });
+          tbody.appendChild(tr);
+        });
+        heads.forEach(function (hd) {
+          var on = hd.k === sortKey;
+          hd.th.setAttribute('aria-sort', on ? (desc ? 'descending' : 'ascending') : 'none');
+          hd.btn.classList.toggle('on', on);
+          hd.btn.setAttribute('data-dir', on ? (desc ? 'desc' : 'asc') : '');
+        });
+      }
+      var thead = h('thead', {}, h('tr', {}, COLS.map(function (c) {
+        var btn = h('button', { type: 'button', class: 'sortb', text: c.t, onclick: function () {
+          if (sortKey === c.k) desc = !desc; else { sortKey = c.k; desc = c.k !== 'team'; }
+          draw();
+        } });
+        var th = h('th', { scope: 'col', class: c.k === 'team' ? '' : 'r' }, btn);
+        heads.push({ k: c.k, th: th, btn: btn });
+        return th;
+      })));
+      draw();
+      return h('div', { class: 'oc' }, h('h3', {}, conf, h('span', { text: (D.ml.season >= 2020 ? 7 : 6) + ' make it' })),
+        h('div', { class: 'tbl-wrap' }, h('table', { class: 'odds' }, h('caption', { class: 'sr', text: conf + ' playoff odds' }), thead, tbody)));
+    }
+
+    body.appendChild(legend([['s3 blk', 'Chance to make the playoffs']].concat(hasBase ? [['up-k', 'Up since last run'], ['down-k', 'Down']] : [])));
+    body.appendChild(h('div', { class: 'odds-grid' }, ['AFC', 'NFC'].map(block)));
+    body.appendChild(h('p', { class: 'fnote' },
+      'Each simulated season gives every team one random boost or drag for the rest of the year (a spread of ' + f1(O.tau_rest) + ' points), because ratings are estimates and teams change. ' +
+      'Then every game left is played from the model\'s range of final scores, ties included; the tiebreakers seed the field, and the higher seed hosts each playoff game. Last run: ' + runTime(O.run_at_utc) + '. ',
+      h('a', { href: O.history_url, text: 'Every run is kept in a public file' }), '.'));
+    body.appendChild(tableView('View playoff odds as a table',
+      [{ t: 'Team' }, { t: 'Conf' }, { t: 'Playoffs', r: 1, n: 1 }, { t: 'Division', r: 1, n: 1 }, { t: '#1 seed', r: 1, n: 1 }, { t: 'Reach SB', r: 1, n: 1 }, { t: 'Win SB', r: 1, n: 1 }, { t: 'Mean wins', r: 1, n: 1 }, { t: 'Likely wins', r: 1, n: 1 }].concat(hasBase ? [{ t: 'Change', r: 1, n: 1 }] : []),
+      function () {
+        return ['AFC', 'NFC'].reduce(function (acc, c) {
+          return acc.concat(O.conferences[c].map(function (r) {
+            var ch = oddsChange(r.d_playoffs);
+            return [byTeam[r.team].name, c, pct(r.playoffs, 1), pct(r.division, 1), pct(r.seed1, 1), pct(r.reach_sb, 1), pct(r.win_sb, 1), f1(r.wins_mean), winsText(r.wins_p10) + ' to ' + winsText(r.wins_p90)].concat(hasBase ? [ch ? ch.text : 'New'] : []);
+          }));
+        }, []);
+      }));
+  }
+
+  function atsText(a) { return a.w + '-' + a.l + (a.push ? '-' + a.push : ''); }
 
   // Live record block for the scorecard: empty-state copy until the first live week is scored.
   function liveBlock() {
@@ -650,12 +783,17 @@
             h('span', {}, h('b', { class: 'num', text: pct(L.model.accuracy, 1) }), 'Model'),
             h('span', {}, h('b', { class: 'num', text: pct(L.elo.accuracy, 1) }), 'Elo v2'),
             mk ? h('span', {}, h('b', { class: 'num', text: pct(mk.market.accuracy, 1) }), 'Vegas') : null)),
-        h('div', {}, h('h3', { text: 'Elo against the spread' }),
-          h('div', { class: 'row' }, h('span', {}, h('b', { class: 'num', text: L.ats_elo.w + '-' + L.ats_elo.l + (L.ats_elo.push ? '-' + L.ats_elo.push : '') }), 'Wins, losses' + (L.ats_elo.push ? ', pushes' : ''))))));
+        h('div', {}, h('h3', { text: 'Against the Vegas spread' }),
+          h('div', { class: 'row' },
+            L.ats_model && L.ats_model.games ? h('span', {}, h('b', { class: 'num', text: atsText(L.ats_model) }), 'Model') : null,
+            h('span', {}, h('b', { class: 'num', text: atsText(L.ats_elo) }), 'Elo v2')))));
       var notes = [];
       if (mk && mk.n !== L.n) notes.push('Brier scores use the ' + mk.n + ' games with a moneyline; correct picks for the model and Elo use all ' + L.n + '.');
       if (W.n) notes.push('Wednesday predictions alone: model ' + W.model.brier.toFixed(4) + ', Elo ' + W.elo.brier.toFixed(4) + ' Brier on ' + plural(W.n, 'game', 'games') + '. The gap to the final numbers is what late quarterback news was worth.');
-      notes.push('The model has no point spread yet, so only Elo has a record against the spread.');
+      var am = L.ats_model;
+      notes.push(am && am.games
+        ? 'Against the spread: wins and losses' + (am.push || L.ats_elo.push ? ' and pushes' : '') + ' when taking the side the forecast\'s line favors over the Vegas line. The model\'s line exists for ' + plural(am.games, 'scored game', 'scored games') + (am.games < L.n ? ' (predictions made before its score model went live have none)' : '') + '.'
+        : 'The model\'s point spread began after the first live predictions, so only Elo has a record against the spread so far.');
       box.appendChild(h('p', { class: 'fnote', text: notes.join(' ') }));
     }
     box.appendChild(h('p', { class: 'fnote' }, 'Last model run: ' + runTime(ml.last_run_utc) + '. ', h('a', { href: ml.ledger_url, text: 'See the prediction ledger' }), '.'));
@@ -1051,7 +1189,8 @@
         h('p', {}, h('b', { text: 'Data. ' }), 'Game results from 1999 on come from nflverse. Results for 1970 to 1998, including playoffs, come from the FiveThirtyEight NFL Elo game file. Both are CC BY 4.0.'),
         h('p', {}, h('b', { text: 'New teams. ' }), 'Franchises that join after 1970 start at ' + cfg.expansion_start + '. The model was tuned on ' + sc.tune_seasons[0] + '-' + sc.tune_seasons[1] + ' and scored on ' + span + '.'),
         h('p', {}, h('b', { text: 'Limits. ' }), 'The Vegas line is still better: a Brier gap of ' + sc.brier_gap_vs_market.toFixed(4) + '. Elo does not know about injuries, starting quarterbacks, or weather.'),
-        D.ml ? h('p', {}, h('b', { text: 'Model. ' }), 'The second forecast is a logistic regression on three inputs: Elo\'s win chance, each team\'s play-by-play efficiency adjusted for its opponents, and how much better or worse this week\'s starting quarterback is than the passing the team\'s recent numbers reflect. It is fit on the 2001 to ' + (D.ml.season - 1) + ' regular seasons and never sees betting lines. On ' + D.ml.holdout.seasons[0] + ' to ' + D.ml.holdout.seasons[1] + ' games it had never seen, it scored a Brier of ' + D.ml.holdout.model_brier.toFixed(4) + ' against ' + D.ml.holdout.elo_brier.toFixed(4) + ' for Elo and ' + D.ml.holdout.market_brier.toFixed(4) + ' for Vegas. Every prediction is added to a ', h('a', { href: D.ml.ledger_url, text: 'public ledger' }), ' before kickoff, and the git history shows when. Last run: ' + runTime(D.ml.last_run_utc) + '.') : null),
+        D.ml ? h('p', {}, h('b', { text: 'Model. ' }), 'The second forecast is a logistic regression on three inputs: Elo\'s win chance, each team\'s play-by-play efficiency adjusted for its opponents, and how much better or worse this week\'s starting quarterback is than the passing the team\'s recent numbers reflect. It is fit on the 2001 to ' + (D.ml.season - 1) + ' regular seasons and never sees betting lines. On ' + D.ml.holdout.seasons[0] + ' to ' + D.ml.holdout.seasons[1] + ' games it had never seen, it scored a Brier of ' + D.ml.holdout.model_brier.toFixed(4) + ' against ' + D.ml.holdout.elo_brier.toFixed(4) + ' for Elo and ' + D.ml.holdout.market_brier.toFixed(4) + ' for Vegas. Every prediction is added to a ', h('a', { href: D.ml.ledger_url, text: 'public ledger' }), ' before kickoff, and the git history shows when. Last run: ' + runTime(D.ml.last_run_utc) + '.') : null,
+        D.ml && D.ml.playoff_odds ? h('p', {}, h('b', { text: 'Playoff odds. ' }), 'A second model predicts the final score margin, not just the winner, using the same three inputs. Its average is the model\'s line, and its spread of outcomes favors the scores football produces most, such as 3 and 7 points. The season is then played out ' + D.ml.playoff_odds.n_sims.toLocaleString('en-US') + ' times. In each run every team gets one random boost or drag that lasts the rest of the year, because a rating is an estimate and teams get better or worse. The NFL\'s own tiebreakers set the seeds; run on every real season from 2006 to 2025, they reproduce every actual playoff field and seeding. The size of that boost or drag was set by replaying weeks 4, 8, 12 and 16 of the 2006 to 2019 seasons; without it, teams given 80 to 90% made the playoffs only about 74% of the time.') : null),
       h('div', {},
         h('h3', { text: 'Links' }),
         h('ul', {},
@@ -1113,6 +1252,7 @@
     D.ladder.teams.forEach(function (t) { byTeam[t.team] = t; });
     D.history.teams.forEach(function (t) { histBy[t.team] = t; });
     renderRest();
+    renderOdds();
     initReveal();
     renderHeader();
     renderLadder();

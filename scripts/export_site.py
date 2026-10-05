@@ -567,9 +567,10 @@ def build_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming:
         pm = float(final.at[gid, "p_home_model"]) if gid in final.index else None
         pv = g["p_market_home"]
         lg = latest_by.get(gid)
+        sm = final.at[gid, "spread_model"] if gid in final.index and "spread_model" in final.columns else None
         week_games.append({
             "game_id": gid, "away": g["away"], "home": g["home"], "p_home_model": pm, "p_market_home": pv,
-            "spread_model": None,
+            "spread_model": None if sm is None or pd.isna(sm) else round(float(sm), 1),
             "run_at_utc": live.utc_iso(final.at[gid, "run_at_utc"]) if gid in final.index else None,
             "gap": None if pm is None or pv is None else round(100 * (pm - pv), 1),
             "qb_change": live.qb_change(lg) if lg and pm is not None else None,
@@ -590,10 +591,17 @@ def build_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming:
     fallback = p_model.isna()
     p_model[fallback] = p_elo.reindex(p_model.index)[fallback]
     proj = live.projected_wins(reg, p_model, p_elo)
+    # The simulation is shown only once publish.json allows it (after the M4 sign-off); it still runs weekly.
+    sim_published = live.publish_flags(live_dir)["publish_sim"]
+    odds = build_playoff_odds(season, live_dir) if sim_published else None
+    sim_now = {t["team"]: t for c in (odds or {}).get("conferences", {}).values() for t in c}
     teams = []
     for r in proj.sort_values(["proj_model", "team"], ascending=[False, True]).itertuples():
+        x = sim_now.get(r.team)
         teams.append({"team": r.team, "w": int(r.w), "l": int(r.l), "t": int(r.t), "remaining": int(r.remaining),
-                      "proj_model": float(r.proj_model), "proj_elo": float(r.proj_elo), "games": r.games})
+                      "proj_model": float(r.proj_model), "proj_elo": float(r.proj_elo),
+                      "wins_p10": x["wins_p10"] if x else None, "wins_p90": x["wins_p90"] if x else None,
+                      "games": r.games})
 
     first_live = reg[reg["week"] == from_week].sort_values(["gameday", "gametime"])
     last_run = (latest or {}).get("run_at_utc") or live.utc_iso(ledger["run_at_utc"].max())
@@ -614,7 +622,60 @@ def build_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming:
                  "note": "Projected wins = wins so far + half a win per tie + the sum of the team's win "
                          "probabilities in its remaining games."},
         "live": live.live_record(ledger, live.results_frame(reg), from_week),
+        "sim_published": sim_published,
+        "playoff_odds": odds,
     }
+
+
+def headline_odds(conferences: dict) -> str | None:
+    teams = [t for c in conferences.values() for t in c]
+    if not teams:
+        return None
+    top = max(teams, key=lambda t: (t["win_sb"], t["team"]))
+    moved = [t for t in teams if t["d_playoffs"] is not None]
+    if moved:
+        m = max(moved, key=lambda t: (abs(t["d_playoffs"]), t["team"]))
+        if abs(m["d_playoffs"]) >= 0.10:
+            way = "rose" if m["d_playoffs"] > 0 else "fell"
+            return (f"{cap(subj(m['team']))}'s playoff chances {way} the most this week, "
+                    f"to {100 * m['playoffs']:.0f}%. {cap(subj(top['team']))} {verb(top['team'], 'is', 'are')} the "
+                    f"Super Bowl favorite at {100 * top['win_sb']:.0f}%.")
+    return f"{cap(subj(top['team']))} {verb(top['team'], 'is', 'are')} the Super Bowl favorite, at {100 * top['win_sb']:.0f}%."
+
+
+def build_playoff_odds(season: int, live_dir: Path) -> dict | None:
+    """The latest simulation run per team, plus the change since the baseline run (live.sim_baseline)."""
+    from nflelo.ml import live
+    from nflelo.meta import conference, division
+
+    path = live.sim_path(season, live_dir)
+    if not path.exists():
+        return None
+    hist = live.read_sim(path)
+    if hist.empty:
+        return None
+    cur_at = hist["run_at_utc"].max()
+    cur = hist[hist["run_at_utc"] == cur_at].set_index("team")
+    base_at = live.sim_baseline(hist["run_at_utc"], cur_at)
+    base = hist[hist["run_at_utc"] == base_at].set_index("team") if base_at is not None else None
+    confs: dict = {"AFC": [], "NFC": []}
+    for t, r in cur.iterrows():
+        row = {"team": t, "div": division(t)}
+        for c in live.SIM_PROBS:
+            row[c] = float(r[c])
+            row[f"d_{c}"] = (round(float(r[c]) - float(base.at[t, c]), 4)
+                             if base is not None and t in base.index else None)
+        for c in ("wins_mean", "wins_p10", "wins_p90"):
+            row[c] = float(r[c])
+        confs[conference(t)].append(row)
+    for c in confs:
+        confs[c].sort(key=lambda x: (-x["playoffs"], -x["seed1"], x["team"]))
+    first = cur.iloc[0]
+    return {"run_at_utc": live.utc_iso(cur_at), "baseline_run_utc": None if base_at is None else live.utc_iso(base_at),
+            "runs": int(hist["run_at_utc"].nunique()), "n_sims": int(first["n_sims"]),
+            "tau_rest": float(first["tau_rest"]), "shape": str(first["shape"]), "model_version": str(first["model_version"]),
+            "history_url": f"{live.REPO_URL}/blob/main/experiments/live/{live.sim_path(season).name}",
+            "conferences": confs, "headline": headline_odds(confs)}
 
 
 def export_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming: dict,

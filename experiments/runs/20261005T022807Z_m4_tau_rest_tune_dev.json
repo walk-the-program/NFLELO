@@ -1,0 +1,296 @@
+{
+  "name": "m4_tau_rest_tune_dev",
+  "label": "dev",
+  "window": {
+    "seasons": [
+      2006,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 1792,
+  "games_hash": "2df70ff962d2eecb",
+  "metrics": {
+    "n": 1792,
+    "brier_playoffs": 0.11941170526785713,
+    "brier_playoffs_tau0": 0.12140696526785713,
+    "tau_rest": 4.5,
+    "best_tau": 4.5,
+    "ece_playoffs": 0.01648080357142856
+  },
+  "features": [
+    "elo_logit",
+    "adj_epa_margin",
+    "qb_delta_diff"
+  ],
+  "params": {
+    "shape": "keynum",
+    "grid": [
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5,
+      4.0,
+      4.5,
+      5.0,
+      5.5,
+      6.0,
+      6.5,
+      7.0,
+      7.5,
+      8.0
+    ],
+    "sims": 5000,
+    "start_weeks": [
+      4,
+      8,
+      12,
+      16
+    ],
+    "seed": 20261004,
+    "rule": "smallest tau within one team-start bootstrap SE of the best"
+  },
+  "data": {
+    "data/games.csv": "fe6d83a49657593e5c0d0d7b0cc89b09e7acd24447cc8086f810de814497b8d0",
+    "data/raw/ml/pbp/1999": "6263ca0dcafed4110f1da80be5126eedc2fba948b3de111dc2e8dd94165ce595",
+    "data/raw/ml/pbp/2000": "29a0904f123de7fe9c10ff07e7605bb29d753ff87f2026659605e60b2c0aa243",
+    "data/raw/ml/pbp/2001": "7b34b78901915ca98449190a1a911308275cc764eb3e565376c3d44667933dc1",
+    "data/raw/ml/pbp/2002": "46fe8b49e4f94e479cf8e5dbb87d90b577d76d0a503d6bf4f2191902f95391a2",
+    "data/raw/ml/pbp/2003": "c45fa61ddb3eba8c316f8c680362284ed01174728ca6e22bdfdba6083d5ec707",
+    "data/raw/ml/pbp/2004": "c95a80bffc740d438965320a6014f9cb839fa57e92e114b2783fc76d8acce653",
+    "data/raw/ml/pbp/2005": "c7e4b4984af805df9719a23004a967593e7d503025b1c301973606e0e4f7cc61",
+    "data/raw/ml/pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+    "data/raw/ml/pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+    "data/raw/ml/pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+    "data/raw/ml/pbp/2009": "5bfb6559343c04092d1ad66c1479782d085d9f390e6806be0a7ca7ec37124806",
+    "data/raw/ml/pbp/2010": "74ad605fea53c27afd00eee71c53b86b5cfbf7133d1a7b5b8f0067d817e55785",
+    "data/raw/ml/pbp/2011": "26727f9d2b0e4f9f616e746b87b9a29359f37a4b484f66f7312baf883d85e958",
+    "data/raw/ml/pbp/2012": "3277aded9792c419cc853cf307f2206c3fb0908d91750b4e1d3d66b567407c66",
+    "data/raw/ml/pbp/2013": "2a31a7cd0e7e2306f626a0f1f4bb96679e5b3e92a8729695858adca35d8b2686",
+    "data/raw/ml/pbp/2014": "c6910558e235dac664b1b7f02654d47ea8d51904ef9ace5d4f015165604e0b12",
+    "data/raw/ml/pbp/2015": "b3314a52b781a00417528b2e3388d2596098cdbe7b565d3c962d7171a98ae70f",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/1999": "b590c0c595ae702489068ed30d25460a1da2f129ce47c4143c8c28618fbb2749",
+    "data/raw/ml/schedules/2000": "d11ca64a246a9b9ce98beb15af6a337887f1a31658a1271d510ef62e094fd927",
+    "data/raw/ml/schedules/2001": "59deb3483354d8e24a55eef5e508f4824a3cdfff44936adea6d02af34c64fffd",
+    "data/raw/ml/schedules/2002": "b394de36fc6286647bdfa1a82383b0fec5f83a5e0aeaefc010336c72f1365545",
+    "data/raw/ml/schedules/2003": "70b3c8a10df7a205ee8bc446fa40dca4f7408f3900d063f1881860119de4834c",
+    "data/raw/ml/schedules/2004": "64d26bdf22af5736b507a04b82c73b17ded7765ad2940c02d880abbe5779d978",
+    "data/raw/ml/schedules/2005": "3535ab82c2c6b866d94623aba9f37eac3b7497fd5ff61898904e03420d80795a",
+    "data/raw/ml/schedules/2006": "04e8c1a0394137e8493db6bf228a75ab1e0e8104eca4056380c13168174fca98",
+    "data/raw/ml/schedules/2007": "ed35269017c5342a04e621717760da8ccdc68421f7a38685eaa355af90d875b2",
+    "data/raw/ml/schedules/2008": "76a274f12d0efbdc6220870e083597fe6669f33bf5f94d30ade9d11efbc3423d",
+    "data/raw/ml/schedules/2009": "b720c554d58f8e8bc4ef4fe3ada0528f1f4065bde6926395f5c4ed46f6c19579",
+    "data/raw/ml/schedules/2010": "c6eb6d6390b8808ab6fe7a1c177d45b2d31c4dc3f7b5ccf3a9ff525c9afe758f",
+    "data/raw/ml/schedules/2011": "367cd43a9a9499d875a00dc12d2476ea3bfabc36dfbb82399a695f5230618232",
+    "data/raw/ml/schedules/2012": "94fd313c6126390c47c936cc04c986ec6a2526cad776f078e61c8e740171ceb0",
+    "data/raw/ml/schedules/2013": "48b55301b46a4acc55b1263555b01d62475fce5196f943176cf5bb23b5b979b6",
+    "data/raw/ml/schedules/2014": "56c8544f26975a429dd1dcd67996b28cb3680c742c79c2367bfea1e35ae93940",
+    "data/raw/ml/schedules/2015": "68c3bf6df90e969fe80aa46eb3351ad624e5e7c3f85c664644811508bbb647c3",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56"
+  },
+  "git": {
+    "sha": "0e22932c58494fb4d3db2f2b815fc223689f802e",
+    "dirty": true
+  },
+  "timestamp": "2026-10-05T02:28:07+00:00",
+  "notes": "tau_rest tuned on DEV made-playoffs Brier (Walker's decision after the 2002-2005 tuning failed on DEV); game_ids are season_week_team.",
+  "table": [
+    {
+      "tau": 0.0,
+      "brier": 0.12140696526785713,
+      "minus_best": 0.001995259999999999,
+      "se": 0.0006872298338628462,
+      "within_1se": false
+    },
+    {
+      "tau": 0.5,
+      "brier": 0.12135820750000001,
+      "minus_best": 0.0019465022321428567,
+      "se": 0.0006735141176933615,
+      "within_1se": false
+    },
+    {
+      "tau": 1.0,
+      "brier": 0.12116159625,
+      "minus_best": 0.0017498909821428564,
+      "se": 0.0006402673480786004,
+      "within_1se": false
+    },
+    {
+      "tau": 1.5,
+      "brier": 0.12120254638392858,
+      "minus_best": 0.0017908411160714283,
+      "se": 0.000592825150247629,
+      "within_1se": false
+    },
+    {
+      "tau": 2.0,
+      "brier": 0.12064990325892858,
+      "minus_best": 0.001238197991071428,
+      "se": 0.0005202194616986872,
+      "within_1se": false
+    },
+    {
+      "tau": 2.5,
+      "brier": 0.12044317040178572,
+      "minus_best": 0.0010314651339285697,
+      "se": 0.0004345690427558409,
+      "within_1se": false
+    },
+    {
+      "tau": 3.0,
+      "brier": 0.11987242223214287,
+      "minus_best": 0.00046071696428571325,
+      "se": 0.00033846261920788704,
+      "within_1se": false
+    },
+    {
+      "tau": 3.5,
+      "brier": 0.11986663200892857,
+      "minus_best": 0.0004549267410714273,
+      "se": 0.00024833177718393116,
+      "within_1se": false
+    },
+    {
+      "tau": 4.0,
+      "brier": 0.11957501375,
+      "minus_best": 0.00016330848214285757,
+      "se": 0.0001613499460547767,
+      "within_1se": false
+    },
+    {
+      "tau": 4.5,
+      "brier": 0.11941170526785713,
+      "minus_best": 0.0,
+      "se": 0.0,
+      "within_1se": true
+    },
+    {
+      "tau": 5.0,
+      "brier": 0.1195384600892857,
+      "minus_best": 0.00012675482142857091,
+      "se": 0.00015523109227355477,
+      "within_1se": true
+    },
+    {
+      "tau": 5.5,
+      "brier": 0.11955230352678571,
+      "minus_best": 0.00014059825892857031,
+      "se": 0.00023153932705164722,
+      "within_1se": true
+    },
+    {
+      "tau": 6.0,
+      "brier": 0.11948154723214285,
+      "minus_best": 6.984196428571242e-05,
+      "se": 0.0003266761937130721,
+      "within_1se": true
+    },
+    {
+      "tau": 6.5,
+      "brier": 0.11967489196428573,
+      "minus_best": 0.0002631866964285708,
+      "se": 0.00041966731216219657,
+      "within_1se": true
+    },
+    {
+      "tau": 7.0,
+      "brier": 0.11974932906249999,
+      "minus_best": 0.0003376237946428569,
+      "se": 0.0005121401543730911,
+      "within_1se": true
+    },
+    {
+      "tau": 7.5,
+      "brier": 0.11999099625,
+      "minus_best": 0.0005792909821428563,
+      "se": 0.0006010257217393285,
+      "within_1se": true
+    },
+    {
+      "tau": 8.0,
+      "brier": 0.12038226138392857,
+      "minus_best": 0.0009705561160714265,
+      "se": 0.0006793495650267463,
+      "within_1se": false
+    }
+  ],
+  "ece": {
+    "playoffs": {
+      "brier": 0.11941170526785713,
+      "ece": 0.01648080357142856,
+      "null": {
+        "n": 1792,
+        "p05": 0.012212232142857134,
+        "median": 0.019486272321428563,
+        "p95": 0.02798733258928569,
+        "reps": 500
+      },
+      "inside": true
+    },
+    "division": {
+      "brier": 0.08810146044642857,
+      "ece": 0.022558258928571422,
+      "null": {
+        "n": 1792,
+        "p05": 0.010810122767857148,
+        "median": 0.01726841517857143,
+        "p95": 0.02496758928571428,
+        "reps": 500
+      },
+      "inside": true
+    },
+    "seed1": {
+      "brier": 0.031998676339285714,
+      "ece": 0.01207745535714286,
+      "null": {
+        "n": 1792,
+        "p05": 0.006183013392857141,
+        "median": 0.00975859375,
+        "p95": 0.015080870535714282,
+        "reps": 500
+      },
+      "inside": true
+    },
+    "reach_sb": {
+      "brier": 0.04649351852678572,
+      "ece": 0.014407142857142854,
+      "null": {
+        "n": 1792,
+        "p05": 0.0042769084821428615,
+        "median": 0.008997098214285718,
+        "p95": 0.01478135044642857,
+        "reps": 500
+      },
+      "inside": true
+    },
+    "win_sb": {
+      "brier": 0.028045857053571432,
+      "ece": 0.001611607142857146,
+      "null": {
+        "n": 1792,
+        "p05": 0.0022677678571428567,
+        "median": 0.005229910714285713,
+        "p95": 0.009992522321428563,
+        "reps": 500
+      },
+      "inside": false
+    }
+  },
+  "timing": {
+    "state_s": 29.86300854664296,
+    "sim_s": 1042.7212690813467
+  }
+}

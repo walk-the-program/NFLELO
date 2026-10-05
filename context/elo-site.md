@@ -6,7 +6,7 @@ Sub-project context for the static NFLELO website in `site/`. General project co
 
 - Static, no build step, no server. `site/index.html`, `site/styles.css`, `site/app.js` (plain JS, hand-built SVG charts, no CDN scripts) and `site/data/*.json`. Only external request: Google Fonts (Figtree for headings, Nunito Sans for body). Must be served over http (it fetches `./data/*.json`); `python3 -m http.server 8765 --directory site`, or `nflelo-site` in `.claude/launch.json`.
 - Hostable on GitHub Pages by publishing `site/`. The weekly GitHub Action (`.github/workflows/weekly.yml`) runs `scripts/build.py`, `scripts/ml_predict.py` and `scripts/export_site.py`, then commits `experiments/live/`, `site/data/` and `outputs/`.
-- Sections, in order: header with four tiles, power ladder, this week, rest of season (only when `data/ml.json` exists), team explorer, luck board, league history (tapestry heatmap and parity), records, model scorecard with methodology.
+- Sections, in order: header with four tiles, power ladder, this week, rest of season (only when `data/ml.json` exists), playoff odds (only when it has a simulation run), team explorer, luck board, league history (tapestry heatmap and parity), records, model scorecard with methodology.
 
 ## Exporter (`scripts/export_site.py`)
 
@@ -45,7 +45,17 @@ Reads `outputs/elo_games.csv`, `outputs/ratings_current.json`, `outputs/model_re
 - With it: This week cards get an Elo, Model, Vegas table (home win chance and line); the gap tags and the week headline switch to model vs Vegas in percentage points; a "QB change" line shows when |qb_delta_diff| >= 0.08. JS inserts "Rest of season" after This week, adds its nav link and renumbers the kickers (01 to 08). Projected wins by division (4 columns from 1280px, 2 from 760px): grey wins so far, model bar in `--series-3`, Elo as a tick; each row is a `<details>` with the team's remaining games. The scorecard gets a "Live 2026 record" block and the methodology a Model paragraph with the ledger link and last run time.
 - `--series-3` (model): `#7b4fc9` light, `#a06ae8` dark, validated with the dataviz script against Elo and Vegas.
 
+## ML model on the site, Phase 2 (M4, 2026-10-04)
+
+- `ml.json` gains `playoff_odds` (null until `experiments/live/sim_<season>.csv` exists): the latest simulation run per team (playoffs, division, #1 seed, reach and win the Super Bowl, mean wins, 10th and 90th percentile wins), split by conference, with `d_*` changes against a baseline run. The baseline is the latest Wednesday (Eastern) run made more than a day earlier (`live.sim_baseline`), so a Wednesday run compares with last Wednesday and a Sunday run with the Wednesday before it; the deck names the baseline run's time. Each rest-of-season team gets `wins_p10`/`wins_p90`, and each this-week game `spread_model` (from the scored ledger row; null for rows written before the margin model).
+- "Playoff odds" section, inserted by JS after Rest of season (or after This week) only when `playoff_odds` exists; `insertSection` adds the nav link and renumbers the kickers. One sortable table per conference (two columns from 1100px): team, playoffs (number plus a `--series-3` bar), change in percentage points (up/down triangle plus sign, `--up`/`--down`, with screen-reader words), division, #1 seed, win Super Bowl. Header buttons sort (`aria-sort`), rows are focusable with a tooltip carrying every number, and a "View playoff odds as a table" details block lists all of them. Team names hide below 1600px (abbreviations stay). Before a baseline exists the change column is left out and the deck says when it will appear.
+- Rest of season: a thin `--ink-2` line under each projection bar marks the 10th to 90th percentile of simulated final wins; tooltip, screen-reader text, legend and table view include it.
+- This week: the Model column's line shows the margin model's spread; "Not yet" stays for rows logged before the margin model. Footnote copy adapts.
+- Scorecard live block: "Against the Vegas spread" shows the model's record (only rows with a spread) next to Elo's once games are scored; the empty-state copy is unchanged until week 5 is scored.
+- Methodology: a "Playoff odds" paragraph (margin model, key numbers, the simulation with season-long shocks, the tiebreaker check, and the DEV calibration caveat in plain words).
+- Without `ml.json`, or with an `ml.json` that has no simulation, the page is unchanged (tested in `tests/ml/test_live.py`).
+- **Gate (2026-10-04, Walker):** the playoff odds and the win range stay off the site until the M4 holdout sign-off. `experiments/live/publish.json` (committed) holds `"publish_sim": false`; the exporter then writes `playoff_odds: null`, `sim_published: false` and null win ranges, even though the weekly job keeps simulating and appending to `sim_<season>.csv`. A missing file also means off. Flip it to true by hand after sign-off (and update `test_committed_publish_flag_keeps_the_simulation_off_the_site`). Margin spreads are not gated.
+
 ## Open items
 
 - Pages deployment (the weekly Action exists since 2026-10-04; it commits data but does not host).
-- Playoff odds and starting-QB adjustment are not on the site yet.

@@ -1,5 +1,8 @@
 # Weekly update (M4-D1): rebuild Elo and the site data, then append the ML model's
-# predictions to the public ledger and commit. It does not host the site.
+# predictions to the public ledger, simulate the rest of the season (playoff odds,
+# appended to experiments/live/sim_<season>.csv), and commit. It does not host the site.
+# The site shows the playoff odds only when experiments/live/publish.json has
+# "publish_sim": true (set by hand after the M4 sign-off); this job never edits it.
 #
 # Schedule. GitHub cron is fixed in UTC, so the Eastern time moves with daylight saving:
 #   Wednesday 14:00 UTC = 10:00 EDT (through Sat 2026-10-31) / 09:00 EST (from Sun 2026-11-01)
@@ -61,7 +64,7 @@ jobs:
       - name: Rebuild Elo, outputs and site data
         run: python scripts/build.py
 
-      - name: Predict unplayed games and append to the ledger
+      - name: Predict unplayed games, append to the ledger, simulate the season
         run: python scripts/ml_predict.py
 
       - name: Export site data with the new ledger rows
@@ -71,6 +74,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # experiments/live holds the ledger, latest_<season>.json, model_/margin_<season>.json and sim_<season>.csv
           git add experiments/live site/data outputs data/games.csv
           if git diff --cached --quiet; then
             echo "No changes to commit."

@@ -461,3 +461,48 @@ td .w-sc { font-weight: 700; }
 
 /* Tagged ladder rows give the tag the room instead of the full team name on narrower screens. */
 @media (max-width: 1399px) { .lrow.has-tag .nm { display: none; } }
+
+/* ---- playoff odds (M4 Phase 2; inserted by app.js only when ml.json has a simulation run) ---- */
+.odds-grid { display: grid; grid-template-columns: 1fr; gap: 44px clamp(40px, 4vw, 72px); margin-top: 8px; }
+@media (min-width: 1100px) { .odds-grid { grid-template-columns: 1fr 1fr; } }
+.oc h3 { font-family: var(--font-body); font-size: 14px; font-weight: 700; color: var(--ink-2); letter-spacing: var(--body-tracking); padding-bottom: 8px; display: flex; justify-content: space-between; }
+.oc h3 span { font-weight: 600; color: var(--ink-3); font-size: 12px; }
+.oc .tbl-wrap { overflow-x: auto; }
+table.odds { table-layout: fixed; min-width: 340px; }
+table.odds th:first-child { width: 34%; }
+table.odds thead th { padding: 0 0 8px; }
+table.odds thead th.r { padding-left: 6px; }
+table.odds tbody th, table.odds td { padding: 9px 0 9px 6px; border-bottom: 1px solid var(--rule); font-size: 15px; }
+table.odds tbody th { padding-left: 0; font-weight: 400; color: var(--ink); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+table.odds tbody tr { cursor: default; }
+table.odds tbody tr:hover { background: var(--hover-wash); }
+table.odds tbody tr:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+table.odds .tm .abbr { font-size: 17px; margin-right: 10px; }
+table.odds .tm .nm { color: var(--ink-2); font-size: 14px; }
+@media (max-width: 1599px) { table.odds .tm .nm { display: none; } table.odds th:first-child { width: 18%; } }
+.sortb { all: unset; cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
+.sortb:hover, .sortb.on { color: var(--ink); }
+.sortb:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sortb.on::after { content: ""; display: inline-block; width: 5px; height: 5px; margin-left: 6px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); }
+.sortb.on[data-dir="asc"]::after { transform: translateY(1px) rotate(-135deg); }
+td.pc { position: relative; }
+td.pc b { font-weight: 700; position: relative; }
+.ob { position: absolute; left: 6px; right: 46px; top: 50%; height: 10px; margin-top: -5px; }
+.ob::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--rule); }
+.ob i { position: absolute; left: 0; top: 0; bottom: 0; display: block; background: var(--series-3); min-width: 1px; }
+td.chg { font-weight: 700; }
+td.chg .na { color: var(--ink-3); font-weight: 400; }
+.legend i.up-k { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid var(--up); background: none; }
+.legend i.down-k { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid var(--down); background: none; }
+.wb .rg { top: 20px; height: 2px; background: var(--ink-2); }
+table.odds th:nth-child(2) { width: 30%; }
+.legend i.rg, .tip i.rg { background: var(--ink-2); height: 2px; }
+@media (max-width: 599px) {
+  table.odds { min-width: 0; }
+  table.odds th:first-child { width: 17%; }
+  table.odds th:nth-child(2) { width: auto; }
+  .ob { display: none; }
+  .sortb { white-space: normal; line-height: 1.2; }
+  table.odds tbody th, table.odds td { font-size: 14px; }
+  table.odds thead th { vertical-align: bottom; }
+}
