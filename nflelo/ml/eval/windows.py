@@ -21,6 +21,10 @@
 - M6_DEV, 2018-2019: the M6 play-model development window
   (context/ml-m6-method.md, section 6), the same season-ahead seasons as
   M5B_DEV. Guarded like DEV.
+- M7A_DEV, 2016-2019: the M7a development window (context/ml-m7-method.md,
+  section 2): season-ahead WP and kicking models for 2016-2019 (trained from
+  2006); the fourth-down valuation needs two M6 training seasons, so it (and
+  the pre-registered acceptance preview) covers 2018-2019. Guarded like DEV.
 """
 from __future__ import annotations
 
@@ -35,11 +39,12 @@ TUNE = (2000, 2005)
 M5_DEV = (2012, 2019)
 M5B_DEV = (2018, 2019)
 M6_DEV = (2018, 2019)
+M7A_DEV = (2016, 2019)
 
 LABELS = {"dev": DEV, "holdout": HOLDOUT, "reproduction": REPRODUCTION, "tune": TUNE, "m5dev": M5_DEV, "m5bdev": M5B_DEV,
-          "m6dev": M6_DEV}
+          "m6dev": M6_DEV, "m7adev": M7A_DEV}
 # Labels whose runs may never touch the holdout.
-NON_HOLDOUT_LABELS = frozenset({"dev", "tune", "m5dev", "m5bdev", "m6dev"})
+NON_HOLDOUT_LABELS = frozenset({"dev", "tune", "m5dev", "m5bdev", "m6dev", "m7adev"})
 
 
 class HoldoutError(RuntimeError):

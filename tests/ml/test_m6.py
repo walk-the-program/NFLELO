@@ -345,6 +345,8 @@ def test_gbm_fold_and_turnover(table):
 
 M6_FILES = {"nflelo/ml/plays/__init__.py", "nflelo/ml/plays/data.py", "nflelo/ml/plays/metrics.py",
             "nflelo/ml/plays/baseline.py", "nflelo/ml/plays/gbm.py", "nflelo/ml/plays/net.py", "scripts/ml_m6.py"}
+# M7a's fourth-down valuation uses the M6 call-view GBM and is CC BY-SA 4.0 itself (tests/ml/test_m5.py checks it).
+M7A_SA_FILES = {"nflelo/ml/decisions/fourth.py", "scripts/ml_m7a.py"}
 
 
 def test_m6_stays_inside_its_license_boundary():
@@ -354,7 +356,7 @@ def test_m6_stays_inside_its_license_boundary():
     hits = []
     for path in list((ROOT / "nflelo").rglob("*.py")) + list((ROOT / "scripts").glob("*.py")):
         rel = str(path.relative_to(ROOT))
-        if rel in M6_FILES:
+        if rel in M6_FILES or rel in M7A_SA_FILES:
             continue
         tree = ast.parse(path.read_text())
         for n in ast.walk(tree):
