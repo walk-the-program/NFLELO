@@ -293,7 +293,7 @@ No paid APIs, no cloud.
 | M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Built 2026-10-03 (reproduces both exactly), awaiting Walker's review |
 | M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | **Passed 2026-10-04.** Holdout: A4s beats Elo by 0.0035 Brier (CI [-0.0063, -0.0007]). The ECE of 0.028 is within the noise range for n = 1,615; the 0.02 bar is recorded as flawed. |
 | M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Phase 1 built 2026-10-04 (weekly predictions, ledger, site, Action). Phase 2 built 2026-10-04; holdout sign-off run once on 2026-10-05: **margin model FAIL** on its primary (MAE vs Elo -0.059, CI [-0.150, +0.035] includes zero), **playoff odds PASS** (made-playoffs ECE 0.028 <= 0.044; Brier vs tau 0 -0.0024, CI upper bound -0.00015 < +0.001). Odds stay gated off the site until Walker decides. |
-| M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Not started |
+| M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Built 2026-10-05 (player values, lineups, ladder on 2012-2019). **No gain over A4s**: B1-B3 within noise, the one-SE rule keeps B0 (A4s). Stopped before the notebook, holdout, shadow and site work; awaiting Walker. See "M5 build notes". |
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Not started |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | Not started |
 | M7 | Personnel decision support (causal) | M6 | Not started |
@@ -619,6 +619,37 @@ Notes:
 - Reach-SB passed its secondary by 0.00001, a coin flip's margin. Treat it as borderline.
 - The margin primary failed for lack of power more than lack of effect: the point estimate matches DEV, and S1-S3 pass. Under the pre-registration that is still a FAIL. The live 2026 win probability stays A4s either way. The ledger's `spread_model` and the site spreads were not gated, so they stay up unless Walker decides otherwise.
 - `experiments/live/publish.json` is unchanged (`publish_sim: false`); opening the playoff odds is Walker's call.
+
+### M5 build notes (2026-10-05, stopped early: no gain)
+
+Spec: `context/ml-m5-method.md` (approved; D1 (a), D2, D3, D4). Built through the ladder on the M5 window, then stopped under the "B1-B3 show no gain" rule. Notebook 05, the holdout, shadow logging and site work were not started.
+
+**Where things are.** `nflelo/ml/data.py` (cached loaders for `player_stats`, `depth_charts`, `injuries`, `rosters_weekly`, `players`, and `load_participation_for_validation`; `load_depth_charts` normalizes both formats: week-shift rule, 2004 dropped, 2005+ by default, 2025+ ESPN snapshots resolved to the team's last snapshot strictly before kickoff), `nflelo/ml/players/` (`positions.py`, `credit.py`, `value.py`, `lineup.py`, `inputs.py`, and `validate.py`, the only reader of participation), `nflelo/ml/features/roster.py` (features plus `roster_leakage_check`), `scripts/ml_tune_players.py`, `scripts/ml_m5.py` (`--leakcheck`, `--validate`), `tests/ml/test_m5.py`. `eval/windows.py` gained `M5_DEV = (2012, 2019)` (label `m5dev`, guarded like DEV); `asof.corrupt_from` now also shuffles every credited-player ID and play-event flag on late plays. Saved outputs: `data/raw/ml/m5/` (gitignored).
+
+**Data finding (corrects `m5-data-scope.md`).** Weekly-roster statuses are week-accurate only from 2016. In 2005-2015, 35-45% of player-weeks marked RES (and 13-36% marked CUT) had the player credited on a play that same week: the status is effectively the season-end status, which is future information. The first ladder run used it and a post-hoc count of "rank-1 starters on reserve" beat A4s by 0.0027 Brier while having zero correlation with the market's view (0.007), the signature of a leak. `lineup.roster_status_seasons` now detects week-accurate seasons from the data (2016-2019 pass), and the roster and inactive layers are switched off elsewhere. After the fix the same count has no gain (-0.0001 [-0.0009, +0.0007]) and correlates with the market (-0.15) as real injury news should.
+
+**Credit and values.** Credit per the spec table, era-aware from the data (receiving 2003-2008, QB hits 1999-2005 and TFL 2003-2007 unavailable). The 2019 top-10 lists are sane (QB: Mahomes, Jackson, Prescott; DL: Hunter, Crosby; LB: Barrett, Judon, Watt; CB: Peters, White, Gilmore; S: Harris, Byard; WR: Godwin, Thomas; TE: Waller, Andrews; K: Lambo, Tucker). Tuned on 2001-2008 without outcomes (`m5_tune_players`): half-life 32 weeks; k = QB 4, DL 8, LB 8, RB 16, WR 16, TE 16, CB 16, K 16, S 32 (all interior); skill vs replacement QB 0.30, K 0.13, DL 0.09, WR 0.09, LB 0.08, TE 0.05, CB 0.03, S 0.03, RB 0.02. With/without lambda 4,000 plays (interior) on 2006-2008 team residuals: MSE 0.04848 vs 0.04897 box-only and 0.05368 intercept-only.
+
+**Validation against participation (2016-2019, validation only).** Usage-based share MAE by group: QB 0.009, RB 0.110, OL 0.143 (pregame p), S 0.162, WR 0.190, LB 0.198, TE 0.228, CB 0.235 (bias -0.15: two chart slots vs nickel), DL 0.261. Lineup flags (rank-1 starters, p < 0.5): 63% of actual absences caught, 1.0% false alarms; 2019 with partial inactives 81% caught; Friday-only 57% (2019: 59%). Status probabilities (2009-2015): Questionable 0.60 (QB) to 0.87 (RB), Doubtful 0.01-0.05, Out about 0.
+
+**Ladder** (REG 2012-2019 with moneylines, n = 2,047, games hash `890722aef13c4355`; B0 = A4s trained 2001..S-1, reproduces the M3 ladder exactly; other steps trained 2009..S-1; paired bootstrap vs B0, 2,000 reps, seed 20261003; all ECEs pass the one-sided null):
+
+| Step | Brier | vs B0 [95% CI] |
+|---|---|---|
+| B0 A4s (chosen) | 0.2147 | |
+| B0r A4s trained from 2009 | 0.2150 | +0.0004 [-0.0000, +0.0007] |
+| B1 + lineup delta, box values | 0.2149 | +0.0002 [-0.0006, +0.0011] |
+| B2 + lineup delta, with/without | 0.2150 | +0.0004 [-0.0004, +0.0012] |
+| B3 B2 + preseason change | 0.2154 | +0.0008 [-0.0004, +0.0019] |
+| B4 B3 split off/def | 0.2154 | +0.0008 [-0.0004, +0.0020] |
+| B5 B3 with 0/1 probabilities | 0.2155 | +0.0008 [-0.0003, +0.0020] |
+| B3f B3 Friday-only | 0.2155 | +0.0008 [-0.0004, +0.0019] |
+
+Elo 0.2175, market 0.2110. Weeks 1-4: B3 +0.0009 (the preseason term does not fix the early season). Games with 2+ non-QB starters out (n = 755): B1 -0.0005 [-0.0019, +0.0009]. The lineup-delta coefficients are positive in every refit (B1 +3.3 to +5.1, B2 +2.4 to +4.2) and the features correlate +0.13 with the market's departure from A4s, so they carry real information, but too little to move Brier on 2,047 games. The preseason coefficients flip sign across refits.
+
+**Leakage.** Every builder passes `roster_leakage_check` (play-by-play scrambled from as_of, later weeks' depth charts, injuries and rosters scrambled) on synthetic data and on real 2017 games; the positive control (the game's own players) fails. The first real-data run caught a with/without leak (a player's position group, which sets his prior strength, was read from his latest row, including later games); fixed and covered by a test. Known exceptions, all fixed tables: status probabilities estimated on 2009-2015 (overlaps 2012-2015, as the spec says), the era-gap and roster-accuracy tables, and position groups taken from each season's charts and rosters.
+
+**Timing.** Tuning 122 s; ladder 72 s end to end; real-data leakage check 75 s.
 
 ## 10. Open decisions for Walker (start the ML chat here)
 

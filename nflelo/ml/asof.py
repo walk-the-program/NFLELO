@@ -86,7 +86,13 @@ def games_before(games: pd.DataFrame, as_of) -> pd.DataFrame:
 _PLAY_NOISE_COLS = ("epa", "wp", "success", "yards_gained", "wpa")
 _SCHED_NOISE_COLS = ("home_score", "away_score", "result", "total")
 # Who threw the ball on late plays is outcome information too; shuffled among late plays.
+# So is every other player credited on a late play (M5): any column ending in "_player_id"
+# or named in _PLAY_ID_EXTRA, and the play-event flags in _PLAY_EVENT_COLS.
 _PLAY_ID_COLS = ("passer_id", "passer_player_id")
+_PLAY_ID_EXTRA = ("rusher_id", "receiver_id", "forced_fumble_player_1_team", "forced_fumble_player_2_team")
+_PLAY_EVENT_COLS = ("sack", "qb_hit", "tackled_for_loss", "interception", "fumble_forced", "incomplete_pass",
+                    "complete_pass", "pass_attempt", "rush_attempt", "qb_scramble", "field_goal_result",
+                    "kick_distance", "field_goal_attempt", "extra_point_attempt")
 # The schedule's starting QBs. Kept by default: decision M3-D1 treats the starter's
 # identity as known before kickoff. `scramble_starters=True` removes that exception.
 _STARTER_COLS = ("home_qb_id", "away_qb_id")
@@ -97,8 +103,9 @@ def corrupt_from(pbp: pd.DataFrame, sched: pd.DataFrame, as_of, seed: int = 0,
     """Copies of (pbp, sched) with everything from games kicking off at or after `as_of` scrambled.
 
     Play outcomes (EPA, win probability, success, yards) are replaced with
-    noise, pass and run labels are shuffled, passer IDs are shuffled among the
-    late plays, and scores are randomized. With `scramble_starters`, the
+    noise, pass and run labels are shuffled, passer IDs and every other
+    credited-player ID and play-event flag (sacks, hits, interceptions, field
+    goal results, ...) are shuffled among the late plays, and scores are randomized. With `scramble_starters`, the
     schedule's starting-QB IDs of late games are shuffled as well. Games
     before `as_of` are untouched. `sched` must have a `kickoff` column.
     """
@@ -128,7 +135,9 @@ def corrupt_from(pbp: pd.DataFrame, sched: pd.DataFrame, as_of, seed: int = 0,
             p.loc[m, "pass"] = (p.loc[m, "play_type"] == "pass").astype(float).to_numpy()
         if "rush" in p.columns:
             p.loc[m, "rush"] = (p.loc[m, "play_type"] == "run").astype(float).to_numpy()
-        for c in _PLAY_ID_COLS:
+        id_cols = list(_PLAY_ID_COLS) + sorted(c for c in p.columns if c.endswith("_player_id")
+                                               and c not in _PLAY_ID_COLS) + list(_PLAY_ID_EXTRA + _PLAY_EVENT_COLS)
+        for c in id_cols:
             if c in p.columns:
                 p[c] = p[c].astype(object)
                 p.loc[m, c] = rng.permutation(p.loc[m, c].to_numpy(object))

@@ -9,7 +9,11 @@
   overlaps the holdout, so it needs `allow_holdout=True` too.
 - TUNE, 2000-2005: where the M3 rating knobs are tuned (decision M3-D2), on
   next-week EPA rather than game outcomes. Runs labelled "tune" carry a tuning
-  loss, not a Brier.
+  loss, not a Brier. (M5 tunes player knobs on 2001-2008 under the same label.)
+- M5_DEV, 2012-2019: the M5 evaluation window (decision M5-D3), a sub-window
+  of DEV. Lineup features need injury reports (2009+) and a few training
+  seasons, so M5 is scored here, against A4s on the same games. Guarded like
+  DEV: it can never include a holdout season.
 """
 from __future__ import annotations
 
@@ -21,8 +25,11 @@ DEV = (2006, 2019)
 HOLDOUT = (2020, 2025)
 REPRODUCTION = tuple(config.TEST_SEASONS)
 TUNE = (2000, 2005)
+M5_DEV = (2012, 2019)
 
-LABELS = {"dev": DEV, "holdout": HOLDOUT, "reproduction": REPRODUCTION, "tune": TUNE}
+LABELS = {"dev": DEV, "holdout": HOLDOUT, "reproduction": REPRODUCTION, "tune": TUNE, "m5dev": M5_DEV}
+# Labels whose runs may never touch the holdout.
+NON_HOLDOUT_LABELS = frozenset({"dev", "tune", "m5dev"})
 
 
 class HoldoutError(RuntimeError):

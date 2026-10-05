@@ -17,7 +17,7 @@ Research done 2026-10-04 (read-only; scratch scripts were not kept in the repo).
 | Play-by-play player IDs | 1999+ | Passer, rusher, receiver, sack, QB hit, TFL, tackles, pass defensed, INT, fumbles, kicker, punter, penalty | Usable. Gaps: 2003-2008 lack incomplete-pass targets and TFL credit; 2003-2005 lack QB hits |
 | Depth charts (`load_depth_charts`) | 2001-2024 weekly; 2025+ daily ESPN snapshots | Listed starters by position | Usable for 2005+. Drop 2004 (frozen); 2001-2003 are weak. Two formats need two code paths |
 | Injury reports (`load_injuries`) | 2009+ | Final Friday status per player | Usable |
-| Weekly rosters (`load_rosters_weekly`) | 2002+ | ACT, RES (IR), INA, and so on | Usable. RES from 2002; INA (game-day inactive) only from 2020 (partial in 2019) |
+| Weekly rosters (`load_rosters_weekly`) | 2002+ | ACT, RES (IR), INA, and so on | Usable **from 2016 only** for statuses (correction 2026-10-05: before 2016 the status is effectively the season-end status; 35-45% of RES player-weeks played that week). INA (game-day inactive) only from 2020 (partial in 2019) |
 | Players table (`load_players`) | all | IDs, positions | Usable |
 | Next Gen Stats | 2016+ | QB and receiver tracking stats, qualifying players only | Thin; use with care |
 | Participation | 2016-2025 | Who was on the field for every play | CC BY-SA: validation, or M5 if share-alike is accepted for it |

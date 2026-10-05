@@ -64,14 +64,14 @@ def log_run(name: str, *, label: str, seasons: tuple[int, int], game_ids: Iterab
             notes: str = "", extra: dict | None = None, runs_dir: Path = RUNS_DIR) -> Path:
     """Write one run record and return its path.
 
-    `label` is "dev", "holdout", or "reproduction". The holdout flag is set
+    `label` is "dev", "m5dev", "tune", "holdout", or "reproduction". The holdout flag is set
     from the seasons themselves, so a run cannot touch 2020-2025 unflagged.
     """
     if label not in windows.LABELS:
         raise ValueError(f"label must be one of {sorted(windows.LABELS)}")
     holdout = windows.touches_holdout(seasons)
-    if label == "dev" and holdout:
-        raise windows.HoldoutError(f"a 'dev' run cannot include holdout seasons: {seasons}")
+    if label in windows.NON_HOLDOUT_LABELS and holdout:
+        raise windows.HoldoutError(f"a {label!r} run cannot include holdout seasons: {seasons}")
     ids = list(game_ids)
     now = datetime.now(timezone.utc)
     rec = {
