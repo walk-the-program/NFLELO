@@ -292,7 +292,7 @@ No paid APIs, no cloud.
 | M1 | Data layer and leak-proof features | none | Built 2026-10-03, awaiting Walker's review |
 | M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Built 2026-10-03 (reproduces both exactly), awaiting Walker's review |
 | M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | **Passed 2026-10-04.** Holdout: A4s beats Elo by 0.0035 Brier (CI [-0.0063, -0.0007]). The ECE of 0.028 is within the noise range for n = 1,615; the 0.02 bar is recorded as flawed. |
-| M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Phase 1 built 2026-10-04 (weekly predictions, ledger, site, Action), awaiting Walker's review. Phase 2 built 2026-10-04. The 2002-2005 tau_rest (0.5) failed on DEV; Walker had it re-tuned on DEV (4.5) and approved one holdout run for the margin model and playoff odds, pre-registered below. Holdout not run yet. Playoff odds gated off the site until sign-off. |
+| M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Phase 1 built 2026-10-04 (weekly predictions, ledger, site, Action). Phase 2 built 2026-10-04; holdout sign-off run once on 2026-10-05: **margin model FAIL** on its primary (MAE vs Elo -0.059, CI [-0.150, +0.035] includes zero), **playoff odds PASS** (made-playoffs ECE 0.028 <= 0.044; Brier vs tau 0 -0.0024, CI upper bound -0.00015 < +0.001). Odds stay gated off the site until Walker decides. |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Not started |
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Not started |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | Not started |
@@ -551,6 +551,47 @@ Walker approved ONE holdout run covering the margin model and the playoff odds. 
 - Descriptive: made-playoffs Brier (frozen tau and tau = 0) and ECE by start week and by season; the season-cluster bootstrap CI; reliability tables.
 
 **Procedure.** First `python scripts/ml_m4.py signoff-dry-run`: the same code path on DEV 2006-2019 without logging, which must reproduce the logged DEV margin numbers and the DEV backtest exactly (max |diff| 0). Then, once, `python scripts/ml_m4.py signoff`: runs on 2020-2025, prints every number and each rule's verdict, writes `data/raw/ml/m4/signoff_holdout.json`, and logs `m4_signoff_margin` and `m4_signoff_playoff_odds` to `experiments/runs/` with `holdout: true`. The site gate (`experiments/live/publish.json`) is opened only if the playoff-odds primary passes and Walker approves. The 2026 live win probability stays A4s whatever the margin result.
+
+### M4 holdout sign-off (2026-10-05)
+
+`python scripts/ml_m4.py signoff` ran once, on the committed pre-registration (commit e51e890, clean tree), with nothing changed. Frozen: key-number margin shape, tau_rest 4.5, 10,000 simulations per start, seeds 20261004 + 1000 * season + week. Runs: `experiments/runs/20261005T024754Z_m4_signoff_margin.json` and `..._m4_signoff_playoff_odds.json` (`holdout: true`); full output `data/raw/ml/m4/signoff_holdout.json`. Nothing was retuned.
+
+Margin model: REG 2020-2025 with moneylines, n = 1,615, games hash `1b27abff81bddb2c` (as expected). Playoff odds: 24 starts, 768 team-starts.
+
+| Rule | Value | Threshold | Result |
+|---|---|---|---|
+| Margin primary: MAE model minus Elo spread | -0.059 [-0.150, +0.035] (model 10.126, Elo 10.185) | CI upper bound < 0 | **FAIL** |
+| Margin S1: implied Brier minus A4s | +0.00001 (SE 0.00047; 0.2195 vs 0.2195) | <= 1 SE | PASS |
+| Margin S2: ECE of implied win probability | 0.0348 | <= p95 0.0363 | PASS |
+| Margin S3: spread bins inside the fair-coin band | 5 of 6 | >= 5 | PASS |
+| Odds P1: made-playoffs ECE | 0.0282 | <= p95 0.0441 | PASS |
+| Odds P2: made-playoffs Brier, tau 4.5 minus tau 0 | -0.0024 [-0.0049, -0.00015] (0.1234 vs 0.1258) | CI upper bound < +0.001 | PASS |
+| Odds secondary: division ECE | 0.0353 | <= 0.0378 | PASS |
+| Odds secondary: #1 seed ECE | 0.0114 | <= 0.0234 | PASS |
+| Odds secondary: reach SB ECE | 0.02187 | <= 0.02188 | PASS (by 0.00001) |
+| Odds secondary: win SB ECE | 0.0039 | <= 0.0143 | PASS |
+
+**Verdicts as pre-registered: margin model FAIL (primary); playoff odds PASS (primary and all secondaries).** The two-sided descriptive field is inside [p05, p95] for every ECE.
+
+Descriptive, margin model:
+- Market spread MAE 9.764; model minus market +0.362 [+0.230, +0.492] (wider than DEV's +0.180).
+- CRPS: continuous normal 7.2801, rounded normal 7.2783, key-number 7.2541 (key-number still best, by 0.024, SE 0.006).
+- Implied win-probability ECE: rounded normal 0.0329, key-number 0.0348, A4s 0.0283 (null 5-95% about [0.014, 0.036]).
+- Home beats our spread by bin: (-inf, -7] 0.586 of 128 [0.430, 0.570] OUTSIDE (big away favorites cover too rarely, so our spread overrates them); (-7, -3] 0.554; (-3, 0] 0.453; (0, 3] 0.487; (3, 7] 0.480; (7, inf] 0.497.
+- MAE by season (model / Elo / market): 2020 9.99 / 10.04 / 9.83; 2021 11.22 / 11.32 / 10.78; 2022 9.05 / 9.00 / 8.74; 2023 10.44 / 10.48 / 9.90; 2024 10.02 / 10.05 / 9.61; 2025 10.03 / 10.20 / 9.72. The model beats Elo in 5 of 6 seasons, but by about as much as on DEV (-0.06) on a window half the size, so the interval is twice as wide.
+- 2025 fit: intercept +0.30, elo_logit +5.74, adj_epa_margin +10.20, qb_delta_diff +24.61, sigma 13.32.
+
+Descriptive, playoff odds (made playoffs, Brier tau 4.5 / tau 0, ECE):
+- By start week: week 4 0.1721 / 0.1758, 0.092; week 8 0.1327 / 0.1337, 0.055; week 12 0.1207 / 0.1250, 0.047; week 16 0.0682 / 0.0689, 0.033 (192 team-starts each). The shock helps at every start week.
+- By season: 2020 0.0785 / 0.0743; 2021 0.1540 / 0.1618; 2022 0.1185 / 0.1187; 2023 0.1453 / 0.1463; 2024 0.0908 / 0.0886; 2025 0.1533 / 0.1653. Four of six improve. The season-cluster CI is [-0.0071, +0.0019] (6 clusters), descriptive only.
+- Other outcomes, Brier tau 4.5 vs 0: division 0.1122 vs 0.1158 (-0.0037 [-0.0060, -0.0014]); #1 seed 0.0374 vs 0.0372; reach SB 0.0477 vs 0.0466 (+0.0011 [-0.0001, +0.0023]); win SB 0.0277 vs 0.0278.
+- Reliability: the biggest gaps are -10.5 points at 0.6-0.7 and +6.2 at 0.5-0.6 (about 50 team-starts each); 0.8-0.9 came true 86%, 0.9-1.0 97.5%.
+
+Notes:
+- Per-week and per-season ECEs (0.03 to 0.12) are on 128-192 team-starts each and are much noisier than the pooled 0.028; they are not rules.
+- Reach-SB passed its secondary by 0.00001, a coin flip's margin. Treat it as borderline.
+- The margin primary failed for lack of power more than lack of effect: the point estimate matches DEV, and S1-S3 pass. Under the pre-registration that is still a FAIL. The live 2026 win probability stays A4s either way. The ledger's `spread_model` and the site spreads were not gated, so they stay up unless Walker decides otherwise.
+- `experiments/live/publish.json` is unchanged (`publish_sim: false`); opening the playoff odds is Walker's call.
 
 ## 10. Open decisions for Walker (start the ML chat here)
 
