@@ -1,0 +1,500 @@
+{
+  "name": "m6_call_N1",
+  "label": "m6dev",
+  "window": {
+    "seasons": [
+      2018,
+      2019
+    ],
+    "game_type": "REG+POST"
+  },
+  "holdout": false,
+  "n": 55543,
+  "games_hash": "2e7aa347318c6509",
+  "metrics": {
+    "n": 55543,
+    "crps": 3.930954163994043,
+    "logloss": 2.849196538225332,
+    "tov_brier": 0.019800028333314432,
+    "ece_first": 0.0052700025277087875
+  },
+  "features": [
+    "down",
+    "ydstogo",
+    "yardline_100",
+    "score_diff",
+    "half_secs",
+    "game_secs",
+    "off_timeouts",
+    "def_timeouts",
+    "home",
+    "roof_indoor",
+    "roof_open",
+    "temp",
+    "wind",
+    "off_rb",
+    "off_te",
+    "off_wr",
+    "off_ol",
+    "def_dl",
+    "def_lb",
+    "def_db",
+    "form_shotgun",
+    "form_pistol",
+    "form_under_center",
+    "box",
+    "off_pass_o",
+    "off_rush_o",
+    "def_pass_d",
+    "def_rush_d",
+    "is_pass"
+  ],
+  "params": {
+    "ratings": {
+      "lam": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "rapm": {
+      "lam": {
+        "CB": 32000.0,
+        "DL": 1024000.0,
+        "LB": 2000.0,
+        "OL": 1000.0,
+        "QB": 500.0,
+        "RB": 1000.0,
+        "S": 4000.0,
+        "TE": 2000.0,
+        "WR": 4000.0
+      },
+      "lam_other": 20000.0,
+      "decay": 1.0,
+      "situation": true,
+      "box_scale": 0.25
+    }
+  },
+  "data": {
+    "data/raw/ml/pbp/1999": "6263ca0dcafed4110f1da80be5126eedc2fba948b3de111dc2e8dd94165ce595",
+    "data/raw/ml/pbp/2000": "29a0904f123de7fe9c10ff07e7605bb29d753ff87f2026659605e60b2c0aa243",
+    "data/raw/ml/pbp/2001": "7b34b78901915ca98449190a1a911308275cc764eb3e565376c3d44667933dc1",
+    "data/raw/ml/pbp/2002": "46fe8b49e4f94e479cf8e5dbb87d90b577d76d0a503d6bf4f2191902f95391a2",
+    "data/raw/ml/pbp/2003": "c45fa61ddb3eba8c316f8c680362284ed01174728ca6e22bdfdba6083d5ec707",
+    "data/raw/ml/pbp/2004": "c95a80bffc740d438965320a6014f9cb839fa57e92e114b2783fc76d8acce653",
+    "data/raw/ml/pbp/2005": "c7e4b4984af805df9719a23004a967593e7d503025b1c301973606e0e4f7cc61",
+    "data/raw/ml/pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+    "data/raw/ml/pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+    "data/raw/ml/pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+    "data/raw/ml/pbp/2009": "5bfb6559343c04092d1ad66c1479782d085d9f390e6806be0a7ca7ec37124806",
+    "data/raw/ml/pbp/2010": "74ad605fea53c27afd00eee71c53b86b5cfbf7133d1a7b5b8f0067d817e55785",
+    "data/raw/ml/pbp/2011": "26727f9d2b0e4f9f616e746b87b9a29359f37a4b484f66f7312baf883d85e958",
+    "data/raw/ml/pbp/2012": "3277aded9792c419cc853cf307f2206c3fb0908d91750b4e1d3d66b567407c66",
+    "data/raw/ml/pbp/2013": "2a31a7cd0e7e2306f626a0f1f4bb96679e5b3e92a8729695858adca35d8b2686",
+    "data/raw/ml/pbp/2014": "c6910558e235dac664b1b7f02654d47ea8d51904ef9ace5d4f015165604e0b12",
+    "data/raw/ml/pbp/2015": "b3314a52b781a00417528b2e3388d2596098cdbe7b565d3c962d7171a98ae70f",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/1999": "b590c0c595ae702489068ed30d25460a1da2f129ce47c4143c8c28618fbb2749",
+    "data/raw/ml/schedules/2000": "d11ca64a246a9b9ce98beb15af6a337887f1a31658a1271d510ef62e094fd927",
+    "data/raw/ml/schedules/2001": "59deb3483354d8e24a55eef5e508f4824a3cdfff44936adea6d02af34c64fffd",
+    "data/raw/ml/schedules/2002": "b394de36fc6286647bdfa1a82383b0fec5f83a5e0aeaefc010336c72f1365545",
+    "data/raw/ml/schedules/2003": "70b3c8a10df7a205ee8bc446fa40dca4f7408f3900d063f1881860119de4834c",
+    "data/raw/ml/schedules/2004": "64d26bdf22af5736b507a04b82c73b17ded7765ad2940c02d880abbe5779d978",
+    "data/raw/ml/schedules/2005": "3535ab82c2c6b866d94623aba9f37eac3b7497fd5ff61898904e03420d80795a",
+    "data/raw/ml/schedules/2006": "04e8c1a0394137e8493db6bf228a75ab1e0e8104eca4056380c13168174fca98",
+    "data/raw/ml/schedules/2007": "ed35269017c5342a04e621717760da8ccdc68421f7a38685eaa355af90d875b2",
+    "data/raw/ml/schedules/2008": "76a274f12d0efbdc6220870e083597fe6669f33bf5f94d30ade9d11efbc3423d",
+    "data/raw/ml/schedules/2009": "b720c554d58f8e8bc4ef4fe3ada0528f1f4065bde6926395f5c4ed46f6c19579",
+    "data/raw/ml/schedules/2010": "c6eb6d6390b8808ab6fe7a1c177d45b2d31c4dc3f7b5ccf3a9ff525c9afe758f",
+    "data/raw/ml/schedules/2011": "367cd43a9a9499d875a00dc12d2476ea3bfabc36dfbb82399a695f5230618232",
+    "data/raw/ml/schedules/2012": "94fd313c6126390c47c936cc04c986ec6a2526cad776f078e61c8e740171ceb0",
+    "data/raw/ml/schedules/2013": "48b55301b46a4acc55b1263555b01d62475fce5196f943176cf5bb23b5b979b6",
+    "data/raw/ml/schedules/2014": "56c8544f26975a429dd1dcd67996b28cb3680c742c79c2367bfea1e35ae93940",
+    "data/raw/ml/schedules/2015": "68c3bf6df90e969fe80aa46eb3351ad624e5e7c3f85c664644811508bbb647c3",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56",
+    "data/raw/ml/depth_charts/2005": "1dc213a56b6b9fa614893148e01304c7284ed834f45d0f00c32dc4429cc60d48",
+    "data/raw/ml/depth_charts/2006": "fb8390a24831112c290ed6e20f4546935ac17249912d3834c533657a1c7684c6",
+    "data/raw/ml/depth_charts/2007": "57666065438f443ae58038c66bc9e8915cbc9b11a29c19b5bd2b8edda2fde2db",
+    "data/raw/ml/depth_charts/2008": "ee790c140926db347fe6e764f2e62f0e1446b7c2a1c034458552682d4e31a9a7",
+    "data/raw/ml/depth_charts/2009": "7a2f84b9b92165aaec386a39b2cfdc03ade8f7a5768c07148a261bc426e745b7",
+    "data/raw/ml/depth_charts/2010": "6eda4ecf1d1e81e7feb38cd99d430b322d48444b42a8404e5bf735c71e34070c",
+    "data/raw/ml/depth_charts/2011": "88dc4b3694af0c8e904d8464528bf26a092ea6998b1a686e04793430b69ea81c",
+    "data/raw/ml/depth_charts/2012": "bddec1cc10d60492f196d090dbd43c2db0f23c9eb72194fe5750b5ea9c9bf89e",
+    "data/raw/ml/depth_charts/2013": "93432b67f59114523fc767494e0ec33e78f11a34cd891e2a40d95ed194d84e4f",
+    "data/raw/ml/depth_charts/2014": "39b007c1814635fd35a6c93adacc81cc86f5966cc205451fb0976f459a61237d",
+    "data/raw/ml/depth_charts/2015": "b0e831c90d433436188a53c69ec107d7b99b949ebb772ed5e2989d700c4d3481",
+    "data/raw/ml/depth_charts/2016": "f16d97dc32299176c53c2325bbcd5345885122764ad36498339b3f0609947fee",
+    "data/raw/ml/depth_charts/2017": "3db3826d9d1a221a95d068681980bc0450325bb80fe7f7970b331366eeb44822",
+    "data/raw/ml/depth_charts/2018": "44857b3e4f4814cca31e1541d48cb97407c2c1ed59f6c4c46b6cf1da47b7711c",
+    "data/raw/ml/depth_charts/2019": "3b2ad2b9205133b1e72df71631a78b3a48201fbcb2c871ab02213776af70056f",
+    "data/raw/ml/rosters_weekly/2002": "ff5065be3a5a3c31f17769590b85e27bfeaec22c040d12c6ae636157d000a509",
+    "data/raw/ml/rosters_weekly/2003": "2f28e96c1cc0238bdc36d4fbc75952b3af2a5f88a1875ed79b92012ffce1937b",
+    "data/raw/ml/rosters_weekly/2004": "24c9ed7c7ba0f3187a22871cade086a443cdcc945e5e2283f1846e3af2b2857a",
+    "data/raw/ml/rosters_weekly/2005": "f9c3dff3abb8bd7f03e882d73e840a4aae214d36395992f997178ce53b39d039",
+    "data/raw/ml/rosters_weekly/2006": "4ca8b46ba7104a85fcd174345adf534bb064d8b27e6ebf6ee8681a6111530748",
+    "data/raw/ml/rosters_weekly/2007": "5be7756f9c2a83796929b8c28b70e5ffafee1eb0153c8b012e2110cc448307c5",
+    "data/raw/ml/rosters_weekly/2008": "a7463fe7f071a4d908bd91f185f878728d76c686987a43934774790f83fe11a6",
+    "data/raw/ml/rosters_weekly/2009": "aded782ac4cc2a892159565f2df933170ad069cb80f9309549601aeeaae6e988",
+    "data/raw/ml/rosters_weekly/2010": "dbf5adc511c48319991467f56e1d7d9df7c983bb5036f89b8bdc739db175c3ed",
+    "data/raw/ml/rosters_weekly/2011": "447e0eda09a2ffa5918c2c3b4fb9d66daf81ba0cf2b2f9b9a96f5a25db98c7cd",
+    "data/raw/ml/rosters_weekly/2012": "0edaaef42d4972c29297e896dce6d36cbf38046f72807995dcac4d0ffb83816f",
+    "data/raw/ml/rosters_weekly/2013": "ee97af362f770b6a632f6fa4c99d301afe240ca2383dac949e206d5997ca4892",
+    "data/raw/ml/rosters_weekly/2014": "f5d6554525d453a8329d5a2bfdbed14abb7a406f4c258922b997ecc8b0dbc7d3",
+    "data/raw/ml/rosters_weekly/2015": "0af43e8d75e00616fdedffdc73b6a76c268fe685716afc6099c4f6240f2a38ef",
+    "data/raw/ml/rosters_weekly/2016": "f9c06d464aa792524baeb3bc9bd99e2ee789799011c2a14b354bf967eb54c32b",
+    "data/raw/ml/rosters_weekly/2017": "e08db5a5b46438379d57cd00839beb70e3b4b5ab7135d00f1d3e2167b87d9b3e",
+    "data/raw/ml/rosters_weekly/2018": "fbb0028f79f07d83ed6ce882bd022a95653f10cacd3bed990f75825feb5c2892",
+    "data/raw/ml/rosters_weekly/2019": "050ddd66e0a04bb3be6830c239119707d6850b2bb7ea0f0e3f5040aa983aad26",
+    "data/raw/ml/injuries/2009": "d12cc75579894878b9b0a8582f231e442462f80f9ccff1d62f51ddf3aaca93ca",
+    "data/raw/ml/injuries/2010": "0376ff700ff95ffc7fc50b86a22941bd683a4107400fc9f0a7d675061efc1d9a",
+    "data/raw/ml/injuries/2011": "fbe463450cadafb45fad3b15d3d474403e2f88344f4f84ff83154da82f4935ad",
+    "data/raw/ml/injuries/2012": "a238d5e4af5c662a576540a7fe50f71185008d2e9e995ae76f96e54ef1fcfa25",
+    "data/raw/ml/injuries/2013": "58e5c0bdc1d8f9d907d9b11cd044800b86573a4321c4a1b72308ad579d78928a",
+    "data/raw/ml/injuries/2014": "b61fff9320799ce3ba03fb263f72193166be663f9fd6eec0b6b2597d97edbce0",
+    "data/raw/ml/injuries/2015": "b17b3df9d35adb005e6df91f25999bbe8fec413df02e18b68f41bdad2eb4bdf6",
+    "data/raw/ml/injuries/2016": "bdfdc2f69eac23a92b0ef21f82820c29fef665996dc877bb6243d9b946b7bddf",
+    "data/raw/ml/injuries/2017": "5f1dda6592877a26ade565a6864b90b86a5255917ab6d06305bec6bb981462f8",
+    "data/raw/ml/injuries/2018": "d45f4a0280f1f10abd7f72965d29bd17e11b1539d78e536620709130d964c052",
+    "data/raw/ml/injuries/2019": "f582f091ba157f2495b11583fe98f1e02ced22da2a99c5d40a3cf3821e8c6734",
+    "data/raw/ml/players/0": "591f5a30d2714ad89d2db772330141169189e5357a8b62f48c437faff96244de",
+    "data/raw/ml/participation/2016": "cf5d6f7518c199c3cc75e76bc5a25ab2d32e0b463d9834b6a1e0d2b171997fc0",
+    "data/raw/ml/participation/2017": "c0b9e1e541758f88b03c69085cfcdc27ccc027102b70d1581f136a82b145df1b",
+    "data/raw/ml/participation/2018": "901340151c6bcfcd5e2580555f28b4f3c5e8cbe67afb4dc7a7f5cf17ff5fd5b5",
+    "data/raw/ml/participation/2019": "945e80c4bbd2f452ea5ffa6d8751d5b57dd966c0d5f94d023390863a2baa1ba8",
+    "data/games.csv": "404f3b34ed1f3f5ae79d8b0ed152cad773586a31f40693c5722056b8503c8329"
+  },
+  "git": {
+    "sha": "bc0bff7ce2aa191b3e76b20fd2241e21a0e38d1d",
+    "dirty": false
+  },
+  "timestamp": "2026-10-05T08:08:33+00:00",
+  "notes": "N0 + learned player embeddings, DeepSets pooling (offense and defense). CC BY-SA 4.0 (participation-derived).",
+  "license": {
+    "license": "CC BY-SA 4.0",
+    "note": "CC BY-SA 4.0. Derived from nflverse participation data: NFL Next Gen Stats via nflverse (2016-2022), FTN Data via nflverse (2023+). M6 play outcome model (context/ml-m6-method.md)."
+  },
+  "view": "call",
+  "model": "N1",
+  "plays_hash": "a17893a380256859",
+  "one_se": {
+    "best": "N2",
+    "within": [
+      "gbm",
+      "N2"
+    ],
+    "chosen": "gbm",
+    "chosen_this": false
+  },
+  "result": {
+    "crps": 3.930954163994043,
+    "logloss": 2.849196538225332,
+    "tov_brier": 0.019800028333314432,
+    "cal_first": {
+      "ece": 0.0052700025277087875,
+      "null_p95": 0.005600995525836382,
+      "null_median": 0.0038119802389141506,
+      "floor": 0.01,
+      "ok_null": true,
+      "ok": true,
+      "mean_pred": 0.29908906782570194,
+      "observed": 0.29805736096357777
+    },
+    "brier_first": 0.18111864895165108,
+    "cal_20plus": {
+      "ece": 0.0033874136434437524,
+      "null_p95": 0.0022891822181507135,
+      "null_median": 0.001077427660600205,
+      "floor": 0.01,
+      "ok_null": false,
+      "ok": true,
+      "mean_pred": 0.06130120598459218,
+      "observed": 0.06468861962803593
+    },
+    "brier_20plus": 0.05862525597965905,
+    "cal_loss": {
+      "ece": 0.0038819137026819836,
+      "null_p95": 0.002627306025144381,
+      "null_median": 0.0012489794887259212,
+      "floor": 0.01,
+      "ok_null": false,
+      "ok": true,
+      "mean_pred": 0.08652112294487742,
+      "observed": 0.08528527447203067
+    },
+    "brier_loss": 0.07763871280590806,
+    "cal_tov": {
+      "ece": 4.063603687928497e-05,
+      "null_p95": 0.0012021075084754603,
+      "null_median": 0.00038951641403340095,
+      "floor": 0.01,
+      "ok_null": true,
+      "ok": true,
+      "mean_pred": 0.02037112025339466,
+      "observed": 0.02036260194804026
+    },
+    "mean_expected_yards": 5.6476851437341935,
+    "vs_baseline": {
+      "crps": {
+        "n": 55543,
+        "clusters": 534,
+        "diff": -0.017397333003569906,
+        "ci_low": -0.021258617770012762,
+        "ci_high": -0.013942616973793412,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.00188165206593821
+      },
+      "logloss": {
+        "n": 55543,
+        "clusters": 534,
+        "diff": -0.021779035972732532,
+        "ci_low": -0.024593832639277505,
+        "ci_high": -0.01909182532731593,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.001418374115252039
+      },
+      "tov_brier": {
+        "n": 55543,
+        "clusters": 534,
+        "diff": -2.7977380556415536e-05,
+        "ci_low": -5.051720790794352e-05,
+        "ci_high": -6.523182150334043e-06,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 1.1242892547709873e-05
+      }
+    },
+    "vs_best": {
+      "n": 55543,
+      "clusters": 534,
+      "diff": 0.0008712998438123125,
+      "ci_low": -0.00042445721167175206,
+      "ci_high": 0.0021910491624749172,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.0006729710842267957
+    },
+    "within_1se": false
+  },
+  "splits": {
+    "run": {
+      "n": 21113,
+      "crps": 2.6975414677657805,
+      "vs_baseline": {
+        "n": 21113,
+        "clusters": 534,
+        "diff": -0.011011915579004735,
+        "ci_low": -0.015045407502947883,
+        "ci_high": -0.007103451899431317,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0019961193349335086
+      }
+    },
+    "pass": {
+      "n": 34430,
+      "crps": 4.6873016009811845,
+      "vs_baseline": {
+        "n": 34430,
+        "clusters": 534,
+        "diff": -0.021312968149804132,
+        "ci_low": -0.026750558218675446,
+        "ci_high": -0.01603891229018009,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0027363675330809483
+      }
+    },
+    "down1": {
+      "n": 25063,
+      "crps": 3.815266757453838,
+      "vs_baseline": {
+        "n": 25063,
+        "clusters": 534,
+        "diff": -0.018059728341612583,
+        "ci_low": -0.023320861497336313,
+        "ci_high": -0.012648768210956635,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0026477967180396815
+      }
+    },
+    "down2": {
+      "n": 18547,
+      "crps": 3.8134257174287813,
+      "vs_baseline": {
+        "n": 18547,
+        "clusters": 534,
+        "diff": -0.01664225482542031,
+        "ci_low": -0.023740752069217913,
+        "ci_high": -0.01006549149615382,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0034031767768133736
+      }
+    },
+    "down3": {
+      "n": 11190,
+      "crps": 4.414986572215361,
+      "vs_baseline": {
+        "n": 11190,
+        "clusters": 534,
+        "diff": -0.01820374357167063,
+        "ci_low": -0.026979150622089255,
+        "ci_high": -0.009375079869969218,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0045623308817909795
+      }
+    },
+    "down4": {
+      "n": 743,
+      "crps": 3.477321486425377,
+      "vs_baseline": {
+        "n": 743,
+        "clusters": 398,
+        "diff": -0.0017568031997070098,
+        "ci_low": -0.0343467047813411,
+        "ci_high": 0.031490614505427644,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.016801262494448004
+      }
+    },
+    "zone_1_20": {
+      "n": 7951,
+      "crps": 2.3001800698806143,
+      "vs_baseline": {
+        "n": 7951,
+        "clusters": 533,
+        "diff": -0.012975521293103427,
+        "ci_low": -0.020223364145007635,
+        "ci_high": -0.005672829066920894,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0036608925880321553
+      }
+    },
+    "zone_21_50": {
+      "n": 16376,
+      "crps": 4.110431437597234,
+      "vs_baseline": {
+        "n": 16376,
+        "clusters": 534,
+        "diff": -0.013146297373275165,
+        "ci_low": -0.019383543205730717,
+        "ci_high": -0.006785226302892521,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0031045830511078187
+      }
+    },
+    "zone_51_80": {
+      "n": 26211,
+      "crps": 4.285593344081908,
+      "vs_baseline": {
+        "n": 26211,
+        "clusters": 534,
+        "diff": -0.019648071648864122,
+        "ci_low": -0.025035709932190554,
+        "ci_high": -0.01414977768608297,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0028082872457687617
+      }
+    },
+    "zone_81_99": {
+      "n": 5005,
+      "crps": 4.077151454800629,
+      "vs_baseline": {
+        "n": 5005,
+        "clusters": 529,
+        "diff": -0.02654392116736991,
+        "ci_low": -0.04182537205254811,
+        "ci_high": -0.01064146155084111,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.007812624032673363
+      }
+    },
+    "era_ngs": {
+      "n": 55543,
+      "crps": 3.930954163994043,
+      "vs_baseline": {
+        "n": 55543,
+        "clusters": 534,
+        "diff": -0.017397333003569906,
+        "ci_low": -0.021258617770012762,
+        "ci_high": -0.013942616973793412,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.00188165206593821
+      }
+    }
+  },
+  "fits": {
+    "call_2018": {
+      "chosen": {
+        "lr": 0.0003,
+        "hidden": 128,
+        "emb_l2": 0.01
+      },
+      "epochs": 12,
+      "val_loss": [
+        2.9150988334793655,
+        2.914874432291017,
+        2.9152789503991476
+      ]
+    },
+    "call_2019": {
+      "chosen": {
+        "lr": 0.0003,
+        "hidden": 128,
+        "emb_l2": 0.1
+      },
+      "epochs": 15,
+      "val_loss": [
+        2.958654930830684,
+        2.9572120089829887,
+        2.9568912654900332
+      ]
+    }
+  }
+}
