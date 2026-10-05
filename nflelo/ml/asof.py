@@ -83,7 +83,7 @@ def games_before(games: pd.DataFrame, as_of) -> pd.DataFrame:
 # --------------------------------------------------------------------------- leakage check
 
 # Numeric play-level columns that carry outcome information and get scrambled.
-_PLAY_NOISE_COLS = ("epa", "wp", "success", "yards_gained", "wpa")
+_PLAY_NOISE_COLS = ("epa", "wp", "success", "yards_gained", "wpa", "cpoe")
 _SCHED_NOISE_COLS = ("home_score", "away_score", "result", "total")
 # Who threw the ball on late plays is outcome information too; shuffled among late plays.
 # So is every other player credited on a late play (M5): any column ending in "_player_id"

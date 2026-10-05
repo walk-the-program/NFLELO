@@ -2,7 +2,7 @@
 
 Written 2026-10-05 by Claude under Walker's standing delegation. Read `context/ml-m3-method.md`, the M3 and No-Elo notes in `context/ml.md`, and the M5 and M5b results first.
 
-Status: **approved under delegation 2026-10-05; build in progress.**
+Status: **approved under delegation 2026-10-05; built 2026-10-05 (dev only).** Result: the one-SE pick is C2d (Elo + Kalman `kf_margin` + QB delta), -0.0010 Brier vs A4s with a CI that just includes zero, so the acceptance bar is narrowly not met; C1 and the QB extras gave nothing. See "M3b build notes" and the proposed holdout pre-registration in `context/ml.md`.
 
 ## Why
 

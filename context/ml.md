@@ -292,6 +292,7 @@ No paid APIs, no cloud.
 | M1 | Data layer and leak-proof features | none | Built 2026-10-03, awaiting Walker's review |
 | M2 | Evaluation harness, reproducing Elo 0.2201 and market 0.2104 | M1 | Built 2026-10-03 (reproduces both exactly), awaiting Walker's review |
 | M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | **Passed 2026-10-04.** Holdout: A4s beats Elo by 0.0035 Brier (CI [-0.0063, -0.0007]). The ECE of 0.028 is within the noise range for n = 1,615; the 0.02 bar is recorded as flawed. |
+| M3b | Game-model refinement: Kalman team strength, week-varying weights, better QB term (C1-C4) | M3 | Built 2026-10-05 (dev only). One-SE pick **C2d** (Elo + Kalman `kf_margin` + QB delta): DEV Brier 0.2141 vs A4s 0.2151, -0.0010 [-0.0019, +0.0000]: **bar narrowly not met** (CI includes zero). C1 and every QB extra: no gain. Holdout pre-registration proposed, not run; awaiting Walker. See "M3b build notes". |
 | M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Phase 1 built 2026-10-04 (weekly predictions, ledger, site, Action). Phase 2 built 2026-10-04; holdout sign-off run once on 2026-10-05: **margin model FAIL** on its primary (MAE vs Elo -0.059, CI [-0.150, +0.035] includes zero), **playoff odds PASS** (made-playoffs ECE 0.028 <= 0.044; Brier vs tau 0 -0.0024, CI upper bound -0.00015 < +0.001). Odds stay gated off the site until Walker decides. |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Built 2026-10-05 (player values, lineups, ladder on 2012-2019). **No gain over A4s**: B1-B3 within noise, the one-SE rule keeps B0 (A4s). Stopped before the notebook, holdout, shadow and site work; awaiting Walker. See "M5 build notes". |
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | **Holdout run 2026-10-05: primary FAIL.** Beats team ratings, loses to box-score values. Kept as a descriptive player view. |
@@ -732,6 +733,108 @@ One holdout run, scored once, with the settings below frozen in committed code. 
 
 **Procedure.** First `python scripts/ml_m5b.py signoff-dry-run`: the same code path on dev 2018-2019 without logging; it must print REPRODUCED against `data/raw/ml/m5b/dev.json` (run `ml_m5b.py dev` on the committed code first). Then, once, `python scripts/ml_m5b.py signoff`: it refuses to start if any `m5b_signoff_*` run with `holdout: true` exists in `experiments/runs/`, prints every number and each rule's verdict, writes `data/raw/ml/m5b/signoff_holdout.json`, and logs `m5b_signoff_rapm`, `_team`, `_box`, `_intercept` and `_game_model` with `holdout: true`. Whatever happens is recorded in this file.
 
+### M3b build notes (2026-10-05, dev only; holdout not run)
+
+Spec: `context/ml-m3b-method.md` (approved under delegation). Only CC BY data: play-by-play, schedules, and the nflverse players table's birth dates. No participation, no snap counts, nothing PFR-derived.
+
+**Where things are.** `nflelo/ml/features/kalman.py` (state-space team strength: `game_table`, `run_filter`, the two likelihoods, `tune`, `build_features`, `TUNED`), `nflelo/ml/features/qb.py` (extended behind flags: `QBExtras`, `build_features_ext`, `ext_states`, `score_values`, `TUNED_EXTRAS`, `TUNED_EXPERIENCE_CHANGED`; with no active extras the M3 code path runs untouched), `scripts/ml_m3b.py` (`tune`, `dev`, `leakcheck`, `signoff-dry-run`, `signoff`), `tests/ml/test_m3b.py`, `notebooks/07_game_model_refinement.ipynb`. Small edits: `asof.corrupt_from` now also scrambles `cpoe` on late plays; `qb.dropback_plays` carries a `cpoe` column when the play-by-play has one (M3's aggregation ignores it). Saved outputs: `data/raw/ml/m3b/` (gitignored: `tune.json`, `dev.json`, `leakcheck.json`, `ladder_frame.parquet`, `coefs.parquet`).
+
+**C2, the Kalman filter.** One latent strength per franchise (points vs average) plus home field, full 33 x 33 covariance, run from 1999 week 1 (every team at 0, SD 6). Each week: time update (weekly random-walk drift; at a new season, the mean is multiplied by gamma and off-season variance is added), then a prediction for every game of the week from the pre-week state (the as-of rule), then sequential updates with two measurements per game: the point margin (d + h + noise) and the raw home-minus-away EPA per play, scaled to points and with the league's home EPA edge removed (d + noise), with correlated noise. The EPA margin is raw on purpose: the measurement is about the difference between the two teams, so the filter adjusts for the opponent itself. One strength per team, not offense and defense: margins only identify the difference. Home field is a drifting state rather than a constant, because the home edge has fallen since 2000 (Elo v2 learns it online for the same reason); the tuned drift is tiny, so in practice it is a slowly updated estimate, and the logistic intercept, refit each season, absorbs the rest.
+- Tuning (2000-2005 REG and POST, 1,586 games; 1999 burn-in; DEV never read). The margin-only likelihood the spec names turned out to be flat along a ridge in (scale, sigma_e, rho): four starts gave log likelihoods from -6,372.6 to -6,365.9 with scale anywhere from 29 to 91 and rho from -0.88 to 0.98. The objective is therefore the **joint** predictive density of both measurements (with the Jacobian of the EPA scale), which gives the same answer from all four starts (-6,071.9 to -6,072.2); its margin-only log likelihood is -6,368.6, within 2.7 of the best margin-only fit.
+- **Frozen (`kalman.TUNED`): q_week 0.722 (0.85 points of drift per week, 3.5 per season), gamma 0.483, q_season 14.4 (3.8 points), sigma_m 12.36, sigma_e 13.52, rho 0.807, scale 39.9 points per EPA/play, q_hfa 0.00034 per week (about 0.08 points per season), epa_home 0.0086** (fixed from 1999-2005). None at a bound. Margin log likelihood per game -4.016 vs -4.092 for a constant forecast; RMSE 13.42 vs 14.49 points.
+- **The EPA measurement adds almost nothing.** At the tuned noise levels one game's EPA margin adds about 3% to the information in its point margin (the two share most of the game's luck). Descriptive check, not a ladder step: switching it off gives a standalone DEV Brier of 0.2165 against 0.2167 with it. The filter's value is its structure (a step size that follows the uncertainty, and stronger off-season reversion than Elo's: it keeps 48% of a team's distance from average, Elo v2 60%).
+- **Standalone** (P = Phi(kf_margin / sqrt(kf_sd^2 + sigma_m^2)), no QB term): DEV Brier **0.2167**, log loss 0.6236, accuracy 0.645, ECE 0.017; vs Elo -0.0011 [-0.0029, +0.0007]; vs A4s +0.0016 [-0.0004, +0.0036]. Weeks 1-4: 0.2232 (A4s 0.2243, Elo 0.2229). Changed-starter games: 0.2248 (it has no QB information). `kf_margin` correlates 0.94 with `elo_logit` and 0.94 with `adj_epa_margin`.
+
+**C3, the QB term** (QB targets, not game outcomes: next game's EPA per dropback for the starter, dropback-weighted MSE).
+- **Draft-field license finding.** nflverse-players' `CONTRIBUTING.md` lists "Draft information: draft year, draft round, draft pick, draft team (from PFR)". The players table's draft fields are Pro-Football-Reference-derived, so **draft round is not used**; the experience prior uses career dropbacks only (counted from play-by-play before as_of). Birth dates are "basic player information ... (mostly from GSIS)", CC BY via nflverse, and are used for aging.
+- (a) CPOE composite, tuned on 2007-2008 (1,024 starter-games; history from 1999, CPOE from 2006): value = EPA value + 0.01 x (shrunk CPOE - replacement CPOE), CPOE shrunk with k = 400 attempts. wMSE 0.11457 vs 0.11490. Before 2006 everyone's CPOE term is 0, so A4s's training rows for 2001-2005 are unchanged.
+- (b) Experience prior, 2000-2005 (3,036 starter-games): prior = replacement level + an offset by career dropbacks [0, 100), [100, 500), [500, 2000), 2000+ (QBs already playing in 1999 go in the top bucket): -0.054, +0.016, +0.141, +0.065 EPA per dropback. wMSE 0.10839 vs 0.10918.
+- (c) Aging, 2000-2005 grid (peak 26-34, slope before 0-0.20, after 0 to -0.05 per year): peak 31, +0.14 per year before, 0 after. wMSE 0.10810 vs 0.10918. The slope is far too steep to be aging; it absorbs young QBs improving faster than the 48-week memory allows. (The first grid stopped at 0.03, then 0.08; both optima were at the edge, so the grid was widened.)
+- (d) **Added after (b) scored worse on DEV**, labelled as such: (b)'s offsets re-tuned only on the 351 starter-games of 2000-2005 where the team's starter changed from its previous game (the games the prior is for): -0.065, +0.080, +0.033, +0.032. wMSE 0.11445 vs 0.11588 (the all-starter offsets give 0.11505 there).
+
+**C1.** `early = max(0, 1 - (week - 1) / w0)`; interactions with `elo_logit` (or `kf_margin`) and `adj_epa_margin`. **w0 is tuned on DEV** (grid 1, 2, 3, 4, 5, 6, 8, 10, 12, 18; Brier minus A4s from +0.0001 to +0.0004): best w0 = 1, at the grid's edge, and no w0 beats A4s.
+
+**C2d was added** to the spec's C2a-c: in C2b, `adj_epa_margin`'s coefficient turned negative in later refits (2019: -0.90; range -0.90 to +0.52) once `kf_margin` was in, so the fourth keep/replace cell (keep Elo, replace the ridge EPA margin with `kf_margin`) was run too.
+
+**Ladder** (DEV REG 2006-2019 with moneylines, n = 3,450, games hash `52b8194df3a2ebf4`; A4s's protocol; paired bootstrap vs A4s, 2,000 reps, seed 20261003; ECE ok = at or below the 95th percentile of a calibrated forecaster at this n). A4s reproduces 0.21509.
+
+| Step | Model | Brier | Log loss | Acc | ECE (p95) | minus A4s [95% CI] |
+|---|---|---|---|---|---|---|
+| A4s | elo_logit + adj_epa_margin + qb_delta_diff | 0.2151 | 0.6197 | 0.647 | 0.011 (0.025) | |
+| A4bs | A4s, last game's starter | 0.2172 | 0.6244 | 0.643 | 0.012 (0.025) | +0.0021 [+0.0010, +0.0033] |
+| C1 | A4s + early interactions, w0 = 1 | 0.2152 | 0.6199 | 0.647 | 0.013 (0.025) | +0.0001 [-0.0001, +0.0002] |
+| C2a | kf_margin + adj_epa_margin + qb | 0.2146 | 0.6186 | 0.654 | 0.019 (0.027) | -0.0005 [-0.0020, +0.0010] |
+| C2b | elo + kf_margin + adj_epa_margin + qb | 0.2141 | 0.6175 | 0.649 | 0.013 (0.026) | -0.0009 [-0.0019, +0.0001] |
+| C2c | kf_margin + qb | 0.2145 | 0.6185 | 0.651 | 0.023 (0.026) | -0.0006 [-0.0021, +0.0010] |
+| **C2d** | **elo_logit + kf_margin + qb_delta_diff** | **0.2141** | **0.6175** | **0.650** | **0.014 (0.026)** | **-0.0010 [-0.0019, +0.0000]** |
+| C2k | kf_margin alone (logistic) | 0.2167 | 0.6235 | 0.647 | 0.015 (0.025) | +0.0016 [-0.0005, +0.0035] |
+| KF | filter alone, no logistic | 0.2167 | 0.6236 | 0.645 | 0.017 (0.025) | +0.0016 [-0.0004, +0.0036] |
+| C3a | A4s, CPOE composite | 0.2150 | 0.6196 | 0.644 | 0.016 (0.025) | -0.0000 [-0.0002, +0.0001] |
+| C3b | A4s, experience prior | 0.2157 | 0.6210 | 0.643 | 0.014 (0.026) | +0.0006 [+0.0000, +0.0013] |
+| C3c | A4s, aging | 0.2155 | 0.6206 | 0.643 | 0.015 (0.026) | +0.0004 [+0.0000, +0.0008] |
+| C3d | A4s, experience prior tuned on changed starters | 0.2152 | 0.6199 | 0.647 | 0.013 (0.025) | +0.0001 [-0.0004, +0.0006] |
+| C3abc | A4s, CPOE + experience + aging | 0.2161 | 0.6217 | 0.646 | 0.015 (0.025) | +0.0010 [+0.0003, +0.0016] |
+| C4 | C2d + C3a | 0.2141 | 0.6175 | 0.650 | 0.015 (0.026) | -0.0010 [-0.0019, -0.0000] |
+| | Elo v2 | 0.2178 | 0.6255 | 0.641 | 0.015 | |
+| | Market | 0.2106 | 0.6096 | 0.663 | 0.018 | |
+
+Every ECE passes the one-sided check. Leak alarm (better than A4s by more than 0.006): none. C4 combines the changes that beat A4s on their own: the best C2 (C2d) and the best C3 (C3a; C1 did not beat A4s).
+
+**Splits** (Brier; minus A4s [95% CI]). A4s: weeks 1-4 0.2243 (market 0.2198, n 751), 5-9 0.2126 (0.2095, n 969), 10-18 0.2125 (0.2072, n 1,730); changed starter 0.2150 (market 0.2072, n 664; the starter differs from the team's previous game for either side), unchanged 0.2151 (0.2114, n 2,786). (The M3b spec quotes 0.2142 for A4s on changed-starter games; this definition gives 0.2150.)
+
+| Step | Weeks 1-4 | Weeks 5-9 | Weeks 10-18 | Changed starter | Unchanged |
+|---|---|---|---|---|---|
+| C1 | +0.0003 [-0.0004, +0.0010] | +0.0000 | +0.0000 | +0.0003 [-0.0003, +0.0009] | +0.0000 |
+| C2a | +0.0002 [-0.0026, +0.0028] | +0.0012 | -0.0017 [-0.0038, +0.0005] | +0.0008 [-0.0026, +0.0043] | -0.0008 |
+| C2b | -0.0005 [-0.0022, +0.0012] | -0.0001 | -0.0016 [-0.0030, -0.0001] | -0.0001 [-0.0023, +0.0020] | -0.0011 |
+| C2c | -0.0000 [-0.0028, +0.0026] | +0.0011 | -0.0017 [-0.0038, +0.0005] | +0.0010 [-0.0023, +0.0045] | -0.0009 |
+| **C2d** | **-0.0006 [-0.0023, +0.0011]** | **-0.0002** | **-0.0016 [-0.0029, -0.0002]** | **-0.0000 [-0.0021, +0.0021]** | **-0.0012 [-0.0022, -0.0001]** |
+| KF | -0.0011 [-0.0049, +0.0026] | +0.0026 | +0.0023 | +0.0098 [+0.0037, +0.0162] | -0.0003 |
+| C3a | +0.0001 | -0.0000 | -0.0001 | +0.0001 [-0.0003, +0.0006] | -0.0001 |
+| C3b | +0.0013 [-0.0003, +0.0028] | +0.0003 | +0.0006 | +0.0027 [+0.0001, +0.0052] | +0.0002 |
+| C3c | -0.0001 | +0.0006 | +0.0006 [+0.0001, +0.0011] | +0.0007 [-0.0007, +0.0021] | +0.0004 |
+| C3d | +0.0002 | -0.0001 | +0.0002 | +0.0002 [-0.0019, +0.0023] | +0.0001 |
+| C3abc | +0.0011 | +0.0008 | +0.0010 [+0.0001, +0.0019] | +0.0031 [+0.0004, +0.0056] | +0.0005 |
+| C4 | -0.0004 | -0.0002 | -0.0017 [-0.0030, -0.0003] | +0.0001 [-0.0020, +0.0022] | -0.0012 |
+
+On changed-starter games every step stays about 0.008 behind the market (C2d 0.2150 vs 0.2072).
+
+**Choice (one-SE rule).** Best DEV Brier: C4 (0.21410). Within one SE: C2b, C2d, C4. **Chosen: C2d** (3 features, no QB extras). C2d minus A4s **-0.00095 [-0.00191, +0.000001]**: the interval just includes zero, so **the M3b acceptance bar (CI excludes zero) is not met on DEV**, narrowly. Log loss: -0.0022 [-0.0043, -0.0001]. vs Elo -0.0037 [-0.0055, -0.0019]; vs market +0.0035 [+0.0013, +0.0059]. Wednesday twin (C2d with last game's starter): 0.2161, minus A4bs -0.0011 [-0.0021, -0.0001].
+- C2d coefficients, 2019 refit (trained 2001-2018; range over the 14 refits): intercept -0.014 [-0.051, -0.014], elo_logit +0.433 [+0.176, +0.496], kf_margin +0.083 [+0.068, +0.114] per point, qb_delta_diff +3.495 [+2.592, +3.665]. Every refit has the expected signs. Per 1 SD (2019 fit, log-odds): kf_margin +0.49, elo_logit +0.33, qb_delta_diff +0.22.
+- Per season, C2d minus A4s ranges from -0.0057 (2013) to +0.0021 (2015); 8 of 14 seasons favor C2d (2019 by -0.00001).
+
+**Read.** The Kalman filter is the one real gain, a small one (0.001 Brier, borderline), and it comes from how the filter weighs results over time, not from EPA. It replaces the ridge EPA margin rather than Elo: Elo's long memory still helps next to it. Neither weakness that motivated M3b moved: the early season (weeks 1-4) is unchanged within noise under every candidate, and the changed-starter gap to the market (about 0.008) is not closed by any QB extra. Each QB extra improves the QB-EPA target it was tuned on and none improves game predictions; the market's edge on QB changes comes from information the play-by-play doesn't have (practice reports, the coach's plan, how hurt the starter is).
+
+**Leakage.** The filter and every QB-extras variant pass `asof.leakage_check` on synthetic data (tests) and on real 2014-2017 data (`ml_m3b.py leakcheck`: 8 games from 2017 weeks 1, 2, 9, 17 and a wild-card game; Kalman 8/8 leak-free; QB variants a, b, c, d, abc with the actual starter (identity kept, M3-D1) and the last starter (identities scrambled) 8/8 each). Positive control, the filter's post-week margin: 0/8 leak-free, as required. A test checks that with no extras the QB builder's output equals M3's exactly (A4s unchanged).
+
+**Registry.** `m3b_tune_kalman`, `m3b_tune_qb` (label tune), and `m3b_A4s`, `m3b_A4bs`, `m3b_C1`, `m3b_C2a`-`d`, `m3b_C2k`, `m3b_KF`, `m3b_C3a`-`d`, `m3b_C3abc`, `m3b_C4_C2d+C3a`, `m3b_C2d_last` (label dev, 2006-2019), logged from an uncommitted tree; re-log after the commit if a clean-commit record is wanted. `signoff-dry-run` reproduces `dev.json` exactly (max |Brier diff| 0).
+
+**Timing.** `tune` 246 s (Kalman 227 s: four joint-likelihood starts plus four margin-only reference fits, about 0.03 s per filter pass over 1999-2005; QB extras 18 s). `dev` 18.5 s (features 10.7 s: Kalman 0.2 s, QB extras 6 s). `leakcheck` 18 s. `signoff-dry-run` 14 s. A full filter pass over 1999-2019 takes about 0.1 s, so a weekly update is trivial.
+
+**Open items.**
+- The spec's acceptance bar is missed by a hair (CI upper bound +0.000001). Whether to spend the holdout run on C2d is Walker's call; the pre-registration below is written so the run is ready if he says yes.
+- The margin-only tuning objective in the spec was replaced by the joint likelihood (reason above).
+- C2d and C3d were added beyond the spec; C3d after seeing C3b's DEV result.
+- C1's w0 is DEV-tuned and sits at the grid's edge (1).
+
+### M3b holdout pre-registration (proposed 2026-10-05; not yet run; awaiting Walker)
+
+One holdout run, scored once, with everything frozen in committed code. The result is recorded here whatever it shows; nothing is retuned afterwards. Note before deciding: **C2d did not clear the M3b bar on DEV** (CI [-0.0019, +0.0000] includes zero, narrowly).
+
+**Frozen.** Model C2d = logistic on `elo_logit`, `kf_margin`, `qb_delta_diff` (actual starter, M3-D1), A4s's protocol: walk-forward, season S fit on REG 2001..S-1 with weights 0.5 ** ((S - 1 - season) / 8), ties as two half rows, unpenalized. `kf_margin` from `kalman.TUNED` (q_week 0.72158, gamma 0.48317, q_season 14.431, sigma_m 12.361, sigma_e 13.52, rho 0.80709, scale 39.921, q_hfa 0.00034383, epa_home 0.0085843; p0 36, h0 0, ph0 9), filter run from 1999 on REG and POST games. M3 knobs unchanged (lambda 100, half-life 48, rho 0.25, QB k 100). Elo v2 `DEFAULT_CONFIG`. Spec frozen in `scripts/ml_m3b.py` (`CHOSEN`, `SIGNOFF`).
+
+**Games.** REG 2020-2025 with moneylines: n = 1,615, games hash `1b27abff81bddb2c`. The run stops if either differs.
+
+**Primary (exact).** d = Brier(C2d) - Brier(A4s) on those games. **PASS iff the upper end of the 95% paired bootstrap CI (2,000 reps, seed 20261003) is below 0 AND C2d's ECE (10 uniform bins) is at or below the 95th percentile of a perfectly calibrated forecaster at the same n** (`calibration.ece_null_range`, 500 draws, seed 20261003; one-sided).
+
+**Secondaries** (each reported; none changes the primary verdict):
+- Weeks 1-4: C2d minus A4s and C2d minus market, paired CIs.
+- Changed-starter games (the starter differs from the team's previous game, either side) and unchanged games: same comparisons.
+- The Wednesday-only twin (C2d with last game's starter) minus A4bs, and minus A4s.
+- Descriptive: C2d minus Elo and minus market, log loss, weeks 5-9 and 10-18, per season, the 2025-fit coefficients.
+
+**Procedure.** First `python scripts/ml_m3b.py signoff-dry-run` on the committed code: the same code path on DEV without logging; it must print REPRODUCED against `data/raw/ml/m3b/dev.json` (run `ml_m3b.py dev` on the committed code first). Then, once and only with Walker's OK, `python scripts/ml_m3b.py signoff`: it refuses to start if any `m3b_signoff_*` run with `holdout: true` exists in `experiments/runs/`, prints every number and the verdict, writes `data/raw/ml/m3b/signoff_holdout.json`, and logs `m3b_signoff_{chosen, A4s, twin, A4bs, elo_v2, market}` with `holdout: true`. If it passes, C2d runs as a shadow model in the weekly ledger; A4s stays the 2026 headline.
+
 ## 10. Open decisions for Walker (start the ML chat here)
 
 - **D1. Share-alike data: DECIDED 2026-10-03.** Accepted. Personnel-based work (M5b, M6, M7) will be released under CC BY-SA. Stages A and M5a use only CC BY data, so they stay unrestricted and are done first. This can be revisited later (for example, by licensing play-level data directly) without touching A or M5a.
@@ -757,6 +860,7 @@ One holdout run, scored once, with the settings below frozen in committed code. 
 | 2026-10-04 | M4 Phase 1 built. The live record starts with nflverse week 5 (first kickoff Thursday 2026-10-08; the write-up's "week 6" was off by one). QB change tag threshold 0.08 EPA per dropback. Model series color `--series-3`. |
 | 2026-10-05 | M5 method approved (`context/ml-m5-method.md`). D1: CC BY only, so playing time comes from usage stats and participation is used only for validation. D2: the final injury report and game-day inactives count as pregame facts, and the Friday-only version (B3f) is always reported. D3: the evaluation window is 2012-2019, compared with A4s on the same games. D4: M5 runs as a shadow model in 2026 and can be promoted in 2027. |
 | 2026-10-05 | M5b built under the standing delegation (dev only). Participation sides are rebuilt from `players_on_play` (raw drop rate 12.7% in 2016 and 7.9% in 2018, under 0.5% after). `box_scale` (the prior is 0.25 x the box value) was added to the tuning. Settings frozen in `rapm.TUNED`; holdout pre-registration proposed in "M5b holdout pre-registration", awaiting review before the one run. |
+| 2026-10-05 | M3b built under the standing delegation (dev only). The nflverse players table's draft fields come from Pro-Football-Reference (nflverse-players CONTRIBUTING.md), so draft round is not used anywhere; the QB experience prior uses career dropbacks only. The Kalman filter is tuned by the joint likelihood of margin and EPA margin (the margin-only likelihood is flat in the EPA knobs). C2d (Elo + `kf_margin` + QB delta) is the one-SE pick but misses the CI bar narrowly; its holdout pre-registration is proposed in "M3b holdout pre-registration" and not run. |
 
 ### M5b holdout sign-off (run once, 2026-10-05, commit 21ccd41, clean tree)
 
