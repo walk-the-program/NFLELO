@@ -3,7 +3,7 @@
   "season": 2026,
   "week": 4,
   "change_is_since": "ratings 7 days before as_of (teams with no earlier game show 0)",
-  "hfa_current": 37.0,
+  "hfa_current": 37.3,
   "config": {
     "start": 1500.0,
     "k": 20.0,
@@ -56,7 +56,7 @@
       "rating": 1611.4,
       "rank": 5,
       "last_game_date": "2026-10-04",
-      "rating_change": -19.5,
+      "rating_change": -19.6,
       "rank_change": -4
     },
     {
@@ -88,7 +88,7 @@
       "rating": 1567.5,
       "rank": 9,
       "last_game_date": "2026-10-04",
-      "rating_change": 19.5,
+      "rating_change": 19.6,
       "rank_change": 1
     },
     {
@@ -109,10 +109,10 @@
     },
     {
       "franchise": "DET",
-      "rating": 1544.1,
+      "rating": 1520.8,
       "rank": 12,
-      "last_game_date": "2026-09-27",
-      "rating_change": 0.0,
+      "last_game_date": "2026-10-04",
+      "rating_change": -23.3,
       "rank_change": -1
     },
     {
@@ -172,44 +172,44 @@
       "rank_change": 1
     },
     {
+      "franchise": "CAR",
+      "rating": 1471.2,
+      "rank": 20,
+      "last_game_date": "2026-10-04",
+      "rating_change": 23.3,
+      "rank_change": 4
+    },
+    {
       "franchise": "CLE",
       "rating": 1466.8,
-      "rank": 20,
+      "rank": 21,
       "last_game_date": "2026-10-01",
       "rating_change": 15.7,
-      "rank_change": 1
+      "rank_change": 0
     },
     {
       "franchise": "NYG",
       "rating": 1465.9,
-      "rank": 21,
+      "rank": 22,
       "last_game_date": "2026-10-04",
       "rating_change": 20.2,
-      "rank_change": 5
+      "rank_change": 4
     },
     {
       "franchise": "ATL",
       "rating": 1461.4,
-      "rank": 22,
+      "rank": 23,
       "last_game_date": "2026-09-24",
       "rating_change": 0.0,
-      "rank_change": -3
+      "rank_change": -4
     },
     {
       "franchise": "LV",
       "rating": 1452.6,
-      "rank": 23,
+      "rank": 24,
       "last_game_date": "2026-10-04",
       "rating_change": -11.6,
-      "rank_change": -5
-    },
-    {
-      "franchise": "CAR",
-      "rating": 1447.9,
-      "rank": 24,
-      "last_game_date": "2026-09-27",
-      "rating_change": 0.0,
-      "rank_change": 0
+      "rank_change": -6
     },
     {
       "franchise": "NO",

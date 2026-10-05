@@ -16,6 +16,10 @@ One row per (game, prediction run), with the columns in LEDGER_COLUMNS. Rules:
   unless asked (`market=True`), and nothing in the feature code reads the
   ledger at all (decision D3; tests/ml/test_live.py checks both).
 
+The shadow model (M3b C2d) has its own append-only ledger, `<season>_shadow.csv`
+(SHADOW_COLUMNS), written in the same run with the same rules; `shadow_record`
+scores it on the games A4s is scored on. It has no market columns.
+
 This module needs only pandas and numpy: scripts/export_site.py imports it, and
 the plain site build installs only requirements.txt (decision D5). The feature
 side lives in `nflelo.ml.live_features`.
@@ -351,6 +355,107 @@ def sim_baseline(runs: pd.Series, current) -> pd.Timestamp | None:
     r = pd.Series(sorted(set(to_utc(runs))))
     r = r[(r < cur - pd.Timedelta(days=1)) & (r.dt.tz_convert(ET).dt.dayofweek == 2)]
     return None if r.empty else r.iloc[-1]
+
+
+# --------------------------------------------------------------------------- shadow model (M3b C2d)
+
+# experiments/live/<season>_shadow.csv: append-only, one row per (game, prediction run), written in the same
+# run as the main ledger's rows (same run_at_utc) but in its own file, so the main ledger's schema never changes.
+# The shadow model is logged and scored next to A4s; it never replaces A4s on the site (context/ml.md, M3b).
+SHADOW_COLUMNS = ["run_at_utc", "game_id", "kickoff_utc", "model_version", "p_home_shadow", "kf_margin", "kf_sd",
+                  "data_hash"]
+
+
+def shadow_path(season: int, root: Path = LIVE_DIR) -> Path:
+    return root / f"{int(season)}_shadow.csv"
+
+
+def shadow_model_path(season: int, root: Path = LIVE_DIR) -> Path:
+    return root / f"shadow_{int(season)}.json"
+
+
+def shadow_url(season: int) -> str:
+    return f"{REPO_URL}/blob/main/experiments/live/{shadow_path(season).name}"
+
+
+def check_shadow_rows(rows: pd.DataFrame) -> None:
+    """The main ledger's rules for the shadow ledger: exact columns, complete rows, nothing at or after kickoff."""
+    if list(rows.columns) != SHADOW_COLUMNS:
+        raise LedgerError(f"shadow rows need exactly these columns, in order: {SHADOW_COLUMNS}; got {list(rows.columns)}")
+    for c in SHADOW_COLUMNS:
+        if rows[c].isna().any():
+            raise LedgerError(f"missing {c} in {int(rows[c].isna().sum())} shadow rows")
+    late = (to_utc(rows["run_at_utc"]) >= to_utc(rows["kickoff_utc"])).to_numpy()
+    if late.any():
+        bad = rows.loc[late, ["game_id", "run_at_utc", "kickoff_utc"]].to_dict("records")
+        raise LedgerError(f"{int(late.sum())} shadow rows were made at or after kickoff, e.g. {bad[:3]}")
+    if rows["run_at_utc"].nunique() > 1:
+        raise LedgerError("one append is one prediction run: all rows must share run_at_utc")
+    if rows["game_id"].duplicated().any():
+        raise LedgerError("a run has at most one row per game")
+    p = pd.to_numeric(rows["p_home_shadow"], errors="coerce")
+    if ((p < 0) | (p > 1)).any():
+        raise LedgerError("p_home_shadow outside [0, 1]")
+    if (pd.to_numeric(rows["kf_sd"], errors="coerce") < 0).any():
+        raise LedgerError("kf_sd below 0")
+
+
+def append_shadow(rows: pd.DataFrame, path: Path) -> int:
+    """Append one shadow run. Same rules as `append_rows`: all or nothing, append only, runs move forward."""
+    if rows.empty:
+        return 0
+    check_shadow_rows(rows)
+    path = Path(path)
+    if path.exists() and path.stat().st_size > 0:
+        with open(path) as f:
+            header = f.readline().rstrip("\n").split(",")
+        if header != SHADOW_COLUMNS:
+            raise LedgerError(f"{path} has columns {header}, expected {SHADOW_COLUMNS}")
+        prev = read_shadow(path)
+        if len(prev) and to_utc(rows["run_at_utc"].iloc[0]) <= prev["run_at_utc"].max():
+            raise LedgerError(f"run_at {rows['run_at_utc'].iloc[0]} is not later than the last run in {path}")
+        rows.to_csv(path, mode="a", header=False, index=False, lineterminator="\n")
+    else:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        rows.to_csv(path, index=False, lineterminator="\n")
+    return int(len(rows))
+
+
+def read_shadow(path: Path) -> pd.DataFrame:
+    """The shadow ledger with parsed UTC times. It has no market columns; any that appear are dropped (D3)."""
+    df = pd.read_csv(path, dtype={"game_id": str, "model_version": str, "data_hash": str})
+    df["run_at_utc"] = to_utc(df["run_at_utc"])
+    df["kickoff_utc"] = to_utc(df["kickoff_utc"])
+    return df.drop(columns=[c for c in df.columns if c in MARKET_COLUMNS or "market" in c])
+
+
+def shadow_record(shadow: pd.DataFrame, main: pd.DataFrame, results: pd.DataFrame, from_week: int) -> dict:
+    """The shadow model's live score on exactly the games A4s is scored on.
+
+    Each model's scored row is its last one before kickoff (`latest_before_kickoff`).
+    A4s's scored games are the completed games from `from_week` on with a main-ledger
+    row; the shadow is scored on those that also have a shadow row (`missing` counts
+    the rest), and A4s is re-scored on the same games so the two are paired.
+    """
+    a = latest_before_kickoff(main)[["game_id", "p_home_model"]].merge(results, on="game_id", how="inner")
+    a = a[a["week"] >= from_week]
+    s = latest_before_kickoff(shadow)[["game_id", "p_home_shadow", "model_version"]]
+    rows = a.merge(s, on="game_id", how="inner")
+    out = {"from_week": int(from_week), "n": int(len(rows)), "a4s_games": int(len(a)),
+           "missing": int(len(a) - len(rows))}
+    if rows.empty:
+        return out
+    y = rows["y"].to_numpy(float)
+    ps, pm = rows["p_home_shadow"].to_numpy(float), rows["p_home_model"].to_numpy(float)
+    d = (y - ps) ** 2 - (y - pm) ** 2
+    out["shadow"] = _m(y, ps)
+    out["model"] = _m(y, pm)
+    out["brier_diff"] = round(float(d.mean()), 4)          # shadow minus A4s, paired; negative = shadow better
+    out["brier_diff_se"] = round(float(d.std(ddof=1) / np.sqrt(len(d))), 4) if len(d) > 1 else None
+    out["accuracy_diff"] = round(out["shadow"]["accuracy"] - out["model"]["accuracy"], 4)
+    out["model_versions"] = sorted(rows["model_version"].astype(str).unique().tolist())
+    out["weeks"] = sorted(int(w) for w in rows["week"].unique())
+    return out
 
 
 # --------------------------------------------------------------------------- latest run

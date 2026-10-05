@@ -4,6 +4,8 @@
     python scripts/ml_predict.py --offline    # use the cached nflverse files only
     python scripts/ml_predict.py --now 2026-10-07T14:00:00Z --ledger /tmp/test.csv   # tests only
     python scripts/ml_predict.py --fit-margin-only   # fit and save the season's margin model, nothing else
+    python scripts/ml_predict.py --fit-shadow-only   # fit and save the season's shadow model (C2d), nothing else
+    python scripts/ml_predict.py --no-shadow         # skip the shadow model (the main ledger is unchanged either way)
 
 Run scripts/build.py first: the Elo numbers come from outputs/ and must include
 every game nflverse already shows as final (the script stops otherwise).
@@ -33,6 +35,16 @@ M4 Phase 2 additions:
   time) runs after the ledger append and adds 32 rows to the append-only
   experiments/live/sim_<season>.csv.
 
+M3b shadow model (context/ml.md, "Shadow deployment"):
+- C2d (elo_logit + Kalman kf_margin + qb_delta_diff), fit once per season on REG
+  2001..season-1 with the M3b protocol and frozen in experiments/live/shadow_<season>.json
+  with kalman.TUNED. The first fit refits 2019 through the same code path and stops
+  unless it reproduces the logged DEV fit (m3b_C2d).
+- Each run predicts every unplayed game with the Kalman state as of now (the A4s
+  as-of rule) and appends the pre-kickoff rows to experiments/live/<season>_shadow.csv,
+  with the same run_at_utc as the main ledger rows. The main ledger's rows and
+  schema do not depend on it, and a shadow failure never blocks the A4s record.
+
 Afterwards run scripts/export_site.py so site/data/ml.json picks up the new rows.
 """
 import argparse
@@ -53,7 +65,7 @@ from nflelo import data as elo_data  # noqa: E402
 from nflelo.evaluate import market_prob  # noqa: E402
 from nflelo.ml import asof, live, live_features, registry  # noqa: E402
 from nflelo.ml import data as mldata  # noqa: E402
-from nflelo.ml.features import opponent_adjust as oa, qb  # noqa: E402
+from nflelo.ml.features import kalman as kf, opponent_adjust as oa, qb  # noqa: E402
 from nflelo.ml.models import logistic, margin as mm  # noqa: E402
 from nflelo.ml.sim import season as sim, state as sim_state  # noqa: E402
 
@@ -293,6 +305,164 @@ def combined_version(model: dict, margin: dict | None) -> str:
     return model["model_version"] if margin is None else f"{model['model_version']}+{margin['version']}"
 
 
+# --------------------------------------------------------------------------- the shadow model (M3b C2d)
+
+SHADOW_REFERENCE_SEASON = 2019   # the last DEV refit, logged by scripts/ml_m3b.py dev (m3b_C2d)
+
+
+def shadow_spec() -> dict:
+    """Everything that defines the shadow model; a saved fit is reused only when this matches."""
+    return {"model": "C2d", "role": "shadow: logged and scored next to A4s, never shown as the model's pick",
+            "features": live_features.SHADOW_FEATURES, "kind": "logistic, unpenalized", "kalman": kf.TUNED.to_dict(),
+            "qb": qb.tuned_config().to_dict(), "train_start": logistic.TRAIN_START,
+            "season_half_life": logistic.SEASON_HALF_LIFE, "ties": "two half-weight rows",
+            "elo_config": config.DEFAULT_CONFIG.to_dict(), "qb_starter": "actual (M3-D1)",
+            "hfa": "Elo online HFA frozen before the week's first game",
+            "kalman_asof": "completed REG/POST games before the feature week's as_of (the A4s rule), then the "
+                           "filter's time update to that week"}
+
+
+def shadow_reference(season: int = SHADOW_REFERENCE_SEASON) -> tuple[dict, str] | tuple[None, None]:
+    """The logged DEV walk-forward fit of `season` for C2d (scripts/ml_m3b.py dev, label dev)."""
+    for path in sorted(glob.glob(str(registry.RUNS_DIR / "*_m3b_C2d.json")), reverse=True):
+        rec = json.loads(Path(path).read_text())
+        if rec.get("label") != "dev":
+            continue
+        for c in rec.get("coefficients") or []:
+            if int(c["season"]) == season:
+                return ({k: float(c[k]) for k in ["intercept", *live_features.SHADOW_FEATURES]},
+                        str(Path(path).relative_to(config.ROOT)))
+    return None, None
+
+
+def shadow_frame(season: int, pbp: pd.DataFrame, sched: pd.DataFrame, games: pd.DataFrame) -> pd.DataFrame:
+    """The M3 frame for REG 2001..season-1 plus kf_margin/kf_sd, built as scripts/ml_m3b.py build_frame does."""
+    last = season - 1
+    g, p, s = (games[games["season"] <= last].reset_index(drop=True),
+               pbp[pbp["game_id"].str[:4].astype(int) <= last].reset_index(drop=True),
+               sched[sched["season"] <= last].reset_index(drop=True))
+    frame, _ = ml_m3.build_frame(g, p, s, last_season=last)
+    reg = s.set_index("game_id").loc[frame["game_id"]].reset_index()
+    k = kf.build_features(p, s, reg, kf.TUNED)
+    frame["kf_margin"], frame["kf_sd"] = k["kf_margin"].to_numpy(), k["kf_sd"].to_numpy()
+    if frame[["kf_margin", "kf_sd"]].isna().any().any():
+        raise SystemExit("NaN in Kalman features")
+    return frame
+
+
+def fit_shadow_model(season: int, pbp: pd.DataFrame, sched: pd.DataFrame, games: pd.DataFrame) -> dict:
+    """Fit C2d for `season` on REG 2001..season-1 with the M3b protocol, after checking it reproduces the DEV fit."""
+    frame = shadow_frame(season, pbp, sched, games)
+    feats = live_features.SHADOW_FEATURES
+    ref_season = SHADOW_REFERENCE_SEASON
+    _, coefs = logistic.walk_forward(frame, feats, (ref_season, ref_season), train_start=logistic.TRAIN_START)
+    got = {k: float(coefs.iloc[-1][k]) for k in ["intercept", *feats]}
+    ref, ref_src = shadow_reference(ref_season)
+    if ref is None:
+        raise SystemExit(f"no logged m3b_C2d DEV fit for {ref_season} in {registry.RUNS_DIR}; cannot check the "
+                         "shadow fit. Stopping.")
+    worst = max(abs(got[k] - ref[k]) for k in got)
+    repro = {"season": ref_season, "refit": got, "reference": ref, "reference_file": ref_src,
+             "n_train": int(coefs.iloc[-1]["n_train"]), "max_abs_diff": worst}
+    if worst > COEF_TOLERANCE:
+        raise SystemExit(f"shadow refit of {ref_season} does not reproduce {ref_src}: max |diff| {worst:.2e} "
+                         f"(got {got}, expected {ref}). Stopping.")
+    repro["status"] = "reproduced"
+    print(f"shadow reproduction check: {ref_season} C2d coefficients match {ref_src} (max |diff| {worst:.1e})")
+
+    train = frame[(frame["season"] >= logistic.TRAIN_START) & (frame["season"] < season)]
+    m = logistic.fit_logistic(train[feats].to_numpy(float), train["y"].to_numpy(float),
+                              logistic.season_weights(train["season"], season))
+    coef = {f: float(c) for f, c in zip(feats, m.coef_[0])}
+    blob = json.dumps({"intercept": float(m.intercept_[0]), "coef": coef, "kalman": kf.TUNED.to_dict()},
+                      sort_keys=True)
+    last = season - 1
+    fp = registry.data_fingerprint(games_csv=False, ml_datasets=("pbp", "schedules"),
+                                   seasons=range(FIRST_DATA_SEASON, last + 1))
+    return {
+        "model_version": f"C2d-{season}-{hashlib.sha256(blob.encode()).hexdigest()[:8]}", "season": season,
+        "spec": shadow_spec(), "features": feats, "intercept": float(m.intercept_[0]), "coef": coef,
+        "kalman": kf.TUNED.to_dict(),
+        "train": {"seasons": [logistic.TRAIN_START, last], "game_type": "REG", "n_games": int(len(train)),
+                  "games_hash": registry.games_hash(train["game_id"]),
+                  "weights": f"0.5 ** (({season} - 1 - season) / {logistic.SEASON_HALF_LIFE})"},
+        "reproduction_check": repro, "data": fp, "git": registry.git_commit(),
+        "fitted_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
+
+
+def shadow_model(season: int, pbp, sched, games, refit: bool, root: Path = live.LIVE_DIR) -> dict:
+    path = live.shadow_model_path(season, root)
+    if path.exists() and not refit:
+        m = json.loads(path.read_text())
+        if m.get("spec") != shadow_spec():
+            raise SystemExit(f"{path} was fit with a different spec; rerun with --refit-shadow after review")
+        print(f"shadow model: reusing {path.relative_to(config.ROOT)} ({m['model_version']}, fit {m['fitted_at_utc']})")
+        return m
+    m = fit_shadow_model(season, pbp, sched, games)
+    path.write_text(json.dumps(m, indent=2) + "\n")
+    print(f"shadow model: fit {m['model_version']} on REG {m['train']['seasons'][0]}-{m['train']['seasons'][1]} "
+          f"(n = {m['train']['n_games']}), saved to {path.relative_to(config.ROOT)}")
+    return m
+
+
+def shadow_predict(shadow: dict, pred: pd.DataFrame, pbp, sched, season: int, now: pd.Timestamp) -> pd.DataFrame:
+    """The shadow model's home win probability for every game in `pred`, plus kf_margin and kf_sd.
+
+    Reads Elo and the QB term from `pred` (the A4s features, computed once) and never writes to it.
+    """
+    if shadow["kalman"] != kf.TUNED.to_dict():
+        raise ValueError("the saved shadow model was fit with other Kalman knobs than kalman.TUNED")
+    todo = sched[(sched["season"] == season) & (sched["game_type"] == "REG")].drop_duplicates("game_id")
+    todo = todo.set_index("game_id").loc[pred.index].reset_index()
+    k = live_features.kalman_asof(pbp, sched, todo, now, kf.TUNED)
+    x = pd.DataFrame({"elo_logit": pred["elo_logit"].to_numpy(float), "kf_margin": k["kf_margin"].to_numpy(float),
+                      "qb_delta_diff": pred["qb_delta_diff"].to_numpy(float)}, index=pred.index)
+    return pd.DataFrame({"p_home_shadow": live_features.predict(shadow, x), "kf_margin": x["kf_margin"],
+                         "kf_sd": k["kf_sd"].to_numpy(float), "kickoff_utc": pred["kickoff_utc"]}, index=pred.index)
+
+
+def shadow_rows(sp: pd.DataFrame, now: pd.Timestamp, version: str, dhash: str) -> pd.DataFrame:
+    ahead = sp[sp["kickoff_utc"] > now]
+    rows = pd.DataFrame({
+        "run_at_utc": live.utc_iso(now), "game_id": ahead.index.to_numpy(),
+        "kickoff_utc": [live.utc_iso(k) for k in ahead["kickoff_utc"]], "model_version": version,
+        "p_home_shadow": ahead["p_home_shadow"].astype(float).round(4).to_numpy(),
+        "kf_margin": ahead["kf_margin"].astype(float).round(2).to_numpy(),
+        "kf_sd": ahead["kf_sd"].astype(float).round(2).to_numpy(), "data_hash": dhash,
+    })
+    return rows.sort_values(["kickoff_utc", "game_id"], kind="stable").reset_index(drop=True)[live.SHADOW_COLUMNS]
+
+
+def record_run(pred: pd.DataFrame, now: pd.Timestamp, model: dict, dhash: str, version: str, ledger: Path,
+               shadow: dict | None = None, shadow_pred: pd.DataFrame | None = None, season: int = SEASON
+               ) -> tuple[pd.DataFrame, int, int]:
+    """Append the run to the main ledger and, when there is a shadow prediction, to the shadow ledger.
+
+    The main ledger's rows come from `pred` alone, so they are the same bytes with or without the
+    shadow (tested). A shadow problem never blocks the A4s record: bad shadow rows are reported
+    and skipped. Returns (main rows, main rows written, shadow rows written).
+    """
+    rows = ledger_rows(pred, now, model, dhash, version)
+    srows = None
+    if shadow is not None and shadow_pred is not None:
+        srows = shadow_rows(shadow_pred, now, shadow["model_version"], dhash)
+        try:
+            live.check_shadow_rows(srows)
+        except live.LedgerError as e:
+            print(f"WARNING: shadow rows refused ({e}); the A4s ledger is unaffected", file=sys.stderr)
+            srows = None
+    n = live.append_rows(rows, ledger)
+    ns = 0
+    if srows is not None:
+        spath = ledger.parent / live.shadow_path(season).name
+        try:
+            ns = live.append_shadow(srows, spath)
+        except live.LedgerError as e:
+            print(f"WARNING: shadow ledger append refused ({e}); the A4s ledger is unaffected", file=sys.stderr)
+    return rows, n, ns
+
+
 # --------------------------------------------------------------------------- predict
 
 def model_columns(model: dict, margin: dict | None, feats: pd.DataFrame) -> pd.DataFrame:
@@ -459,6 +629,9 @@ def main() -> int:
     ap.add_argument("--refit", action="store_true", help="refit the season A4s model even if one is saved")
     ap.add_argument("--refit-margin", action="store_true", help="refit the season margin model even if one is saved")
     ap.add_argument("--fit-margin-only", action="store_true", help="fit and save the margin model, then stop")
+    ap.add_argument("--no-shadow", action="store_true", help="skip the shadow model (C2d)")
+    ap.add_argument("--refit-shadow", action="store_true", help="refit the season shadow model even if one is saved")
+    ap.add_argument("--fit-shadow-only", action="store_true", help="fit and save the shadow model, then stop")
     ap.add_argument("--sims", type=int, default=sim.DEFAULT_SIMS, help="simulated seasons (default 20,000)")
     a = ap.parse_args()
     season = SEASON
@@ -473,9 +646,13 @@ def main() -> int:
     if a.fit_margin_only:
         margin_model(season, pbp, sched, games, a.refit_margin)
         return 0
+    if a.fit_shadow_only:
+        shadow_model(season, pbp, sched, games, a.refit_shadow)
+        return 0
     check_elo_fresh(sched, games, export_site.load_elo(), season)
     model = season_model(season, pbp, sched, games, a.refit)
     margin = margin_model(season, pbp, sched, games, a.refit_margin)
+    shadow = None if a.no_shadow else shadow_model(season, pbp, sched, games, a.refit_shadow)
     version = combined_version(model, margin)
     dhash = data_hash(season)
 
@@ -483,13 +660,24 @@ def main() -> int:
     if pred.empty:
         print(f"No unplayed {season} REG games; nothing to predict.")
         return 0
-    rows = ledger_rows(pred, now, model, dhash, version)
-    n = live.append_rows(rows, ledger)
+    sp = None
+    if shadow is not None:
+        try:
+            sp = shadow_predict(shadow, pred, pbp, sched, season, now)
+        except Exception as e:  # a shadow bug must not block the A4s record
+            print(f"WARNING: shadow model failed ({e!r}); the A4s ledger is unaffected", file=sys.stderr)
+    rows, n, ns = record_run(pred, now, model, dhash, version, ledger, shadow, sp, season)
     nxt = live_features.next_week(sched[sched["season"] == season], now)
     latest = latest_payload(pred, now, model, dhash, set(rows["game_id"]), nxt, version)
     lp = ledger.parent / live.latest_path(season).name
     lp.write_text(json.dumps(latest, indent=1) + "\n")
     print(f"run {live.utc_iso(now)}: appended {n} rows to {ledger}; wrote {lp}")
+    if shadow is not None:
+        spath = ledger.parent / live.shadow_path(season).name
+        print(f"shadow {shadow['model_version']}: appended {ns} rows to {spath}")
+        if sp is not None and ns:
+            d = (sp["p_home_shadow"] - pred["p_home_model"]).abs()
+            print(f"  shadow vs A4s, |p difference| over unplayed games: mean {d.mean():.3f}, max {d.max():.3f}")
     summarize(pred, rows, season, sched)
     run_sim(season, now, pbp, sched, games, margin, version, ledger.parent, a.sims)
     return 0

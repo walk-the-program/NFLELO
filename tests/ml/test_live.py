@@ -428,3 +428,216 @@ def test_committed_publish_flag_shows_odds_only_with_simulation_history(tmp_path
     else:
         assert ml["playoff_odds"] is None
         assert all(t["wins_p10"] is None and t["wins_p90"] is None for t in ml["rest"]["teams"])
+
+
+# --------------------------------------------------------------------------- shadow model (M3b C2d)
+
+def shadow_rows_for(run_at, games: dict, p=None, kf_sd=5.0) -> pd.DataFrame:
+    """Shadow ledger rows for one run: games = {game_id: kickoff}."""
+    n = len(games)
+    df = pd.DataFrame({"run_at_utc": live.utc_iso(run_at), "game_id": list(games),
+                       "kickoff_utc": [live.utc_iso(k) for k in games.values()], "model_version": "C2d-test",
+                       "p_home_shadow": p if p is not None else [0.6] * n, "kf_margin": [1.5] * n,
+                       "kf_sd": [kf_sd] * n, "data_hash": "abc"})
+    return df[live.SHADOW_COLUMNS]
+
+
+def test_shadow_post_kickoff_rows_are_refused_and_nothing_is_written(tmp_path):
+    path = tmp_path / "2026_shadow.csv"
+    with pytest.raises(live.LedgerError, match="at or after kickoff"):
+        live.append_shadow(shadow_rows_for(KICK["2026_05_A"], {"2026_05_A": KICK["2026_05_A"]}), path)
+    late = shadow_rows_for(KICK["2026_05_A"] + pd.Timedelta(minutes=1), KICK)
+    with pytest.raises(live.LedgerError):
+        live.append_shadow(late, path)                     # one bad row sinks the whole run
+    assert not path.exists()
+    assert live.append_shadow(shadow_rows_for(T0, KICK), path) == 2
+    first = path.read_bytes()
+    with pytest.raises(live.LedgerError, match="not later"):
+        live.append_shadow(shadow_rows_for(T0, KICK), path)
+    with pytest.raises(live.LedgerError, match="kf_sd"):
+        live.append_shadow(shadow_rows_for(T0 + pd.Timedelta(hours=1), KICK, kf_sd=-1.0), path)
+    live.append_shadow(shadow_rows_for(T0 + pd.Timedelta(days=1), KICK), path)
+    assert path.read_bytes().startswith(first)
+
+
+def test_ml_predict_shadow_rows_skip_games_that_have_kicked_off():
+    import ml_predict
+    now = pd.Timestamp("2026-10-11T17:00:00Z")
+    sp = pd.DataFrame({"p_home_shadow": [0.5, 0.6, 0.7], "kf_margin": [1.0, 2.0, 3.0], "kf_sd": 5.0,
+                       "kickoff_utc": pd.to_datetime(["2026-10-09T00:15:00Z", "2026-10-11T17:00:00Z",
+                                                      "2026-10-11T20:25:00Z"], utc=True)},
+                      index=["g_thu", "g_now", "g_late"])
+    r = ml_predict.shadow_rows(sp, now, "C2d-test", "abc")
+    assert list(r["game_id"]) == ["g_late"] and list(r.columns) == live.SHADOW_COLUMNS
+    live.check_shadow_rows(r)
+
+
+def _fake_shadow():
+    from nflelo.ml.features import kalman
+    return {"model_version": "C2d-test", "kalman": kalman.TUNED.to_dict(), "features": live_features.SHADOW_FEATURES,
+            "intercept": 0.05, "coef": {"elo_logit": 0.5, "kf_margin": 0.07, "qb_delta_diff": 3.5}}
+
+
+def _synthetic_pred(synth_pbp, synth_sched):
+    s, todo, now, elo = _live_inputs(synth_sched)
+    pred = live_features.build(synth_pbp, s, todo, now, elo)
+    pred["p_home_model"] = np.linspace(0.3, 0.7, len(pred))
+    pred["spread_model"], pred["p_home_elo"], pred["spread_elo"] = 1.5, 0.55, 2.0
+    pred["p_home_market"], pred["spread_market"] = 0.58, 3.0
+    pred["kickoff_utc"] = live.to_utc(todo.set_index("game_id").loc[pred.index, "kickoff"]).array
+    return s, pred, now
+
+
+def test_main_ledger_is_byte_identical_with_and_without_the_shadow(tmp_path, synth_pbp, synth_sched):
+    import ml_predict
+    s, pred, now = _synthetic_pred(synth_pbp, synth_sched)
+    before = pred.copy()
+    shadow = _fake_shadow()
+    sp = ml_predict.shadow_predict(shadow, pred, synth_pbp, s, 2023, now)
+    pd.testing.assert_frame_equal(pred, before)            # the shadow reads the A4s features, never writes them
+    assert sp["p_home_shadow"].between(0, 1).all() and (sp["kf_sd"] > 0).all()
+    model = {"model_version": "A4s-test"}
+    out = {}
+    for name, sh, spred in (("off", None, None), ("on", shadow, sp)):
+        d = tmp_path / name
+        d.mkdir()
+        rows, n, ns = ml_predict.record_run(pred, now, model, "abc", "A4s-test", d / "2023.csv", sh, spred, 2023)
+        out[name] = (d, n, ns)
+    assert out["off"][1] == out["on"][1] > 0 and out["off"][2] == 0 and out["on"][2] == out["on"][1]
+    assert (out["off"][0] / "2023.csv").read_bytes() == (out["on"][0] / "2023.csv").read_bytes()
+    assert not (out["off"][0] / "2023_shadow.csv").exists()
+    sh = live.read_shadow(out["on"][0] / "2023_shadow.csv")
+    main = live.read_ledger(out["on"][0] / "2023.csv")
+    assert (sh["run_at_utc"] == main["run_at_utc"].iloc[0]).all() and set(sh["game_id"]) == set(main["game_id"])
+
+    # a bad shadow row is reported and skipped; the main ledger is still written, byte for byte the same
+    bad = sp.copy()
+    bad.iloc[0, bad.columns.get_loc("p_home_shadow")] = np.nan
+    d = tmp_path / "bad"
+    d.mkdir()
+    _, n, ns = ml_predict.record_run(pred, now, model, "abc", "A4s-test", d / "2023.csv", shadow, bad, 2023)
+    assert ns == 0 and not (d / "2023_shadow.csv").exists()
+    assert (d / "2023.csv").read_bytes() == (out["off"][0] / "2023.csv").read_bytes()
+
+
+def test_kalman_asof_reproduces_the_filter_and_ignores_the_market(synth_pbp, synth_sched):
+    """For a played game, the live as-of prediction at its week's as_of is the filter's own pre-week prediction,
+    bit for bit; and scrambling every betting column changes nothing."""
+    from nflelo.ml.features import kalman, opponent_adjust as oa
+    cfg = kalman.TUNED
+    s = asof.add_asof(synth_sched)
+    gt = kalman.game_table(synth_pbp, s, cfg)
+    res = kalman.run_filter(gt, cfg)
+    ords = oa.week_ordinals(s)
+    pos = {g: k for k, g in enumerate(gt["game_id"])}
+    checked = 0
+    for (season, week), wk in s[s["game_type"] == "REG"].groupby(["season", "week"]):
+        if (season, week) not in {(2022, 1), (2022, 4), (2023, 1), (2023, 3)}:
+            continue
+        p = kalman.predict_at(gt, cfg, wk, wk["as_of"].min(), int(season), int(ords[(season, week)]))
+        for g in wk["game_id"]:
+            assert p.at[g, "kf_margin"] == res.pred_mean[pos[g]]
+            assert p.at[g, "kf_sd"] == np.sqrt(res.pred_var[pos[g]])
+            checked += 1
+    assert checked >= 8
+
+    st, todo, now, _ = _live_inputs(synth_sched)
+    a = live_features.kalman_asof(synth_pbp, st, todo, now)
+    rng = np.random.default_rng(11)
+    s2 = st.copy()
+    for c in ("spread_line", "total_line", "home_moneyline", "away_moneyline"):
+        s2[c] = rng.normal(0, 300, len(s2))
+    b = live_features.kalman_asof(synth_pbp, s2, s2.loc[todo.index], now)
+    pd.testing.assert_frame_equal(a, b)
+    assert list(a.columns) == ["kf_margin", "kf_sd"] and a.notna().all().all()
+    # the A4s as-of rule: weeks 4-6 all use week 4's state (the first week not started), not their own week's
+    assert set(todo["week"]) == {4, 5, 6}
+    st_gt = kalman.game_table(synth_pbp, st, cfg)
+    want = kalman.predict_at(st_gt, cfg, todo, now, 2023, int(oa.week_ordinals(st)[(2023, 4)]))
+    pd.testing.assert_frame_equal(a, want)
+    assert st_gt["kick_ns"].max() < now.value               # only completed games before now were absorbed
+
+
+def test_shadow_scoring_uses_the_last_pre_kickoff_row_on_the_games_a4s_is_scored_on(tmp_path):
+    games = {"2026_04_X": pd.Timestamp("2026-10-04T17:00:00Z"), **KICK,
+             "2026_05_C": pd.Timestamp("2026-10-11T20:25:00Z")}
+    main_path, sh_path = tmp_path / "2026.csv", tmp_path / "2026_shadow.csv"
+    run1 = pd.Timestamp("2026-10-01T14:00:00Z")
+    live.append_rows(rows(run1, games, p_home_model=[0.9, 0.8, 0.3, 0.6]), main_path)
+    live.append_shadow(shadow_rows_for(run1, games, p=[0.9, 0.5, 0.5, 0.5]), sh_path)
+    run2 = pd.Timestamp("2026-10-07T14:00:00Z")
+    later = {k: v for k, v in games.items() if k != "2026_04_X"}
+    live.append_rows(rows(run2, later, p_home_model=[0.7, 0.2, 0.6]), main_path)
+    live.append_shadow(shadow_rows_for(run2, {k: later[k] for k in ("2026_05_A", "2026_05_B")}, p=[0.9, 0.1]),
+                       sh_path)
+    # forged after kickoff: never selected
+    shadow_rows_for(KICK["2026_05_B"] + pd.Timedelta(hours=1), {"2026_05_B": KICK["2026_05_B"]}, p=[0.99]).to_csv(
+        sh_path, mode="a", header=False, index=False)
+    results = pd.DataFrame({"game_id": ["2026_04_X", "2026_05_A", "2026_05_B"], "season": 2026, "week": [4, 5, 5],
+                            "y": [1.0, 1.0, 0.0], "margin": [7.0, 3.0, -10.0]})   # 2026_05_C not played yet
+    rec = live.shadow_record(live.read_shadow(sh_path), live.read_ledger(main_path), results, from_week=5)
+    assert rec["a4s_games"] == 2 and rec["n"] == 2 and rec["missing"] == 0 and rec["weeks"] == [5]
+    assert rec["shadow"]["brier"] == pytest.approx((0.1 ** 2 + 0.1 ** 2) / 2, abs=1e-4)
+    assert rec["model"]["brier"] == pytest.approx((0.3 ** 2 + 0.2 ** 2) / 2, abs=1e-4)   # A4s on the same games
+    assert rec["brier_diff"] == pytest.approx(0.01 - 0.065, abs=1e-4)
+    assert rec["model_versions"] == ["C2d-test"]
+    # A4s-scored games with no shadow row are counted as missing, and A4s is re-scored on the paired games only
+    only_a = tmp_path / "only_a.csv"
+    live.append_shadow(shadow_rows_for(run2, {"2026_05_A": KICK["2026_05_A"]}, p=[0.9]), only_a)
+    rec = live.shadow_record(live.read_shadow(only_a), live.read_ledger(main_path), results, from_week=5)
+    assert rec["n"] == 1 and rec["missing"] == 1 and rec["model"]["brier"] == pytest.approx(0.09, abs=1e-4)
+    none = live.shadow_record(live.read_shadow(only_a), live.read_ledger(main_path), results.iloc[:1], from_week=5)
+    assert none["n"] == 0 and "shadow" not in none
+
+
+def test_shadow_reader_never_returns_market_columns(tmp_path):
+    assert not [c for c in live.SHADOW_COLUMNS if is_market_column(c) or c in live.MARKET_COLUMNS]
+    path = tmp_path / "2026_shadow.csv"
+    live.append_shadow(shadow_rows_for(T0, KICK), path)
+    hand = pd.read_csv(path)
+    hand["p_home_market"], hand["spread_market"] = 0.5, 3.0          # a hand-edited file
+    hand.to_csv(path, index=False)
+    got = live.read_shadow(path)
+    assert not [c for c in got.columns if is_market_column(c) or c in live.MARKET_COLUMNS]
+
+
+def test_shadow_feature_code_never_reads_any_ledger():
+    ml = config.ROOT / "nflelo" / "ml"
+    for p in [ml / "live_features.py", ml / "features" / "kalman.py"]:
+        text = p.read_text()
+        for banned in ("read_shadow", "_shadow.csv", "shadow_record", "p_home_shadow"):
+            assert banned not in text, f"{p.name} mentions {banned!r}"
+
+
+@needs_inputs
+def test_exporter_with_and_without_the_shadow_ledger(tmp_path, monkeypatch):
+    """ml.json gets a `shadow` block only when <season>_shadow.csv exists; everything else is identical.
+    The block is scored on the same games as the model."""
+    import export_site
+    elo, ratings, schedule = export_site.load_elo(), export_site.load_ratings(), export_site.load_schedule()
+    season = ratings["season"]
+    upcoming = export_site.build_upcoming(schedule, ratings, elo)
+    monkeypatch.setitem(live.LIVE_FROM_WEEK, season, 1)     # score the played weeks too
+    out_json = {}
+    for name in ("without", "with"):
+        live_dir = tmp_path / f"live_{name}"
+        made = write_ledger(live_dir, schedule, season, unplayed_only=False)
+        assert made is not None
+        run_at, led = made
+        if name == "with":
+            kick = dict(zip(led["game_id"], live.to_utc(led["kickoff_utc"])))
+            live.append_shadow(shadow_rows_for(run_at, kick, p=list(np.clip(led["p_home_model"] + 0.05, 0, 1))),
+                               live.shadow_path(season, live_dir))
+        out = tmp_path / f"data_{name}"
+        monkeypatch.setattr(export_site, "SITE_DATA", out)
+        export_site.export_ml(schedule, ratings, elo, upcoming, live_dir)
+        out_json[name] = json.loads((out / "ml.json").read_text())
+    assert out_json["without"]["shadow"] is None
+    sh = out_json["with"]["shadow"]
+    final = out_json["with"]["live"]["final"]
+    assert final["n"] > 0 and sh["n"] == final["n"] == sh["a4s_games"] and sh["missing"] == 0
+    assert sh["model"]["brier"] == final["model"]["brier"]
+    assert sh["ledger_url"].endswith(f"experiments/live/{season}_shadow.csv")
+    json.dumps(out_json["with"], allow_nan=False)
+    rest = {k: v for k, v in out_json["with"].items() if k != "shadow"}
+    assert rest == {k: v for k, v in out_json["without"].items() if k != "shadow"}

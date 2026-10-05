@@ -604,6 +604,12 @@ def build_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming:
                       "games": r.games})
 
     first_live = reg[reg["week"] == from_week].sort_values(["gameday", "gametime"])
+    # the shadow model (M3b C2d), scored on the same games as the model; null without its ledger
+    sp = live.shadow_path(season, live_dir)
+    shadow = None
+    if sp.exists():
+        shadow = {**live.shadow_record(live.read_shadow(sp), ledger, live.results_frame(reg), from_week),
+                  "ledger_url": live.shadow_url(season)}
     last_run = (latest or {}).get("run_at_utc") or live.utc_iso(ledger["run_at_utc"].max())
     return {
         "season": season,
@@ -624,6 +630,7 @@ def build_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming:
         "live": live.live_record(ledger, live.results_frame(reg), from_week),
         "sim_published": sim_published,
         "playoff_odds": odds,
+        "shadow": shadow,
     }
 
 

@@ -795,6 +795,9 @@
         ? 'Against the spread: wins and losses' + (am.push || L.ats_elo.push ? ' and pushes' : '') + ' when taking the side the forecast\'s line favors over the Vegas line. The model\'s line exists for ' + plural(am.games, 'scored game', 'scored games') + (am.games < L.n ? ' (predictions made before its score model went live have none)' : '') + '.'
         : 'The model\'s point spread began after the first live predictions, so only Elo has a record against the spread so far.');
       box.appendChild(h('p', { class: 'fnote', text: notes.join(' ') }));
+      // Shadow model: logged before kickoff in its own ledger, scored on the same games; hidden until one is scored.
+      var S = ml.shadow;
+      if (S && S.n) box.appendChild(h('p', { class: 'fnote' }, 'Shadow model (Kalman, testing for 2027): Brier ' + S.shadow.brier.toFixed(4) + ' against the model\'s ' + S.model.brier.toFixed(4) + ' on the same ' + plural(S.n, 'game', 'games') + '. It does not change the model\'s picks. ', h('a', { href: S.ledger_url, text: 'See its ledger' }), '.'));
     }
     box.appendChild(h('p', { class: 'fnote' }, 'Last model run: ' + runTime(ml.last_run_utc) + '. ', h('a', { href: ml.ledger_url, text: 'See the prediction ledger' }), '.'));
     return box;

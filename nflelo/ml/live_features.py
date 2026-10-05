@@ -38,6 +38,7 @@ from ..teams import franchise
 from . import asof as asof_mod
 from .data import drop_market_columns
 from .features import context
+from .features import kalman
 from .features import opponent_adjust as oa
 from .features import qb
 from .features import team_efficiency as te
@@ -187,6 +188,45 @@ def build(pbp: pd.DataFrame, sched: pd.DataFrame, games: pd.DataFrame, now, elo:
     for c in st.columns:
         out[c] = st[c].to_numpy(object)
     out["qb_source"] = [game_qb_source(x, y) for x, y in zip(out["home_qb_source"], out["away_qb_source"])]
+    return out
+
+
+# --------------------------------------------------------------------------- the shadow model's Kalman feature
+
+SHADOW_FEATURES = ["elo_logit", "kf_margin", "qb_delta_diff"]   # M3b C2d (context/ml.md, "Shadow deployment")
+
+
+def kalman_asof(pbp: pd.DataFrame, sched: pd.DataFrame, games: pd.DataFrame, now,
+                cfg: kalman.KalmanConfig = kalman.TUNED) -> pd.DataFrame:
+    """kf_margin and kf_sd for `games` (unplayed rows of `sched`, one season) as of `now`, indexed by game_id.
+
+    Same as-of rule as `build`: each game gets its feature week (its own week
+    while that week is in progress, otherwise the first week that has not
+    started), and the filter absorbs only completed REG/POST games that kicked
+    off before that week's as_of (and before `now`). It then predicts the way
+    the filter predicts that week in training (`kalman.predict_at`).
+    """
+    sched = drop_market_columns(sched)          # D3
+    games = drop_market_columns(games)
+    if "as_of" not in sched.columns:
+        sched = asof_mod.add_asof(sched)
+    season = int(games["season"].iloc[0])
+    if (games["season"] != season).any():
+        raise ValueError("kalman_asof() takes one season's games at a time")
+    season_sched = sched[sched["season"] == season]
+    fw = feature_weeks(games, season_sched, now)
+    wk_asof = season_sched.groupby("week")["as_of"].min()
+    ords = oa.week_ordinals(sched)
+    gt = kalman.game_table(pbp, sched, cfg)
+    now = pd.Timestamp(now)
+    parts = []
+    for w in sorted(set(fw.tolist())):
+        cutoff = min(pd.Timestamp(wk_asof[w]), now)
+        parts.append(kalman.predict_at(gt, cfg, games[fw == w], cutoff, season, int(ords[(season, int(w))])))
+    out = pd.concat(parts).loc[games["game_id"].to_numpy()]
+    te.assert_no_market_columns(out)
+    if out.isna().any().any():
+        raise ValueError(f"NaN in live Kalman features: {out.isna().sum().to_dict()}")
     return out
 
 

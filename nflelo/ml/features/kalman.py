@@ -410,6 +410,51 @@ def build_features(pbp: pd.DataFrame, sched: pd.DataFrame, games: pd.DataFrame |
     return out
 
 
+def predict_at(gt: pd.DataFrame, cfg: KalmanConfig, games: pd.DataFrame, cutoff, season: int, ord_: int
+               ) -> pd.DataFrame:
+    """kf_margin and kf_sd for `games`, predicted the way `run_filter` predicts week (season, ord_).
+
+    The filter runs over the games of `gt` (a `game_table`) that kicked off
+    before `cutoff`, then takes the same time update `run_filter` would make
+    before that week (the season transition at a new season, otherwise the
+    drift for the weeks elapsed), and then the same pre-week prediction. So for
+    a played game, with `cutoff` = its week's as_of, this reproduces
+    `run_filter`'s pred_mean and pred_var bit for bit (tested). Unlike
+    `_unplayed`, the drift since the last game is added. `games` needs game_id,
+    season, home_team, away_team (and location, when known).
+    """
+    cut = int(te._utc_ns(pd.Series([pd.Timestamp(cutoff)]))[0])
+    sub = gt[gt["kick_ns"] < cut].reset_index(drop=True)
+    fr = run_filter(sub, cfg)
+    x, P = fr.x_final.copy(), fr.P_final.copy()
+    T = len(TEAMS)
+    H = T
+    diag_t = np.arange(T)
+    if len(sub):
+        prev_season, prev_ord = int(sub["season"].iat[-1]), int(sub["ord"].iat[-1])
+        if int(season) != prev_season:
+            x[:T] *= cfg.gamma
+            P[:T, :] *= cfg.gamma
+            P[:, :T] *= cfg.gamma
+            P[diag_t, diag_t] += cfg.q_season
+            P[H, H] += cfg.q_hfa
+        else:
+            dt = max(int(ord_) - prev_ord, 1)
+            P[diag_t, diag_t] += cfg.q_week * dt
+            P[H, H] += cfg.q_hfa * dt
+    code = {t: k for k, t in enumerate(TEAMS)}
+    S = games["season"].astype(int).to_numpy()
+    i = np.array([code[franchise(c, int(y))] for c, y in zip(games["home_team"], S)], dtype=int)
+    j = np.array([code[franchise(c, int(y))] for c, y in zip(games["away_team"], S)], dtype=int)
+    loc = games["location"] if "location" in games.columns else pd.Series("Home", index=games.index)
+    h = (loc != "Neutral").to_numpy().astype(float)
+    mean = x[i] - x[j] + h * x[H]
+    var = P[i, i] + P[j, j] - 2 * P[i, j] + h * (P[H, H] + 2 * P[i, H] - 2 * P[j, H])
+    out = pd.DataFrame({"kf_margin": mean, "kf_sd": np.sqrt(var)}, index=games["game_id"].to_numpy())
+    out.index.name = "game_id"
+    return out
+
+
 def _unplayed(gt: pd.DataFrame, cfg: KalmanConfig, sched: pd.DataFrame, ids) -> pd.DataFrame:
     """Predictions for scheduled games with no result yet, from the state after every game before their as_of."""
     s = sched.drop_duplicates("game_id").set_index("game_id").loc[ids]

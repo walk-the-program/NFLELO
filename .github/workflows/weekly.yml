@@ -74,7 +74,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # experiments/live holds the ledger, latest_<season>.json, model_/margin_<season>.json and sim_<season>.csv
+          # experiments/live holds the ledger, latest_<season>.json, model_/margin_<season>.json, sim_<season>.csv,
+          # and the M3b shadow model: shadow_<season>.json and its own ledger <season>_shadow.csv
           git add experiments/live site/data outputs data/games.csv
           if git diff --cached --quiet; then
             echo "No changes to commit."
