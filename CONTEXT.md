@@ -124,6 +124,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-05 | Claude, under delegation: M5b method approved (`context/ml-m5b-method.md`). Bayesian RAPM on participation data 2016+, with M5 box-score values as the priors. The primary test is season-ahead play-level MSE against team ratings and box-score values: develop on 2018-2019, then one holdout run on 2020-2025. The ratings are CC BY-SA. |
 | 2026-10-05 | Claude, under delegation: M5b dev results accepted. RAPM beats team ratings (-0.0027 MSE, CI excludes zero) and box values (-0.0019) on 2018-2019 season-ahead play EPA (n 55,543 plays). Approved before the holdout: the participation side-repair (0.4% of plays dropped instead of 12.7%; exact on lists that were already complete), tuning box_scale, and scoring REG+POST as on dev. Known exception: M5's lookup_groups later-season fallback; M5b rebuilds priors cut at S-1, and M5 is not in production. |
 | 2026-10-05 | M5b holdout run once (commit 21ccd41): primary FAIL. Season-ahead 2020-2025 play EPA MSE: RAPM beats team ratings (-0.0018, CI excludes zero) but loses to box-score values summed over the on-field players (+0.0010, CI excludes zero). Player-level beats team-level; on-field plus-minus adds nothing beyond box credit with public data. The ratings are kept as a descriptive view only. |
+| 2026-10-05 | Claude, under delegation: next is M3b, game-model refinement (`context/ml-m3b-method.md`), aimed at the measured weak spots (early season, changed QB) before M6 and M7. Winners run as shadow models in 2026; A4s stays the live headline. |
 
 ## Context file index
 
@@ -138,3 +139,4 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 - `context/m5-data-scope.md`: what free data can support pregame-lineup player values (sources, depth-chart accuracy, injury-report reliability, OL sample sizes, risks).
 - `context/ml-m5-method.md`: the M5 method (per-player values from game-level stats, probabilistic pregame lineups, roster features, shadow deployment) and decisions M5-D1 to M5-D4 (approved 2026-10-05).
 - `context/ml-m5b-method.md`: M5b on-field player ratings (Bayesian RAPM from participation data, CC BY-SA), tested season-ahead.
+- `context/ml-m3b-method.md`: M3b game-model refinement (week-varying weights, Kalman-filter team strength, a better QB term).
