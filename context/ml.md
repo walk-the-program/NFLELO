@@ -298,7 +298,7 @@ No paid APIs, no cloud.
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | **Holdout run 2026-10-05: primary FAIL.** Beats team ratings, loses to box-score values. Kept as a descriptive player view. |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | **Passed 2026-10-05** (holdout, both views): GBM beats the situational baseline on season-ahead CRPS (-0.018, CI excludes zero); calibration passed on the 0.01 floor. |
 | M7a | WP model + fourth-down decisions | M6 | **Holdout 2026-10-05: primary FAIL** (conversion calibration). The WP model passes and beats nflfastR wp (-0.0099 Brier); FG and punt pass. The audit is published. |
-| M7b | Early-down play type and personnel (causal, Part B of the M7 spec) | M6 | Built 2026-10-05 (dev only). Recommended-minus-observed OPE, season-ahead 2018-2019: **+0.074 EPA per early-down play [+0.051, +0.096]**; placebo -0.008 [-0.018, +0.003]; dev preview of the pre-registered rule: PASS. 23-28% of cells have a clear recommendation (nearly all passes, mostly from 12 personnel). Holdout pre-registration proposed, not run. See "M7b build notes". |
+| M7b | Early-down play type × personnel policy (causal, CC BY-SA) | M6 | **Passed 2026-10-05** (holdout): recommended minus observed +0.052 EPA/play [+0.038, +0.067]; placebo includes 0. |
 
 ### M1/M2 build notes (2026-10-03)
 
@@ -1217,3 +1217,25 @@ One holdout run, scored once, with everything frozen in committed code. The resu
 4. Estimated runtime is 25-35 minutes. Run it detached (M7a's first attempt hit the 2-hour tool limit).
 
 Whatever happens is recorded in this file.
+
+### M7b holdout sign-off (run once, 2026-10-05, commit ca7b0ac, clean tree)
+
+Season-ahead 2020-2025, early downs (1st and 2nd, outside the last 2 minutes of each half). The dry run reproduced dev exactly beforehand. **M7b PRIMARY: PASS.**
+
+| Check | Result |
+|---|---|
+| **OPE, recommended minus observed policy (EPA per play)** | **+0.0524 [+0.0377, +0.0670]** (the CI lower bound is above 0: pass) |
+| Placebo (shuffled actions) | +0.0058 [-0.0007, +0.0124] (the CI includes 0: pass) |
+| Success rate OPE | +0.0407 [+0.0351, +0.0464] |
+| Plays where the policy applies, and changes the call | 66.7%, and 54.9% (+0.079 EPA per changed play) |
+| Overlap threshold 0.10 | +0.0453 [+0.0334, +0.0569] |
+| Weights trimmed at 10 | +0.0538 [+0.0398, +0.0675] |
+| Observed-policy sanity check | -0.0008 [-0.0014, -0.0002] (about 1.5% of the gain) |
+| Outcome model EPA MSE vs cell × action mean | -0.0125 [-0.0145, -0.0106] |
+
+- **What it recommends, every season:** more early-down passing, mostly from **12 personnel** (one RB, two TE) and 11 personnel, especially on 1st and 10. 18-22 of 60 cells give a clear recommendation each season, covering 65-76% of plays.
+- **Stable across seasons:** the same cells recur in every holdout season, e.g. 1st and 10 between the 21s within 3 points: 12-personnel pass, +0.17 to +0.23 EPA over the current mix.
+- **Caveats, stated plainly:**
+  - The placebo CI's upper end (+0.012) and the placebo's growing count of "clear" cells in later seasons (4 to 10 of 60, though they earn nothing) suggest a small residual bias, perhaps 0.005 EPA per play, well below the +0.052 gain.
+  - OPE and the placebo test the pipeline, not unmeasured confounding: teams may know things we don't, such as injuries or the game plan.
+  - **Game theory:** if teams all passed more from 12 personnel, defenses would adjust. These are marginal shifts from current tendencies, not a fixed optimal strategy.

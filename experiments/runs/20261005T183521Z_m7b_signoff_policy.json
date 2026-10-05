@@ -1,0 +1,4727 @@
+{
+  "name": "m7b_signoff_policy",
+  "label": "holdout",
+  "window": {
+    "seasons": [
+      2020,
+      2025
+    ],
+    "game_type": "REG"
+  },
+  "holdout": true,
+  "n": 122917,
+  "games_hash": "972732120634b559",
+  "metrics": {
+    "n": 122917,
+    "recs": {
+      "main": {
+        "2020": {
+          "cells": 60,
+          "clear": 18,
+          "clear_share": 0.3,
+          "plays_in_clear_cells": 0.6537727203299221,
+          "with_candidates": 48,
+          "best_counts": {
+            "12_pass": 12,
+            "11_pass": 5,
+            "11_run": 1
+          },
+          "candidates_per_cell": 3.65,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 1422,
+              "best": "11_pass",
+              "gain": 0.279805151376815,
+              "gain_lo": 0.16772957747133457,
+              "gain_hi": 0.39023866033354015,
+              "dr_mean": 0.2815792174214529,
+              "obs_mean": 0.001774066044637885,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 1986,
+              "best": "12_pass",
+              "gain": 0.30329276851266224,
+              "gain_lo": 0.1545014142911425,
+              "gain_hi": 0.4588075145964379,
+              "dr_mean": 0.26532816583139374,
+              "obs_mean": -0.03796460268126849,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 5002,
+              "best": "12_pass",
+              "gain": 0.22706405302574315,
+              "gain_lo": 0.1257363327439328,
+              "gain_hi": 0.32494549885158125,
+              "dr_mean": 0.22560608771062637,
+              "obs_mean": -0.0014579653151167787,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 558,
+              "best": "11_pass",
+              "gain": 0.31224991912383937,
+              "gain_lo": 0.09662890287843273,
+              "gain_hi": 0.5262137165330001,
+              "dr_mean": 0.32250766086888033,
+              "obs_mean": 0.010257741745040842,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 5059,
+              "best": "12_pass",
+              "gain": 0.18541016331844376,
+              "gain_lo": 0.0911871534608087,
+              "gain_hi": 0.27912554677467744,
+              "dr_mean": 0.23056801693007306,
+              "obs_mean": 0.045157853611629314,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | opp 49-21 | lead 4+",
+              "n_cell": 633,
+              "best": "12_pass",
+              "gain": 0.31437242980535646,
+              "gain_lo": 0.08898081417931,
+              "gain_hi": 0.5670296209963555,
+              "dr_mean": 0.3504080955890713,
+              "obs_mean": 0.03603566578371479,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 9720,
+              "best": "11_pass",
+              "gain": 0.13578997332529813,
+              "gain_lo": 0.08634534188531198,
+              "gain_hi": 0.18646685952833128,
+              "dr_mean": 0.11695891059848569,
+              "obs_mean": -0.0188310627268124,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 1143,
+              "best": "12_pass",
+              "gain": 0.225780445337336,
+              "gain_lo": 0.08070874399525864,
+              "gain_hi": 0.3893550375709952,
+              "dr_mean": 0.20326124680684382,
+              "obs_mean": -0.022519198530492168,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 945,
+              "best": "11_pass",
+              "gain": 0.22272657008070015,
+              "gain_lo": 0.08032966285712656,
+              "gain_hi": 0.3677948626441367,
+              "dr_mean": 0.23127181431751814,
+              "obs_mean": 0.008545244236817958,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | trail 4+",
+              "n_cell": 3114,
+              "best": "12_pass",
+              "gain": 0.20127883419643067,
+              "gain_lo": 0.07540159385901503,
+              "gain_hi": 0.3301295382455509,
+              "dr_mean": 0.20038735579462444,
+              "obs_mean": -0.0008914784018061718,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | lead 4+",
+              "n_cell": 2050,
+              "best": "11_pass",
+              "gain": 0.15658936499458803,
+              "gain_lo": 0.07198857124719246,
+              "gain_hi": 0.23556449527170992,
+              "dr_mean": 0.14027048662145689,
+              "obs_mean": -0.016318878373131156,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | lead 4+",
+              "n_cell": 1299,
+              "best": "12_pass",
+              "gain": 0.22538078725368546,
+              "gain_lo": 0.07105060408367316,
+              "gain_hi": 0.4053325396769711,
+              "dr_mean": 0.23495610259870262,
+              "obs_mean": 0.009575315345017184,
+              "candidates": 5,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.30416666666666664
+        },
+        "2021": {
+          "cells": 60,
+          "clear": 21,
+          "clear_share": 0.35,
+          "plays_in_clear_cells": 0.7184534840153517,
+          "with_candidates": 48,
+          "best_counts": {
+            "12_pass": 14,
+            "11_pass": 7
+          },
+          "candidates_per_cell": 3.6666666666666665,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 1475,
+              "best": "12_pass",
+              "gain": 0.2953317674228217,
+              "gain_lo": 0.1441539420879298,
+              "gain_hi": 0.4540978946306382,
+              "dr_mean": 0.2819521835168945,
+              "obs_mean": -0.013379583905927212,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 6290,
+              "best": "12_pass",
+              "gain": 0.21461740324175432,
+              "gain_lo": 0.13417646355177548,
+              "gain_hi": 0.30349870028366366,
+              "dr_mean": 0.22371486972977306,
+              "obs_mean": 0.009097466488018768,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | within 3",
+              "n_cell": 435,
+              "best": "12_pass",
+              "gain": 0.38840204524638106,
+              "gain_lo": 0.11616190491171186,
+              "gain_hi": 0.666559157838152,
+              "dr_mean": 0.5216513253086387,
+              "obs_mean": 0.13324928006225759,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 3314,
+              "best": "12_pass",
+              "gain": 0.21627017127875114,
+              "gain_lo": 0.11022082937269521,
+              "gain_hi": 0.3265062082574984,
+              "dr_mean": 0.251190608988669,
+              "obs_mean": 0.03492043770991781,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 12022,
+              "best": "11_pass",
+              "gain": 0.13261787452724846,
+              "gain_lo": 0.08784746936166689,
+              "gain_hi": 0.17882424250541512,
+              "dr_mean": 0.1231828882042352,
+              "obs_mean": -0.009434986323013251,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 6421,
+              "best": "12_pass",
+              "gain": 0.17540347328025904,
+              "gain_lo": 0.08688670503970493,
+              "gain_hi": 0.2609369403197835,
+              "dr_mean": 0.2085436736319339,
+              "obs_mean": 0.03314020035167485,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 1792,
+              "best": "11_pass",
+              "gain": 0.2005796445492021,
+              "gain_lo": 0.08576335826381151,
+              "gain_hi": 0.30717904067493584,
+              "dr_mean": 0.20820282040526636,
+              "obs_mean": 0.007623175856064266,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 2374,
+              "best": "12_pass",
+              "gain": 0.21196685635902876,
+              "gain_lo": 0.08018627154387227,
+              "gain_hi": 0.33392952358859007,
+              "dr_mean": 0.17420728014689849,
+              "obs_mean": -0.037759576212130296,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 1108,
+              "best": "11_pass",
+              "gain": 0.195549988581946,
+              "gain_lo": 0.07040320179010374,
+              "gain_hi": 0.3274328710290047,
+              "dr_mean": 0.20702798868225533,
+              "obs_mean": 0.011478000100309369,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 10261,
+              "best": "12_pass",
+              "gain": 0.13475528556340197,
+              "gain_lo": 0.06779749187769303,
+              "gain_hi": 0.2039918789788277,
+              "dr_mean": 0.12428405735633331,
+              "obs_mean": -0.010471228207068662,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 4756,
+              "best": "12_pass",
+              "gain": 0.1733965182570143,
+              "gain_lo": 0.061101352451214,
+              "gain_hi": 0.2789290038674117,
+              "dr_mean": 0.12949088943062237,
+              "obs_mean": -0.04390562882639193,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | opp 49-21 | lead 4+",
+              "n_cell": 802,
+              "best": "11_pass",
+              "gain": 0.19026289128627275,
+              "gain_lo": 0.04818386993614854,
+              "gain_hi": 0.33263014747703534,
+              "dr_mean": 0.26690638054494664,
+              "obs_mean": 0.0766434892586739,
+              "candidates": 5,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.3055555555555556
+        },
+        "2022": {
+          "cells": 60,
+          "clear": 20,
+          "clear_share": 0.3333333333333333,
+          "plays_in_clear_cells": 0.6808685514916173,
+          "with_candidates": 49,
+          "best_counts": {
+            "12_pass": 12,
+            "11_pass": 7,
+            "oth_run": 1
+          },
+          "candidates_per_cell": 3.6166666666666667,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 2824,
+              "best": "12_pass",
+              "gain": 0.26593117479385014,
+              "gain_lo": 0.14436697217335923,
+              "gain_hi": 0.40366819908167717,
+              "dr_mean": 0.23078057205303953,
+              "obs_mean": -0.0351506027408106,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 7659,
+              "best": "12_pass",
+              "gain": 0.21701646259841167,
+              "gain_lo": 0.13348470598834652,
+              "gain_hi": 0.30034286261260656,
+              "dr_mean": 0.23177457596882406,
+              "obs_mean": 0.014758113370412388,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 1773,
+              "best": "12_pass",
+              "gain": 0.2611102316796541,
+              "gain_lo": 0.12605511489866933,
+              "gain_hi": 0.3921667396136549,
+              "dr_mean": 0.2564266129521115,
+              "obs_mean": -0.004683618727542597,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 2165,
+              "best": "11_pass",
+              "gain": 0.19350575941100656,
+              "gain_lo": 0.09323093713695232,
+              "gain_hi": 0.29282044786160105,
+              "dr_mean": 0.19829533305298416,
+              "obs_mean": 0.004789573641977633,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 14494,
+              "best": "11_pass",
+              "gain": 0.12446827392773012,
+              "gain_lo": 0.08330303615672613,
+              "gain_hi": 0.16580610848042965,
+              "dr_mean": 0.1147277507434133,
+              "obs_mean": -0.009740523184316821,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 1315,
+              "best": "11_pass",
+              "gain": 0.188122153970443,
+              "gain_lo": 0.07726067783539023,
+              "gain_hi": 0.3016173925087307,
+              "dr_mean": 0.22257744354918904,
+              "obs_mean": 0.034455289578746065,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 887,
+              "best": "11_pass",
+              "gain": 0.2315808393452497,
+              "gain_lo": 0.07020302932928606,
+              "gain_hi": 0.4039021931032411,
+              "dr_mean": 0.25049838329574037,
+              "obs_mean": 0.018917543950490653,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 12357,
+              "best": "12_pass",
+              "gain": 0.12981823060241823,
+              "gain_lo": 0.06371052366191939,
+              "gain_hi": 0.1949550271911302,
+              "dr_mean": 0.1163910106828124,
+              "obs_mean": -0.013427219919605824,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 7714,
+              "best": "12_pass",
+              "gain": 0.13869609508595293,
+              "gain_lo": 0.06319964145987433,
+              "gain_hi": 0.2189040224301466,
+              "dr_mean": 0.16897609827483095,
+              "obs_mean": 0.030280003188878003,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | opp 49-21 | trail 4+",
+              "n_cell": 2539,
+              "best": "12_pass",
+              "gain": 0.20922364262701573,
+              "gain_lo": 0.06269887807738773,
+              "gain_hi": 0.3675580695036998,
+              "dr_mean": 0.20493005607400716,
+              "obs_mean": -0.004293586553008565,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 4011,
+              "best": "12_pass",
+              "gain": 0.16269609165921364,
+              "gain_lo": 0.062349759246014665,
+              "gain_hi": 0.2632785213241791,
+              "dr_mean": 0.1871830341027194,
+              "obs_mean": 0.024486942443505712,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | opp 49-21 | lead 4+",
+              "n_cell": 999,
+              "best": "11_pass",
+              "gain": 0.17750438184778833,
+              "gain_lo": 0.0514787409414998,
+              "gain_hi": 0.3150189079910622,
+              "dr_mean": 0.2722041836368021,
+              "obs_mean": 0.09469980178901378,
+              "candidates": 5,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.3013888888888889
+        },
+        "2023": {
+          "cells": 60,
+          "clear": 22,
+          "clear_share": 0.36666666666666664,
+          "plays_in_clear_cells": 0.7574325528350975,
+          "with_candidates": 49,
+          "best_counts": {
+            "12_pass": 11,
+            "11_pass": 8,
+            "11_run": 2,
+            "oth_run": 1
+          },
+          "candidates_per_cell": 3.5166666666666666,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 3358,
+              "best": "12_pass",
+              "gain": 0.2457474072893929,
+              "gain_lo": 0.1278091226494182,
+              "gain_hi": 0.3755625020384828,
+              "dr_mean": 0.2115654087934589,
+              "obs_mean": -0.03418199849593399,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 9115,
+              "best": "12_pass",
+              "gain": 0.17190822055955482,
+              "gain_lo": 0.0992852813703147,
+              "gain_hi": 0.24936112409978323,
+              "dr_mean": 0.17923683695686884,
+              "obs_mean": 0.007328616397314066,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 2078,
+              "best": "12_pass",
+              "gain": 0.21499880521961973,
+              "gain_lo": 0.09193949734631729,
+              "gain_hi": 0.3390182394776819,
+              "dr_mean": 0.2244030205972997,
+              "obs_mean": 0.009404215377679954,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 8944,
+              "best": "12_pass",
+              "gain": 0.1464071593192578,
+              "gain_lo": 0.07453941805502542,
+              "gain_hi": 0.2150920848322167,
+              "dr_mean": 0.1729471737502452,
+              "obs_mean": 0.02654001443098741,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 17314,
+              "best": "11_pass",
+              "gain": 0.11007299311520241,
+              "gain_lo": 0.0693952840712318,
+              "gain_hi": 0.15001258754866192,
+              "dr_mean": 0.09695254986689464,
+              "obs_mean": -0.013120443248307773,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 2573,
+              "best": "11_pass",
+              "gain": 0.16354716635397065,
+              "gain_lo": 0.06463174248173813,
+              "gain_hi": 0.2549561611099579,
+              "dr_mean": 0.165750614934802,
+              "obs_mean": 0.002203448580831335,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | opp 49-21 | lead 4+",
+              "n_cell": 1177,
+              "best": "11_pass",
+              "gain": 0.18038633656402725,
+              "gain_lo": 0.060742235729674104,
+              "gain_hi": 0.30890839131813186,
+              "dr_mean": 0.27902545892794034,
+              "obs_mean": 0.09863912236391309,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 4663,
+              "best": "11_pass",
+              "gain": 0.14699693408279668,
+              "gain_lo": 0.06069751331452206,
+              "gain_hi": 0.22375073743447377,
+              "dr_mean": 0.17669912612786923,
+              "obs_mean": 0.02970219204507254,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 6853,
+              "best": "12_pass",
+              "gain": 0.14407310004751597,
+              "gain_lo": 0.0597957410609485,
+              "gain_hi": 0.23033349524159893,
+              "dr_mean": 0.1155073272105916,
+              "obs_mean": -0.02856577283692435,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 1045,
+              "best": "11_pass",
+              "gain": 0.2174572317209325,
+              "gain_lo": 0.05011560778118309,
+              "gain_hi": 0.37526598324099375,
+              "dr_mean": 0.2557021735561126,
+              "obs_mean": 0.038244941835180055,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | lead 4+",
+              "n_cell": 373,
+              "best": "11_run",
+              "gain": 0.2590628679872856,
+              "gain_lo": 0.03879104481915484,
+              "gain_hi": 0.4860481542228537,
+              "dr_mean": 0.35650734461358924,
+              "obs_mean": 0.0974444766263037,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 14434,
+              "best": "12_pass",
+              "gain": 0.09600822398966469,
+              "gain_lo": 0.035248960988955656,
+              "gain_hi": 0.15526792980645976,
+              "dr_mean": 0.08407126899287556,
+              "obs_mean": -0.011936954996789114,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.29305555555555557
+        },
+        "2024": {
+          "cells": 60,
+          "clear": 21,
+          "clear_share": 0.35,
+          "plays_in_clear_cells": 0.7045986648036019,
+          "with_candidates": 50,
+          "best_counts": {
+            "12_pass": 13,
+            "11_pass": 5,
+            "11_run": 2,
+            "oth_run": 1
+          },
+          "candidates_per_cell": 3.5166666666666666,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 3819,
+              "best": "12_pass",
+              "gain": 0.23325106334678952,
+              "gain_lo": 0.1228558162254128,
+              "gain_hi": 0.3510531773622894,
+              "dr_mean": 0.19033422867563576,
+              "obs_mean": -0.042916834671153745,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 10489,
+              "best": "12_pass",
+              "gain": 0.18521768098785682,
+              "gain_lo": 0.11541846252190736,
+              "gain_hi": 0.24644614558517766,
+              "dr_mean": 0.19716489042004967,
+              "obs_mean": 0.011947209432192856,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 2369,
+              "best": "12_pass",
+              "gain": 0.22731240262906316,
+              "gain_lo": 0.1092975010456864,
+              "gain_hi": 0.36032940476169173,
+              "dr_mean": 0.23832503691937196,
+              "obs_mean": 0.011012634290308826,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 5312,
+              "best": "12_pass",
+              "gain": 0.16617501230120962,
+              "gain_lo": 0.07783861980977373,
+              "gain_hi": 0.2507636855189532,
+              "dr_mean": 0.19100038337726968,
+              "obs_mean": 0.024825371076060053,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 19882,
+              "best": "11_pass",
+              "gain": 0.10893152544694773,
+              "gain_lo": 0.07251613180598067,
+              "gain_hi": 0.14371533967310562,
+              "dr_mean": 0.09813014150151003,
+              "obs_mean": -0.010801383945437691,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 2961,
+              "best": "11_pass",
+              "gain": 0.15510470745772537,
+              "gain_lo": 0.07239134078246436,
+              "gain_hi": 0.23894513633762862,
+              "dr_mean": 0.14352312788651736,
+              "obs_mean": -0.011581579571208008,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 7850,
+              "best": "12_pass",
+              "gain": 0.15693590364494994,
+              "gain_lo": 0.07218280006832281,
+              "gain_hi": 0.2376313292515361,
+              "dr_mean": 0.1203170126711692,
+              "obs_mean": -0.036618890973780724,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 10296,
+              "best": "12_pass",
+              "gain": 0.13737167250249388,
+              "gain_lo": 0.06654356901611223,
+              "gain_hi": 0.20445781990664627,
+              "dr_mean": 0.16178814008969813,
+              "obs_mean": 0.024416467587204223,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 1225,
+              "best": "11_pass",
+              "gain": 0.20241540060119786,
+              "gain_lo": 0.062115034590161086,
+              "gain_hi": 0.34847227066111996,
+              "dr_mean": 0.2476896458060299,
+              "obs_mean": 0.04527424520483198,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 21-50 | within 3",
+              "n_cell": 4854,
+              "best": "12_pass",
+              "gain": 0.14251045179971777,
+              "gain_lo": 0.04799460702510499,
+              "gain_hi": 0.24222447605434438,
+              "dr_mean": 0.22363398770341297,
+              "obs_mean": 0.08112353590369514,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 16596,
+              "best": "12_pass",
+              "gain": 0.10346401673590828,
+              "gain_lo": 0.04636134759046982,
+              "gain_hi": 0.1592137658717565,
+              "dr_mean": 0.08731696643646017,
+              "obs_mean": -0.016147050299448126,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | lead 4+",
+              "n_cell": 422,
+              "best": "11_run",
+              "gain": 0.2233673092205658,
+              "gain_lo": 0.028162930200872516,
+              "gain_hi": 0.4326985155201023,
+              "dr_mean": 0.3262388685199004,
+              "obs_mean": 0.10287155929933457,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.29305555555555557
+        },
+        "2025": {
+          "cells": 60,
+          "clear": 19,
+          "clear_share": 0.31666666666666665,
+          "plays_in_clear_cells": 0.6784708249496982,
+          "with_candidates": 51,
+          "best_counts": {
+            "12_pass": 14,
+            "11_pass": 3,
+            "11_run": 2
+          },
+          "candidates_per_cell": 3.5166666666666666,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 4268,
+              "best": "12_pass",
+              "gain": 0.2339733090436264,
+              "gain_lo": 0.13605524509957434,
+              "gain_hi": 0.33500467030811687,
+              "dr_mean": 0.19092870949475158,
+              "obs_mean": -0.04304459954887486,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 11953,
+              "best": "12_pass",
+              "gain": 0.1839972282531708,
+              "gain_lo": 0.12095945173502602,
+              "gain_hi": 0.24554535298677338,
+              "dr_mean": 0.19391406632762406,
+              "obs_mean": 0.009916838074453259,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 1412,
+              "best": "11_pass",
+              "gain": 0.21794758428311656,
+              "gain_lo": 0.08352295034771555,
+              "gain_hi": 0.3566942419408381,
+              "dr_mean": 0.27303460086651327,
+              "obs_mean": 0.0550870165833967,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 22386,
+              "best": "11_pass",
+              "gain": 0.11438796476296091,
+              "gain_lo": 0.08116427965302103,
+              "gain_hi": 0.14687622386325583,
+              "dr_mean": 0.10602192018752302,
+              "obs_mean": -0.008366044575437905,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 11508,
+              "best": "12_pass",
+              "gain": 0.1374175488549432,
+              "gain_lo": 0.07579455522788538,
+              "gain_hi": 0.199472300710729,
+              "dr_mean": 0.16228792777104784,
+              "obs_mean": 0.024870378916104628,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 6023,
+              "best": "12_pass",
+              "gain": 0.14917905633836495,
+              "gain_lo": 0.06559357929159206,
+              "gain_hi": 0.23287434999749435,
+              "dr_mean": 0.1668834436890177,
+              "obs_mean": 0.017704387350652735,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | lead 4+",
+              "n_cell": 1315,
+              "best": "12_pass",
+              "gain": 0.23205654329899433,
+              "gain_lo": 0.057519989932551356,
+              "gain_hi": 0.41344491460784727,
+              "dr_mean": 0.25865050764947406,
+              "obs_mean": 0.02659396435047969,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 8817,
+              "best": "12_pass",
+              "gain": 0.13238340743423774,
+              "gain_lo": 0.049246782541322726,
+              "gain_hi": 0.20545081905692067,
+              "dr_mean": 0.10355008484316783,
+              "obs_mean": -0.028833322591069924,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 3341,
+              "best": "12_pass",
+              "gain": 0.1642662649771738,
+              "gain_lo": 0.041067923031769336,
+              "gain_hi": 0.2902059481759501,
+              "dr_mean": 0.14581141932916153,
+              "obs_mean": -0.018454845648012263,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | within 3",
+              "n_cell": 780,
+              "best": "12_pass",
+              "gain": 0.27414421957442686,
+              "gain_lo": 0.04068952807942757,
+              "gain_hi": 0.5059547770399178,
+              "dr_mean": 0.41285436769175354,
+              "obs_mean": 0.13871014811732668,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 18643,
+              "best": "12_pass",
+              "gain": 0.093108950670122,
+              "gain_lo": 0.03802624185200204,
+              "gain_hi": 0.14618699792778525,
+              "dr_mean": 0.08086217603414347,
+              "obs_mean": -0.012246774635978525,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-short | red zone | within 3",
+              "n_cell": 2451,
+              "best": "11_run",
+              "gain": 0.0936482764766641,
+              "gain_lo": 0.03284879435467418,
+              "gain_hi": 0.15942221486692779,
+              "dr_mean": 0.1533512347917533,
+              "obs_mean": 0.05970295831508917,
+              "candidates": 5,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.29305555555555557
+        }
+      },
+      "thr10": {
+        "2020": {
+          "cells": 60,
+          "clear": 19,
+          "clear_share": 0.31666666666666665,
+          "plays_in_clear_cells": 0.6647192098162008,
+          "with_candidates": 48,
+          "best_counts": {
+            "12_pass": 10,
+            "11_pass": 7,
+            "11_run": 2
+          },
+          "candidates_per_cell": 2.6333333333333333,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 1986,
+              "best": "12_pass",
+              "gain": 0.29781037795829574,
+              "gain_lo": 0.18145373075866683,
+              "gain_hi": 0.4181697559514568,
+              "dr_mean": 0.29152496164596453,
+              "obs_mean": -0.006285416312331169,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 1422,
+              "best": "11_pass",
+              "gain": 0.28223583913267325,
+              "gain_lo": 0.17089365335480786,
+              "gain_hi": 0.39295101993337,
+              "dr_mean": 0.28444554406843037,
+              "obs_mean": 0.0022097049357571725,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 1143,
+              "best": "12_pass",
+              "gain": 0.2927166156787358,
+              "gain_lo": 0.1105527435502645,
+              "gain_hi": 0.4910658161427474,
+              "dr_mean": 0.3072785736159981,
+              "obs_mean": 0.01456195793726228,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 5059,
+              "best": "12_pass",
+              "gain": 0.19339706195878772,
+              "gain_lo": 0.09326135837185325,
+              "gain_hi": 0.2887729351495757,
+              "dr_mean": 0.24208213303198342,
+              "obs_mean": 0.048685071073195724,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 945,
+              "best": "11_pass",
+              "gain": 0.22272657008070015,
+              "gain_lo": 0.08032966285712656,
+              "gain_hi": 0.3677948626441367,
+              "dr_mean": 0.23127181431751814,
+              "obs_mean": 0.008545244236817958,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 9720,
+              "best": "11_pass",
+              "gain": 0.12983717262805408,
+              "gain_lo": 0.08003114922459348,
+              "gain_hi": 0.1809768835890206,
+              "dr_mean": 0.11268351177795263,
+              "obs_mean": -0.01715366085010146,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | lead 4+",
+              "n_cell": 2050,
+              "best": "11_pass",
+              "gain": 0.15658936499458803,
+              "gain_lo": 0.07198857124719246,
+              "gain_hi": 0.23556449527170992,
+              "dr_mean": 0.14027048662145689,
+              "obs_mean": -0.016318878373131156,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 3942,
+              "best": "12_pass",
+              "gain": 0.19594836081229025,
+              "gain_lo": 0.07177231289287324,
+              "gain_hi": 0.3089253560415139,
+              "dr_mean": 0.17400919853099595,
+              "obs_mean": -0.021939162281294295,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 21-50 | within 3",
+              "n_cell": 2275,
+              "best": "12_pass",
+              "gain": 0.22754265414404032,
+              "gain_lo": 0.07001085519550299,
+              "gain_hi": 0.373981741374397,
+              "dr_mean": 0.27049698096684277,
+              "obs_mean": 0.04295432682280244,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 5002,
+              "best": "12_pass",
+              "gain": 0.16189687791169088,
+              "gain_lo": 0.05590281676810454,
+              "gain_hi": 0.26168829998307863,
+              "dr_mean": 0.1386408471505379,
+              "obs_mean": -0.02325603076115296,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | trail 4+",
+              "n_cell": 3114,
+              "best": "12_pass",
+              "gain": 0.18804672459985364,
+              "gain_lo": 0.05499812730151964,
+              "gain_hi": 0.3300353436062518,
+              "dr_mean": 0.18222032221132647,
+              "obs_mean": -0.005826402388527141,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 8044,
+              "best": "11_pass",
+              "gain": 0.0951072928104097,
+              "gain_lo": 0.048251675213495854,
+              "gain_hi": 0.1425088870390653,
+              "dr_mean": 0.09004363871922416,
+              "obs_mean": -0.005063654091185533,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.21944444444444444
+        },
+        "2021": {
+          "cells": 60,
+          "clear": 17,
+          "clear_share": 0.2833333333333333,
+          "plays_in_clear_cells": 0.6121760792295774,
+          "with_candidates": 48,
+          "best_counts": {
+            "12_pass": 11,
+            "11_pass": 6
+          },
+          "candidates_per_cell": 2.75,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 1475,
+              "best": "12_pass",
+              "gain": 0.30483575535576535,
+              "gain_lo": 0.1271111559441104,
+              "gain_hi": 0.48519541454662063,
+              "dr_mean": 0.3273068122275714,
+              "obs_mean": 0.02247105687180602,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | trail 4+",
+              "n_cell": 1665,
+              "best": "12_pass",
+              "gain": 0.23725201531638065,
+              "gain_lo": 0.1049616792301332,
+              "gain_hi": 0.3718874098991669,
+              "dr_mean": 0.26539656860205296,
+              "obs_mean": 0.028144553285672277,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 2374,
+              "best": "12_pass",
+              "gain": 0.23178079664963022,
+              "gain_lo": 0.09343648979346862,
+              "gain_hi": 0.3525963382583164,
+              "dr_mean": 0.21543521870986168,
+              "obs_mean": -0.016345577939768517,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 21-50 | within 3",
+              "n_cell": 2881,
+              "best": "12_pass",
+              "gain": 0.2124356586647976,
+              "gain_lo": 0.08768138635918395,
+              "gain_hi": 0.33501117904862715,
+              "dr_mean": 0.2865184127116115,
+              "obs_mean": 0.07408275404681391,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 6290,
+              "best": "12_pass",
+              "gain": 0.1724042571570496,
+              "gain_lo": 0.08309085721017614,
+              "gain_hi": 0.25966263083582936,
+              "dr_mean": 0.16345839773356965,
+              "obs_mean": -0.008945859423479911,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 12022,
+              "best": "11_pass",
+              "gain": 0.12223747944413396,
+              "gain_lo": 0.07705985818832531,
+              "gain_hi": 0.16650416648256283,
+              "dr_mean": 0.11435281815681238,
+              "obs_mean": -0.00788466128732159,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 6421,
+              "best": "12_pass",
+              "gain": 0.16905968181773978,
+              "gain_lo": 0.07483068741164156,
+              "gain_hi": 0.2607483155802989,
+              "dr_mean": 0.2097576695580998,
+              "obs_mean": 0.040697987740359994,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 4756,
+              "best": "12_pass",
+              "gain": 0.18182037022153455,
+              "gain_lo": 0.07257788528878222,
+              "gain_hi": 0.28558777052875917,
+              "dr_mean": 0.14682560665038188,
+              "obs_mean": -0.03499476357115266,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 1792,
+              "best": "11_pass",
+              "gain": 0.189430303054878,
+              "gain_lo": 0.07254634895896088,
+              "gain_hi": 0.29569534466658975,
+              "dr_mean": 0.20234319902404332,
+              "obs_mean": 0.012912895969165342,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 1108,
+              "best": "11_pass",
+              "gain": 0.1950796591417233,
+              "gain_lo": 0.0711427271466952,
+              "gain_hi": 0.32606537986527245,
+              "dr_mean": 0.20738945327784625,
+              "obs_mean": 0.012309794136122952,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 10261,
+              "best": "12_pass",
+              "gain": 0.1397160325823451,
+              "gain_lo": 0.0679601598499058,
+              "gain_hi": 0.2145120079778021,
+              "dr_mean": 0.12999296371011507,
+              "obs_mean": -0.009723068872230015,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 719,
+              "best": "11_pass",
+              "gain": 0.2784325337239887,
+              "gain_lo": 0.0603698675140708,
+              "gain_hi": 0.4892823451096241,
+              "dr_mean": 0.33585754591980155,
+              "obs_mean": 0.057425012195812836,
+              "candidates": 3,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.22916666666666666
+        },
+        "2022": {
+          "cells": 60,
+          "clear": 17,
+          "clear_share": 0.2833333333333333,
+          "plays_in_clear_cells": 0.6269321412696149,
+          "with_candidates": 49,
+          "best_counts": {
+            "12_pass": 12,
+            "11_pass": 5
+          },
+          "candidates_per_cell": 2.8,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 2824,
+              "best": "12_pass",
+              "gain": 0.23220289139227518,
+              "gain_lo": 0.1119004489313549,
+              "gain_hi": 0.34945928446397573,
+              "dr_mean": 0.2058319400370227,
+              "obs_mean": -0.026370951355252494,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 1773,
+              "best": "12_pass",
+              "gain": 0.2589230838117096,
+              "gain_lo": 0.09982706188368481,
+              "gain_hi": 0.4196398911785738,
+              "dr_mean": 0.2878342299330756,
+              "obs_mean": 0.028911146121366058,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 7659,
+              "best": "12_pass",
+              "gain": 0.17927049107511317,
+              "gain_lo": 0.0934231876447771,
+              "gain_hi": 0.2626026341644236,
+              "dr_mean": 0.18589913198504626,
+              "obs_mean": 0.006628640909933108,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 2165,
+              "best": "11_pass",
+              "gain": 0.1802186949136179,
+              "gain_lo": 0.08160702699693852,
+              "gain_hi": 0.2785184412634025,
+              "dr_mean": 0.18371068518404804,
+              "obs_mean": 0.0034919902704301526,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 14494,
+              "best": "11_pass",
+              "gain": 0.11984767669706303,
+              "gain_lo": 0.08095277117146578,
+              "gain_hi": 0.16094845485335235,
+              "dr_mean": 0.10831822259728123,
+              "obs_mean": -0.011529454099781788,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 7714,
+              "best": "12_pass",
+              "gain": 0.15406957808863936,
+              "gain_lo": 0.07445220856713836,
+              "gain_hi": 0.22958834535502542,
+              "dr_mean": 0.1836761403125805,
+              "obs_mean": 0.029606562223941126,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 1315,
+              "best": "11_pass",
+              "gain": 0.18469402538927637,
+              "gain_lo": 0.07299548893909809,
+              "gain_hi": 0.2980703202676314,
+              "dr_mean": 0.22314653042305116,
+              "obs_mean": 0.03845250503377481,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 12357,
+              "best": "12_pass",
+              "gain": 0.12467465669839436,
+              "gain_lo": 0.05702131210170872,
+              "gain_hi": 0.19221431679225665,
+              "dr_mean": 0.10509278960661086,
+              "obs_mean": -0.019581867091783476,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | trail 4+",
+              "n_cell": 1992,
+              "best": "12_pass",
+              "gain": 0.1855981899374747,
+              "gain_lo": 0.03916083184156109,
+              "gain_hi": 0.3316722916110792,
+              "dr_mean": 0.20560744036016448,
+              "obs_mean": 0.020009250422689792,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | opp 49-21 | lead 4+",
+              "n_cell": 999,
+              "best": "11_pass",
+              "gain": 0.15817601379904841,
+              "gain_lo": 0.03536744351571001,
+              "gain_hi": 0.29125881067837733,
+              "dr_mean": 0.2578314239326473,
+              "obs_mean": 0.09965541013359887,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | within 3",
+              "n_cell": 504,
+              "best": "12_pass",
+              "gain": 0.31300317489536905,
+              "gain_lo": 0.03524652079185054,
+              "gain_hi": 0.6287801423586697,
+              "dr_mean": 0.47128762568176114,
+              "obs_mean": 0.15828445078639206,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 5744,
+              "best": "12_pass",
+              "gain": 0.1223500153628629,
+              "gain_lo": 0.024459047920659945,
+              "gain_hi": 0.2142741436834279,
+              "dr_mean": 0.09460329788120259,
+              "obs_mean": -0.02774671748166031,
+              "candidates": 3,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.23333333333333334
+        },
+        "2023": {
+          "cells": 60,
+          "clear": 23,
+          "clear_share": 0.38333333333333336,
+          "plays_in_clear_cells": 0.741608752984782,
+          "with_candidates": 49,
+          "best_counts": {
+            "12_pass": 13,
+            "11_pass": 8,
+            "11_run": 2
+          },
+          "candidates_per_cell": 2.783333333333333,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 3358,
+              "best": "12_pass",
+              "gain": 0.22277663685681898,
+              "gain_lo": 0.11203603588694584,
+              "gain_hi": 0.34057781330964376,
+              "dr_mean": 0.19668258753843573,
+              "obs_mean": -0.026094049318383265,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 8944,
+              "best": "12_pass",
+              "gain": 0.17223910683213306,
+              "gain_lo": 0.10118982724447739,
+              "gain_hi": 0.24162471677464392,
+              "dr_mean": 0.20505712089796943,
+              "obs_mean": 0.03281801406583636,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | trail 4+",
+              "n_cell": 2293,
+              "best": "12_pass",
+              "gain": 0.22197709982428182,
+              "gain_lo": 0.08450867928256102,
+              "gain_hi": 0.3575659889855985,
+              "dr_mean": 0.24073233237736,
+              "obs_mean": 0.01875523255307815,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 1045,
+              "best": "11_pass",
+              "gain": 0.24798588917732017,
+              "gain_lo": 0.06990381187542637,
+              "gain_hi": 0.4209009265011783,
+              "dr_mean": 0.31519509093868187,
+              "obs_mean": 0.06720920176136172,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 6853,
+              "best": "12_pass",
+              "gain": 0.1488769514895949,
+              "gain_lo": 0.06560781416560897,
+              "gain_hi": 0.24076116394291125,
+              "dr_mean": 0.1288926091536958,
+              "obs_mean": -0.019984342335899116,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 17314,
+              "best": "11_pass",
+              "gain": 0.10221196665433845,
+              "gain_lo": 0.06161642636912376,
+              "gain_hi": 0.14302725298739946,
+              "dr_mean": 0.08739788282822862,
+              "obs_mean": -0.014814083826109823,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 2078,
+              "best": "12_pass",
+              "gain": 0.20119693337118771,
+              "gain_lo": 0.056412527887211905,
+              "gain_hi": 0.3448431555883732,
+              "dr_mean": 0.230388733861523,
+              "obs_mean": 0.029191800490335314,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 2573,
+              "best": "11_pass",
+              "gain": 0.15422421949280435,
+              "gain_lo": 0.052417284905734406,
+              "gain_hi": 0.2482960568889797,
+              "dr_mean": 0.15735010501727575,
+              "obs_mean": 0.0031258855244714456,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | within 3",
+              "n_cell": 602,
+              "best": "11_pass",
+              "gain": 0.20082980930329544,
+              "gain_lo": 0.04763350775852757,
+              "gain_hi": 0.35049046110333887,
+              "dr_mean": 0.33442141935764563,
+              "obs_mean": 0.1335916100543502,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 9115,
+              "best": "12_pass",
+              "gain": 0.11985223354485267,
+              "gain_lo": 0.0462873918166444,
+              "gain_hi": 0.2030104255182313,
+              "dr_mean": 0.1215681926797989,
+              "obs_mean": 0.0017159591349462304,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | trail 4+",
+              "n_cell": 7337,
+              "best": "12_pass",
+              "gain": 0.13077589286602598,
+              "gain_lo": 0.04325031978090872,
+              "gain_hi": 0.22185766017220632,
+              "dr_mean": 0.1554217258741021,
+              "obs_mean": 0.024645833008076136,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 4663,
+              "best": "11_pass",
+              "gain": 0.11899396284644166,
+              "gain_lo": 0.038645837433971986,
+              "gain_hi": 0.19209763160357848,
+              "dr_mean": 0.15044563799907873,
+              "obs_mean": 0.03145167515263705,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.23194444444444445
+        },
+        "2024": {
+          "cells": 60,
+          "clear": 21,
+          "clear_share": 0.35,
+          "plays_in_clear_cells": 0.727725508461419,
+          "with_candidates": 49,
+          "best_counts": {
+            "12_pass": 14,
+            "11_pass": 5,
+            "11_run": 2
+          },
+          "candidates_per_cell": 2.8,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 10489,
+              "best": "12_pass",
+              "gain": 0.17413353872039017,
+              "gain_lo": 0.1017465212457775,
+              "gain_hi": 0.24259725973839907,
+              "dr_mean": 0.18471422888730948,
+              "obs_mean": 0.010580690166919302,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 10296,
+              "best": "12_pass",
+              "gain": 0.16984662846105025,
+              "gain_lo": 0.0989816156009989,
+              "gain_hi": 0.2383995354703554,
+              "dr_mean": 0.18705150720074212,
+              "obs_mean": 0.01720487873969187,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 3819,
+              "best": "12_pass",
+              "gain": 0.2112277313990396,
+              "gain_lo": 0.09831871928294116,
+              "gain_hi": 0.3121421402546992,
+              "dr_mean": 0.16790920647790536,
+              "obs_mean": -0.04331852492113424,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | trail 4+",
+              "n_cell": 2580,
+              "best": "12_pass",
+              "gain": 0.24204138734252156,
+              "gain_lo": 0.0943163611057366,
+              "gain_hi": 0.3804480813685681,
+              "dr_mean": 0.24865777300460543,
+              "obs_mean": 0.006616385662083865,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 7850,
+              "best": "12_pass",
+              "gain": 0.17558300055258305,
+              "gain_lo": 0.09254802990555692,
+              "gain_hi": 0.2585107976038984,
+              "dr_mean": 0.15371480882974636,
+              "obs_mean": -0.02186819172283669,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 1225,
+              "best": "11_pass",
+              "gain": 0.2495864267496685,
+              "gain_lo": 0.08535757587654272,
+              "gain_hi": 0.4289312007055078,
+              "dr_mean": 0.3103590315184074,
+              "obs_mean": 0.060772604768738823,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | lead 4+",
+              "n_cell": 633,
+              "best": "11_pass",
+              "gain": 0.3344752462361978,
+              "gain_lo": 0.08500357937735409,
+              "gain_hi": 0.6079777149373468,
+              "dr_mean": 0.4106871680940544,
+              "obs_mean": 0.07621192185785654,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 19882,
+              "best": "11_pass",
+              "gain": 0.10517855616393193,
+              "gain_lo": 0.06852615014035997,
+              "gain_hi": 0.14065740611186067,
+              "dr_mean": 0.09203109204433574,
+              "obs_mean": -0.013147464119596193,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 2961,
+              "best": "11_pass",
+              "gain": 0.14045017372555632,
+              "gain_lo": 0.05668495591418157,
+              "gain_hi": 0.22311897805507364,
+              "dr_mean": 0.12518469867163104,
+              "obs_mean": -0.015265475053925275,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 21-50 | within 3",
+              "n_cell": 4854,
+              "best": "12_pass",
+              "gain": 0.14914682181306976,
+              "gain_lo": 0.051576178268925514,
+              "gain_hi": 0.2462102840892873,
+              "dr_mean": 0.2241295483108344,
+              "obs_mean": 0.07498272649776462,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | lead 4+",
+              "n_cell": 422,
+              "best": "11_run",
+              "gain": 0.2265002342551851,
+              "gain_lo": 0.03767317781408166,
+              "gain_hi": 0.44075899003978003,
+              "dr_mean": 0.33331008120350136,
+              "obs_mean": 0.10680984694831627,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 16596,
+              "best": "12_pass",
+              "gain": 0.09423845775511007,
+              "gain_lo": 0.03542502091277389,
+              "gain_hi": 0.15236579852034074,
+              "dr_mean": 0.06811242217873716,
+              "obs_mean": -0.026126035576372907,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.23333333333333334
+        },
+        "2025": {
+          "cells": 60,
+          "clear": 20,
+          "clear_share": 0.3333333333333333,
+          "plays_in_clear_cells": 0.6343099694054739,
+          "with_candidates": 51,
+          "best_counts": {
+            "12_pass": 13,
+            "11_pass": 5,
+            "11_run": 2
+          },
+          "candidates_per_cell": 2.8333333333333335,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 4268,
+              "best": "12_pass",
+              "gain": 0.25894705348443164,
+              "gain_lo": 0.1592158590850911,
+              "gain_hi": 0.3553556018944824,
+              "dr_mean": 0.20848982360140955,
+              "obs_mean": -0.050457229883022064,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | trail 4+",
+              "n_cell": 2814,
+              "best": "12_pass",
+              "gain": 0.2606308693012389,
+              "gain_lo": 0.125268335136938,
+              "gain_hi": 0.39253720048564494,
+              "dr_mean": 0.26325506551400907,
+              "obs_mean": 0.002624196212770172,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 11953,
+              "best": "12_pass",
+              "gain": 0.16290903112833274,
+              "gain_lo": 0.0967975189231228,
+              "gain_hi": 0.2277921142358272,
+              "dr_mean": 0.16825874288582843,
+              "obs_mean": 0.005349711757495698,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 11508,
+              "best": "12_pass",
+              "gain": 0.14779555727683646,
+              "gain_lo": 0.0833365493353968,
+              "gain_hi": 0.21173673395010298,
+              "dr_mean": 0.17160221578230522,
+              "obs_mean": 0.02380665850546876,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 22386,
+              "best": "11_pass",
+              "gain": 0.10997239972390016,
+              "gain_lo": 0.07535707318306675,
+              "gain_hi": 0.14283313325582353,
+              "dr_mean": 0.10065352495758448,
+              "obs_mean": -0.009318874766315686,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 1412,
+              "best": "11_pass",
+              "gain": 0.22988153668773584,
+              "gain_lo": 0.06924910632941982,
+              "gain_hi": 0.39833765392823,
+              "dr_mean": 0.2822798057414238,
+              "obs_mean": 0.05239826905368796,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | lead 4+",
+              "n_cell": 718,
+              "best": "11_pass",
+              "gain": 0.3066958816321294,
+              "gain_lo": 0.06368032844846021,
+              "gain_hi": 0.5540586165888394,
+              "dr_mean": 0.36973157106400206,
+              "obs_mean": 0.06303568943187263,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 8817,
+              "best": "12_pass",
+              "gain": 0.14105015825918962,
+              "gain_lo": 0.057548322502158286,
+              "gain_hi": 0.21685405325265483,
+              "dr_mean": 0.12067551997412175,
+              "obs_mean": -0.02037463828506788,
+              "candidates": 3,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 3341,
+              "best": "12_pass",
+              "gain": 0.18904549415257327,
+              "gain_lo": 0.054344859719688304,
+              "gain_hi": 0.3229874730345456,
+              "dr_mean": 0.1619779152630626,
+              "obs_mean": -0.02706757888951068,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 18643,
+              "best": "12_pass",
+              "gain": 0.10040644346111889,
+              "gain_lo": 0.04638347887453967,
+              "gain_hi": 0.1537782004742581,
+              "dr_mean": 0.07957338404851509,
+              "obs_mean": -0.0208330594126038,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 6023,
+              "best": "12_pass",
+              "gain": 0.13969688592502635,
+              "gain_lo": 0.0446520304623314,
+              "gain_hi": 0.2307696187205671,
+              "dr_mean": 0.17145346887686652,
+              "obs_mean": 0.03175658295184016,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 1976,
+              "best": "12_pass",
+              "gain": 0.22511903606591935,
+              "gain_lo": 0.04295759536565618,
+              "gain_hi": 0.4238596235782614,
+              "dr_mean": 0.20801786373324102,
+              "obs_mean": -0.01710117233267837,
+              "candidates": 3,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.2361111111111111
+        }
+      },
+      "trim10": {
+        "2020": {
+          "cells": 60,
+          "clear": 20,
+          "clear_share": 0.3333333333333333,
+          "plays_in_clear_cells": 0.6670739779033654,
+          "with_candidates": 48,
+          "best_counts": {
+            "12_pass": 14,
+            "11_pass": 5,
+            "11_run": 1
+          },
+          "candidates_per_cell": 3.65,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 1422,
+              "best": "11_pass",
+              "gain": 0.27981657608922755,
+              "gain_lo": 0.16757763046652638,
+              "gain_hi": 0.3904141421063755,
+              "dr_mean": 0.2815906421338654,
+              "obs_mean": 0.001774066044637885,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 1986,
+              "best": "12_pass",
+              "gain": 0.29393498197476053,
+              "gain_lo": 0.15457302442093288,
+              "gain_hi": 0.4303501804084294,
+              "dr_mean": 0.25597037929349203,
+              "obs_mean": -0.03796460268126849,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 5002,
+              "best": "12_pass",
+              "gain": 0.21549703356395833,
+              "gain_lo": 0.11952275366770171,
+              "gain_hi": 0.3071408274665822,
+              "dr_mean": 0.21403906824884156,
+              "obs_mean": -0.0014579653151167787,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 558,
+              "best": "11_pass",
+              "gain": 0.30518544994844493,
+              "gain_lo": 0.09038387745700643,
+              "gain_hi": 0.5163086310366328,
+              "dr_mean": 0.3154431916934858,
+              "obs_mean": 0.010257741745040842,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 1143,
+              "best": "12_pass",
+              "gain": 0.2312304340300539,
+              "gain_lo": 0.0903453352383292,
+              "gain_hi": 0.3865611659260442,
+              "dr_mean": 0.20871123549956172,
+              "obs_mean": -0.022519198530492168,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 5059,
+              "best": "12_pass",
+              "gain": 0.18194363769271052,
+              "gain_lo": 0.09015630224453257,
+              "gain_hi": 0.27255914351216565,
+              "dr_mean": 0.22710149130433982,
+              "obs_mean": 0.045157853611629314,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | lead 4+",
+              "n_cell": 1299,
+              "best": "12_pass",
+              "gain": 0.2296337164731999,
+              "gain_lo": 0.08812789654670279,
+              "gain_hi": 0.39139327973779287,
+              "dr_mean": 0.2392090318182171,
+              "obs_mean": 0.009575315345017184,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 9720,
+              "best": "11_pass",
+              "gain": 0.1352471752116689,
+              "gain_lo": 0.08598893327244221,
+              "gain_hi": 0.18590865535322823,
+              "dr_mean": 0.11641611248485646,
+              "obs_mean": -0.0188310627268124,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 945,
+              "best": "11_pass",
+              "gain": 0.22272657008070015,
+              "gain_lo": 0.08032966285712656,
+              "gain_hi": 0.3677948626441367,
+              "dr_mean": 0.23127181431751814,
+              "obs_mean": 0.008545244236817958,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | opp 49-21 | lead 4+",
+              "n_cell": 633,
+              "best": "12_pass",
+              "gain": 0.27295071980398894,
+              "gain_lo": 0.07765254350393458,
+              "gain_hi": 0.4903346816245883,
+              "dr_mean": 0.30898638558770375,
+              "obs_mean": 0.03603566578371479,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | lead 4+",
+              "n_cell": 2050,
+              "best": "11_pass",
+              "gain": 0.15658936499458803,
+              "gain_lo": 0.07198857124719246,
+              "gain_hi": 0.23556449527170992,
+              "dr_mean": 0.14027048662145689,
+              "obs_mean": -0.016318878373131156,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | trail 4+",
+              "n_cell": 3114,
+              "best": "12_pass",
+              "gain": 0.19046156216750956,
+              "gain_lo": 0.07152609929996256,
+              "gain_hi": 0.3139530930255421,
+              "dr_mean": 0.1895700837657034,
+              "obs_mean": -0.0008914784018061718,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.30416666666666664
+        },
+        "2021": {
+          "cells": 60,
+          "clear": 28,
+          "clear_share": 0.4666666666666667,
+          "plays_in_clear_cells": 0.8205385261921398,
+          "with_candidates": 48,
+          "best_counts": {
+            "12_pass": 20,
+            "11_pass": 6,
+            "oth_run": 2
+          },
+          "candidates_per_cell": 3.6666666666666665,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 1475,
+              "best": "12_pass",
+              "gain": 0.29514077586742066,
+              "gain_lo": 0.1500432809943127,
+              "gain_hi": 0.4425204643707736,
+              "dr_mean": 0.28176119196149346,
+              "obs_mean": -0.013379583905927212,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 6290,
+              "best": "12_pass",
+              "gain": 0.2037786224513212,
+              "gain_lo": 0.125353670993195,
+              "gain_hi": 0.28561372440404337,
+              "dr_mean": 0.21287608893933999,
+              "obs_mean": 0.009097466488018768,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | within 3",
+              "n_cell": 435,
+              "best": "12_pass",
+              "gain": 0.36576378215795946,
+              "gain_lo": 0.09983409103436182,
+              "gain_hi": 0.6393191068057654,
+              "dr_mean": 0.499013062220217,
+              "obs_mean": 0.13324928006225759,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 2374,
+              "best": "12_pass",
+              "gain": 0.21619910125364158,
+              "gain_lo": 0.09807519810019598,
+              "gain_hi": 0.32640054529893864,
+              "dr_mean": 0.17843952504151125,
+              "obs_mean": -0.037759576212130296,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 3314,
+              "best": "12_pass",
+              "gain": 0.19052593299693932,
+              "gain_lo": 0.09251086743331834,
+              "gain_hi": 0.2910769928471015,
+              "dr_mean": 0.22544637070685716,
+              "obs_mean": 0.03492043770991781,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 6421,
+              "best": "12_pass",
+              "gain": 0.16999265827089063,
+              "gain_lo": 0.08706615949744062,
+              "gain_hi": 0.2489683620695264,
+              "dr_mean": 0.2031328586225655,
+              "obs_mean": 0.03314020035167485,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 12022,
+              "best": "11_pass",
+              "gain": 0.1303109313697284,
+              "gain_lo": 0.08695814187217867,
+              "gain_hi": 0.17563198246827227,
+              "dr_mean": 0.12087594504671516,
+              "obs_mean": -0.009434986323013251,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 1792,
+              "best": "11_pass",
+              "gain": 0.19784006004504234,
+              "gain_lo": 0.08484869413019053,
+              "gain_hi": 0.3004511615808048,
+              "dr_mean": 0.2054632359011066,
+              "obs_mean": 0.007623175856064266,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 10261,
+              "best": "12_pass",
+              "gain": 0.13597116137620727,
+              "gain_lo": 0.07210310041706938,
+              "gain_hi": 0.20036947891473206,
+              "dr_mean": 0.1254999331691386,
+              "obs_mean": -0.010471228207068662,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 1108,
+              "best": "11_pass",
+              "gain": 0.195549988581946,
+              "gain_lo": 0.07040320179010374,
+              "gain_hi": 0.3274328710290047,
+              "dr_mean": 0.20702798868225533,
+              "obs_mean": 0.011478000100309369,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 4756,
+              "best": "12_pass",
+              "gain": 0.17190115128526012,
+              "gain_lo": 0.06510997392751837,
+              "gain_hi": 0.2699511385555054,
+              "dr_mean": 0.12799552245886822,
+              "obs_mean": -0.04390562882639193,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | lead 4+",
+              "n_cell": 2569,
+              "best": "11_pass",
+              "gain": 0.11847781437149396,
+              "gain_lo": 0.04777683544406665,
+              "gain_hi": 0.18912534075704512,
+              "dr_mean": 0.13380445070686872,
+              "obs_mean": 0.015326636335374762,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.3055555555555556
+        },
+        "2022": {
+          "cells": 60,
+          "clear": 22,
+          "clear_share": 0.36666666666666664,
+          "plays_in_clear_cells": 0.7208407068512912,
+          "with_candidates": 49,
+          "best_counts": {
+            "12_pass": 14,
+            "11_pass": 7,
+            "oth_run": 1
+          },
+          "candidates_per_cell": 3.6166666666666667,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 2824,
+              "best": "12_pass",
+              "gain": 0.24922001614623995,
+              "gain_lo": 0.1410407762705421,
+              "gain_hi": 0.36215744934260774,
+              "dr_mean": 0.21406941340542937,
+              "obs_mean": -0.0351506027408106,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 1773,
+              "best": "12_pass",
+              "gain": 0.25236429432240626,
+              "gain_lo": 0.12327485775304604,
+              "gain_hi": 0.3776449042193645,
+              "dr_mean": 0.24768067559486368,
+              "obs_mean": -0.004683618727542597,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 7659,
+              "best": "12_pass",
+              "gain": 0.19983683173305378,
+              "gain_lo": 0.12290129386959744,
+              "gain_hi": 0.2759927921678206,
+              "dr_mean": 0.2145949451034662,
+              "obs_mean": 0.014758113370412388,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 2165,
+              "best": "11_pass",
+              "gain": 0.18765422511889895,
+              "gain_lo": 0.0897872118014801,
+              "gain_hi": 0.2844719313319498,
+              "dr_mean": 0.19244379876087656,
+              "obs_mean": 0.004789573641977633,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 14494,
+              "best": "11_pass",
+              "gain": 0.12277157132469953,
+              "gain_lo": 0.0828801508086756,
+              "gain_hi": 0.16377151354465294,
+              "dr_mean": 0.11303104814038273,
+              "obs_mean": -0.009740523184316821,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | within 3",
+              "n_cell": 1315,
+              "best": "11_pass",
+              "gain": 0.188122153970443,
+              "gain_lo": 0.07726067783539023,
+              "gain_hi": 0.3016173925087307,
+              "dr_mean": 0.22257744354918904,
+              "obs_mean": 0.034455289578746065,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 7714,
+              "best": "12_pass",
+              "gain": 0.13983904058663,
+              "gain_lo": 0.07129822269532657,
+              "gain_hi": 0.21191472376809212,
+              "dr_mean": 0.170119043775508,
+              "obs_mean": 0.030280003188878003,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 12357,
+              "best": "12_pass",
+              "gain": 0.12611256655293338,
+              "gain_lo": 0.06595751482130369,
+              "gain_hi": 0.18658066270984267,
+              "dr_mean": 0.11268534663332755,
+              "obs_mean": -0.013427219919605824,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 887,
+              "best": "11_pass",
+              "gain": 0.2219977412081575,
+              "gain_lo": 0.06432763209172611,
+              "gain_hi": 0.3887738935786838,
+              "dr_mean": 0.24091528515864816,
+              "obs_mean": 0.018917543950490653,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | within 3",
+              "n_cell": 504,
+              "best": "12_pass",
+              "gain": 0.31473987386298496,
+              "gain_lo": 0.06419841338348485,
+              "gain_hi": 0.5962169826050461,
+              "dr_mean": 0.4457394252332288,
+              "obs_mean": 0.1309995513702438,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 4011,
+              "best": "12_pass",
+              "gain": 0.1521764475847992,
+              "gain_lo": 0.05913286461839672,
+              "gain_hi": 0.24620167787870315,
+              "dr_mean": 0.17666339002830495,
+              "obs_mean": 0.024486942443505712,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | opp 49-21 | trail 4+",
+              "n_cell": 2539,
+              "best": "12_pass",
+              "gain": 0.2003488534317325,
+              "gain_lo": 0.058888642696233104,
+              "gain_hi": 0.3481960766650569,
+              "dr_mean": 0.1960552668787239,
+              "obs_mean": -0.004293586553008565,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.3013888888888889
+        },
+        "2023": {
+          "cells": 60,
+          "clear": 22,
+          "clear_share": 0.36666666666666664,
+          "plays_in_clear_cells": 0.7334687622509711,
+          "with_candidates": 49,
+          "best_counts": {
+            "12_pass": 12,
+            "11_pass": 7,
+            "11_run": 2,
+            "oth_run": 1
+          },
+          "candidates_per_cell": 3.5166666666666666,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 3358,
+              "best": "12_pass",
+              "gain": 0.23158333853919724,
+              "gain_lo": 0.13073520696840532,
+              "gain_hi": 0.3369111662971195,
+              "dr_mean": 0.19740134004326326,
+              "obs_mean": -0.03418199849593399,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 9115,
+              "best": "12_pass",
+              "gain": 0.1638475487495408,
+              "gain_lo": 0.09777363057991473,
+              "gain_hi": 0.23233239398559835,
+              "dr_mean": 0.17117616514685488,
+              "obs_mean": 0.007328616397314066,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 2078,
+              "best": "12_pass",
+              "gain": 0.20924447330879872,
+              "gain_lo": 0.09325836617673224,
+              "gain_hi": 0.3300829017132535,
+              "dr_mean": 0.2186486886864787,
+              "obs_mean": 0.009404215377679954,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 8944,
+              "best": "12_pass",
+              "gain": 0.1494594311077212,
+              "gain_lo": 0.08683652844126996,
+              "gain_hi": 0.21311234386499156,
+              "dr_mean": 0.1759994455387086,
+              "obs_mean": 0.02654001443098741,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 6853,
+              "best": "12_pass",
+              "gain": 0.14787089249303867,
+              "gain_lo": 0.0709278426504479,
+              "gain_hi": 0.2291034834795201,
+              "dr_mean": 0.11930511965611433,
+              "obs_mean": -0.02856577283692435,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 17314,
+              "best": "11_pass",
+              "gain": 0.10735358387700945,
+              "gain_lo": 0.06717004307628423,
+              "gain_hi": 0.14664908863056395,
+              "dr_mean": 0.09423314062870168,
+              "obs_mean": -0.013120443248307773,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 2573,
+              "best": "11_pass",
+              "gain": 0.1611460852674711,
+              "gain_lo": 0.06285147939998474,
+              "gain_hi": 0.2518658257976717,
+              "dr_mean": 0.1633495338483024,
+              "obs_mean": 0.002203448580831335,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 4663,
+              "best": "11_pass",
+              "gain": 0.14272875770099205,
+              "gain_lo": 0.05910087651785884,
+              "gain_hi": 0.21727984715555157,
+              "dr_mean": 0.1724309497460646,
+              "obs_mean": 0.02970219204507254,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | opp 49-21 | lead 4+",
+              "n_cell": 1177,
+              "best": "11_pass",
+              "gain": 0.16476776628090561,
+              "gain_lo": 0.053432773504423124,
+              "gain_hi": 0.28521497836501536,
+              "dr_mean": 0.2634068886448187,
+              "obs_mean": 0.09863912236391309,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 1045,
+              "best": "11_pass",
+              "gain": 0.20945718487493953,
+              "gain_lo": 0.05329004780388491,
+              "gain_hi": 0.3576245635680367,
+              "dr_mean": 0.2477021267101196,
+              "obs_mean": 0.038244941835180055,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 14434,
+              "best": "12_pass",
+              "gain": 0.09972398277970324,
+              "gain_lo": 0.04355413822718547,
+              "gain_hi": 0.15488180742483615,
+              "dr_mean": 0.08778702778291413,
+              "obs_mean": -0.011936954996789114,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 1-20 | lead 4+",
+              "n_cell": 373,
+              "best": "11_run",
+              "gain": 0.25877867310862324,
+              "gain_lo": 0.03824479168138286,
+              "gain_hi": 0.4857833754646326,
+              "dr_mean": 0.35622314973492697,
+              "obs_mean": 0.0974444766263037,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.29305555555555557
+        },
+        "2024": {
+          "cells": 60,
+          "clear": 22,
+          "clear_share": 0.36666666666666664,
+          "plays_in_clear_cells": 0.7446110852352119,
+          "with_candidates": 50,
+          "best_counts": {
+            "12_pass": 13,
+            "11_pass": 6,
+            "11_run": 2,
+            "oth_run": 1
+          },
+          "candidates_per_cell": 3.5166666666666666,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 3819,
+              "best": "12_pass",
+              "gain": 0.22110397704092846,
+              "gain_lo": 0.12453245260630517,
+              "gain_hi": 0.3188551487222923,
+              "dr_mean": 0.17818714236977473,
+              "obs_mean": -0.042916834671153745,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 10489,
+              "best": "12_pass",
+              "gain": 0.18110982294172118,
+              "gain_lo": 0.11816814036086905,
+              "gain_hi": 0.23849454017523697,
+              "dr_mean": 0.19305703237391403,
+              "obs_mean": 0.011947209432192856,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | trail 4+",
+              "n_cell": 2369,
+              "best": "12_pass",
+              "gain": 0.20437980728015587,
+              "gain_lo": 0.09646146341371824,
+              "gain_hi": 0.32142837923543394,
+              "dr_mean": 0.21539244157046467,
+              "obs_mean": 0.011012634290308826,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 7850,
+              "best": "12_pass",
+              "gain": 0.16514666705598904,
+              "gain_lo": 0.08847487254043751,
+              "gain_hi": 0.23891055238834794,
+              "dr_mean": 0.12852777608220828,
+              "obs_mean": -0.036618890973780724,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 10296,
+              "best": "12_pass",
+              "gain": 0.14116893819255524,
+              "gain_lo": 0.07721805922161494,
+              "gain_hi": 0.20263595467307705,
+              "dr_mean": 0.1655854057797595,
+              "obs_mean": 0.024416467587204223,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 5312,
+              "best": "12_pass",
+              "gain": 0.15787631610575442,
+              "gain_lo": 0.0739421804794379,
+              "gain_hi": 0.23781284814422526,
+              "dr_mean": 0.18270168718181448,
+              "obs_mean": 0.024825371076060053,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 2961,
+              "best": "11_pass",
+              "gain": 0.15357942235779062,
+              "gain_lo": 0.07048331243137895,
+              "gain_hi": 0.2359239720366515,
+              "dr_mean": 0.1419978427865826,
+              "obs_mean": -0.011581579571208008,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 19882,
+              "best": "11_pass",
+              "gain": 0.10558883846588285,
+              "gain_lo": 0.07001755267077057,
+              "gain_hi": 0.13977712710820556,
+              "dr_mean": 0.09478745452044515,
+              "obs_mean": -0.010801383945437691,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 1225,
+              "best": "11_pass",
+              "gain": 0.1980128183308376,
+              "gain_lo": 0.06126446745586236,
+              "gain_hi": 0.3427516471597962,
+              "dr_mean": 0.2432870635356696,
+              "obs_mean": 0.04527424520483198,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 16596,
+              "best": "12_pass",
+              "gain": 0.10607544825273507,
+              "gain_lo": 0.052058421374194676,
+              "gain_hi": 0.15763518273224297,
+              "dr_mean": 0.08992839795328694,
+              "obs_mean": -0.016147050299448126,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-mid | own 21-50 | within 3",
+              "n_cell": 4854,
+              "best": "12_pass",
+              "gain": 0.13303449895465697,
+              "gain_lo": 0.04486762799643118,
+              "gain_hi": 0.2232825440240845,
+              "dr_mean": 0.21415803485835214,
+              "obs_mean": 0.08112353590369514,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | trail 4+",
+              "n_cell": 2580,
+              "best": "12_pass",
+              "gain": 0.18228568277037105,
+              "gain_lo": 0.039692224317707435,
+              "gain_hi": 0.3138016953671804,
+              "dr_mean": 0.17659059211320868,
+              "obs_mean": -0.005695090657162361,
+              "candidates": 4,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.29305555555555557
+        },
+        "2025": {
+          "cells": 60,
+          "clear": 19,
+          "clear_share": 0.31666666666666665,
+          "plays_in_clear_cells": 0.6703233097213418,
+          "with_candidates": 51,
+          "best_counts": {
+            "12_pass": 14,
+            "11_pass": 3,
+            "11_run": 2
+          },
+          "candidates_per_cell": 3.5166666666666666,
+          "clear_cells": [
+            {
+              "cell": "1-10+ | own 1-20 | within 3",
+              "n_cell": 4268,
+              "best": "12_pass",
+              "gain": 0.23627506725827788,
+              "gain_lo": 0.14978709814798358,
+              "gain_hi": 0.32315892681124636,
+              "dr_mean": 0.19323046770940305,
+              "obs_mean": -0.04304459954887486,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | within 3",
+              "n_cell": 11953,
+              "best": "12_pass",
+              "gain": 0.1740526782438247,
+              "gain_lo": 0.11668963736904611,
+              "gain_hi": 0.2296295914327306,
+              "dr_mean": 0.183969516318278,
+              "obs_mean": 0.009916838074453259,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | lead 4+",
+              "n_cell": 11508,
+              "best": "12_pass",
+              "gain": 0.14109886439558872,
+              "gain_lo": 0.08377589063121611,
+              "gain_hi": 0.19959834876082513,
+              "dr_mean": 0.16596924331169333,
+              "obs_mean": 0.024870378916104628,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-short | opp 49-21 | within 3",
+              "n_cell": 1412,
+              "best": "11_pass",
+              "gain": 0.20785947852255973,
+              "gain_lo": 0.0791111948293324,
+              "gain_hi": 0.3419437540956125,
+              "dr_mean": 0.2629464951059564,
+              "obs_mean": 0.0550870165833967,
+              "candidates": 6,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | within 3",
+              "n_cell": 22386,
+              "best": "11_pass",
+              "gain": 0.11208518058905852,
+              "gain_lo": 0.07832008252173672,
+              "gain_hi": 0.14458190698828016,
+              "dr_mean": 0.10371913601362062,
+              "obs_mean": -0.008366044575437905,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | opp 49-21 | lead 4+",
+              "n_cell": 6023,
+              "best": "12_pass",
+              "gain": 0.14871213091347363,
+              "gain_lo": 0.07293955984649962,
+              "gain_hi": 0.2276382577877709,
+              "dr_mean": 0.16641651826412637,
+              "obs_mean": 0.017704387350652735,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 21-50 | within 3",
+              "n_cell": 8817,
+              "best": "12_pass",
+              "gain": 0.1424608759398348,
+              "gain_lo": 0.06407211995253553,
+              "gain_hi": 0.2107153245917438,
+              "dr_mean": 0.11362755334876486,
+              "obs_mean": -0.028833322591069924,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | within 3",
+              "n_cell": 3341,
+              "best": "12_pass",
+              "gain": 0.1583990316206705,
+              "gain_lo": 0.04902563614858617,
+              "gain_hi": 0.26752172658306406,
+              "dr_mean": 0.13994418597265826,
+              "obs_mean": -0.018454845648012263,
+              "candidates": 5,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 21-50 | trail 4+",
+              "n_cell": 18643,
+              "best": "12_pass",
+              "gain": 0.09875220678322431,
+              "gain_lo": 0.04874095219985314,
+              "gain_hi": 0.14742599786656496,
+              "dr_mean": 0.08650543214724578,
+              "obs_mean": -0.012246774635978525,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "2-long | own 1-20 | lead 4+",
+              "n_cell": 1315,
+              "best": "12_pass",
+              "gain": 0.1901354342753169,
+              "gain_lo": 0.03977863363965764,
+              "gain_hi": 0.343595473843411,
+              "dr_mean": 0.2167293986257966,
+              "obs_mean": 0.02659396435047969,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | own 1-20 | trail 4+",
+              "n_cell": 2814,
+              "best": "12_pass",
+              "gain": 0.17552746658810817,
+              "gain_lo": 0.034339427219323496,
+              "gain_hi": 0.310125917822549,
+              "dr_mean": 0.1679899687248743,
+              "obs_mean": -0.007537497863233881,
+              "candidates": 4,
+              "clear": true
+            },
+            {
+              "cell": "1-10+ | red zone | lead 4+",
+              "n_cell": 1625,
+              "best": "11_pass",
+              "gain": 0.1546909571574632,
+              "gain_lo": 0.03430225062914387,
+              "gain_hi": 0.26864978068707374,
+              "dr_mean": 0.1894851546006231,
+              "obs_mean": 0.03479419744315989,
+              "candidates": 5,
+              "clear": true
+            }
+          ],
+          "share_cell_actions_candidate": 0.29305555555555557
+        }
+      }
+    },
+    "placebo_recs": {
+      "2020": {
+        "cells": 60,
+        "clear": 4,
+        "clear_share": 0.06666666666666667,
+        "plays_in_clear_cells": 0.09133954482969299,
+        "with_candidates": 48,
+        "best_counts": {
+          "oth_run": 2,
+          "21_run": 1,
+          "21_pass": 1
+        },
+        "candidates_per_cell": 4.0,
+        "clear_cells": [
+          {
+            "cell": "2-short | opp 49-21 | trail 4+",
+            "n_cell": 480,
+            "best": "21_run",
+            "gain": 0.5255137685243721,
+            "gain_lo": 0.2481616923063323,
+            "gain_hi": 0.8766823861667985,
+            "dr_mean": 0.5268971413286198,
+            "obs_mean": 0.001383372804247624,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-mid | opp 49-21 | lead 4+",
+            "n_cell": 633,
+            "best": "oth_run",
+            "gain": 0.5251306031606298,
+            "gain_lo": 0.1577522377920118,
+            "gain_hi": 0.9409031919092962,
+            "dr_mean": 0.5711887355225184,
+            "obs_mean": 0.04605813236188849,
+            "candidates": 5,
+            "clear": true
+          },
+          {
+            "cell": "1-short | red zone | within 3",
+            "n_cell": 1004,
+            "best": "oth_run",
+            "gain": 0.17343512209547263,
+            "gain_lo": 0.01827814323664899,
+            "gain_hi": 0.31055259100381993,
+            "dr_mean": 0.23093771874453425,
+            "obs_mean": 0.057502596649061585,
+            "candidates": 7,
+            "clear": true
+          },
+          {
+            "cell": "1-10+ | own 21-50 | lead 4+",
+            "n_cell": 5059,
+            "best": "21_pass",
+            "gain": 0.1368097221566845,
+            "gain_lo": 0.004302178707319454,
+            "gain_hi": 0.29341313995481433,
+            "dr_mean": 0.1662176895181752,
+            "obs_mean": 0.029407967361490716,
+            "candidates": 7,
+            "clear": true
+          }
+        ],
+        "share_cell_actions_candidate": 0.3333333333333333
+      },
+      "2021": {
+        "cells": 60,
+        "clear": 5,
+        "clear_share": 0.08333333333333333,
+        "plays_in_clear_cells": 0.060313313282903465,
+        "with_candidates": 48,
+        "best_counts": {
+          "21_run": 2,
+          "oth_run": 2,
+          "12_pass": 1
+        },
+        "candidates_per_cell": 4.1,
+        "clear_cells": [
+          {
+            "cell": "2-short | opp 49-21 | trail 4+",
+            "n_cell": 618,
+            "best": "21_run",
+            "gain": 0.39985113934911276,
+            "gain_lo": 0.14110481445739775,
+            "gain_hi": 0.698560654153992,
+            "dr_mean": 0.3619362056026291,
+            "obs_mean": -0.03791493374648361,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-mid | opp 49-21 | lead 4+",
+            "n_cell": 802,
+            "best": "oth_run",
+            "gain": 0.43321160275091747,
+            "gain_lo": 0.12675804687319747,
+            "gain_hi": 0.7690347053434379,
+            "dr_mean": 0.5194068189419743,
+            "obs_mean": 0.0861952161910567,
+            "candidates": 5,
+            "clear": true
+          },
+          {
+            "cell": "2-short | opp 49-21 | within 3",
+            "n_cell": 719,
+            "best": "21_run",
+            "gain": 0.21069393466623862,
+            "gain_lo": 0.01353249081731084,
+            "gain_hi": 0.4240044364661853,
+            "dr_mean": 0.2334208878889522,
+            "obs_mean": 0.022726953222713613,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-short | own 21-50 | within 3",
+            "n_cell": 1248,
+            "best": "oth_run",
+            "gain": 0.15797883195984186,
+            "gain_lo": 0.008297433735542195,
+            "gain_hi": 0.3253526391914159,
+            "dr_mean": 0.20013740225638543,
+            "obs_mean": 0.04215857029654357,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-long | own 21-50 | lead 4+",
+            "n_cell": 2569,
+            "best": "12_pass",
+            "gain": 0.15219392192300668,
+            "gain_lo": 0.005324217170728836,
+            "gain_hi": 0.3067495362559821,
+            "dr_mean": 0.1675205582583814,
+            "obs_mean": 0.015326636335374762,
+            "candidates": 5,
+            "clear": true
+          }
+        ],
+        "share_cell_actions_candidate": 0.3416666666666667
+      },
+      "2022": {
+        "cells": 60,
+        "clear": 6,
+        "clear_share": 0.1,
+        "plays_in_clear_cells": 0.05967307708436423,
+        "with_candidates": 49,
+        "best_counts": {
+          "oth_run": 2,
+          "11_run": 1,
+          "21_run": 1,
+          "12_run": 1,
+          "21_pass": 1
+        },
+        "candidates_per_cell": 4.1,
+        "clear_cells": [
+          {
+            "cell": "2-mid | opp 49-21 | lead 4+",
+            "n_cell": 999,
+            "best": "oth_run",
+            "gain": 0.3391270279264107,
+            "gain_lo": 0.057927767584723726,
+            "gain_hi": 0.6402906810540455,
+            "dr_mean": 0.45011232765953396,
+            "obs_mean": 0.11098529973312327,
+            "candidates": 5,
+            "clear": true
+          },
+          {
+            "cell": "2-short | own 21-50 | lead 4+",
+            "n_cell": 740,
+            "best": "11_run",
+            "gain": 0.14016889783839756,
+            "gain_lo": 0.0337025584894761,
+            "gain_hi": 0.24879534960211291,
+            "dr_mean": 0.1126145726125307,
+            "obs_mean": -0.027554325225866854,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-short | opp 49-21 | trail 4+",
+            "n_cell": 766,
+            "best": "21_run",
+            "gain": 0.28405170954929226,
+            "gain_lo": 0.03082982730293402,
+            "gain_hi": 0.5535048486987716,
+            "dr_mean": 0.27336280350286857,
+            "obs_mean": -0.010688906046423672,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-mid | own 1-20 | trail 4+",
+            "n_cell": 300,
+            "best": "12_run",
+            "gain": 0.47738493461433107,
+            "gain_lo": 0.02740872821837509,
+            "gain_hi": 1.0344643015499302,
+            "dr_mean": 0.647283214745496,
+            "obs_mean": 0.16989828013116492,
+            "candidates": 4,
+            "clear": true
+          },
+          {
+            "cell": "2-short | own 21-50 | within 3",
+            "n_cell": 1486,
+            "best": "oth_run",
+            "gain": 0.1501413968478744,
+            "gain_lo": 0.009840484788798703,
+            "gain_hi": 0.29670132168134744,
+            "dr_mean": 0.18843400288363496,
+            "obs_mean": 0.03829260603576058,
+            "candidates": 6,
+            "clear": true
+          }
+        ],
+        "share_cell_actions_candidate": 0.3416666666666667
+      },
+      "2023": {
+        "cells": 60,
+        "clear": 9,
+        "clear_share": 0.15,
+        "plays_in_clear_cells": 0.18052674721123346,
+        "with_candidates": 49,
+        "best_counts": {
+          "12_run": 3,
+          "21_pass": 2,
+          "11_run": 2,
+          "oth_run": 1,
+          "21_run": 1
+        },
+        "candidates_per_cell": 4.233333333333333,
+        "clear_cells": [
+          {
+            "cell": "2-mid | opp 49-21 | lead 4+",
+            "n_cell": 1177,
+            "best": "oth_run",
+            "gain": 0.45811379432768545,
+            "gain_lo": 0.1785501864829888,
+            "gain_hi": 0.7586111505861058,
+            "dr_mean": 0.567278082103789,
+            "obs_mean": 0.10916428777610364,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-mid | own 1-20 | trail 4+",
+            "n_cell": 339,
+            "best": "12_run",
+            "gain": 0.4454807002238918,
+            "gain_lo": 0.06712005174887678,
+            "gain_hi": 0.9618045853755934,
+            "dr_mean": 0.6094160584341471,
+            "obs_mean": 0.16393535821025526,
+            "candidates": 4,
+            "clear": true
+          },
+          {
+            "cell": "2-short | opp 49-21 | trail 4+",
+            "n_cell": 899,
+            "best": "21_run",
+            "gain": 0.25646866884802616,
+            "gain_lo": 0.03147939442329552,
+            "gain_hi": 0.4898549279366414,
+            "dr_mean": 0.24483909361070114,
+            "obs_mean": -0.011629575237325003,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-mid | own 21-50 | lead 4+",
+            "n_cell": 2139,
+            "best": "21_pass",
+            "gain": 0.2232122039622816,
+            "gain_lo": 0.01583097125794948,
+            "gain_hi": 0.4489141576454405,
+            "dr_mean": 0.3263772864217236,
+            "obs_mean": 0.10316508245944206,
+            "candidates": 7,
+            "clear": true
+          },
+          {
+            "cell": "1-10+ | own 21-50 | lead 4+",
+            "n_cell": 8944,
+            "best": "21_pass",
+            "gain": 0.10386974225307427,
+            "gain_lo": 0.01514249223834894,
+            "gain_hi": 0.20428742988941917,
+            "dr_mean": 0.13066953436263792,
+            "obs_mean": 0.026799792109563673,
+            "candidates": 7,
+            "clear": true
+          }
+        ],
+        "share_cell_actions_candidate": 0.3527777777777778
+      },
+      "2024": {
+        "cells": 60,
+        "clear": 9,
+        "clear_share": 0.15,
+        "plays_in_clear_cells": 0.14987113802204627,
+        "with_candidates": 50,
+        "best_counts": {
+          "12_run": 3,
+          "oth_run": 2,
+          "21_pass": 1,
+          "11_run": 1,
+          "21_run": 1,
+          "12_pass": 1
+        },
+        "candidates_per_cell": 4.266666666666667,
+        "clear_cells": [
+          {
+            "cell": "2-mid | opp 49-21 | lead 4+",
+            "n_cell": 1343,
+            "best": "oth_run",
+            "gain": 0.4797558862556748,
+            "gain_lo": 0.22046997801095353,
+            "gain_hi": 0.7753585087048454,
+            "dr_mean": 0.582570937151982,
+            "obs_mean": 0.10281505089630726,
+            "candidates": 7,
+            "clear": true
+          },
+          {
+            "cell": "2-mid | own 21-50 | lead 4+",
+            "n_cell": 2451,
+            "best": "21_pass",
+            "gain": 0.26811646872117084,
+            "gain_lo": 0.06267399106699746,
+            "gain_hi": 0.47861803719775664,
+            "dr_mean": 0.37248174368000875,
+            "obs_mean": 0.10436527495883799,
+            "candidates": 7,
+            "clear": true
+          },
+          {
+            "cell": "2-mid | own 1-20 | trail 4+",
+            "n_cell": 386,
+            "best": "12_run",
+            "gain": 0.3751112011741574,
+            "gain_lo": 0.021213644148815713,
+            "gain_hi": 0.8080229545222448,
+            "dr_mean": 0.5366202893251478,
+            "obs_mean": 0.1615090881509904,
+            "candidates": 4,
+            "clear": true
+          },
+          {
+            "cell": "1-10+ | opp 49-21 | lead 4+",
+            "n_cell": 5312,
+            "best": "oth_run",
+            "gain": 0.12858858521021993,
+            "gain_lo": 0.01986336001364604,
+            "gain_hi": 0.24108828057974974,
+            "dr_mean": 0.1563646929450172,
+            "obs_mean": 0.027776107734797273,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-short | own 21-50 | lead 4+",
+            "n_cell": 995,
+            "best": "11_run",
+            "gain": 0.10738581152670774,
+            "gain_lo": 0.014218492246350727,
+            "gain_hi": 0.20687290424402935,
+            "dr_mean": 0.11044965846420085,
+            "obs_mean": 0.0030638469374930513,
+            "candidates": 6,
+            "clear": true
+          }
+        ],
+        "share_cell_actions_candidate": 0.35555555555555557
+      },
+      "2025": {
+        "cells": 60,
+        "clear": 10,
+        "clear_share": 0.16666666666666666,
+        "plays_in_clear_cells": 0.08368567569802376,
+        "with_candidates": 51,
+        "best_counts": {
+          "oth_run": 3,
+          "21_run": 2,
+          "12_run": 2,
+          "21_pass": 1,
+          "12_pass": 1,
+          "11_run": 1
+        },
+        "candidates_per_cell": 4.316666666666666,
+        "clear_cells": [
+          {
+            "cell": "2-mid | opp 49-21 | lead 4+",
+            "n_cell": 1538,
+            "best": "oth_run",
+            "gain": 0.4175418136212653,
+            "gain_lo": 0.1522990620720564,
+            "gain_hi": 0.7131405227756503,
+            "dr_mean": 0.5086891559378632,
+            "obs_mean": 0.09114734231659799,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-mid | own 1-20 | lead 4+",
+            "n_cell": 470,
+            "best": "21_pass",
+            "gain": 0.5382758234422154,
+            "gain_lo": 0.12628754232916828,
+            "gain_hi": 0.9485396082338401,
+            "dr_mean": 0.627545536220047,
+            "obs_mean": 0.08926971277783172,
+            "candidates": 5,
+            "clear": true
+          },
+          {
+            "cell": "2-mid | own 1-20 | within 3",
+            "n_cell": 780,
+            "best": "21_run",
+            "gain": 0.5338560617022599,
+            "gain_lo": 0.12246265961138565,
+            "gain_hi": 1.0079280136005386,
+            "dr_mean": 0.6313800457342671,
+            "obs_mean": 0.09752398403200709,
+            "candidates": 7,
+            "clear": true
+          },
+          {
+            "cell": "2-short | opp 49-21 | lead 4+",
+            "n_cell": 718,
+            "best": "12_pass",
+            "gain": 0.2985228750884532,
+            "gain_lo": 0.05140422441916027,
+            "gain_hi": 0.5811183114344387,
+            "dr_mean": 0.3259363753505766,
+            "obs_mean": 0.02741350026212342,
+            "candidates": 6,
+            "clear": true
+          },
+          {
+            "cell": "2-long | red zone | within 3",
+            "n_cell": 1692,
+            "best": "12_run",
+            "gain": 0.28487204088838775,
+            "gain_lo": 0.03340021719558601,
+            "gain_hi": 0.5715181341228317,
+            "dr_mean": 0.2661914497142238,
+            "obs_mean": -0.018680591174163916,
+            "candidates": 4,
+            "clear": true
+          }
+        ],
+        "share_cell_actions_candidate": 0.3597222222222222
+      }
+    },
+    "action_shares": {
+      "11_run": 0.21244416964292978,
+      "11_pass": 0.29693207611640376,
+      "12_run": 0.13003896938584572,
+      "12_pass": 0.13018540966668565,
+      "21_run": 0.05210019769437913,
+      "21_pass": 0.04437140509449466,
+      "13_run": 0.02557010014888095,
+      "13_pass": 0.020135538615488502,
+      "10_run": 0.0018549102239722739,
+      "10_pass": 0.0041654124327798435,
+      "oth_run": 0.051400538574810646,
+      "oth_pass": 0.030801272403329076
+    }
+  },
+  "features": [
+    "down",
+    "ydstogo",
+    "yardline_100",
+    "score_diff",
+    "half_secs",
+    "game_secs",
+    "off_timeouts",
+    "def_timeouts",
+    "home",
+    "roof_indoor",
+    "roof_open",
+    "temp",
+    "wind",
+    "off_pass_o",
+    "off_rush_o",
+    "def_pass_d",
+    "def_rush_d",
+    "tend_11_run",
+    "tend_11_pass",
+    "tend_12_run",
+    "tend_12_pass",
+    "tend_21_run",
+    "tend_21_pass",
+    "tend_13_run",
+    "tend_13_pass",
+    "tend_10_run",
+    "tend_10_pass",
+    "tend_oth_run",
+    "tend_oth_pass"
+  ],
+  "params": {
+    "actions": [
+      "11_run",
+      "11_pass",
+      "12_run",
+      "12_pass",
+      "21_run",
+      "21_pass",
+      "13_run",
+      "13_pass",
+      "10_run",
+      "10_pass",
+      "oth_run",
+      "oth_pass"
+    ],
+    "cells": [
+      "1-10+ | own 1-20 | trail 4+",
+      "1-10+ | own 1-20 | within 3",
+      "1-10+ | own 1-20 | lead 4+",
+      "1-10+ | own 21-50 | trail 4+",
+      "1-10+ | own 21-50 | within 3",
+      "1-10+ | own 21-50 | lead 4+",
+      "1-10+ | opp 49-21 | trail 4+",
+      "1-10+ | opp 49-21 | within 3",
+      "1-10+ | opp 49-21 | lead 4+",
+      "1-10+ | red zone | trail 4+",
+      "1-10+ | red zone | within 3",
+      "1-10+ | red zone | lead 4+",
+      "1-short | own 1-20 | trail 4+",
+      "1-short | own 1-20 | within 3",
+      "1-short | own 1-20 | lead 4+",
+      "1-short | own 21-50 | trail 4+",
+      "1-short | own 21-50 | within 3",
+      "1-short | own 21-50 | lead 4+",
+      "1-short | opp 49-21 | trail 4+",
+      "1-short | opp 49-21 | within 3",
+      "1-short | opp 49-21 | lead 4+",
+      "1-short | red zone | trail 4+",
+      "1-short | red zone | within 3",
+      "1-short | red zone | lead 4+",
+      "2-short | own 1-20 | trail 4+",
+      "2-short | own 1-20 | within 3",
+      "2-short | own 1-20 | lead 4+",
+      "2-short | own 21-50 | trail 4+",
+      "2-short | own 21-50 | within 3",
+      "2-short | own 21-50 | lead 4+",
+      "2-short | opp 49-21 | trail 4+",
+      "2-short | opp 49-21 | within 3",
+      "2-short | opp 49-21 | lead 4+",
+      "2-short | red zone | trail 4+",
+      "2-short | red zone | within 3",
+      "2-short | red zone | lead 4+",
+      "2-mid | own 1-20 | trail 4+",
+      "2-mid | own 1-20 | within 3",
+      "2-mid | own 1-20 | lead 4+",
+      "2-mid | own 21-50 | trail 4+",
+      "2-mid | own 21-50 | within 3",
+      "2-mid | own 21-50 | lead 4+",
+      "2-mid | opp 49-21 | trail 4+",
+      "2-mid | opp 49-21 | within 3",
+      "2-mid | opp 49-21 | lead 4+",
+      "2-mid | red zone | trail 4+",
+      "2-mid | red zone | within 3",
+      "2-mid | red zone | lead 4+",
+      "2-long | own 1-20 | trail 4+",
+      "2-long | own 1-20 | within 3",
+      "2-long | own 1-20 | lead 4+",
+      "2-long | own 21-50 | trail 4+",
+      "2-long | own 21-50 | within 3",
+      "2-long | own 21-50 | lead 4+",
+      "2-long | opp 49-21 | trail 4+",
+      "2-long | opp 49-21 | within 3",
+      "2-long | opp 49-21 | lead 4+",
+      "2-long | red zone | trail 4+",
+      "2-long | red zone | within 3",
+      "2-long | red zone | lead 4+"
+    ],
+    "features": [
+      "down",
+      "ydstogo",
+      "yardline_100",
+      "score_diff",
+      "half_secs",
+      "game_secs",
+      "off_timeouts",
+      "def_timeouts",
+      "home",
+      "roof_indoor",
+      "roof_open",
+      "temp",
+      "wind",
+      "off_pass_o",
+      "off_rush_o",
+      "def_pass_d",
+      "def_rush_d",
+      "tend_11_run",
+      "tend_11_pass",
+      "tend_12_run",
+      "tend_12_pass",
+      "tend_21_run",
+      "tend_21_pass",
+      "tend_13_run",
+      "tend_13_pass",
+      "tend_10_run",
+      "tend_10_pass",
+      "tend_oth_run",
+      "tend_oth_pass"
+    ],
+    "overlap": 0.05,
+    "overlap_alt": 0.1,
+    "trim_floor": 0.1,
+    "cand_share": 0.5,
+    "min_taken": 30,
+    "tend_m": 25,
+    "prior_league": 0.5,
+    "prop_params": {
+      "learning_rate": 0.05,
+      "max_leaf_nodes": 7,
+      "min_samples_leaf": 500,
+      "l2_regularization": 1.0
+    },
+    "out_params": {
+      "learning_rate": 0.05,
+      "max_leaf_nodes": 15,
+      "min_samples_leaf": 400,
+      "l2_regularization": 1.0
+    },
+    "max_iter": 500,
+    "reps": 2000,
+    "seed": 20261003,
+    "placebo_seed": 20261010
+  },
+  "data": {
+    "data/raw/ml/participation/2016": "cf5d6f7518c199c3cc75e76bc5a25ab2d32e0b463d9834b6a1e0d2b171997fc0",
+    "data/raw/ml/participation/2017": "c0b9e1e541758f88b03c69085cfcdc27ccc027102b70d1581f136a82b145df1b",
+    "data/raw/ml/participation/2018": "901340151c6bcfcd5e2580555f28b4f3c5e8cbe67afb4dc7a7f5cf17ff5fd5b5",
+    "data/raw/ml/participation/2019": "945e80c4bbd2f452ea5ffa6d8751d5b57dd966c0d5f94d023390863a2baa1ba8",
+    "data/raw/ml/participation/2020": "a9243ee7c093f905908ad6a0abd5e50181467f4abb3ca3d21d46ebd9f121da15",
+    "data/raw/ml/participation/2021": "388340a608d68f5e10e19e71775b2a0802d17f54ec0021c1202e93258bb1ddde",
+    "data/raw/ml/participation/2022": "13dae00af89ec800cf250346316b4d21b25d8c80c38f86c0b54a3ee3982609cd",
+    "data/raw/ml/participation/2023": "1c64d7e2360caf4b1f88ea7403aea9a95e32ca059ca6ebf6dcc707c996f2c2f5",
+    "data/raw/ml/participation/2024": "301c2ac6d1e2342acd2475e8327dfeafc02edaeaf4bfa0b5dbd47f1f516c86fd",
+    "data/raw/ml/participation/2025": "e57b9cc8a23eaa06a1d55440c619425b6c4e86235600270d4c52039ae5a10a85",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/pbp/2020": "d86d1e3f98b64bd839c8533a3867cb0f0e3d6216cd11bddd11efd5bc6c594a04",
+    "data/raw/ml/pbp/2021": "d2fbf41c83c843e1c6db4ec117ef9b4b49b7730666f21005fc9951dce09d0e0a",
+    "data/raw/ml/pbp/2022": "311971fb4404dc8759a9f77c50ef2f4933fbd2d24deb5a747987058d0b6788a8",
+    "data/raw/ml/pbp/2023": "19fc2ce8abb85be47fad16ceff178c67d6581309e87d53bb70c4531373867b1e",
+    "data/raw/ml/pbp/2024": "e332d33a0c83a33073cde85f8e8f1ac0caebcc552eda7e7c92612ff306bafa73",
+    "data/raw/ml/pbp/2025": "5ed293fdf54d79e34426133829f3111faf577db29b8cfc25cf910d75eb55b2ef",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56",
+    "data/raw/ml/schedules/2020": "93e73882e9b596f8c244dab217bcb5aeab70c4e4431b6cd4dd7607a2383f4398",
+    "data/raw/ml/schedules/2021": "6c2b25a860bf549a5172d655df209debbd9b2c41b24402d33cc01950abf69a55",
+    "data/raw/ml/schedules/2022": "4df92f492652dacc5460a44ec948a703f9fe7be75a0aba2d4dfd4987b481bb9c",
+    "data/raw/ml/schedules/2023": "374486417a0ba32495817457c26b77e09499c7614b0285086cf41ccef9d759cc",
+    "data/raw/ml/schedules/2024": "53f6e036f443c71e6aa54396f4890259ce7580c1052b30424559418612ea1b31",
+    "data/raw/ml/schedules/2025": "81066567d1c138059687806a679f5a233d91196fb535ea06a2541596dfdd378c"
+  },
+  "git": {
+    "sha": "ca7b0ac39174b4cee3e3edc60f0ab12885507019",
+    "dirty": false
+  },
+  "timestamp": "2026-10-05T18:35:21+00:00",
+  "notes": "cells and recommendations per season",
+  "license": "CC BY-SA 4.0",
+  "note": "CC BY-SA 4.0. Derived from nflverse participation data: NFL Next Gen Stats via nflverse (2016-2022), FTN Data via nflverse (2023+). M6 play outcome model (context/ml-m6-method.md). M7b early-down play type x personnel (context/ml-m7-method.md, section 4).",
+  "signoff": "m7b_signoff",
+  "plays_hash": "6df666acf8110d55",
+  "per_season": {
+    "2020": {
+      "ope": {
+        "n": 20187,
+        "clusters": 269,
+        "diff": 0.07678461421713395,
+        "ci_low": 0.041745837717517276,
+        "ci_high": 0.1108099419232746,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.017199884154864897
+      },
+      "ope_succ": {
+        "n": 20187,
+        "clusters": 269,
+        "diff": 0.04688305844838275,
+        "ci_low": 0.03378848223617058,
+        "ci_high": 0.0610355170937361,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.006913700254260181
+      },
+      "placebo": {
+        "n": 20187,
+        "clusters": 269,
+        "diff": 0.0014890991696651157,
+        "ci_low": -0.014495146331043048,
+        "ci_high": 0.018736972616226654,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.008521549454103355
+      },
+      "observed_check": {
+        "n": 20187,
+        "clusters": 269,
+        "diff": -0.0038686636863807656,
+        "ci_low": -0.00547512844792145,
+        "ci_high": -0.002273458190065145,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0008231066540339754
+      },
+      "clear_share": 0.3,
+      "overlap_2plus": 0.999653242185565,
+      "nuisance": {
+        "n_train": 78564,
+        "seasons": [
+          2016,
+          2017,
+          2018,
+          2019
+        ],
+        "prop_iter": 191,
+        "epa_iter": 87,
+        "succ_iter": 121,
+        "prop_seconds": 5.639037083135918,
+        "outcome_seconds": 0.888548708986491
+      },
+      "folds": [
+        {
+          "fold": 2016,
+          "n_train": 58626,
+          "seasons": [
+            2017,
+            2018,
+            2019
+          ],
+          "prop_iter": 241,
+          "epa_iter": 146,
+          "succ_iter": 132,
+          "prop_seconds": 6.056630582781509,
+          "outcome_seconds": 0.9783004592172801
+        },
+        {
+          "fold": 2017,
+          "n_train": 58994,
+          "seasons": [
+            2016,
+            2018,
+            2019
+          ],
+          "prop_iter": 147,
+          "epa_iter": 103,
+          "succ_iter": 142,
+          "prop_seconds": 3.6964693749323487,
+          "outcome_seconds": 0.9663861668668687
+        },
+        {
+          "fold": 2018,
+          "n_train": 59115,
+          "seasons": [
+            2016,
+            2017,
+            2019
+          ],
+          "prop_iter": 134,
+          "epa_iter": 143,
+          "succ_iter": 182,
+          "prop_seconds": 3.4861519581172615,
+          "outcome_seconds": 1.152520874980837
+        },
+        {
+          "fold": 2019,
+          "n_train": 58957,
+          "seasons": [
+            2016,
+            2017,
+            2018
+          ],
+          "prop_iter": 189,
+          "epa_iter": 64,
+          "succ_iter": 115,
+          "prop_seconds": 4.617111959028989,
+          "outcome_seconds": 0.7563159158453345
+        }
+      ],
+      "seconds": {
+        "cross_fit": 23.802380375098437,
+        "fit_predict": 7.007937166839838,
+        "cells_ope": 0.8463595830835402
+      },
+      "placebo_seconds": {
+        "cross_fit": 13.827913415851071,
+        "fit_predict": 4.916102000046521,
+        "cells_ope": 0.25333520909771323
+      }
+    },
+    "2021": {
+      "ope": {
+        "n": 20482,
+        "clusters": 285,
+        "diff": 0.035861575370265235,
+        "ci_low": 0.0010421919670150258,
+        "ci_high": 0.07134348649018167,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.018002987112924487
+      },
+      "ope_succ": {
+        "n": 20482,
+        "clusters": 285,
+        "diff": 0.03653563101357736,
+        "ci_low": 0.022792709005330525,
+        "ci_high": 0.050612068530801295,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0070810474950314005
+      },
+      "placebo": {
+        "n": 20482,
+        "clusters": 285,
+        "diff": -0.001697569212201694,
+        "ci_low": -0.010338156007520511,
+        "ci_high": 0.006847803712235274,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0043714690144247646
+      },
+      "observed_check": {
+        "n": 20482,
+        "clusters": 285,
+        "diff": 0.0003431149948516694,
+        "ci_low": -0.0012879617403263339,
+        "ci_high": 0.001962023188768139,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0008253661815986202
+      },
+      "clear_share": 0.35,
+      "overlap_2plus": 0.9996094131432477,
+      "nuisance": {
+        "n_train": 98751,
+        "seasons": [
+          2016,
+          2017,
+          2018,
+          2019,
+          2020
+        ],
+        "prop_iter": 341,
+        "epa_iter": 107,
+        "succ_iter": 151,
+        "prop_seconds": 11.998219624860212,
+        "outcome_seconds": 1.1630860001314431
+      },
+      "folds": [
+        {
+          "fold": 2016,
+          "n_train": 78813,
+          "seasons": [
+            2017,
+            2018,
+            2019,
+            2020
+          ],
+          "prop_iter": 310,
+          "epa_iter": 112,
+          "succ_iter": 160,
+          "prop_seconds": 8.840936209075153,
+          "outcome_seconds": 1.1703101249877363
+        },
+        {
+          "fold": 2017,
+          "n_train": 79181,
+          "seasons": [
+            2016,
+            2018,
+            2019,
+            2020
+          ],
+          "prop_iter": 201,
+          "epa_iter": 102,
+          "succ_iter": 187,
+          "prop_seconds": 5.899278874974698,
+          "outcome_seconds": 1.1597114580217749
+        },
+        {
+          "fold": 2018,
+          "n_train": 79302,
+          "seasons": [
+            2016,
+            2017,
+            2019,
+            2020
+          ],
+          "prop_iter": 218,
+          "epa_iter": 111,
+          "succ_iter": 95,
+          "prop_seconds": 6.347292375052348,
+          "outcome_seconds": 0.9470360840205103
+        },
+        {
+          "fold": 2019,
+          "n_train": 79144,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2020
+          ],
+          "prop_iter": 266,
+          "epa_iter": 87,
+          "succ_iter": 174,
+          "prop_seconds": 7.647829083958641,
+          "outcome_seconds": 1.1375659161712974
+        },
+        {
+          "fold": 2020,
+          "n_train": 78564,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019
+          ],
+          "prop_iter": 191,
+          "epa_iter": 87,
+          "succ_iter": 121,
+          "prop_seconds": 5.770629750099033,
+          "outcome_seconds": 0.9061781668569893
+        }
+      ],
+      "seconds": {
+        "cross_fit": 42.689566124929115,
+        "fit_predict": 13.843916082987562,
+        "cells_ope": 1.008908374933526
+      },
+      "placebo_seconds": {
+        "cross_fit": 20.352167249890044,
+        "fit_predict": 4.923341583926231,
+        "cells_ope": 0.30236954102292657
+      }
+    },
+    "2022": {
+      "ope": {
+        "n": 21062,
+        "clusters": 284,
+        "diff": 0.021203987000601773,
+        "ci_low": -0.014160492703892271,
+        "ci_high": 0.05480248735755189,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.017873989823685373
+      },
+      "ope_succ": {
+        "n": 21062,
+        "clusters": 284,
+        "diff": 0.0269299676311898,
+        "ci_low": 0.012406412593082996,
+        "ci_high": 0.0405860330713324,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.007190039150635142
+      },
+      "placebo": {
+        "n": 21062,
+        "clusters": 284,
+        "diff": 0.010254108375849965,
+        "ci_low": 0.0004284472272188138,
+        "ci_high": 0.02068957181821904,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0051192909104564805
+      },
+      "observed_check": {
+        "n": 21062,
+        "clusters": 284,
+        "diff": 0.0007566667584459902,
+        "ci_low": -0.0007156111357489276,
+        "ci_high": 0.002288695285390963,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0007622513868780626
+      },
+      "clear_share": 0.3333333333333333,
+      "overlap_2plus": 0.999477732409078,
+      "nuisance": {
+        "n_train": 119233,
+        "seasons": [
+          2016,
+          2017,
+          2018,
+          2019,
+          2020,
+          2021
+        ],
+        "prop_iter": 243,
+        "epa_iter": 149,
+        "succ_iter": 215,
+        "prop_seconds": 9.226548833074048,
+        "outcome_seconds": 1.792566583957523
+      },
+      "folds": [
+        {
+          "fold": 2016,
+          "n_train": 99295,
+          "seasons": [
+            2017,
+            2018,
+            2019,
+            2020,
+            2021
+          ],
+          "prop_iter": 187,
+          "epa_iter": 143,
+          "succ_iter": 133,
+          "prop_seconds": 6.463148375041783,
+          "outcome_seconds": 1.2635693750344217
+        },
+        {
+          "fold": 2017,
+          "n_train": 99663,
+          "seasons": [
+            2016,
+            2018,
+            2019,
+            2020,
+            2021
+          ],
+          "prop_iter": 212,
+          "epa_iter": 86,
+          "succ_iter": 227,
+          "prop_seconds": 7.165337459184229,
+          "outcome_seconds": 1.4012302909977734
+        },
+        {
+          "fold": 2018,
+          "n_train": 99784,
+          "seasons": [
+            2016,
+            2017,
+            2019,
+            2020,
+            2021
+          ],
+          "prop_iter": 184,
+          "epa_iter": 146,
+          "succ_iter": 172,
+          "prop_seconds": 6.368284750031307,
+          "outcome_seconds": 1.3669192919041961
+        },
+        {
+          "fold": 2019,
+          "n_train": 99626,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2020,
+            2021
+          ],
+          "prop_iter": 253,
+          "epa_iter": 183,
+          "succ_iter": 141,
+          "prop_seconds": 8.257118083070964,
+          "outcome_seconds": 1.470895207952708
+        },
+        {
+          "fold": 2020,
+          "n_train": 99046,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2021
+          ],
+          "prop_iter": 210,
+          "epa_iter": 105,
+          "succ_iter": 182,
+          "prop_seconds": 7.04117783321999,
+          "outcome_seconds": 1.2984413339290768
+        },
+        {
+          "fold": 2021,
+          "n_train": 98751,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020
+          ],
+          "prop_iter": 341,
+          "epa_iter": 107,
+          "succ_iter": 151,
+          "prop_seconds": 10.939914542017505,
+          "outcome_seconds": 1.1745090829208493
+        }
+      ],
+      "seconds": {
+        "cross_fit": 57.9204447909724,
+        "fit_predict": 11.761268417118117,
+        "cells_ope": 1.1465726250316948
+      },
+      "placebo_seconds": {
+        "cross_fit": 30.696652541169897,
+        "fit_predict": 7.035946124931797,
+        "cells_ope": 0.34817020897753537
+      }
+    },
+    "2023": {
+      "ope": {
+        "n": 20730,
+        "clusters": 285,
+        "diff": 0.08250778230658283,
+        "ci_low": 0.04556484005352176,
+        "ci_high": 0.11811187026723262,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.018184464254958874
+      },
+      "ope_succ": {
+        "n": 20730,
+        "clusters": 285,
+        "diff": 0.05332637343577898,
+        "ci_low": 0.03808643151204852,
+        "ci_high": 0.06822609624291001,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.007721110175675015
+      },
+      "placebo": {
+        "n": 20730,
+        "clusters": 285,
+        "diff": 0.006709287855690546,
+        "ci_low": -0.014758280008462032,
+        "ci_high": 0.02828903094332253,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.011114314714338124
+      },
+      "observed_check": {
+        "n": 20730,
+        "clusters": 285,
+        "diff": -0.002396594871525392,
+        "ci_low": -0.0037209476710890533,
+        "ci_high": -0.0009841079875926942,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.000698467408284663
+      },
+      "clear_share": 0.36666666666666664,
+      "overlap_2plus": 0.9993246502653159,
+      "nuisance": {
+        "n_train": 140295,
+        "seasons": [
+          2016,
+          2017,
+          2018,
+          2019,
+          2020,
+          2021,
+          2022
+        ],
+        "prop_iter": 318,
+        "epa_iter": 90,
+        "succ_iter": 247,
+        "prop_seconds": 12.985737624811009,
+        "outcome_seconds": 1.8708260420244187
+      },
+      "folds": [
+        {
+          "fold": 2016,
+          "n_train": 120357,
+          "seasons": [
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "prop_iter": 294,
+          "epa_iter": 100,
+          "succ_iter": 183,
+          "prop_seconds": 10.787603083066642,
+          "outcome_seconds": 2.108111541951075
+        },
+        {
+          "fold": 2017,
+          "n_train": 120725,
+          "seasons": [
+            2016,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "prop_iter": 309,
+          "epa_iter": 217,
+          "succ_iter": 254,
+          "prop_seconds": 20.378232334041968,
+          "outcome_seconds": 3.8108145829755813
+        },
+        {
+          "fold": 2018,
+          "n_train": 120846,
+          "seasons": [
+            2016,
+            2017,
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "prop_iter": 274,
+          "epa_iter": 176,
+          "succ_iter": 309,
+          "prop_seconds": 16.87368862493895,
+          "outcome_seconds": 4.534995499998331
+        },
+        {
+          "fold": 2019,
+          "n_train": 120688,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2020,
+            2021,
+            2022
+          ],
+          "prop_iter": 283,
+          "epa_iter": 130,
+          "succ_iter": 229,
+          "prop_seconds": 22.336643791990355,
+          "outcome_seconds": 1.779718166217208
+        },
+        {
+          "fold": 2020,
+          "n_train": 120108,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2021,
+            2022
+          ],
+          "prop_iter": 267,
+          "epa_iter": 192,
+          "succ_iter": 206,
+          "prop_seconds": 9.923341332934797,
+          "outcome_seconds": 1.9031804581172764
+        },
+        {
+          "fold": 2021,
+          "n_train": 119813,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2022
+          ],
+          "prop_iter": 421,
+          "epa_iter": 126,
+          "succ_iter": 232,
+          "prop_seconds": 15.253880542004481,
+          "outcome_seconds": 1.878783790860325
+        },
+        {
+          "fold": 2022,
+          "n_train": 119233,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021
+          ],
+          "prop_iter": 243,
+          "epa_iter": 149,
+          "succ_iter": 215,
+          "prop_seconds": 9.097784791141748,
+          "outcome_seconds": 1.9466247498057783
+        }
+      ],
+      "seconds": {
+        "cross_fit": 130.15633408306167,
+        "fit_predict": 15.653073207940906,
+        "cells_ope": 1.302777084056288
+      },
+      "placebo_seconds": {
+        "cross_fit": 39.32423745794222,
+        "fit_predict": 9.993736292002723,
+        "cells_ope": 0.3917825829703361
+      }
+    },
+    "2024": {
+      "ope": {
+        "n": 20380,
+        "clusters": 285,
+        "diff": 0.043605627349907986,
+        "ci_low": 0.005435025331641408,
+        "ci_high": 0.08249244399718518,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.019871287952746546
+      },
+      "ope_succ": {
+        "n": 20380,
+        "clusters": 285,
+        "diff": 0.03976229418334338,
+        "ci_low": 0.027351711121442912,
+        "ci_high": 0.05253516225903969,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.006496002513693712
+      },
+      "placebo": {
+        "n": 20380,
+        "clusters": 285,
+        "diff": 0.007344415174314701,
+        "ci_low": -0.01054599777838889,
+        "ci_high": 0.024969787809746364,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.00889960545784617
+      },
+      "observed_check": {
+        "n": 20380,
+        "clusters": 285,
+        "diff": -0.00036186860622305347,
+        "ci_low": -0.0017828352554069052,
+        "ci_high": 0.0010035781940815195,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0007055063972169493
+      },
+      "clear_share": 0.35,
+      "overlap_2plus": 0.9994111874386653,
+      "nuisance": {
+        "n_train": 161025,
+        "seasons": [
+          2016,
+          2017,
+          2018,
+          2019,
+          2020,
+          2021,
+          2022,
+          2023
+        ],
+        "prop_iter": 242,
+        "epa_iter": 184,
+        "succ_iter": 258,
+        "prop_seconds": 11.207624374888837,
+        "outcome_seconds": 2.6137183329556137
+      },
+      "folds": [
+        {
+          "fold": 2016,
+          "n_train": 141087,
+          "seasons": [
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "prop_iter": 281,
+          "epa_iter": 125,
+          "succ_iter": 208,
+          "prop_seconds": 11.90049691684544,
+          "outcome_seconds": 1.9073995421640575
+        },
+        {
+          "fold": 2017,
+          "n_train": 141455,
+          "seasons": [
+            2016,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "prop_iter": 254,
+          "epa_iter": 155,
+          "succ_iter": 275,
+          "prop_seconds": 10.605887250043452,
+          "outcome_seconds": 2.505041416035965
+        },
+        {
+          "fold": 2018,
+          "n_train": 141576,
+          "seasons": [
+            2016,
+            2017,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "prop_iter": 225,
+          "epa_iter": 183,
+          "succ_iter": 244,
+          "prop_seconds": 9.689169666031376,
+          "outcome_seconds": 2.317779750097543
+        },
+        {
+          "fold": 2019,
+          "n_train": 141418,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "prop_iter": 316,
+          "epa_iter": 135,
+          "succ_iter": 222,
+          "prop_seconds": 12.967711125034839,
+          "outcome_seconds": 1.997543292120099
+        },
+        {
+          "fold": 2020,
+          "n_train": 140838,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2021,
+            2022,
+            2023
+          ],
+          "prop_iter": 244,
+          "epa_iter": 165,
+          "succ_iter": 215,
+          "prop_seconds": 10.768148500006646,
+          "outcome_seconds": 2.076371875125915
+        },
+        {
+          "fold": 2021,
+          "n_train": 140543,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2022,
+            2023
+          ],
+          "prop_iter": 355,
+          "epa_iter": 115,
+          "succ_iter": 167,
+          "prop_seconds": 15.518490166869015,
+          "outcome_seconds": 1.6466418330091983
+        },
+        {
+          "fold": 2022,
+          "n_train": 139963,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2023
+          ],
+          "prop_iter": 264,
+          "epa_iter": 124,
+          "succ_iter": 201,
+          "prop_seconds": 11.00631641689688,
+          "outcome_seconds": 1.7389154999982566
+        },
+        {
+          "fold": 2023,
+          "n_train": 140295,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "prop_iter": 318,
+          "epa_iter": 90,
+          "succ_iter": 247,
+          "prop_seconds": 13.056582082994282,
+          "outcome_seconds": 1.9959734589792788
+        }
+      ],
+      "seconds": {
+        "cross_fit": 118.01379137509502,
+        "fit_predict": 14.545135041931644,
+        "cells_ope": 1.4503592080436647
+      },
+      "placebo_seconds": {
+        "cross_fit": 82.90862895804457,
+        "fit_predict": 7.166890624910593,
+        "cells_ope": 0.4312235831748694
+      }
+    },
+    "2025": {
+      "ope": {
+        "n": 20076,
+        "clusters": 285,
+        "diff": 0.05508707545396875,
+        "ci_low": 0.022599809876527824,
+        "ci_high": 0.09061784523460734,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.017495056573538045
+      },
+      "ope_succ": {
+        "n": 20076,
+        "clusters": 285,
+        "diff": 0.04086218629634231,
+        "ci_low": 0.02768652233329054,
+        "ci_high": 0.05556658235929755,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.007175058624600652
+      },
+      "placebo": {
+        "n": 20076,
+        "clusters": 285,
+        "diff": 0.010539364307426828,
+        "ci_low": -0.008247803448454964,
+        "ci_high": 0.02998647442651804,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.009645281948666342
+      },
+      "observed_check": {
+        "n": 20076,
+        "clusters": 285,
+        "diff": 0.0008990986166840518,
+        "ci_low": -0.0005502028121669863,
+        "ci_high": 0.0023157530701151245,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0007435831196892725
+      },
+      "clear_share": 0.31666666666666665,
+      "overlap_2plus": 0.9992528392109982,
+      "nuisance": {
+        "n_train": 181405,
+        "seasons": [
+          2016,
+          2017,
+          2018,
+          2019,
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "prop_iter": 261,
+        "epa_iter": 140,
+        "succ_iter": 231,
+        "prop_seconds": 13.129318166989833,
+        "outcome_seconds": 2.6540454579517245
+      },
+      "folds": [
+        {
+          "fold": 2016,
+          "n_train": 161467,
+          "seasons": [
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024
+          ],
+          "prop_iter": 293,
+          "epa_iter": 149,
+          "succ_iter": 173,
+          "prop_seconds": 14.81143279117532,
+          "outcome_seconds": 2.1376624999102205
+        },
+        {
+          "fold": 2017,
+          "n_train": 161835,
+          "seasons": [
+            2016,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024
+          ],
+          "prop_iter": 309,
+          "epa_iter": 132,
+          "succ_iter": 309,
+          "prop_seconds": 14.050914249848574,
+          "outcome_seconds": 2.5326838749460876
+        },
+        {
+          "fold": 2018,
+          "n_train": 161956,
+          "seasons": [
+            2016,
+            2017,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024
+          ],
+          "prop_iter": 283,
+          "epa_iter": 126,
+          "succ_iter": 290,
+          "prop_seconds": 20.246037333039567,
+          "outcome_seconds": 4.492388499900699
+        },
+        {
+          "fold": 2019,
+          "n_train": 161798,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024
+          ],
+          "prop_iter": 292,
+          "epa_iter": 125,
+          "succ_iter": 264,
+          "prop_seconds": 22.42153074988164,
+          "outcome_seconds": 4.520271042129025
+        },
+        {
+          "fold": 2020,
+          "n_train": 161218,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2021,
+            2022,
+            2023,
+            2024
+          ],
+          "prop_iter": 304,
+          "epa_iter": 130,
+          "succ_iter": 259,
+          "prop_seconds": 23.303657375043258,
+          "outcome_seconds": 2.314529250143096
+        },
+        {
+          "fold": 2021,
+          "n_train": 160923,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2022,
+            2023,
+            2024
+          ],
+          "prop_iter": 461,
+          "epa_iter": 122,
+          "succ_iter": 295,
+          "prop_seconds": 21.080384500091895,
+          "outcome_seconds": 2.539086541859433
+        },
+        {
+          "fold": 2022,
+          "n_train": 160343,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2023,
+            2024
+          ],
+          "prop_iter": 239,
+          "epa_iter": 187,
+          "succ_iter": 228,
+          "prop_seconds": 10.972757291980088,
+          "outcome_seconds": 2.4168025418184698
+        },
+        {
+          "fold": 2023,
+          "n_train": 160675,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2024
+          ],
+          "prop_iter": 443,
+          "epa_iter": 158,
+          "succ_iter": 276,
+          "prop_seconds": 19.661830291850492,
+          "outcome_seconds": 2.4465775000862777
+        },
+        {
+          "fold": 2024,
+          "n_train": 161025,
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ],
+          "prop_iter": 242,
+          "epa_iter": 184,
+          "succ_iter": 258,
+          "prop_seconds": 11.120738666970283,
+          "outcome_seconds": 2.6358072080183774
+        }
+      ],
+      "seconds": {
+        "cross_fit": 193.04567950009368,
+        "fit_predict": 16.45640324987471,
+        "cells_ope": 1.60314325010404
+      },
+      "placebo_seconds": {
+        "cross_fit": 68.3529908338096,
+        "fit_predict": 8.632872916059569,
+        "cells_ope": 0.4856792089994997
+      }
+    }
+  }
+}
