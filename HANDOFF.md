@@ -2,6 +2,36 @@
 
 Newest entry first. Append only; never edit or delete past entries.
 
+## 2026-10-05 · ML build M1-M7 (live predictions, playoff odds, player and play models, decision support)
+
+**Did:**
+- Built ML milestones M1-M7 under `nflelo/ml/`: data, as-of, features, models, eval, live, sim, players, plays, wp, decisions.
+- Scripts are `scripts/ml_*.py`. The notebooks are `notebooks/01-10`.
+- Every method write-up is in `context/ml-*-method.md`. The results scoreboard is `context/ml-results.md`.
+- Live 2026 pipeline:
+  - `scripts/ml_predict.py` and `.github/workflows/weekly.yml` (Wed 14:00 and Sun 12:00 UTC);
+  - the append-only ledger `experiments/live/2026.csv`, the shadow ledger `2026_shadow.csv`, and `sim_2026.csv`;
+  - the site has the model, spreads, rest of season, and playoff odds.
+- Competitor review: `context/competitor-nfelo.md`.
+
+**Verified:**
+- `pytest -q`: 296 passed (run at the end of the session).
+- Every holdout (2020-2025) ran once on a clean commit, after its rules were committed and a dry run reproduced dev.
+  - **Passes:** M3, playoff odds, M6, the M7a WP model, M7b.
+  - **Fails:** the M4 margin model, M5b, and M7a conversion.
+  - M5 is a negative result on dev, and M3b missed narrowly on dev (no holdout).
+- The weekly GitHub Action succeeded on two manual runs.
+
+**Decided:**
+- Walker set the direction: a portfolio for NFL teams, model first, no betting features. Most later choices were made by Claude under Walker's standing delegation and are logged in the `CONTEXT.md` decision log.
+- M3b was not given a holdout run after its narrow dev miss (no moving the goalposts). It runs as a 2026 shadow model instead.
+- The 2026 live headline stays frozen on A4s.
+- The M7a sign-off's first attempt was killed by the 2-hour tool limit before any outcome printed. It was restarted as a detached process; long runs need `nohup`.
+
+**Next:** fix M7a's fourth-down conversion mix (use teams' actual 4th-down run/pass mix, not the league share) and test it on the 2026 live season, since the holdout is spent. Then the site track: a model performance page, game pages, and team pages.
+
+**Blocked on Walker:** hosting (Cloudflare Pages account and domain), and the GitHub cache purge request (drafted in `context/pending/github-purge-request.txt`; needs his signed-in browser).
+
 ## 2026-10-03 · Elo v2 rebuild, NFLELO demo site, data licensing cleanup, ML plan
 
 **Did:**
