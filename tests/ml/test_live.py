@@ -260,35 +260,15 @@ SITE_FILES = ["meta.json", "ladder.json", "upcoming.json", "history.json", "luck
 needs_inputs = pytest.mark.skipif(not all(p.exists() for p in INPUTS), reason="needs outputs/ and data/raw/schedules.csv")
 
 
-@needs_inputs
-def test_exporter_without_ledger_writes_the_same_site_data(tmp_path, monkeypatch):
-    import export_site
-    out, empty = tmp_path / "data", tmp_path / "live"
-    empty.mkdir()
-    (out).mkdir()
-    (out / "ml.json").write_text("{}")                     # a stale file from an earlier run is removed
-    monkeypatch.setattr(export_site, "SITE_DATA", out)
-    monkeypatch.setattr(export_site, "LIVE_DIR", empty)
-    sizes = export_site.export()
-    assert set(sizes) == set(SITE_FILES)
-    assert not (out / "ml.json").exists()
-    for name in SITE_FILES:
-        assert (out / name).read_bytes() == (config.ROOT / "site" / "data" / name).read_bytes(), name
-
-
-@needs_inputs
-def test_exporter_with_ledger_writes_valid_ml_json(tmp_path, monkeypatch):
-    import export_site
-    elo, ratings, schedule = export_site.load_elo(), export_site.load_ratings(), export_site.load_schedule()
-    season = ratings["season"]
-    upcoming = export_site.build_upcoming(schedule, ratings, elo)
+def write_ledger(live_dir: Path, schedule: pd.DataFrame, season: int, unplayed_only: bool = True):
+    """A one-run ledger (plus latest_<season>.json) for the season's games, made a day before the first kickoff.
+    Returns (run_at, ledger rows), or None when there are no games to log."""
     reg = schedule[(schedule["season"] == season) & (schedule["game_type"] == "REG")]
-    todo = asof.add_asof(reg[reg["home_score"].isna()])
+    todo = reg[reg["home_score"].isna()] if unplayed_only else reg
     if todo.empty:
-        pytest.skip("no unplayed games")
-    kick = todo.set_index("game_id")["kickoff"].dt.tz_convert("UTC")
+        return None
+    kick = asof.add_asof(todo).set_index("game_id")["kickoff"].dt.tz_convert("UTC")
     run_at = kick.min() - pd.Timedelta(days=1)
-    live_dir = tmp_path / "live"
     led = rows(run_at, kick.to_dict(), p_home_model=list(np.linspace(0.3, 0.7, len(kick))),
                p_home_elo=[0.5] * len(kick), spread_elo=[1.0] * len(kick),
                p_home_market=[0.55] * len(kick), spread_market=[2.5] * len(kick))
@@ -298,6 +278,71 @@ def test_exporter_with_ledger_writes_valid_ml_json(tmp_path, monkeypatch):
                          "qb_delta_home": 0.1, "qb_delta_away": 0.0, "home_qb_name": "Somebody"}
                         for g, p in zip(led["game_id"], led["p_home_model"])]}
     live.latest_path(season, live_dir).write_text(json.dumps(latest))
+    return run_at, led
+
+
+def write_sim_history(live_dir: Path, season: int, run_at: pd.Timestamp, teams: list[str]) -> pd.Timestamp:
+    """Two Wednesday simulation runs a week apart (all probabilities 0.25, then 0.5). Returns the later run time."""
+    wed = run_at.floor("D") - pd.Timedelta(days=(run_at.dayofweek - 2) % 7) + pd.Timedelta(hours=14)
+    for k, at in enumerate((wed - pd.Timedelta(days=7), wed)):
+        df = pd.DataFrame({"run_at_utc": live.utc_iso(at), "team": teams})
+        for c in live.SIM_PROBS:
+            df[c] = 0.25 + 0.25 * k
+        df["wins_mean"], df["wins_p10"], df["wins_p90"] = 8.5, 6.0, 11.0
+        df["n_sims"], df["tau_rest"], df["shape"], df["seed"], df["model_version"] = 20000, 0.5, "keynum", 1, "A4s+M"
+        live.append_sim(df[live.SIM_COLUMNS], live.sim_path(season, live_dir))
+    return wed
+
+
+def season_teams(schedule: pd.DataFrame, season: int) -> list[str]:
+    reg = schedule[(schedule["season"] == season) & (schedule["game_type"] == "REG")]
+    return sorted(set(reg["home_team"]) | set(reg["away_team"]))
+
+
+@needs_inputs
+def test_exporter_ml_files_never_change_the_non_ml_site_data(tmp_path, monkeypatch):
+    """Same environment, same inputs: exporting with the ML files (ledger, latest run, open simulation) and
+    without them gives byte-identical non-ML JSON. Only ml.json differs, and only the ML run has it."""
+    import export_site
+    schedule, season = export_site.load_schedule(), export_site.load_ratings()["season"]
+    with_ml, without_ml = tmp_path / "live_with", tmp_path / "live_without"
+    with_ml.mkdir()
+    without_ml.mkdir()
+    made = write_ledger(with_ml, schedule, season, unplayed_only=False)
+    assert made is not None, f"no {season} REG games in the schedule"
+    (with_ml / live.PUBLISH_FILE).write_text(json.dumps({"publish_sim": True}))
+    write_sim_history(with_ml, season, made[0], season_teams(schedule, season))
+
+    out, sizes = {}, {}
+    for name, live_dir in (("with", with_ml), ("without", without_ml)):
+        out[name] = tmp_path / f"data_{name}"
+        out[name].mkdir()
+        (out[name] / "ml.json").write_text("{}")         # a stale file from an earlier run
+        monkeypatch.setattr(export_site, "SITE_DATA", out[name])
+        monkeypatch.setattr(export_site, "LIVE_DIR", live_dir)
+        sizes[name] = export_site.export()
+
+    assert set(sizes["without"]) == set(SITE_FILES)
+    assert not (out["without"] / "ml.json").exists()     # the stale file is removed when there is no ledger
+    assert set(sizes["with"]) == set(SITE_FILES) | {"ml.json"}
+    ml = json.loads((out["with"] / "ml.json").read_text())
+    assert ml["ledger_rows"] == len(made[1]) and ml["sim_published"] is True and ml["playoff_odds"] is not None
+    for name in SITE_FILES:
+        assert (out["with"] / name).read_bytes() == (out["without"] / name).read_bytes(), name
+
+
+@needs_inputs
+def test_exporter_with_ledger_writes_valid_ml_json(tmp_path, monkeypatch):
+    import export_site
+    elo, ratings, schedule = export_site.load_elo(), export_site.load_ratings(), export_site.load_schedule()
+    season = ratings["season"]
+    upcoming = export_site.build_upcoming(schedule, ratings, elo)
+    reg = schedule[(schedule["season"] == season) & (schedule["game_type"] == "REG")]
+    live_dir = tmp_path / "live"
+    made = write_ledger(live_dir, schedule, season)
+    if made is None:
+        pytest.skip("no unplayed games")
+    run_at, led = made
     out = tmp_path / "data"
     monkeypatch.setattr(export_site, "SITE_DATA", out)
     assert export_site.export_ml(schedule, ratings, elo, upcoming, live_dir) > 0
@@ -318,15 +363,7 @@ def test_exporter_with_ledger_writes_valid_ml_json(tmp_path, monkeypatch):
 
     # with two simulation runs: odds per conference, change since the earlier Wednesday run, win ranges
     (live_dir / live.PUBLISH_FILE).write_text(json.dumps({"publish_sim": True}))
-    wed = run_at.floor("D") - pd.Timedelta(days=(run_at.dayofweek - 2) % 7) + pd.Timedelta(hours=14)
-    teams = sorted({t["team"] for t in ml["rest"]["teams"]})
-    for k, at in enumerate((wed - pd.Timedelta(days=7), wed)):
-        df = pd.DataFrame({"run_at_utc": live.utc_iso(at), "team": teams})
-        for c in live.SIM_PROBS:
-            df[c] = 0.25 + 0.25 * k
-        df["wins_mean"], df["wins_p10"], df["wins_p90"] = 8.5, 6.0, 11.0
-        df["n_sims"], df["tau_rest"], df["shape"], df["seed"], df["model_version"] = 20000, 0.5, "keynum", 1, "A4s+M"
-        live.append_sim(df[live.SIM_COLUMNS], live.sim_path(season, live_dir))
+    wed = write_sim_history(live_dir, season, run_at, sorted({t["team"] for t in ml["rest"]["teams"]}))
     export_site.export_ml(schedule, ratings, elo, upcoming, live_dir)
     ml = json.loads((out / "ml.json").read_text())
     po = ml["playoff_odds"]
@@ -338,7 +375,7 @@ def test_exporter_with_ledger_writes_valid_ml_json(tmp_path, monkeypatch):
     assert ml["sim_published"] is True
     json.dumps(ml, allow_nan=False)
 
-    # gated: the simulation history is there, but publish_sim is false (the committed default) -> nothing shown
+    # gated: the simulation history is there, but publish_sim is false -> nothing shown
     (live_dir / live.PUBLISH_FILE).write_text(json.dumps({"publish_sim": False}))
     export_site.export_ml(schedule, ratings, elo, upcoming, live_dir)
     ml = json.loads((out / "ml.json").read_text())
@@ -349,5 +386,45 @@ def test_exporter_with_ledger_writes_valid_ml_json(tmp_path, monkeypatch):
     assert json.loads((out / "ml.json").read_text())["playoff_odds"] is None      # no file: not published
 
 
-def test_committed_publish_flag_keeps_the_simulation_off_the_site():
-    assert live.publish_flags()["publish_sim"] is False
+def test_committed_publish_flag_is_valid():
+    """experiments/live/publish.json exists and holds a real boolean (opened 2026-10-05 after the M4 holdout)."""
+    path = live.LIVE_DIR / live.PUBLISH_FILE
+    assert path.exists(), path
+    d = json.loads(path.read_text())
+    assert isinstance(d.get("publish_sim"), bool), "publish_sim must be a JSON boolean, not a string or number"
+    assert live.publish_flags()["publish_sim"] is d["publish_sim"]
+
+
+@needs_inputs
+def test_committed_publish_flag_shows_odds_only_with_simulation_history(tmp_path, monkeypatch):
+    """With the committed flag: no simulation history -> no odds or win ranges, even when the gate is open;
+    with history -> odds and win ranges exactly when the gate is open."""
+    import export_site
+    elo, ratings, schedule = export_site.load_elo(), export_site.load_ratings(), export_site.load_schedule()
+    season = ratings["season"]
+    upcoming = export_site.build_upcoming(schedule, ratings, elo)
+    live_dir = tmp_path / "live"
+    made = write_ledger(live_dir, schedule, season, unplayed_only=False)
+    assert made is not None, f"no {season} REG games in the schedule"
+    (live_dir / live.PUBLISH_FILE).write_bytes((live.LIVE_DIR / live.PUBLISH_FILE).read_bytes())
+    is_open = live.publish_flags(live_dir)["publish_sim"]
+    assert is_open is live.publish_flags()["publish_sim"]
+    out = tmp_path / "data"
+    monkeypatch.setattr(export_site, "SITE_DATA", out)
+
+    export_site.export_ml(schedule, ratings, elo, upcoming, live_dir)
+    ml = json.loads((out / "ml.json").read_text())
+    assert ml["sim_published"] is is_open
+    assert ml["playoff_odds"] is None                      # no sim_<season>.csv yet
+    assert all(t["wins_p10"] is None and t["wins_p90"] is None for t in ml["rest"]["teams"])
+
+    write_sim_history(live_dir, season, made[0], season_teams(schedule, season))
+    export_site.export_ml(schedule, ratings, elo, upcoming, live_dir)
+    ml = json.loads((out / "ml.json").read_text())
+    assert ml["sim_published"] is is_open
+    if is_open:
+        assert ml["playoff_odds"] is not None and ml["playoff_odds"]["runs"] == 2
+        assert all(t["wins_p10"] == 6.0 and t["wins_p90"] == 11.0 for t in ml["rest"]["teams"])
+    else:
+        assert ml["playoff_odds"] is None
+        assert all(t["wins_p10"] is None and t["wins_p90"] is None for t in ml["rest"]["teams"])

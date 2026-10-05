@@ -424,6 +424,33 @@ Other observations:
 - The market is about as good as on DEV (0.2096 vs 0.2106), while A4s and Elo both scored worse (0.2195 and 0.2231), so the gap to the market widened.
 - The QB news gain (A4s vs A4bs) is about the same size as on DEV (-0.0020), but no longer significant. Starter changes were 23% of games, against 19% on DEV.
 
+### No-Elo study (2026-10-05, descriptive, DEV only)
+
+Walker asked whether our own features can stand without Elo's log-odds, as a typical ML model would be built. `scripts/ml_m3_noelo.py` reuses the M3 ladder machinery unchanged (walk-forward REG 2001..S-1, season-decay weights, frozen knobs, ties as half rows) on the same 3,450 DEV games (hash `52b8194df3a2ebf4`). Runs are `experiments/runs/20261005T033941Z_m3_noelo_N{1..6}.json` (label dev, `"study": "no_elo"`), and notebook 03, section 7, reads them. It changes nothing live, and no holdout season was loaded. ECE p95 is the one-sided null used in M4; every variant is under it. CIs are paired bootstrap (2,000 reps, seed 20261003); negative means the variant is better.
+
+| Id | Features | Brier | Log loss | Acc | ECE (null p95) | vs Elo 0.2178 | vs A4s 0.2151 |
+|---|---|---|---|---|---|---|---|
+| N1 | adj_epa_margin | 0.2209 | 0.6329 | 0.635 | 0.018 (0.024) | +0.0030 [+0.0007, +0.0053] | +0.0058 [+0.0036, +0.0080] |
+| N2 | adj_epa_margin + qb_delta_diff | 0.2183 | 0.6275 | 0.643 | 0.016 (0.025) | +0.0005 [-0.0021, +0.0033] | +0.0033 [+0.0016, +0.0049] |
+| **N3** | N2 + rest_diff + neutral | **0.2182** | 0.6271 | 0.647 | 0.012 (0.025) | +0.0004 [-0.0024, +0.0033] | +0.0031 [+0.0013, +0.0049] |
+| N4 | adj pass + rush margins + qb_delta_diff + rest + neutral | 0.2188 | 0.6284 | 0.643 | 0.010 (0.024) | +0.0010 [-0.0018, +0.0039] | +0.0037 [+0.0019, +0.0056] |
+| N5 | boosted trees (A6 settings) on N4 features | 0.2209 | 0.6339 | 0.640 | 0.021 (0.026) | +0.0030 [-0.0003, +0.0066] | +0.0058 [+0.0032, +0.0085] |
+| N6 | N2 + raw_epa_margin (M1) | 0.2185 | 0.6277 | 0.645 | 0.013 (0.025) | +0.0007 [-0.0021, +0.0034] | +0.0034 [+0.0015, +0.0052] |
+
+The best no-Elo model is N3; N2 is within 0.0001 of it.
+
+| Weeks | n | N3 | N2 | A4s | Elo | N3 minus Elo | A4s minus N2 |
+|---|---|---|---|---|---|---|---|
+| 1-4 | 751 | 0.2277 | 0.2281 | 0.2243 | 0.2229 | +0.0049 [-0.0005, +0.0100] | -0.0038 [-0.0073, -0.0004] |
+| 5-9 | 969 | 0.2167 | 0.2173 | 0.2126 | 0.2140 | +0.0027 [-0.0022, +0.0080] | -0.0047 [-0.0081, -0.0016] |
+| 10-18 | 1,730 | 0.2149 | 0.2147 | 0.2125 | 0.2178 | -0.0028 [-0.0066, +0.0011] | -0.0022 [-0.0045, +0.0004] |
+| All | 3,450 | 0.2182 | 0.2183 | 0.2151 | 0.2178 | +0.0004 | -0.0033 [-0.0049, -0.0016] |
+
+- N3's log-odds correlate **0.86** with `elo_logit` (0.85, 0.86, 0.87 by bucket) and 0.94 with A4s's.
+- A4s refit on one week bucket's training rows (2019 model, trained 2001-2018, ± bootstrap SE over 200 reps): `elo_logit` +1.04 ± 0.25 (weeks 1-4), +0.98 ± 0.21 (5-9), +0.68 ± 0.14 (10-18); `adj_epa_margin` -0.36 ± 1.18, +0.80 ± 1.04, +2.03 ± 0.90. The early-season fits are noisy; the medians over the 14 refits do not fall smoothly (elo_logit 0.47, 0.96, 0.70).
+
+**Read.** Our features can stand on their own, but only to about Elo's level: the best no-Elo model ties Elo (0.2182 vs 0.2178), and it gets there only with the QB term. Elo and our features are mostly the same information (correlation 0.86), but not entirely. Adding Elo back improves Brier by 0.0033 with an interval that excludes zero, and most of that comes in weeks 1-9, when our EPA ratings still lean on a shrunk copy of last season. By weeks 10-18, the no-Elo model is ahead of Elo, Elo's added value falls to 0.002 (not significant), and Elo's weight in the model drops from about 1.0 to 0.7 as EPA's rises. Elo's edge is its long memory of results across seasons. Flexible trees (N5) and adding raw EPA (N6) don't recover it.
+
 ---
 
 ### M4 Phase 1 build notes (2026-10-04)
