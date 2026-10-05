@@ -13,6 +13,8 @@ Walker Tracy wrote an NFL Elo analysis in fall 2025, covering regular seasons fr
 
 Hard constraints: the data must be **free**, and it must be **safe for commercial use**. No paid or metered APIs.
 
+**Purpose (Walker, 2026-10-05):** NFLELO is a portfolio piece for getting hired by NFL teams, not a betting product. The priority is the most rigorous, premium model possible, with the full set of site pages built around it. No betting features: no picks against the spread, no units, no EV bets, no sportsbook offers. Vegas appears only as a benchmark to measure against. Every page should read like work a front office would respect: clear methods, honest uncertainty, and verifiable results.
+
 ## What exists today (as of 2026-10-02)
 
 **Elo v2, the current system.** `scripts/build.py` pulls nflverse, rebuilds `data/games.csv` (1970 onward), runs Elo, and writes `outputs/` (per-game ratings, current ratings JSON, model report). Details are in `context/data-and-elo.md`.
@@ -86,7 +88,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 
 ## Open questions for Walker
 
-- Will the site ever charge money or run ads? The answer decides whether FTN data is usable and how careful we need to be with licensing.
+- Monetization is not a goal for now (the purpose is a portfolio for NFL teams). If that changes, revisit FTN and the other share-alike data, and get legal advice.
 
 ## Parked until Walker picks them back up (2026-10-04)
 
@@ -116,6 +118,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-05 | M4 holdout sign-off, run once on pre-registered rules (commit e51e890). The margin model FAILS its primary: MAE beat Elo's spread by 0.059 points (10.126 vs 10.185), but the CI [-0.150, +0.035] includes zero; it passes all three secondaries. The market spread's MAE is 9.764. Playoff odds (tau_rest 4.5) PASS every rule: made-playoffs ECE 0.028 within the null, Brier 0.1234 vs 0.1258 for tau 0 (CI excludes zero). The odds stay hidden on the site (`publish_sim` false) until Walker decides. |
 | 2026-10-05 | Walker: publish the playoff odds (`publish_sim` true) and keep the model spread on the site, with methodology copy stating that its edge over Elo's spread is not proven. M4 is complete. |
 | 2026-10-05 | No-Elo study (DEV only, descriptive). The best model without Elo (adjusted EPA + QB + rest/neutral) scores 0.2182, a tie with Elo's 0.2178; A4s with Elo scores 0.2151, and adding Elo back is worth 0.0033 (CI excludes zero). Elo's value is mostly in weeks 1-9 (its long memory across seasons); by weeks 10-18 the no-Elo model beats Elo. Boosted trees did not help. This points to a better early-season prior, the M5 lineup work, as the next lever. Two live tests were rewritten to stop depending on the committed site data. |
+| 2026-10-05 | Direction set by Walker: NFLELO is a portfolio for NFL teams. Model quality comes first ("the most premium model ever"), and the site pages from the competitor review follow (game pages, team pages, model performance, QB and player pages). There are no betting features; Vegas stays a benchmark only. |
 
 ## Context file index
 

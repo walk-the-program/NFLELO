@@ -48,5 +48,5 @@ Reviewed 2026-10-05 in the browser: the games page, model performance, power rat
 4. **QB rankings** from the M3 QB values (shrunk EPA per dropback), with a career view.
 5. **An EPA tiers chart:** adjusted offense vs defense scatter from our ridge ratings. It's cheap to build.
 6. **Strength of schedule:** remaining and played, from the simulation.
-7. **Betting-oriented views** (edge vs the line, ATS record). This is a product decision for Walker: it changes the audience, and if ads or affiliate offers are ever involved, the legal exposure too.
+7. ~~Betting-oriented views~~ **Declined (Walker, 2026-10-05):** the audience is NFL teams, not bettors.
 8. **Calculators:** low value. Only build them if search traffic becomes a goal.
