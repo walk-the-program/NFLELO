@@ -9,8 +9,10 @@ Datasets: "pbp" (1999+) and "schedules", plus the M5 player datasets (all CC BY)
 "player_stats" (weekly, 1999+), "depth_charts" (2001+; two formats, see
 `load_depth_charts`), "injuries" (2009+), "rosters_weekly" (2002+), and
 "players" (one snapshot, stored as season 0). "participation" (2016+) is
-CC BY-SA and may be used ONLY for validation checks (decision M5-D1 (a)):
-nothing that feeds a model may read it. Never add snap counts or any
+CC BY-SA 4.0. M5 reads it only for validation (`load_participation_for_validation`,
+decision M5-D1 (a)). M5b (on-field ratings, approved under D1) reads it through
+`load_participation`, and only the M5b modules may call that (a test enforces it):
+nothing derived from participation may feed A4s or any CC BY artifact. Never add snap counts or any
 Pro-Football-Reference-derived dataset (see context/ml.md section 3); FTN
 data is out of scope.
 
@@ -511,6 +513,27 @@ def load_participation_for_validation(seasons: Iterable[int], validate: bool = T
     (a test enforces it).
     """
     return _load("participation", [s for s in seasons if s >= FIRST_SEASON["participation"]], None, validate, root)
+
+
+PARTICIPATION_LICENSE = "CC BY-SA 4.0"
+PARTICIPATION_CREDIT = {"ngs": "NFL Next Gen Stats via nflverse (2016-2022)", "ftn": "FTN Data via nflverse (2023+)"}
+PARTICIPATION_FTN_FIRST = 2023  # nflverse switched the participation source from NGS to FTN in 2023
+
+
+def load_participation(seasons: Iterable[int], validate: bool = True, root: Path = ML_DIR) -> pd.DataFrame:
+    """Participation (who was on the field, every play; 2016+) for M5b on-field ratings. CC BY-SA 4.0.
+
+    Approved for M5b under decision D1 (2026-10-03). Only the M5b modules
+    (`nflelo.ml.players.participation`, `nflelo.ml.players.rapm`,
+    `scripts/ml_m5b.py`) may call this; anything derived from it is CC BY-SA
+    and must never flow into A4s or any CC BY artifact (a test enforces the
+    import boundary). Credit: NFL Next Gen Stats via nflverse for 2016-2022,
+    FTN Data via nflverse for 2023 onward. Cached per season with a manifest
+    entry, like every other dataset here.
+    """
+    seasons = [int(s) for s in seasons if int(s) >= FIRST_SEASON["participation"]]
+    df = _load("participation", seasons, None, validate, root)
+    return df
 
 
 DEPTH_SNAPSHOT_FIRST = 2025   # from 2025 on, nflverse publishes ESPN daily snapshots instead of weekly charts

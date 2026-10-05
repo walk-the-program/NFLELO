@@ -161,8 +161,17 @@ class BoxValues:
         self.asofs, self.ords = week_asof(sched), week_ordinals(sched)
 
     def sums(self, S: int, W: int, half_life: float, min_weight: float = 1e-3) -> BoxSums:
-        end = np.searchsorted(self.kick, self.asofs[(S, W)], side="left")
-        w = decay_weights(int(self.ords[(S, W)]), self.ord[:end], S, self.season[:end], half_life, 1.0)
+        return self.sums_at(int(self.asofs[(S, W)]), int(self.ords[(S, W)]), S, half_life, min_weight)
+
+    def sums_at(self, as_of_ns: int, ord_now: int, S: int, half_life: float, min_weight: float = 1e-3) -> BoxSums:
+        """`sums` at an explicit as_of (UTC ns) and timeline position: only rows that kicked off before as_of.
+
+        `sums(S, W)` is `sums_at(as_of of (S, W), ord of (S, W), S, ...)`. With
+        as_of past the last row and ord_now = (last week's ord + 1) it gives the
+        values at the start of the next season without needing that season's schedule.
+        """
+        end = np.searchsorted(self.kick, as_of_ns, side="left")
+        w = decay_weights(int(ord_now), self.ord[:end], S, self.season[:end], half_life, 1.0)
         keep = w * self.share[:end] > 0
         keep &= w > min_weight * 1e-3
         idx = np.flatnonzero(keep)

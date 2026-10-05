@@ -14,6 +14,10 @@
   of DEV. Lineup features need injury reports (2009+) and a few training
   seasons, so M5 is scored here, against A4s on the same games. Guarded like
   DEV: it can never include a holdout season.
+- M5B_DEV, 2018-2019: the M5b development window (context/ml-m5b-method.md,
+  section 4): season-ahead play predictions for 2018 (ratings from 2016-2017)
+  and 2019 (from 2016-2018). Participation starts in 2016, so these are the
+  only DEV seasons with training data behind them. Guarded like DEV.
 """
 from __future__ import annotations
 
@@ -26,10 +30,11 @@ HOLDOUT = (2020, 2025)
 REPRODUCTION = tuple(config.TEST_SEASONS)
 TUNE = (2000, 2005)
 M5_DEV = (2012, 2019)
+M5B_DEV = (2018, 2019)
 
-LABELS = {"dev": DEV, "holdout": HOLDOUT, "reproduction": REPRODUCTION, "tune": TUNE, "m5dev": M5_DEV}
+LABELS = {"dev": DEV, "holdout": HOLDOUT, "reproduction": REPRODUCTION, "tune": TUNE, "m5dev": M5_DEV, "m5bdev": M5B_DEV}
 # Labels whose runs may never touch the holdout.
-NON_HOLDOUT_LABELS = frozenset({"dev", "tune", "m5dev"})
+NON_HOLDOUT_LABELS = frozenset({"dev", "tune", "m5dev", "m5bdev"})
 
 
 class HoldoutError(RuntimeError):

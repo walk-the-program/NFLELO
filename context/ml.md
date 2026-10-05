@@ -294,7 +294,7 @@ No paid APIs, no cloud.
 | M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | **Passed 2026-10-04.** Holdout: A4s beats Elo by 0.0035 Brier (CI [-0.0063, -0.0007]). The ECE of 0.028 is within the noise range for n = 1,615; the 0.02 bar is recorded as flawed. |
 | M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Phase 1 built 2026-10-04 (weekly predictions, ledger, site, Action). Phase 2 built 2026-10-04; holdout sign-off run once on 2026-10-05: **margin model FAIL** on its primary (MAE vs Elo -0.059, CI [-0.150, +0.035] includes zero), **playoff odds PASS** (made-playoffs ECE 0.028 <= 0.044; Brier vs tau 0 -0.0024, CI upper bound -0.00015 < +0.001). Odds stay gated off the site until Walker decides. |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Built 2026-10-05 (player values, lineups, ladder on 2012-2019). **No gain over A4s**: B1-B3 within noise, the one-SE rule keeps B0 (A4s). Stopped before the notebook, holdout, shadow and site work; awaiting Walker. See "M5 build notes". |
-| M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Not started |
+| M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Built 2026-10-05 (cleaning, Bayesian RAPM, tuning, dev evaluation, leakage check, notebooks 05 and 06). Dev, season-ahead 2018-2019 (tuned on the same predictions): RAPM beats team ratings by 0.0027 MSE [-0.0042, -0.0013] and box values by 0.0019 [-0.0032, -0.0005]. Holdout pre-registration proposed; not run. See "M5b build notes". |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | Not started |
 | M7 | Personnel decision support (causal) | M6 | Not started |
 
@@ -651,6 +651,87 @@ Elo 0.2175, market 0.2110. Weeks 1-4: B3 +0.0009 (the preseason term does not fi
 
 **Timing.** Tuning 122 s; ladder 72 s end to end; real-data leakage check 75 s.
 
+### M5b build notes (2026-10-05, dev only; holdout not run)
+
+Spec: `context/ml-m5b-method.md` (approved under delegation). Everything participation-derived is **CC BY-SA 4.0** and labelled so in its docstrings, file metadata (`data/raw/ml/m5b/LICENSE.txt`, a `license` key in every JSON) and run records. A test (`tests/ml/test_m5.py`) keeps participation and RAPM out of every module except `players/participation.py`, `players/rapm.py` and `scripts/ml_m5b.py`, so nothing reaches A4s.
+
+**Where things are.** `nflelo/ml/data.py` (`load_participation`, M5b only; cached with manifest entries for 2016-2025), `nflelo/ml/players/participation.py` (cleaning, side repair, sparse design, snaps and shares), `nflelo/ml/players/rapm.py` (Bayesian RAPM, season chaining, posterior SDs, season-ahead API, leakage check, `TUNED`), `scripts/ml_m5b.py` (`clean`, `tune`, `dev`, `leakcheck`, `signoff-dry-run`, `signoff`), `tests/ml/test_m5b.py`, `notebooks/05_player_values.ipynb`, `notebooks/06_player_ratings.ipynb`. Also: `eval/windows.py` gained `M5B_DEV = (2018, 2019)` (label `m5bdev`, guarded like DEV); `eval/bootstrap.py` gained `cluster_bootstrap_diff` (resamples whole games); `players/value.py` gained `BoxValues.sums_at` (box values at an explicit as-of). Saved outputs: `data/raw/ml/m5b/` (gitignored).
+
+**Data cleaning (finding).** The raw participation lists would have failed the 5% drop rule: plays with exactly 11 + 11 listed GSIS IDs were 87.3% of clean scrimmage plays in 2016 and 92.1% in 2018 (2016: one offensive or defensive player with no GSIS mapping; 2018-2019: a 12th offensive ID that is not one of the 22 players on the play). `players_on_play` lists all 22 (as NFL `nfl_id`s through 2022, GSIS IDs from 2023), and every one maps to GSIS through the players table (CC BY). The repair assigns each of the 22 to his team (the side he is listed on most often in that game; a player never listed in the game goes to the side that is one short). On every play whose lists were already 11 + 11 (2016-2019), the repair reproduces them exactly. Drop rate after the repair, kept plays (REG and POST, garbage time out):
+
+| Season | Era | Clean plays | Raw drop | Repaired | Drop | Kept |
+|---|---|---|---|---|---|---|
+| 2016 | NGS | 28,488 | 12.7% | 3,511 | 0.42% | 28,367 |
+| 2017 | NGS | 28,086 | 0.1% | 0 | 0.12% | 28,051 |
+| 2018 | NGS | 27,629 | 7.9% | 2,169 | 0.07% | 27,611 |
+| 2019 | NGS | 27,957 | 4.9% | 1,335 | 0.09% | 27,932 |
+| 2020-2022 | NGS | 88,740 | 0.1% | 0 | 0.09% | 88,662 |
+| 2023-2025 | FTN | 88,969 | 0.1% | 0 | 0.10% | 88,883 |
+
+Players on the field per season: 1,833-1,858 (2016-2019), 1,964-2,034 (2020-2022), 1,905-1,969 (2023-2025). Per position group the counts are steady across the 2023 NGS-to-FTN switch (for example OL 312-335 and CB 224-237 every season 2020-2025). Every kept play has exactly 22 player-snaps. These are counts only; no 2020-2025 outcome was computed.
+
+**Model.** As in the spec: one coefficient per (player, side), D is EPA allowed (value = -D). Situation terms: down 2/3/4, distance 3-6/7-10/11+, field zone 11-20/21-50/51-80/81+ yards to go, pass, plus home; unpenalized. Prior mean = `box_scale` x the player's M5 box value at the start of S (EPA per on-field play above replacement; 0 with no box record), sign flipped for defenders; a player on the other side of the ball gets prior 0 and `lam_other`. Season chaining in precision form: the fit for S uses H(S) = sum over T < S of decay^(S-1-T) H_T (the S-1 posterior with its evidence discounted toward the box prior, full covariance kept). Solved by conjugate gradients with a Jacobi preconditioner on the offset system (beta - prior); a dense Cholesky checks it (max difference about 1e-11) and gives exact posterior SDs, sigma^2 (H + Lambda)^-1. About 2,600-3,100 active players per fit; a fit takes under 0.1 s. Unit tests recover known effects from synthetic lineups (correlation > 0.9), and two always-together players are split evenly under equal priors and by the prior otherwise, with the pair's sum set by the data and a wider SD than a rotating teammate.
+
+**Leakage (finding and fix).** The real-data check (`ml_m5b.py leakcheck`) corrupts all of 2019 (play-by-play outcomes, situations and credited IDs; participation lists; depth charts, injuries, rosters), rebuilds every input from raw, refits, and predicts the clean 2019 plays. The first run failed: the start-of-2019 box priors moved (max 0.0038). Cause: `credit.lookup_groups` falls back to a player's latest position-table entry when his season has none (its docstring says "nearest earlier"), which can be a later season. M5b now rebuilds the box credits for each S from play-by-play, depth charts and position tables cut at S-1. After the fix, all four models' 2019 predictions are identical (max diff 0.0 on 27,932 plays), the box priors and groups are unchanged, and the positive control (training on 2019 too) changes every play (max 0.77). The same `lookup_groups` behaviour still affects M5 itself (listed there as a known exception); it is not changed here.
+
+**Tuning** (`m5b_tune`, 362 settings, coordinate descent; objective = pooled play-level EPA MSE of the season-ahead predictions for 2018 (from 2016-17) and 2019 (from 2016-18)). Frozen as `rapm.TUNED`:
+
+| Knob | Chosen | Note |
+|---|---|---|
+| Ridge strength (plays) | QB 500, RB 1,000, OL 1,000, LB 2,000, TE 2,000, WR 4,000, S 4,000, CB 32,000, DL 1,024,000 | DL at the top of the grid = prior only: on-field data did not help DL |
+| `lam_other` | 20,000 | not tuned |
+| Decay | 1.0 (old seasons count fully) | edge of the grid |
+| Situation terms | on | off costs +0.0066 MSE |
+| `box_scale` | 0.25 | **added to the tuning** (the spec fixes the prior as the box value "in the same units"); 1.0 costs +0.0009, 0 costs +0.0002 |
+
+Dev MSE 1.93863. One ridge strength for every group costs +0.0010.
+
+**Dev table** (season-ahead 2018 and 2019, all kept REG and POST plays: 55,543 plays, 534 games, games hash `2e7aa347318c6509`; paired bootstrap resampling games, 2,000 reps, seed 20261003). Optimistic for RAPM: its knobs were tuned on these predictions; the baselines were not.
+
+| Model | MSE | RAPM minus model [95% CI] |
+|---|---|---|
+| RAPM | 1.93863 | |
+| Team ratings (M3 opponent-adjust as of week 1, + situation terms) | 1.94136 | -0.00273 [-0.00417, -0.00128] |
+| Box values (M5, summed over the 22, refit) | 1.94050 | -0.00187 [-0.00319, -0.00048] |
+| Intercept | 1.94914 | -0.01051 [-0.01352, -0.00734] |
+
+By season: 2018 RAPM - team -0.0022 [-0.0040, -0.0004], RAPM - box -0.0026 [-0.0044, -0.0008]; 2019 RAPM - team -0.0033 [-0.0055, -0.0011], RAPM - box -0.0012 [-0.0032, +0.0008]. Box minus team -0.0009 [-0.0024, +0.0008]. Box baseline coefficients (offense sum, defense sum): 2018 +0.54, -0.99; 2019 +0.63, -0.74.
+
+**Secondaries (dev).**
+- Team-game EPA-per-play margin from the actual lineups (534 games): MSE RAPM 0.1793, team 0.1863, box 0.1890, intercept 0.1930; RAPM minus team -0.0069 [-0.0120, -0.0019], minus box -0.0097 [-0.0152, -0.0046].
+- Year-to-year correlation of values (200+ snaps in both seasons; mean of 2016-17, 2017-18, 2018-19): chained fits 0.63-0.85 (they share data, so they must correlate); single-season fits (decay 0) OL 0.10, TE 0.09, S 0.19, LB 0.24, WR 0.32, RB 0.41, QB 0.43, CB 0.45 and DL 0.65 (both mostly prior). One season of on-field signal mostly does not repeat for linemen, tight ends and the back seven.
+- Game model, descriptive: A4s logit + b x `rapm_lineup_delta_diff` (b fit on REG 2016..S-1; RAPM values with participation-based snap shares; expected lineup rescaled to 10 offensive and 11 defensive non-QB slots), REG 2018-2019 with moneylines, n = 512: A4s 0.2170, with the term 0.2177, +0.0007 [-0.0012, +0.0025]. b = -4.47 (2018), -1.15 (2019), although the term correlates +0.20 with the market's departure from A4s. 512 training games; reported only. The remembered lineups and expected shares use earlier weeks' participation of the same season, which a live run would not have.
+
+**Sanity** (ratings fit on 2016-2019, players with 300+ snaps in 2019; value, SD; full lists in `ml_m5b.py dev` output and `data/raw/ml/m5b/ratings_through_2019.parquet`). QB top: Mahomes +0.131 ± 0.045, Garoppolo, Watson, Rodgers, Carr; bottom: Rudolph -0.043, Goff, Haskins, D. Jones, Flacco. RB: Henry, A. Jones, Fournette, Kamara, Ekeler; bottom C. Hyde, Freeman. WR: Hill, Woods, Jeffery, Kupp, J. Jones (spread only about ±0.03). TE: Andrews, Heuerman, Kelce. OL: Whitworth +0.051 ± 0.035, Easton, Pugh, Solder, Bozeman, T. Smith; bottom Ereck Flowers -0.067. DL (prior only): Hunter, Donald, D. Lawrence. LB: Judon, Kendricks, Mack, Warner, Za'Darius Smith. CB (almost prior): Peters, Fuller, Gilmore, White. S: Harrison Smith, K. Jackson, Mathieu, E. Thomas.
+
+How far ratings moved from their priors (mean |value - prior|; posterior SD / prior SD): OL 0.0149 (0.82; prior is flat 0, so all OL spread is from the data), LB 0.0145 (0.81), QB 0.0290 (0.74), RB 0.0198 (0.79), TE 0.0100 (0.86), S 0.0075 (0.89), WR 0.0055 (0.93), CB 0.0012 (0.99), DL 0.0000 (1.00). Most individual intervals include zero.
+
+**Registry.** `m5b_tune`, `m5b_dev_rapm`, `m5b_dev_team`, `m5b_dev_box`, `m5b_dev_intercept`, `m5b_dev_game_model` (label `m5bdev`, window REG+POST 2018-2019), logged from an uncommitted tree; re-log after the commit if a clean-commit record is wanted. `signoff-dry-run` reproduces `data/raw/ml/m5b/dev.json` exactly (max |diff| 0).
+
+**Timing.** `clean` 7 s; `tune` 52 s (load 9 s, 362 settings 42 s); `dev` 53 s (evaluation 31 s, game model 6 s, stability 6 s); `leakcheck` 83 s; `signoff-dry-run` 52 s.
+
+### M5b holdout pre-registration (proposed 2026-10-05; not yet run)
+
+One holdout run, scored once, with the settings below frozen in committed code. The result is recorded here whatever it shows, and nothing is retuned afterwards.
+
+**Frozen settings.**
+- Ratings: `rapm.TUNED` = ridge strengths QB 500, RB 1,000, WR 4,000, TE 2,000, OL 1,000, DL 1,024,000, LB 2,000, CB 32,000, S 4,000; `lam_other` 20,000; decay 1.0; situation terms on; `box_scale` 0.25. Priors: M5 box values (`value.TUNED`: half-life 32 weeks, k as tuned in M5) at the start of each season S, rebuilt from data before S with position tables cut at S-1; position groups as of S-1. CG tolerance 1e-10.
+- Plays: `participation.build_plays` as committed (M1 scrimmage plays, garbage time outside 0.05-0.95 win probability, REG and POST, side repair, exactly 11 + 11 GSIS IDs). Expected from the cleaning counts: 177,545 kept plays in 1,693 games for 2020-2025 (if nflverse has not revised the files).
+- Baselines: (a) M3 opponent-adjust ratings (`opponent_adjust.TUNED`: lambda 100, half-life 48, rho 0.25) as of week 1 of S, plus the situation terms fit by weighted least squares on the training plays (each training season against the ratings as of the next season's week 1); (b) M5 box values summed over the 11 offensive and 11 defensive players (two coefficients) plus the situation terms, weighted least squares on the training plays with each training season's start-of-season values; (c) intercept-only reference. Training weights for all models: decay^(S-1-T) = 1.
+- Bootstraps: 2,000 replicates, seed 20261003; play-level CIs resample games.
+
+**Window.** Season-ahead for each S in 2020-2025: ratings and baselines fit on 2016..S-1, predicting every kept play of S. 2016-2019 data are training only.
+
+**Primary (exact).** Pooled over all 2020-2025 kept plays, with d = (EPA - RAPM prediction)^2 - (EPA - baseline prediction)^2, **PASS iff the upper end of the 95% game-cluster bootstrap CI of mean(d) is below 0 for BOTH the team baseline and the box baseline.**
+
+**Secondaries** (each reported; none changes the primary verdict):
+- S1: team-game EPA-per-play margin MSE from the actual lineups; RAPM minus team and RAPM minus box, paired bootstrap over games; pass iff the CI upper bound is below 0 (reported separately for each).
+- S2: the per-season table (MSE of each model and RAPM-minus-baseline CIs for each of 2020-2025). Descriptive.
+- S3: year-to-year correlation of player values by position group, chained and single-season fits, 2016-2025. Descriptive.
+- S4: game model, descriptive: A4s logit + b x `rapm_lineup_delta_diff` (b refit for each S on REG 2016..S-1) against A4s on REG 2020-2025 games with moneylines (the M3 sign-off game set: n = 1,615, games hash `1b27abff81bddb2c` expected), paired Brier CI.
+
+**Procedure.** First `python scripts/ml_m5b.py signoff-dry-run`: the same code path on dev 2018-2019 without logging; it must print REPRODUCED against `data/raw/ml/m5b/dev.json` (run `ml_m5b.py dev` on the committed code first). Then, once, `python scripts/ml_m5b.py signoff`: it refuses to start if any `m5b_signoff_*` run with `holdout: true` exists in `experiments/runs/`, prints every number and each rule's verdict, writes `data/raw/ml/m5b/signoff_holdout.json`, and logs `m5b_signoff_rapm`, `_team`, `_box`, `_intercept` and `_game_model` with `holdout: true`. Whatever happens is recorded in this file.
+
 ## 10. Open decisions for Walker (start the ML chat here)
 
 - **D1. Share-alike data: DECIDED 2026-10-03.** Accepted. Personnel-based work (M5b, M6, M7) will be released under CC BY-SA. Stages A and M5a use only CC BY data, so they stay unrestricted and are done first. This can be revisited later (for example, by licensing play-level data directly) without touching A or M5a.
@@ -675,3 +756,4 @@ Elo 0.2175, market 0.2110. Weeks 1-4: B3 +0.0009 (the preseason term does not fi
 | 2026-10-04 | M4-D3 approved: the playoff simulation includes per-team strength shocks (tau_rest tuned on 2001-2005, backtested on DEV). Walker wants the game model eventually to account for the whole roster that suits up, not just the QB; see M5. |
 | 2026-10-04 | M4 Phase 1 built. The live record starts with nflverse week 5 (first kickoff Thursday 2026-10-08; the write-up's "week 6" was off by one). QB change tag threshold 0.08 EPA per dropback. Model series color `--series-3`. |
 | 2026-10-05 | M5 method approved (`context/ml-m5-method.md`). D1: CC BY only, so playing time comes from usage stats and participation is used only for validation. D2: the final injury report and game-day inactives count as pregame facts, and the Friday-only version (B3f) is always reported. D3: the evaluation window is 2012-2019, compared with A4s on the same games. D4: M5 runs as a shadow model in 2026 and can be promoted in 2027. |
+| 2026-10-05 | M5b built under the standing delegation (dev only). Participation sides are rebuilt from `players_on_play` (raw drop rate 12.7% in 2016 and 7.9% in 2018, under 0.5% after). `box_scale` (the prior is 0.25 x the box value) was added to the tuning. Settings frozen in `rapm.TUNED`; holdout pre-registration proposed in "M5b holdout pre-registration", awaiting review before the one run. |

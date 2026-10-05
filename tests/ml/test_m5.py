@@ -222,16 +222,31 @@ def test_m5_dev_window_is_guarded(tmp_path):
                          data={}, runs_dir=tmp_path)
 
 
+M5B_MODULES = {"nflelo/ml/players/participation.py", "nflelo/ml/players/rapm.py", "scripts/ml_m5b.py"}
+
+
 def test_participation_is_read_only_by_the_validation_module():
-    """Decision M5-D1 (a): participation (CC BY-SA) may only be read for validation."""
+    """Decision M5-D1 (a): participation (CC BY-SA) may only be read for validation, or by the M5b modules.
+
+    M5b (approved under D1) reads participation and is CC BY-SA; nothing else
+    (A4s, the live pipeline, the M5 features) may touch it or anything derived from it.
+    """
     allowed = {ROOT / "nflelo/ml/data.py", ROOT / "nflelo/ml/players/validate.py", ROOT / "scripts/ml_m5.py"}
+    allowed |= {ROOT / p for p in M5B_MODULES}
     hits = []
     for path in list((ROOT / "nflelo").rglob("*.py")) + list((ROOT / "scripts").glob("*.py")):
         if path in allowed:
             continue
-        if re.search(r"load_participation|['\"]participation['\"]|validate import|players\.validate", path.read_text()):
+        if re.search(r"load_participation|['\"]participation['\"]|validate import|players\.validate"
+                     r"|import participation|participation as|players\.participation|\brapm\b", path.read_text()):
             hits.append(str(path.relative_to(ROOT)))
     assert not hits, f"participation referenced outside the validation code: {hits}"
+    # M5 itself still reads participation only through the validation loader
+    src5 = (ROOT / "scripts/ml_m5.py").read_text()
+    assert "rapm" not in src5 and "players import participation" not in src5
+    # the M5b modules carry the share-alike license note
+    for p in M5B_MODULES:
+        assert "CC BY-SA 4.0" in (ROOT / p).read_text(), p
     src = (ROOT / "scripts/ml_m5.py").read_text()
     tree = ast.parse(src)
     users = {n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)

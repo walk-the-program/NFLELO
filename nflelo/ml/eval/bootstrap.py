@@ -41,3 +41,35 @@ def paired_bootstrap_diff(d, reps: int = 2000, seed: int = 20261003, level: floa
     return {"n": int(n), "diff": float(d.mean()), "ci_low": float(lo), "ci_high": float(hi),
             "level": level, "reps": int(reps), "seed": int(seed),
             "excludes_zero": bool(lo > 0 or hi < 0), "boot_se": float(means.std(ddof=1))}
+
+
+def cluster_bootstrap_diff(d, clusters, reps: int = 2000, seed: int = 20261003, level: float = 0.95,
+                           chunk: int = 250) -> dict:
+    """Bootstrap CI for the mean of per-row loss differences `d`, resampling whole clusters (e.g. games).
+
+    Rows inside a cluster are not independent (plays within a game), so each
+    replicate draws clusters with replacement and recomputes the row-weighted
+    mean: sum of d over the drawn clusters / their row count.
+    """
+    d = np.asarray(d, float)
+    codes, _ = _codes(clusters)
+    C = int(codes.max()) + 1 if len(codes) else 0
+    s = np.bincount(codes, weights=d, minlength=C)
+    n = np.bincount(codes, minlength=C).astype(float)
+    rng = np.random.default_rng(seed)
+    means = np.empty(reps)
+    for start in range(0, reps, chunk):
+        k = min(chunk, reps - start)
+        idx = rng.integers(0, C, size=(k, C))
+        means[start:start + k] = s[idx].sum(axis=1) / n[idx].sum(axis=1)
+    alpha = (1 - level) / 2
+    lo, hi = np.quantile(means, [alpha, 1 - alpha])
+    return {"n": int(len(d)), "clusters": C, "diff": float(d.mean()), "ci_low": float(lo), "ci_high": float(hi),
+            "level": level, "reps": int(reps), "seed": int(seed),
+            "excludes_zero": bool(lo > 0 or hi < 0), "boot_se": float(means.std(ddof=1))}
+
+
+def _codes(clusters):
+    import pandas as pd
+    codes, uniq = pd.factorize(np.asarray(clusters, dtype=object))
+    return codes, uniq

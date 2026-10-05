@@ -2,7 +2,7 @@
 
 Written 2026-10-05 by Claude under Walker's standing delegation (see the `CONTEXT.md` decision log). Read `context/ml-m5-method.md` and the M5 build notes in `context/ml.md` first.
 
-Status: **approved under delegation 2026-10-05; build in progress.**
+Status: **approved under delegation 2026-10-05; built 2026-10-05 (dev results and the proposed holdout pre-registration are in `context/ml.md`, "M5b build notes").**
 
 ---
 
