@@ -2,7 +2,7 @@
 
 This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
 
-Last updated: 2026-10-03 (ML M3 holdout run)
+Last updated: 2026-10-05 (ML M1-M7 complete)
 
 ## What this project is
 
@@ -15,7 +15,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 
 **Purpose (Walker, 2026-10-05):** NFLELO is a portfolio piece for getting hired by NFL teams, not a betting product. The priority is the most rigorous, premium model possible, with the full set of site pages built around it. No betting features: no picks against the spread, no units, no EV bets, no sportsbook offers. Vegas appears only as a benchmark to measure against. Every page should read like work a front office would respect: clear methods, honest uncertainty, and verifiable results.
 
-## What exists today (as of 2026-10-02)
+## What exists today (as of 2026-10-05)
 
 **Elo v2, the current system.** `scripts/build.py` pulls nflverse, rebuilds `data/games.csv` (1970 onward), runs Elo, and writes `outputs/` (per-game ratings, current ratings JSON, model report). Details are in `context/data-and-elo.md`.
 
@@ -32,7 +32,9 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | `README.md` | Usage notes for the legacy script. |
 | `Other/` | Word drafts. Kept out of git because the repo is public. |
 
-**ML foundations (M1 and M2, built 2026-10-03).** `nflelo/ml/` caches nflverse play-by-play for 1999-2025 into the gitignored `data/raw/ml/`, builds leak-proof team-efficiency features, and scores models in a walk-forward harness with a locked 2020-2025 holdout. Runs are logged to `experiments/runs/`. **M3 game model (passed 2026-10-04).** Logistic regression on Elo log-odds, opponent-adjusted EPA margin, and a starting-QB delta. DEV 2006-2019 Brier 0.2151 vs Elo 0.2178 (CI excludes zero). On the one holdout run (2020-2025, 1,615 games) it scored 0.2195 vs Elo 0.2231 and the market 0.2096, beating Elo in all six seasons; its ECE of 0.028 missed the 0.02 bar, which turned out to be too tight for the sample size. **M3 is marked passed** (Walker, 2026-10-04). Details are in `context/ml.md`.
+**ML models (M1-M7, built 2026-10-03 to 2026-10-05).** `nflelo/ml/` holds the data cache, leak-proof features, evaluation harness, and every model. **The results scoreboard is `context/ml-results.md`.** Every model was scored once on the locked 2020-2025 seasons under pre-committed rules. Passed: the game model (A4s), playoff odds, the play model (M6), our no-market WP model (M7a), and early-down play calling (M7b). Failed or negative: the margin model, box-score and on-field player values, and fourth-down conversion calibration.
+
+**Live 2026 pipeline.** `.github/workflows/weekly.yml` runs Wednesday and Sunday: Elo rebuild, `scripts/ml_predict.py` (A4s predictions plus the Kalman shadow model, logged before kickoff in `experiments/live/`), the playoff simulation, and the site export. The site in `site/` is not hosted yet.
 
 ### Legacy Elo model (2025)
 
@@ -67,15 +69,13 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 
 - **Pipeline.** A scheduled GitHub Action runs every Wednesday. It pulls nflverse with `nflreadpy`, reruns Elo, and writes JSON. A static site reads the JSON. Hosting is free on GitHub Pages or Cloudflare Pages, with no server and no database.
 - **Model fixes.** Done 2026-10-02: data switch to nflverse, learned HFA, a wider grid tuned on held-out seasons, and a playoffs option (tested; it doesn't help, so it's off). Held-out Brier for 2010-2025 went from 0.2244 to 0.2201. The market scores 0.2104 on the same games.
-  - Next: a starting-QB adjustment.
-  - Later: show Elo against the betting market on the site.
+  - Superseded by the ML game model (M3), which adds the starting-QB adjustment; Vegas is shown only as a benchmark.
 - **Site features:**
   - Weekly power ladder with movement since last week.
   - Playoff odds from a Monte Carlo season simulation.
   - Luck leaderboard.
   - Team history explorer covering 1970 to now.
-  - Picks of the week vs. the betting line.
-  - A running scoreboard of Elo vs. the market.
+  - A running scoreboard of Elo, the model, and the market (the market as a benchmark only).
   - Upset tracker and the "any given Sunday" meter.
 
 ### Machine learning candidates, ranked by value per effort
