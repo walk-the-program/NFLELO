@@ -296,7 +296,7 @@ No paid APIs, no cloud.
 | M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Phase 1 built 2026-10-04 (weekly predictions, ledger, site, Action). Phase 2 built 2026-10-04; holdout sign-off run once on 2026-10-05: **margin model FAIL** on its primary (MAE vs Elo -0.059, CI [-0.150, +0.035] includes zero), **playoff odds PASS** (made-playoffs ECE 0.028 <= 0.044; Brier vs tau 0 -0.0024, CI upper bound -0.00015 < +0.001). Odds stay gated off the site until Walker decides. |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Built 2026-10-05 (player values, lineups, ladder on 2012-2019). **No gain over A4s**: B1-B3 within noise, the one-SE rule keeps B0 (A4s). Stopped before the notebook, holdout, shadow and site work; awaiting Walker. See "M5 build notes". |
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | **Holdout run 2026-10-05: primary FAIL.** Beats team ratings, loses to box-score values. Kept as a descriptive player view. |
-| M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | Built 2026-10-05 (dev only). Every model beats the down-distance-zone baseline by 0.015-0.019 yards of CRPS (about 0.4%) with CIs well below 0. One-SE pick **GBM in both views**. Player identities add at most 0.002 yards (call view N2 minus N0 -0.0023 [-0.0040, -0.0004]; situation view nothing). Dev acceptance preview: PASS in both views under the calibration rule with the 0.010 ECE floor (added 2026-10-05, before any holdout number; null-only, the call view would miss by 0.0002). Holdout pre-registration proposed, not run. See "M6 build notes". |
+| M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | **Passed 2026-10-05** (holdout, both views): GBM beats the situational baseline on season-ahead CRPS (-0.018, CI excludes zero); calibration passed on the 0.01 floor. |
 | M7 | Personnel decision support (causal) | M6 | Not started |
 
 ### M1/M2 build notes (2026-10-03)
@@ -972,3 +972,22 @@ Pre-registered rules, season-ahead 2020-2025, 177,545 plays in 1,693 games, game
 - **Stability:** single-season year-to-year correlations stay low for OL (0.06-0.24), TE (-0.21 to 0.39) and S (-0.10 to 0.30). Chained fits run 0.6-0.95, mostly through their priors.
 
 **Reading.** Player-level information beats team-level information season-ahead: both player methods beat team ratings, so who is on the field matters. But on-field plus-minus adds nothing beyond box-score credit once you know who played, and dev tuning (box_scale, the ridge strengths) didn't carry to 2020-2025. For a public-data model this is a real finding: with about 28,000 plays a season and five linemen always on the field together, individual on-field effects are too collinear and noisy to beat simple credit. The RAPM ratings stay available as a descriptive player view with intervals; they don't feed the game model.
+
+### M6 holdout sign-off (run once, 2026-10-05, commit cb9cd4d, clean tree)
+
+Season-ahead 2020-2025, 177,545 plays in 1,693 games (hash 972732120634b559). The dry run reproduced dev exactly before the real run. **M6 PRIMARY: PASS (both views).**
+
+| View | Model | CRPS | vs baseline [95% CI] | P(first down or TD) ECE | Null p95 | Rule |
+|---|---|---|---|---|---|---|
+| Situation | Baseline | 3.8617 | | 0.0078 | 0.0032 | |
+| Situation | **GBM** | **3.8436** | **-0.0181 [-0.0198, -0.0164]** | 0.0068 | 0.0033 | PASS (floor) |
+| Call | Baseline | 3.7902 | | 0.0076 | 0.0033 | |
+| Call | **GBM** | **3.7713** | **-0.0189 [-0.0206, -0.0172]** | 0.0074 | 0.0032 | PASS (floor) |
+
+- **Calibration passed on the 0.01 practical floor, not the statistical null.** At 177k plays the null band is about 0.003. Every model fails the null-only test, the baseline included. The floor was set before the holdout, on dev evidence (see the rule change above).
+- **Consistency:** the GBM beats the baseline in every season, both data eras (NGS -0.0165 and FTN -0.0198 in the situation view), and every down and field-zone split. Fourth down is borderline (n 3,294).
+- **Player identity (secondary):** this time it helps a little.
+  - Call view: N1 minus N0 -0.0012 [-0.0019, -0.0005]; N2 minus N0 -0.0022 [-0.0032, -0.0013].
+  - Situation view: N2 minus N0 -0.0013 [-0.0022, -0.0004].
+  - That's about 10% of the model's total gain over the baseline. The GBM, which has no identities, still beats every network (GBM minus N2 -0.0011 to -0.0013; the CI touches zero).
+- **Reading:** the play model works, and gives a real, consistent improvement in the full yards distribution from pre-snap information. Player identities carry a small amount of extra signal at the play level, consistent with M5b's finding that player-level beats team-level. The GBM's tabular structure features matter more.
