@@ -297,7 +297,7 @@ No paid APIs, no cloud.
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Built 2026-10-05 (player values, lineups, ladder on 2012-2019). **No gain over A4s**: B1-B3 within noise, the one-SE rule keeps B0 (A4s). Stopped before the notebook, holdout, shadow and site work; awaiting Walker. See "M5 build notes". |
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | **Holdout run 2026-10-05: primary FAIL.** Beats team ratings, loses to box-score values. Kept as a descriptive player view. |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | **Passed 2026-10-05** (holdout, both views): GBM beats the situational baseline on season-ahead CRPS (-0.018, CI excludes zero); calibration passed on the 0.01 floor. |
-| M7a | Fourth-down decision support: our own WP model (CC BY), FG and punt models (CC BY), go / FG / punt valuation with bootstrap bands (CC BY-SA) | M3, M6 | Built 2026-10-05 (dev only; holdout not run). WP beats nflfastR `wp` on dev 2018-2019 (Brier 0.1429 vs 0.1527, -0.0098 [-0.0180, -0.0014]) and trails `vegas_wp` (0.1380). Conversion and FG calibration pass, and the punt distribution beats its baseline (rules as amended 2026-10-05 before any holdout number): **dev acceptance preview PASS**. Audit (model-estimated): teams matched 65% of recommendations (81% of clear calls), 57% of calls are toss-ups. Pre-registration proposed; dry run and sign-off not yet run. See "M7a build notes". |
+| M7a | WP model + fourth-down decisions | M6 | **Holdout 2026-10-05: primary FAIL** (conversion calibration). The WP model passes and beats nflfastR wp (-0.0099 Brier); FG and punt pass. The audit is published. |
 | M7b | Early-down play type and personnel (causal, Part B of the M7 spec) | M6 | Not started |
 
 ### M1/M2 build notes (2026-10-03)
@@ -1077,3 +1077,33 @@ One holdout run, scored once, with everything frozen in committed code. The resu
 **Risk stated before the run.** The play-level WP rule passed on dev against an independent-play null that is too narrow for game-clustered outcomes; the 0.010 floor is the realistic pass route at holdout n.
 
 **Procedure.** First `python scripts/ml_m7a.py dev`, then commit, then `python scripts/ml_m7a.py signoff-dry-run` on the clean committed tree: it reruns the sign-off code path on 2018-2019 without logging and must print REPRODUCED against `data/raw/ml/m7a/dev.json`; it records the commit. Then, once, under Walker's standing delegation (CONTEXT.md, 2026-10-05; the whole procedure runs under it), `python scripts/ml_m7a.py signoff`: it refuses if any `m7a_signoff_*` run with `holdout: true` exists, and refuses unless the dry run reproduced dev on the same commit with a clean tree. It prints every number and each rule's verdict, writes `data/raw/ml/m7a/signoff_holdout.json`, and logs `m7a_signoff_{wp,wp_isotonic,bench_nflfastr_wp,bench_vegas_wp,fg,punt,conversion,audit}` with `holdout: true`. Whatever happens is recorded in this file.
+
+### M7a holdout sign-off (2026-10-05, commit 66a028f, clean tree)
+
+**About the run.** The first sign-off attempt was stopped by a 2-hour tool time limit after 3 of 6 seasons. It had printed only per-season timings, with no outcome numbers, and logged no runs. The run was restarted from scratch as a detached process on the same commit, and that restart is the single holdout look. The dry run had reproduced dev exactly beforehand.
+
+**M7a PRIMARY: FAIL.** WP passed; the components failed on conversion calibration.
+
+| Rule | Result |
+|---|---|
+| WP calibration (233,913 plays, 1,610 games) | ECE 0.0092, under the 0.01 floor, **pass** |
+| WP Brier gap to nflfastR `wp` (≤ +0.002) | **-0.0099 [-0.0146, -0.0055]: ours is better, pass** |
+| FG make calibration (6,312 attempts) | ECE 0.0113 ≤ null p95 0.0132, **pass** |
+| Punt CRPS vs by-spot baseline (12,417 punts) | 5.461 vs 5.566, -0.105 [-0.126, -0.086], **pass** |
+| Conversion calibration, engine on actual go attempts (4,589) | ECE 0.0272 vs null p95 0.0216 and floor 0.01, **FAIL** |
+
+**WP benchmarks:** ours 0.1559, nflfastR `wp` 0.1659, `vegas_wp` 0.1497 (ours minus Vegas +0.0062 [+0.0039, +0.0086]). Ours is better than nflfastR's in Q1-Q3 and ties it in Q4 (0.0993 vs 0.0988). Calibration is weakest in close games (ECE 0.02-0.03 for margins of -3 to +3).
+
+**Conversion, the reason for the FAIL:**
+- The average is near right: on pooled 4th-and-1 and 4th-and-2 the engine predicted 0.643 and teams converted 0.652 (+0.008 [-0.010, +0.027]).
+- 4th-and-2 is under-predicted by +0.042 [+0.006, +0.079].
+- M6 with each play's own features is calibrated on 4th downs (ECE 0.020 ≤ 0.025), so the miss comes from the engine's approximation: run and pass mixed by the league's run share rather than by what teams actually call on 4th down.
+- Fixing this is the first M7a follow-up. Any fix needs a fresh test on 2026 live data, because the holdout is now spent.
+
+**Decision audit (model-estimated; 22,576 fourth downs; published whatever it shows):**
+- Teams matched the recommendation on 66.7% of fourth downs, and 79.8% of clear calls. 51.8% of calls are toss-ups.
+- The model recommends going for it 9,381 times; teams went 4,589 times.
+- Estimated WP given up: 97.9 wins over 6 seasons, 0.061 per game, 0.030 per team-game. Punts account for 66.6, field goals 22.0, go-for-its 9.2.
+- **Consistency:** the model's value of the chosen option matches the realized next-snap WP for punts (-0.0002 [-0.0006, +0.0002]) and go-for-its (+0.0009 [-0.0013, +0.0032]). Field goals are slightly under-valued (+0.0024 [+0.0009, +0.0038]).
+
+**Reading.** Our own WP model, built without any market input, is clearly better than nflfastR's public WP on unseen seasons, which is a strong standalone result. The fourth-down recommendations agree with realized outcomes, and they say teams still punt too often. But the go-for-it conversion component isn't calibrated well enough to pass as written, so the fourth-down tool ships as "model-estimated, conversion slightly conservative at 4th-and-2."
