@@ -223,6 +223,9 @@ def test_m5_dev_window_is_guarded(tmp_path):
 
 
 M5B_MODULES = {"nflelo/ml/players/participation.py", "nflelo/ml/players/rapm.py", "scripts/ml_m5b.py"}
+# M6 (the play model, approved CC BY-SA under D1) reads participation through the M5b cleaning and the M5b
+# ratings; tests/ml/test_m6.py keeps its own modules from being imported anywhere else.
+M6_MODULES = {"nflelo/ml/plays/data.py", "nflelo/ml/plays/net.py", "scripts/ml_m6.py"}
 
 
 def test_participation_is_read_only_by_the_validation_module():
@@ -232,7 +235,7 @@ def test_participation_is_read_only_by_the_validation_module():
     (A4s, the live pipeline, the M5 features) may touch it or anything derived from it.
     """
     allowed = {ROOT / "nflelo/ml/data.py", ROOT / "nflelo/ml/players/validate.py", ROOT / "scripts/ml_m5.py"}
-    allowed |= {ROOT / p for p in M5B_MODULES}
+    allowed |= {ROOT / p for p in M5B_MODULES | M6_MODULES}
     hits = []
     for path in list((ROOT / "nflelo").rglob("*.py")) + list((ROOT / "scripts").glob("*.py")):
         if path in allowed:
@@ -245,7 +248,7 @@ def test_participation_is_read_only_by_the_validation_module():
     src5 = (ROOT / "scripts/ml_m5.py").read_text()
     assert "rapm" not in src5 and "players import participation" not in src5
     # the M5b modules carry the share-alike license note
-    for p in M5B_MODULES:
+    for p in M5B_MODULES | M6_MODULES:
         assert "CC BY-SA 4.0" in (ROOT / p).read_text(), p
     src = (ROOT / "scripts/ml_m5.py").read_text()
     tree = ast.parse(src)

@@ -436,7 +436,8 @@ def _load(dataset: str, seasons: Iterable[int], columns: list[str] | None,
         if columns is not None:
             required = {"pbp": PBP_REQUIRED, "schedules": SCHEDULE_REQUIRED,
                         "player_stats": PLAYER_STATS_REQUIRED, "injuries": INJURIES_REQUIRED,
-                        "rosters_weekly": ROSTERS_REQUIRED}.get(dataset, [])
+                        "rosters_weekly": ROSTERS_REQUIRED,
+                        "participation": PARTICIPATION_REQUIRED}.get(dataset, [])
             need = sorted(set(columns) | (set(required) if validate else set()))
         df = pd.read_parquet(path, columns=need)
         if validate and dataset in _VALIDATORS:
@@ -520,7 +521,8 @@ PARTICIPATION_CREDIT = {"ngs": "NFL Next Gen Stats via nflverse (2016-2022)", "f
 PARTICIPATION_FTN_FIRST = 2023  # nflverse switched the participation source from NGS to FTN in 2023
 
 
-def load_participation(seasons: Iterable[int], validate: bool = True, root: Path = ML_DIR) -> pd.DataFrame:
+def load_participation(seasons: Iterable[int], validate: bool = True, root: Path = ML_DIR,
+                       columns: list[str] | None = None) -> pd.DataFrame:
     """Participation (who was on the field, every play; 2016+) for M5b on-field ratings. CC BY-SA 4.0.
 
     Approved for M5b under decision D1 (2026-10-03). Only the M5b modules
@@ -529,10 +531,11 @@ def load_participation(seasons: Iterable[int], validate: bool = True, root: Path
     and must never flow into A4s or any CC BY artifact (a test enforces the
     import boundary). Credit: NFL Next Gen Stats via nflverse for 2016-2022,
     FTN Data via nflverse for 2023 onward. Cached per season with a manifest
-    entry, like every other dataset here.
+    entry, like every other dataset here. M6 (`nflelo.ml.plays`, also CC BY-SA)
+    reads it too, with `columns` limited to the pre-snap fields.
     """
     seasons = [int(s) for s in seasons if int(s) >= FIRST_SEASON["participation"]]
-    df = _load("participation", seasons, None, validate, root)
+    df = _load("participation", seasons, columns, validate, root)
     return df
 
 

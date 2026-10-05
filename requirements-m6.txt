@@ -1,0 +1,6 @@
+# M6 play model (local only). Kept out of requirements-ml.txt because the weekly GitHub Action installs that
+# file, and on Linux the default torch wheel is the multi-GB CUDA build. CPU-only install:
+#   macOS:  pip install -r requirements-m6.txt
+#   Linux:  pip install -r requirements-m6.txt --extra-index-url https://download.pytorch.org/whl/cpu
+-r requirements-ml.txt
+torch>=2.4
