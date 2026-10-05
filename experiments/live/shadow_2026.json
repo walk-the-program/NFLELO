@@ -168,8 +168,8 @@
     "data/raw/ml/schedules/2025": "81066567d1c138059687806a679f5a233d91196fb535ea06a2541596dfdd378c"
   },
   "git": {
-    "sha": "2bc39a7d726677f0a65acb1ae6047f89c9c07d0c",
-    "dirty": true
+    "sha": "00b2c225d26442aae1b1017f96c1274a43ea2677",
+    "dirty": false
   },
-  "fitted_at_utc": "2026-10-05T06:34:08Z"
+  "fitted_at_utc": "2026-10-05T06:41:36Z"
 }
