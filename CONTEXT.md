@@ -93,6 +93,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 - **Hosting.** Recommended: Cloudflare Pages, connected to the repo, publishing `site/` with no build step. Walker creates the Cloudflare account and picks the domain; Claude does the rest.
 - **GitHub cache purge.** The support request is drafted in `context/pending/github-purge-request.txt` and needs Walker's signed-in Chrome to submit.
 - **M5 method write-up** (pregame-lineup player values), built on `context/m5-data-scope.md`.
+- **One master notebook** (Walker, 2026-10-05): a single `.ipynb` that walks through the WHOLE project end to end: data, Elo, features, models, evaluation, the live pipeline, and the simulation. It calls the real package code instead of copying it. This is a wish for later, not the working method.
 
 ## Decision log
 
@@ -114,6 +115,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-04 | Walker marked M3 passed. The 0.02 ECE bar is recorded as a flawed criterion (too tight for n 1,615), not quietly moved. The model was not recalibrated after seeing the holdout. From M4 on, the calibration check is sample-size-aware: ECE is compared with the distribution a perfectly calibrated model would produce at the same n. M4 started. |
 | 2026-10-04 | The name stays NFLELO, with "NFL" kept on purpose (Walker). The site will be public, hosted by Walker alongside his other websites, not on GitHub Pages. Claude owns everything on GitHub, including the support request to purge the cached pre-rewrite commits (17 orphaned commits ending at a4233624; three of them added the removed files). |
 | 2026-10-05 | M4 holdout sign-off, run once on pre-registered rules (commit e51e890). The margin model FAILS its primary: MAE beat Elo's spread by 0.059 points (10.126 vs 10.185), but the CI [-0.150, +0.035] includes zero; it passes all three secondaries. The market spread's MAE is 9.764. Playoff odds (tau_rest 4.5) PASS every rule: made-playoffs ECE 0.028 within the null, Brier 0.1234 vs 0.1258 for tau 0 (CI excludes zero). The odds stay hidden on the site (`publish_sim` false) until Walker decides. |
+| 2026-10-05 | Walker: publish the playoff odds (`publish_sim` true) and keep the model spread on the site, with methodology copy stating that its edge over Elo's spread is not proven. M4 is complete. |
 
 ## Context file index
 
