@@ -1,0 +1,170 @@
+{
+  "name": "m3b_tune_qb",
+  "label": "tune",
+  "window": {
+    "seasons": [
+      2000,
+      2008
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 4060,
+  "games_hash": "c26b1d1e3fafc39b",
+  "metrics": {
+    "n": 4060
+  },
+  "features": [],
+  "params": {
+    "qb": {
+      "k": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "rookie_dropbacks": 100,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    }
+  },
+  "data": {
+    "data/raw/ml/pbp/1999": "6263ca0dcafed4110f1da80be5126eedc2fba948b3de111dc2e8dd94165ce595",
+    "data/raw/ml/pbp/2000": "29a0904f123de7fe9c10ff07e7605bb29d753ff87f2026659605e60b2c0aa243",
+    "data/raw/ml/pbp/2001": "7b34b78901915ca98449190a1a911308275cc764eb3e565376c3d44667933dc1",
+    "data/raw/ml/pbp/2002": "46fe8b49e4f94e479cf8e5dbb87d90b577d76d0a503d6bf4f2191902f95391a2",
+    "data/raw/ml/pbp/2003": "c45fa61ddb3eba8c316f8c680362284ed01174728ca6e22bdfdba6083d5ec707",
+    "data/raw/ml/pbp/2004": "c95a80bffc740d438965320a6014f9cb839fa57e92e114b2783fc76d8acce653",
+    "data/raw/ml/pbp/2005": "c7e4b4984af805df9719a23004a967593e7d503025b1c301973606e0e4f7cc61",
+    "data/raw/ml/pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+    "data/raw/ml/pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+    "data/raw/ml/pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+    "data/raw/ml/schedules/1999": "b590c0c595ae702489068ed30d25460a1da2f129ce47c4143c8c28618fbb2749",
+    "data/raw/ml/schedules/2000": "d11ca64a246a9b9ce98beb15af6a337887f1a31658a1271d510ef62e094fd927",
+    "data/raw/ml/schedules/2001": "59deb3483354d8e24a55eef5e508f4824a3cdfff44936adea6d02af34c64fffd",
+    "data/raw/ml/schedules/2002": "b394de36fc6286647bdfa1a82383b0fec5f83a5e0aeaefc010336c72f1365545",
+    "data/raw/ml/schedules/2003": "70b3c8a10df7a205ee8bc446fa40dca4f7408f3900d063f1881860119de4834c",
+    "data/raw/ml/schedules/2004": "64d26bdf22af5736b507a04b82c73b17ded7765ad2940c02d880abbe5779d978",
+    "data/raw/ml/schedules/2005": "3535ab82c2c6b866d94623aba9f37eac3b7497fd5ff61898904e03420d80795a",
+    "data/raw/ml/schedules/2006": "04e8c1a0394137e8493db6bf228a75ab1e0e8104eca4056380c13168174fca98",
+    "data/raw/ml/schedules/2007": "ed35269017c5342a04e621717760da8ccdc68421f7a38685eaa355af90d875b2",
+    "data/raw/ml/schedules/2008": "76a274f12d0efbdc6220870e083597fe6669f33bf5f94d30ade9d11efbc3423d"
+  },
+  "git": {
+    "sha": "ca705de4951f4c4a2ae482cf1d51d6972a6801e4",
+    "dirty": false
+  },
+  "timestamp": "2026-10-05T06:27:49+00:00",
+  "notes": "M3b C3 QB extras: experience and aging on 2000-2005, CPOE on 2007-2008 (next-game starter EPA per dropback, dropback-weighted MSE). Draft round not used (nflverse players draft fields come from Pro-Football-Reference).",
+  "results": {
+    "experience": {
+      "offsets": [
+        -0.0541,
+        0.0159,
+        0.1412,
+        0.0648
+      ],
+      "wmse": 0.10838848856543366,
+      "base_wmse": 0.10918214626299075,
+      "bucket_games": [
+        210,
+        409,
+        506,
+        1911
+      ],
+      "edges": [
+        0,
+        100,
+        500,
+        2000
+      ]
+    },
+    "experience_changed": {
+      "offsets": [
+        -0.0651,
+        0.08,
+        0.0329,
+        0.0318
+      ],
+      "wmse": 0.11444571533243834,
+      "base_wmse": 0.11588176986150744,
+      "n_games": 351,
+      "all_starter_offsets_wmse_here": 0.11504561867967909
+    },
+    "aging": {
+      "curve": [
+        31.0,
+        0.14,
+        0.0
+      ],
+      "wmse": 0.1080979965600884,
+      "base_wmse": 0.10918214626299075,
+      "grid_top5": [
+        {
+          "peak": 31,
+          "before": 0.14,
+          "after": 0.0,
+          "wmse": 0.1080979965600884
+        },
+        {
+          "peak": 31,
+          "before": 0.12,
+          "after": 0.0,
+          "wmse": 0.10810869408285916
+        },
+        {
+          "peak": 31,
+          "before": 0.14,
+          "after": -0.005,
+          "wmse": 0.10810882544825078
+        },
+        {
+          "peak": 31,
+          "before": 0.12,
+          "after": -0.005,
+          "wmse": 0.10811968635629887
+        },
+        {
+          "peak": 31,
+          "before": 0.14,
+          "after": -0.01,
+          "wmse": 0.10812130333178159
+        }
+      ],
+      "qb_games_with_age": 4361,
+      "qb_games": 4361
+    },
+    "cpoe": {
+      "cpoe_weight": 0.01,
+      "cpoe_k": 400.0,
+      "wmse": 0.11457294580166469,
+      "base_wmse": 0.11489572021115581,
+      "n_games": 1024,
+      "grid_top5": [
+        {
+          "cpoe_weight": 0.01,
+          "cpoe_k": 400,
+          "wmse": 0.11457294580166469
+        },
+        {
+          "cpoe_weight": 0.0075,
+          "cpoe_k": 200,
+          "wmse": 0.11457634592083005
+        },
+        {
+          "cpoe_weight": 0.015,
+          "cpoe_k": 800,
+          "wmse": 0.11458031549320587
+        },
+        {
+          "cpoe_weight": 0.0125,
+          "cpoe_k": 400,
+          "wmse": 0.11459204971938224
+        },
+        {
+          "cpoe_weight": 0.005,
+          "cpoe_k": 100,
+          "wmse": 0.11459258684472452
+        }
+      ]
+    },
+    "seconds": 18.050695624900982
+  }
+}
