@@ -1,0 +1,7450 @@
+{
+  "name": "m5b_tune",
+  "label": "m5bdev",
+  "window": {
+    "seasons": [
+      2018,
+      2019
+    ],
+    "game_type": "REG+POST"
+  },
+  "holdout": false,
+  "n": 55543,
+  "games_hash": "2e7aa347318c6509",
+  "metrics": {
+    "n": 55543,
+    "mse": 1.9386303734768664
+  },
+  "features": [],
+  "params": {
+    "chosen": {
+      "lam": {
+        "CB": 32000.0,
+        "DL": 1024000.0,
+        "LB": 2000.0,
+        "OL": 1000.0,
+        "QB": 500.0,
+        "RB": 1000.0,
+        "S": 4000.0,
+        "TE": 2000.0,
+        "WR": 4000.0
+      },
+      "lam_other": 20000.0,
+      "decay": 1.0,
+      "situation": true,
+      "box_scale": 0.25
+    },
+    "grid": {
+      "lam": [
+        125.0,
+        250.0,
+        500.0,
+        1000.0,
+        2000.0,
+        4000.0,
+        8000.0,
+        16000.0,
+        32000.0,
+        64000.0,
+        128000.0,
+        256000.0,
+        512000.0,
+        1024000.0
+      ],
+      "decay": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "box_scale": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ]
+    }
+  },
+  "data": {
+    "data/raw/ml/pbp/1999": "6263ca0dcafed4110f1da80be5126eedc2fba948b3de111dc2e8dd94165ce595",
+    "data/raw/ml/pbp/2000": "29a0904f123de7fe9c10ff07e7605bb29d753ff87f2026659605e60b2c0aa243",
+    "data/raw/ml/pbp/2001": "7b34b78901915ca98449190a1a911308275cc764eb3e565376c3d44667933dc1",
+    "data/raw/ml/pbp/2002": "46fe8b49e4f94e479cf8e5dbb87d90b577d76d0a503d6bf4f2191902f95391a2",
+    "data/raw/ml/pbp/2003": "c45fa61ddb3eba8c316f8c680362284ed01174728ca6e22bdfdba6083d5ec707",
+    "data/raw/ml/pbp/2004": "c95a80bffc740d438965320a6014f9cb839fa57e92e114b2783fc76d8acce653",
+    "data/raw/ml/pbp/2005": "c7e4b4984af805df9719a23004a967593e7d503025b1c301973606e0e4f7cc61",
+    "data/raw/ml/pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+    "data/raw/ml/pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+    "data/raw/ml/pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+    "data/raw/ml/pbp/2009": "5bfb6559343c04092d1ad66c1479782d085d9f390e6806be0a7ca7ec37124806",
+    "data/raw/ml/pbp/2010": "74ad605fea53c27afd00eee71c53b86b5cfbf7133d1a7b5b8f0067d817e55785",
+    "data/raw/ml/pbp/2011": "26727f9d2b0e4f9f616e746b87b9a29359f37a4b484f66f7312baf883d85e958",
+    "data/raw/ml/pbp/2012": "3277aded9792c419cc853cf307f2206c3fb0908d91750b4e1d3d66b567407c66",
+    "data/raw/ml/pbp/2013": "2a31a7cd0e7e2306f626a0f1f4bb96679e5b3e92a8729695858adca35d8b2686",
+    "data/raw/ml/pbp/2014": "c6910558e235dac664b1b7f02654d47ea8d51904ef9ace5d4f015165604e0b12",
+    "data/raw/ml/pbp/2015": "b3314a52b781a00417528b2e3388d2596098cdbe7b565d3c962d7171a98ae70f",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/1999": "b590c0c595ae702489068ed30d25460a1da2f129ce47c4143c8c28618fbb2749",
+    "data/raw/ml/schedules/2000": "d11ca64a246a9b9ce98beb15af6a337887f1a31658a1271d510ef62e094fd927",
+    "data/raw/ml/schedules/2001": "59deb3483354d8e24a55eef5e508f4824a3cdfff44936adea6d02af34c64fffd",
+    "data/raw/ml/schedules/2002": "b394de36fc6286647bdfa1a82383b0fec5f83a5e0aeaefc010336c72f1365545",
+    "data/raw/ml/schedules/2003": "70b3c8a10df7a205ee8bc446fa40dca4f7408f3900d063f1881860119de4834c",
+    "data/raw/ml/schedules/2004": "64d26bdf22af5736b507a04b82c73b17ded7765ad2940c02d880abbe5779d978",
+    "data/raw/ml/schedules/2005": "3535ab82c2c6b866d94623aba9f37eac3b7497fd5ff61898904e03420d80795a",
+    "data/raw/ml/schedules/2006": "04e8c1a0394137e8493db6bf228a75ab1e0e8104eca4056380c13168174fca98",
+    "data/raw/ml/schedules/2007": "ed35269017c5342a04e621717760da8ccdc68421f7a38685eaa355af90d875b2",
+    "data/raw/ml/schedules/2008": "76a274f12d0efbdc6220870e083597fe6669f33bf5f94d30ade9d11efbc3423d",
+    "data/raw/ml/schedules/2009": "b720c554d58f8e8bc4ef4fe3ada0528f1f4065bde6926395f5c4ed46f6c19579",
+    "data/raw/ml/schedules/2010": "c6eb6d6390b8808ab6fe7a1c177d45b2d31c4dc3f7b5ccf3a9ff525c9afe758f",
+    "data/raw/ml/schedules/2011": "367cd43a9a9499d875a00dc12d2476ea3bfabc36dfbb82399a695f5230618232",
+    "data/raw/ml/schedules/2012": "94fd313c6126390c47c936cc04c986ec6a2526cad776f078e61c8e740171ceb0",
+    "data/raw/ml/schedules/2013": "48b55301b46a4acc55b1263555b01d62475fce5196f943176cf5bb23b5b979b6",
+    "data/raw/ml/schedules/2014": "56c8544f26975a429dd1dcd67996b28cb3680c742c79c2367bfea1e35ae93940",
+    "data/raw/ml/schedules/2015": "68c3bf6df90e969fe80aa46eb3351ad624e5e7c3f85c664644811508bbb647c3",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56",
+    "data/raw/ml/depth_charts/2005": "1dc213a56b6b9fa614893148e01304c7284ed834f45d0f00c32dc4429cc60d48",
+    "data/raw/ml/depth_charts/2006": "fb8390a24831112c290ed6e20f4546935ac17249912d3834c533657a1c7684c6",
+    "data/raw/ml/depth_charts/2007": "57666065438f443ae58038c66bc9e8915cbc9b11a29c19b5bd2b8edda2fde2db",
+    "data/raw/ml/depth_charts/2008": "ee790c140926db347fe6e764f2e62f0e1446b7c2a1c034458552682d4e31a9a7",
+    "data/raw/ml/depth_charts/2009": "7a2f84b9b92165aaec386a39b2cfdc03ade8f7a5768c07148a261bc426e745b7",
+    "data/raw/ml/depth_charts/2010": "6eda4ecf1d1e81e7feb38cd99d430b322d48444b42a8404e5bf735c71e34070c",
+    "data/raw/ml/depth_charts/2011": "88dc4b3694af0c8e904d8464528bf26a092ea6998b1a686e04793430b69ea81c",
+    "data/raw/ml/depth_charts/2012": "bddec1cc10d60492f196d090dbd43c2db0f23c9eb72194fe5750b5ea9c9bf89e",
+    "data/raw/ml/depth_charts/2013": "93432b67f59114523fc767494e0ec33e78f11a34cd891e2a40d95ed194d84e4f",
+    "data/raw/ml/depth_charts/2014": "39b007c1814635fd35a6c93adacc81cc86f5966cc205451fb0976f459a61237d",
+    "data/raw/ml/depth_charts/2015": "b0e831c90d433436188a53c69ec107d7b99b949ebb772ed5e2989d700c4d3481",
+    "data/raw/ml/depth_charts/2016": "f16d97dc32299176c53c2325bbcd5345885122764ad36498339b3f0609947fee",
+    "data/raw/ml/depth_charts/2017": "3db3826d9d1a221a95d068681980bc0450325bb80fe7f7970b331366eeb44822",
+    "data/raw/ml/depth_charts/2018": "44857b3e4f4814cca31e1541d48cb97407c2c1ed59f6c4c46b6cf1da47b7711c",
+    "data/raw/ml/depth_charts/2019": "3b2ad2b9205133b1e72df71631a78b3a48201fbcb2c871ab02213776af70056f",
+    "data/raw/ml/rosters_weekly/2002": "ff5065be3a5a3c31f17769590b85e27bfeaec22c040d12c6ae636157d000a509",
+    "data/raw/ml/rosters_weekly/2003": "2f28e96c1cc0238bdc36d4fbc75952b3af2a5f88a1875ed79b92012ffce1937b",
+    "data/raw/ml/rosters_weekly/2004": "24c9ed7c7ba0f3187a22871cade086a443cdcc945e5e2283f1846e3af2b2857a",
+    "data/raw/ml/rosters_weekly/2005": "f9c3dff3abb8bd7f03e882d73e840a4aae214d36395992f997178ce53b39d039",
+    "data/raw/ml/rosters_weekly/2006": "4ca8b46ba7104a85fcd174345adf534bb064d8b27e6ebf6ee8681a6111530748",
+    "data/raw/ml/rosters_weekly/2007": "5be7756f9c2a83796929b8c28b70e5ffafee1eb0153c8b012e2110cc448307c5",
+    "data/raw/ml/rosters_weekly/2008": "a7463fe7f071a4d908bd91f185f878728d76c686987a43934774790f83fe11a6",
+    "data/raw/ml/rosters_weekly/2009": "aded782ac4cc2a892159565f2df933170ad069cb80f9309549601aeeaae6e988",
+    "data/raw/ml/rosters_weekly/2010": "dbf5adc511c48319991467f56e1d7d9df7c983bb5036f89b8bdc739db175c3ed",
+    "data/raw/ml/rosters_weekly/2011": "447e0eda09a2ffa5918c2c3b4fb9d66daf81ba0cf2b2f9b9a96f5a25db98c7cd",
+    "data/raw/ml/rosters_weekly/2012": "0edaaef42d4972c29297e896dce6d36cbf38046f72807995dcac4d0ffb83816f",
+    "data/raw/ml/rosters_weekly/2013": "ee97af362f770b6a632f6fa4c99d301afe240ca2383dac949e206d5997ca4892",
+    "data/raw/ml/rosters_weekly/2014": "f5d6554525d453a8329d5a2bfdbed14abb7a406f4c258922b997ecc8b0dbc7d3",
+    "data/raw/ml/rosters_weekly/2015": "0af43e8d75e00616fdedffdc73b6a76c268fe685716afc6099c4f6240f2a38ef",
+    "data/raw/ml/rosters_weekly/2016": "f9c06d464aa792524baeb3bc9bd99e2ee789799011c2a14b354bf967eb54c32b",
+    "data/raw/ml/rosters_weekly/2017": "e08db5a5b46438379d57cd00839beb70e3b4b5ab7135d00f1d3e2167b87d9b3e",
+    "data/raw/ml/rosters_weekly/2018": "fbb0028f79f07d83ed6ce882bd022a95653f10cacd3bed990f75825feb5c2892",
+    "data/raw/ml/rosters_weekly/2019": "050ddd66e0a04bb3be6830c239119707d6850b2bb7ea0f0e3f5040aa983aad26",
+    "data/raw/ml/injuries/2009": "d12cc75579894878b9b0a8582f231e442462f80f9ccff1d62f51ddf3aaca93ca",
+    "data/raw/ml/injuries/2010": "0376ff700ff95ffc7fc50b86a22941bd683a4107400fc9f0a7d675061efc1d9a",
+    "data/raw/ml/injuries/2011": "fbe463450cadafb45fad3b15d3d474403e2f88344f4f84ff83154da82f4935ad",
+    "data/raw/ml/injuries/2012": "a238d5e4af5c662a576540a7fe50f71185008d2e9e995ae76f96e54ef1fcfa25",
+    "data/raw/ml/injuries/2013": "58e5c0bdc1d8f9d907d9b11cd044800b86573a4321c4a1b72308ad579d78928a",
+    "data/raw/ml/injuries/2014": "b61fff9320799ce3ba03fb263f72193166be663f9fd6eec0b6b2597d97edbce0",
+    "data/raw/ml/injuries/2015": "b17b3df9d35adb005e6df91f25999bbe8fec413df02e18b68f41bdad2eb4bdf6",
+    "data/raw/ml/injuries/2016": "bdfdc2f69eac23a92b0ef21f82820c29fef665996dc877bb6243d9b946b7bddf",
+    "data/raw/ml/injuries/2017": "5f1dda6592877a26ade565a6864b90b86a5255917ab6d06305bec6bb981462f8",
+    "data/raw/ml/injuries/2018": "d45f4a0280f1f10abd7f72965d29bd17e11b1539d78e536620709130d964c052",
+    "data/raw/ml/injuries/2019": "f582f091ba157f2495b11583fe98f1e02ced22da2a99c5d40a3cf3821e8c6734",
+    "data/raw/ml/players/0": "591f5a30d2714ad89d2db772330141169189e5357a8b62f48c437faff96244de",
+    "data/raw/ml/participation/2016": "cf5d6f7518c199c3cc75e76bc5a25ab2d32e0b463d9834b6a1e0d2b171997fc0",
+    "data/raw/ml/participation/2017": "c0b9e1e541758f88b03c69085cfcdc27ccc027102b70d1581f136a82b145df1b",
+    "data/raw/ml/participation/2018": "901340151c6bcfcd5e2580555f28b4f3c5e8cbe67afb4dc7a7f5cf17ff5fd5b5",
+    "data/raw/ml/participation/2019": "945e80c4bbd2f452ea5ffa6d8751d5b57dd966c0d5f94d023390863a2baa1ba8",
+    "data/games.csv": "a98d2ee3aa8ca92e0ce6e615547a7870059b48980191dd0de27d211e4840eadf"
+  },
+  "git": {
+    "sha": "8956c97f83dacd0dfefa455ed3cbdb787266f676",
+    "dirty": false
+  },
+  "timestamp": "2026-10-05T05:33:32+00:00",
+  "notes": "M5b tuning on the dev season-ahead predictions (play-level EPA MSE). CC BY-SA 4.0 (participation-derived).",
+  "license": {
+    "license": "CC BY-SA 4.0",
+    "note": "CC BY-SA 4.0. Derived from nflverse participation data: NFL Next Gen Stats via nflverse (2016-2022), FTN Data via nflverse (2023+)."
+  },
+  "tuning": {
+    "chosen": {
+      "lam": {
+        "CB": 32000.0,
+        "DL": 1024000.0,
+        "LB": 2000.0,
+        "OL": 1000.0,
+        "QB": 500.0,
+        "RB": 1000.0,
+        "S": 4000.0,
+        "TE": 2000.0,
+        "WR": 4000.0
+      },
+      "lam_other": 20000.0,
+      "decay": 1.0,
+      "situation": true,
+      "box_scale": 0.25
+    },
+    "mse": 1.9386303734768664,
+    "situation_other": 1.9451812814773504,
+    "edges": [
+      "DL",
+      "decay"
+    ],
+    "diagnostics": {
+      "box_scale_0.0": 1.9388146598747957,
+      "box_scale_1.0": 1.9394981566245746,
+      "all_lam_equal_best": 1.9396599811360877
+    },
+    "path": [
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 4000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.5,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9408176174907752
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 4000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9429234910793625
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 4000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.25,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9415500839492206
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 4000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.75,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9404776593455455
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 4000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9403789034919872
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 125.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9402173841796317
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401399893000855
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 500.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401482687234881
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 1000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9402149740960446
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 2000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9403031378589852
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 8000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940430069918079
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 16000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940460127129481
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 32000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9404764721034315
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 64000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940485003148601
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 128000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9404893623523192
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 256000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9404915659046584
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 512000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9404926737363166
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 1024000.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9404932291743953
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 125.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9409332849424008
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 250.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9404080058590183
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 500.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940104221627884
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400143928473428
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 2000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400573190139185
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 8000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9402100849626798
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 16000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940255534586068
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 32000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9402814492038651
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 64000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940295295186582
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 128000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940302453121647
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 256000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940306092517548
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 512000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9403079275413613
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1024000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9403088489132525
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 125.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9441095670229263
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 250.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9424411179600645
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 500.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.941211630888338
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 1000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9404733674567887
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 2000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401303924815057
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9399916162675317
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 16000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9399951107591824
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 32000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400018445677507
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 64000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940006670745152
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 128000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400094798868024
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 256000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400109877190101
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 512000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400117680059716
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 1024000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400121648126263
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 125.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9416094122517331
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 250.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9408714029689116
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 500.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9403594800896804
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 1000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400952616750515
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400039047903253
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 8000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400012911308193
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 16000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400117595432564
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 32000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940018695688212
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 64000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400226335489592
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 128000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940024726035116
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 256000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400258039713858
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 512000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940026350964839
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 4000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 1024000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400266264811208
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 125.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9432602139399884
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 250.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9412820220347013
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 500.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9403014705341823
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 1000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9399549151854736
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9399218297583927
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 8000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400666771325379
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 16000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401193465920417
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 32000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401505665568273
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 64000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401675941981527
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 128000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401764928554226
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 256000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401810426843489
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 512000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401833432961098
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "OL": 1024000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9401845000997402
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 125.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9459753349922888
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 250.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9438171331863268
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 500.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.942129675865193
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940986253506708
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 2000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.940299850209261
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 8000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9397244995206109
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 16000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.939624357184538
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 32000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9395741202773291
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 64000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.939549004024533
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 128000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9395364537402064
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 256000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9395301816194415
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 512000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9395270464578047
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 4000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9395254791204573
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 125.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9418806037474365
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 250.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9405925529439085
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 500.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9398816053523786
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 1000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9395793486776804
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.939505828185296
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 8000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9395651680601818
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 16000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9395976383700135
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 32000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9396183143118089
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 64000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9396300117250256
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 128000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9396362405272891
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 256000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.939639455734439
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 512000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9396410893169802
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 1024000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9396419127046067
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 125.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9427781989587583
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 250.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9413848940047007
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 500.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9404325553441042
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9398848530349095
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 2000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.939618046096941
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 8000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394639255842137
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 16000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394493095924232
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394442112531787
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 64000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394423247930408
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 128000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394415638849196
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 256000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394412313074427
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 512000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.939441077290557
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394410033885014
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 125.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9418893439980838
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 250.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9407496464148766
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 500.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9400174903732401
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 1000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9396279774809602
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 2000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394736009364495
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 8000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394506703463235
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 16000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.93946611613306
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 32000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394773142504755
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 64000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394839137343236
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 128000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.939487482178519
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 256000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394893360417798
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 512000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.939490280701262
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 1024000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394907575031406
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.0
+        },
+        "mse": 1.9388653534898428
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938725706178696
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.5
+        },
+        "mse": 1.938775098724592
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.75
+        },
+        "mse": 1.9390135311281314
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": false,
+          "box_scale": 0.25
+        },
+        "mse": 1.945279787433166
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.942339492504647
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.25,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9403816347443101
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.5,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9393877454580302
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.75,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938903052637175
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 125.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388449344394434
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938692811648416
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 1000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387537047896048
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 2000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388626408802738
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 4000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389644203709664
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 8000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390355092618028
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 16000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939077925737804
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 32000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391011673441783
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 64000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391133436762982
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 128000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391195772123826
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 256000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391227311746555
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 512000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391243175637627
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 1024000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391251131241287
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 125.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9397960160357686
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 250.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939171327978433
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 500.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388035118023461
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 2000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938742884797492
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388417511866172
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 8000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938926069519459
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 16000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389809077559632
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 32000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390122282791016
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 64000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390289776699197
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 128000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390376406244334
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 256000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390420462875413
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 512000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939044267938924
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1024000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.93904538350415
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 125.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9423025469547524
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 250.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9406899390651826
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 500.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939544789022675
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 1000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389135562005049
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 2000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938679851019571
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386539371492482
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 16000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387331854740688
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 32000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387602218262596
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 64000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387757184475265
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 128000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938783999995975
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 256000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938788279300298
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 512000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387904542644459
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 1024000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938791550661183
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 125.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9400843856054726
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 250.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9393722567603326
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 500.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388981774801846
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 1000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386810150090636
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938633752904389
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 8000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386838518220881
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 16000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387057151782747
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 32000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387187116230247
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 64000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938725776630849
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 128000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387294577822025
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 256000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387313364319807
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 512000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938732285392482
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 1024000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387327622961885
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 125.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9420744978638425
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 250.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9400048686007212
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 500.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389770403869517
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386323637453318
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 4000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387504228170305
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 8000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388682954812309
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 16000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938951753088698
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 32000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390019023717484
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 64000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390295117793328
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 128000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939044018208396
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 256000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390514565338586
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 512000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939055223269469
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1024000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390571186981849
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 125.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.945042342767507
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 250.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9429324537137924
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 500.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9412663235183016
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9401186932288432
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 2000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9394190602163308
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 4000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390316571153545
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 8000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388307518155652
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 16000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387300665983638
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 32000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386801493293484
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 64000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386553974623688
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 128000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386430897859521
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 256000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386369554077876
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 512000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386338934068736
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 125.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.940869520781531
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 250.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939595265274537
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 500.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389092128565106
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 1000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386485410798449
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 4000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387185655201762
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 8000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388225020550252
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 16000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389057908850365
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 32000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389602375906796
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 64000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389917795541112
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 128000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390088280727091
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 256000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939017701700991
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 512000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939022230007671
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 1024000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390245175808698
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 125.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9420223694982675
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 250.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.940577199010827
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 500.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9395943810391951
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 1000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390352518685119
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 2000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387712797863528
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 4000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386691137604763
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 8000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386377150476521
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 16000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386307845361164
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386303734768664
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 64000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386310825838386
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 128000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938631688499234
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 256000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386320574222105
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 512000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386322587857334
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 125.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9410240890994952
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 250.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9399168360794041
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 500.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9392008044730302
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 1000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388151928741784
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 2000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386615414517663
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 8000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386417539964051
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 16000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386584962926834
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 32000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386704873879084
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 64000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386775250586656
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 128000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386813238319909
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 256000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386832957814997
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 512000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386843002290397
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 1024000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386848071131428
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.0
+        },
+        "mse": 1.9388146598747957
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.5
+        },
+        "mse": 1.9386828608032234
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.75
+        },
+        "mse": 1.9389721218525264
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 1.0
+        },
+        "mse": 1.9394981566245746
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": false,
+          "box_scale": 0.25
+        },
+        "mse": 1.9451812814773504
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9421039437679988
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.25,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9401795389627754
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.5,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9392040145272873
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 0.75,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938748920638786
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 125.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387979692011175
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 250.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386443679336827
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 1000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387268238070094
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 2000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388600258516997
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 4000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938972000072306
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 8000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939045937858261
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 16000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390887339339717
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 32000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.93911180993302
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 64000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391237995935815
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 128000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391299116936218
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 256000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391329976278777
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 512000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9391345481385105
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 1024000.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939135325288587
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 125.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939712051968694
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 250.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390848133199827
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 500.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387277356316832
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 2000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386906909222825
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 4000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387955313887837
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 8000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388827871988006
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 16000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389389727221475
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 32000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389709106582673
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 64000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389879501417104
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 128000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389967528073613
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 256000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939001226899132
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 512000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390034823953146
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1024000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390046147894637
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 125.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9421659038971277
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 250.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9405741753152286
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 500.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9394668540845126
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 1000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388726723872385
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 2000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386573600680312
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938659840966294
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 16000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386911417220696
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 32000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938712055734022
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 64000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387240076635588
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 128000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387303828731963
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 256000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387336737036471
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 512000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387353453678091
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 1024000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387361878176728
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 125.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9401268060638366
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 250.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939394313623313
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 500.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389071026365203
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 1000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.93868242874107
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 4000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386471839251178
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 8000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386748598726284
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 16000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386953846055146
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 32000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387076412655821
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 64000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387143162817555
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 128000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387177970612834
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 256000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387195741339986
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 512000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938720471951989
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 1024000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387209231952212
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 125.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9420616254628273
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 250.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9399961049324799
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 500.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.93897230646767
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 2000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938633189665021
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 4000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387504425739805
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 8000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388685016470106
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 16000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389520020660804
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 32000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390021541978113
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 64000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.939029759228472
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 128000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390442618286812
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 256000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390516978024215
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 512000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390554632490702
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 2000.0,
+            "OL": 1024000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390573580044423
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 125.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9450451591794962
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 250.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9429309164677435
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 500.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9412615204038477
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9401126692962334
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 2000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9394136374090591
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 4000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9390275010744442
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 8000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938827615354047
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 16000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387275158307884
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 32000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938677891502739
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 64000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386532808261117
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 128000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386410414243855
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 256000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386349404491006
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 512000.0,
+            "LB": 2000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938631894944253
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 125.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9408827909991075
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 250.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9396055961146244
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 500.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389166466669858
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 1000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9386520491645356
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 4000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9387092610984826
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 8000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9388048713124069
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 16000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938880664825973
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 32000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.938929701821051
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 64000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389579109390518
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 128000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389730954386126
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 256000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389809812388903
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 512000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389850007681262
+      },
+      {
+        "cfg": {
+          "lam": {
+            "CB": 32000.0,
+            "DL": 1024000.0,
+            "LB": 1024000.0,
+            "OL": 1000.0,
+            "QB": 500.0,
+            "RB": 1000.0,
+            "S": 4000.0,
+            "TE": 2000.0,
+            "WR": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9389870301153858
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 125.0,
+            "RB": 125.0,
+            "WR": 125.0,
+            "TE": 125.0,
+            "OL": 125.0,
+            "DL": 125.0,
+            "LB": 125.0,
+            "CB": 125.0,
+            "S": 125.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.965866449603857
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 250.0,
+            "RB": 250.0,
+            "WR": 250.0,
+            "TE": 250.0,
+            "OL": 250.0,
+            "DL": 250.0,
+            "LB": 250.0,
+            "CB": 250.0,
+            "S": 250.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9515385630155793
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 500.0,
+            "RB": 500.0,
+            "WR": 500.0,
+            "TE": 500.0,
+            "OL": 500.0,
+            "DL": 500.0,
+            "LB": 500.0,
+            "CB": 500.0,
+            "S": 500.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.944047221619326
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 1000.0,
+            "RB": 1000.0,
+            "WR": 1000.0,
+            "TE": 1000.0,
+            "OL": 1000.0,
+            "DL": 1000.0,
+            "LB": 1000.0,
+            "CB": 1000.0,
+            "S": 1000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9408148036233932
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 2000.0,
+            "RB": 2000.0,
+            "WR": 2000.0,
+            "TE": 2000.0,
+            "OL": 2000.0,
+            "DL": 2000.0,
+            "LB": 2000.0,
+            "CB": 2000.0,
+            "S": 2000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9397879022624418
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 4000.0,
+            "RB": 4000.0,
+            "WR": 4000.0,
+            "TE": 4000.0,
+            "OL": 4000.0,
+            "DL": 4000.0,
+            "LB": 4000.0,
+            "CB": 4000.0,
+            "S": 4000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9396599811360877
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 8000.0,
+            "RB": 8000.0,
+            "WR": 8000.0,
+            "TE": 8000.0,
+            "OL": 8000.0,
+            "DL": 8000.0,
+            "LB": 8000.0,
+            "CB": 8000.0,
+            "S": 8000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9398176078291567
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 16000.0,
+            "RB": 16000.0,
+            "WR": 16000.0,
+            "TE": 16000.0,
+            "OL": 16000.0,
+            "DL": 16000.0,
+            "LB": 16000.0,
+            "CB": 16000.0,
+            "S": 16000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9400635936606678
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 32000.0,
+            "RB": 32000.0,
+            "WR": 32000.0,
+            "TE": 32000.0,
+            "OL": 32000.0,
+            "DL": 32000.0,
+            "LB": 32000.0,
+            "CB": 32000.0,
+            "S": 32000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.940336821267035
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 64000.0,
+            "RB": 64000.0,
+            "WR": 64000.0,
+            "TE": 64000.0,
+            "OL": 64000.0,
+            "DL": 64000.0,
+            "LB": 64000.0,
+            "CB": 64000.0,
+            "S": 64000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9405818191073576
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 128000.0,
+            "RB": 128000.0,
+            "WR": 128000.0,
+            "TE": 128000.0,
+            "OL": 128000.0,
+            "DL": 128000.0,
+            "LB": 128000.0,
+            "CB": 128000.0,
+            "S": 128000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9407602962395922
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 256000.0,
+            "RB": 256000.0,
+            "WR": 256000.0,
+            "TE": 256000.0,
+            "OL": 256000.0,
+            "DL": 256000.0,
+            "LB": 256000.0,
+            "CB": 256000.0,
+            "S": 256000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9408713502874826
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 512000.0,
+            "RB": 512000.0,
+            "WR": 512000.0,
+            "TE": 512000.0,
+            "OL": 512000.0,
+            "DL": 512000.0,
+            "LB": 512000.0,
+            "CB": 512000.0,
+            "S": 512000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.9409338888675451
+      },
+      {
+        "cfg": {
+          "lam": {
+            "QB": 1024000.0,
+            "RB": 1024000.0,
+            "WR": 1024000.0,
+            "TE": 1024000.0,
+            "OL": 1024000.0,
+            "DL": 1024000.0,
+            "LB": 1024000.0,
+            "CB": 1024000.0,
+            "S": 1024000.0
+          },
+          "lam_other": 20000.0,
+          "decay": 1.0,
+          "situation": true,
+          "box_scale": 0.25
+        },
+        "mse": 1.94096716412764
+      }
+    ],
+    "timing": {
+      "load_s": 8.723772125085816,
+      "tune_s": 42.074572124984115
+    }
+  }
+}
