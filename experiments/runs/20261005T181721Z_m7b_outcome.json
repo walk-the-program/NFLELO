@@ -1,0 +1,121 @@
+{
+  "name": "m7b_outcome",
+  "label": "m7bdev",
+  "window": {
+    "seasons": [
+      2018,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 39056,
+  "games_hash": "2e7aa347318c6509",
+  "metrics": {
+    "n": 39056,
+    "mse": 1.462202073617014,
+    "mse_cell_action": 1.479546290308067,
+    "mse_vs_cell_action": {
+      "n": 39056,
+      "clusters": 534,
+      "diff": -0.017344216691053085,
+      "ci_low": -0.022647166021606106,
+      "ci_high": -0.012227031183433353,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.0026977670202713083
+    },
+    "mse_constant": 1.4728306600613106,
+    "brier_succ": 0.23928653105804876,
+    "brier_succ_cell_action": 0.24331728029763655,
+    "succ_cal": {
+      "ece": 0.006832418752697195,
+      "null_p95": 0.006477818956583978,
+      "null_median": 0.0038306281389946877,
+      "floor": 0.01,
+      "ok_null": false,
+      "ok": true,
+      "mean_pred": 0.43068622263260087,
+      "observed": 0.43685989348627613
+    },
+    "mean_mu_by_action": {
+      "11_run": -0.06661993357445595,
+      "11_pass": 0.08886341907578471,
+      "12_run": -0.1122860606924299,
+      "12_pass": 0.12099091823781574,
+      "21_run": -0.09373036143701437,
+      "21_pass": 0.09379103990167433,
+      "13_run": -0.11277646615596441,
+      "13_pass": 0.09965377864405309,
+      "10_run": 0.07853488441570954,
+      "10_pass": 0.053167048599130316,
+      "oth_run": -0.10550480838278505,
+      "oth_pass": 0.0876983089335832
+    }
+  },
+  "features": [
+    "down",
+    "ydstogo",
+    "yardline_100",
+    "score_diff",
+    "half_secs",
+    "game_secs",
+    "off_timeouts",
+    "def_timeouts",
+    "home",
+    "roof_indoor",
+    "roof_open",
+    "temp",
+    "wind",
+    "off_pass_o",
+    "off_rush_o",
+    "def_pass_d",
+    "def_rush_d",
+    "tend_11_run",
+    "tend_11_pass",
+    "tend_12_run",
+    "tend_12_pass",
+    "tend_21_run",
+    "tend_21_pass",
+    "tend_13_run",
+    "tend_13_pass",
+    "tend_10_run",
+    "tend_10_pass",
+    "tend_oth_run",
+    "tend_oth_pass",
+    "action"
+  ],
+  "params": {
+    "gbm": {
+      "learning_rate": 0.05,
+      "max_leaf_nodes": 15,
+      "min_samples_leaf": 400,
+      "l2_regularization": 1.0
+    }
+  },
+  "data": {
+    "data/raw/ml/participation/2016": "cf5d6f7518c199c3cc75e76bc5a25ab2d32e0b463d9834b6a1e0d2b171997fc0",
+    "data/raw/ml/participation/2017": "c0b9e1e541758f88b03c69085cfcdc27ccc027102b70d1581f136a82b145df1b",
+    "data/raw/ml/participation/2018": "901340151c6bcfcd5e2580555f28b4f3c5e8cbe67afb4dc7a7f5cf17ff5fd5b5",
+    "data/raw/ml/participation/2019": "945e80c4bbd2f452ea5ffa6d8751d5b57dd966c0d5f94d023390863a2baa1ba8",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56"
+  },
+  "git": {
+    "sha": "92ae0848b6b40d85b715b2b4524036bdf5ac0729",
+    "dirty": false
+  },
+  "timestamp": "2026-10-05T18:17:21+00:00",
+  "notes": "",
+  "license": "CC BY-SA 4.0",
+  "note": "CC BY-SA 4.0. Derived from nflverse participation data: NFL Next Gen Stats via nflverse (2016-2022), FTN Data via nflverse (2023+). M6 play outcome model (context/ml-m6-method.md). M7b early-down play type x personnel (context/ml-m7-method.md, section 4).",
+  "plays_hash": "08a6aa8fde050817"
+}

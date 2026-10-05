@@ -1,0 +1,276 @@
+{
+  "name": "m7b_propensity",
+  "label": "m7bdev",
+  "window": {
+    "seasons": [
+      2018,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 39056,
+  "games_hash": "2e7aa347318c6509",
+  "metrics": {
+    "n": 39056,
+    "logloss": 1.8486742615960006,
+    "logloss_cell_baseline": 1.9610324612852827,
+    "logloss_vs_baseline": {
+      "n": 39056,
+      "clusters": 534,
+      "diff": -0.11235819968928211,
+      "ci_low": -0.124865360532155,
+      "ci_high": -0.10009447434999547,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.006377161482483418
+    },
+    "calibration": {
+      "11_run": {
+        "ece": 0.012508913283287449,
+        "null_p95": 0.00585508462036574,
+        "null_median": 0.003176880939579212,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": false,
+        "mean_pred": 0.22775755538308867,
+        "observed": 0.2153574354772634,
+        "share": 0.2153574354772634
+      },
+      "11_pass": {
+        "ece": 0.007929941694347863,
+        "null_p95": 0.00668350773750745,
+        "null_median": 0.004435466607274975,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": true,
+        "mean_pred": 0.3005635705123312,
+        "observed": 0.29877611634575996,
+        "share": 0.29877611634575996
+      },
+      "12_run": {
+        "ece": 0.0028260738004546606,
+        "null_p95": 0.0038696581729791243,
+        "null_median": 0.0021083010319825944,
+        "floor": 0.01,
+        "ok_null": true,
+        "ok": true,
+        "mean_pred": 0.112715126985785,
+        "observed": 0.11373412535845964,
+        "share": 0.11373412535845964
+      },
+      "12_pass": {
+        "ece": 0.006439859329372024,
+        "null_p95": 0.004187133452679562,
+        "null_median": 0.002090601727680222,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": true,
+        "mean_pred": 0.12382318060535998,
+        "observed": 0.12407824662023761,
+        "share": 0.12407824662023761
+      },
+      "21_run": {
+        "ece": 0.004366977250211028,
+        "null_p95": 0.002561418055763845,
+        "null_median": 0.0014036541690011935,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": true,
+        "mean_pred": 0.05015389165932568,
+        "observed": 0.05358971732896354,
+        "share": 0.05358971732896354
+      },
+      "21_pass": {
+        "ece": 0.003543332419152933,
+        "null_p95": 0.0024320212142898974,
+        "null_median": 0.0012331363223126836,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": true,
+        "mean_pred": 0.045941444525116316,
+        "observed": 0.04857128226136829,
+        "share": 0.04857128226136829
+      },
+      "13_run": {
+        "ece": 0.0005272986178013611,
+        "null_p95": 0.0014633076262643787,
+        "null_median": 0.0006195158551309856,
+        "floor": 0.01,
+        "ok_null": true,
+        "ok": true,
+        "mean_pred": 0.020381355046783043,
+        "observed": 0.020611429741909052,
+        "share": 0.020611429741909052
+      },
+      "13_pass": {
+        "ece": 0.0020637397042261364,
+        "null_p95": 0.0011916996976551973,
+        "null_median": 0.0004470516694730234,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": true,
+        "mean_pred": 0.01470862479524115,
+        "observed": 0.016745186399016797,
+        "share": 0.016745186399016797
+      },
+      "10_run": {
+        "ece": 0.000977025779053241,
+        "null_p95": 0.0004905448286230894,
+        "null_median": 0.00017642429209599464,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": true,
+        "mean_pred": 0.0022559804600547637,
+        "observed": 0.0032005325686194183,
+        "share": 0.0032005325686194183
+      },
+      "10_pass": {
+        "ece": 0.002858530766873029,
+        "null_p95": 0.0007610711576225947,
+        "null_median": 0.0003265389923907423,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": true,
+        "mean_pred": 0.004219209111499052,
+        "observed": 0.006759524784924211,
+        "share": 0.006759524784924211
+      },
+      "oth_run": {
+        "ece": 0.004388386276797749,
+        "null_p95": 0.0031669634774624533,
+        "null_median": 0.0017642256807488955,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": true,
+        "mean_pred": 0.06280548785285474,
+        "observed": 0.062141540352314624,
+        "share": 0.062141540352314624
+      },
+      "oth_pass": {
+        "ece": 0.0022905182637236758,
+        "null_p95": 0.001985799445908948,
+        "null_median": 0.0008323275081785118,
+        "floor": 0.01,
+        "ok_null": false,
+        "ok": true,
+        "mean_pred": 0.03467457306256044,
+        "observed": 0.03643486276116346,
+        "share": 0.03643486276116346
+      }
+    },
+    "all_calibrated": false,
+    "pass_share_pred": 0.523930602612108,
+    "pass_share_obs": 0.5313652191724703,
+    "overlap": {
+      "main": {
+        "thr": 0.05,
+        "n": 39056,
+        "share_2plus": 1.0,
+        "mean_eligible": 5.276756452273658,
+        "share_pairs_eligible": 0.4397297043561382,
+        "share_observed_eligible": 0.8862402703809914,
+        "share_eligible_by_action": {
+          "11_run": 0.9998719786972552,
+          "11_pass": 0.9962873822204015,
+          "12_run": 0.8594326095862351,
+          "12_pass": 0.9250819336337567,
+          "21_run": 0.3901577222449816,
+          "21_pass": 0.3728748463744367,
+          "13_run": 0.07904035231462515,
+          "13_pass": 0.01863990167963949,
+          "10_run": 0.00148504711183941,
+          "10_pass": 0.009217533797623925,
+          "oth_run": 0.4604926259729619,
+          "oth_pass": 0.16417451863990168
+        }
+      },
+      "thr10": {
+        "thr": 0.1,
+        "n": 39056,
+        "share_2plus": 0.9929076198279394,
+        "mean_eligible": 3.5441929537074968,
+        "share_pairs_eligible": 0.2953494128089581,
+        "share_observed_eligible": 0.7569387546087669,
+        "share_eligible_by_action": {
+          "11_run": 0.9805663662433429,
+          "11_pass": 0.9777755018435068,
+          "12_run": 0.5311603850880786,
+          "12_pass": 0.6707036050798852,
+          "21_run": 0.11839410077836952,
+          "21_pass": 0.09217533797623925,
+          "13_run": 0.009063908234330193,
+          "13_pass": 0.00012802130274477673,
+          "10_run": 0.0001536255632937321,
+          "10_pass": 0.002278779188857026,
+          "oth_run": 0.13447357640311347,
+          "oth_pass": 0.027319746005735356
+        }
+      }
+    }
+  },
+  "features": [
+    "down",
+    "ydstogo",
+    "yardline_100",
+    "score_diff",
+    "half_secs",
+    "game_secs",
+    "off_timeouts",
+    "def_timeouts",
+    "home",
+    "roof_indoor",
+    "roof_open",
+    "temp",
+    "wind",
+    "off_pass_o",
+    "off_rush_o",
+    "def_pass_d",
+    "def_rush_d",
+    "tend_11_run",
+    "tend_11_pass",
+    "tend_12_run",
+    "tend_12_pass",
+    "tend_21_run",
+    "tend_21_pass",
+    "tend_13_run",
+    "tend_13_pass",
+    "tend_10_run",
+    "tend_10_pass",
+    "tend_oth_run",
+    "tend_oth_pass"
+  ],
+  "params": {
+    "gbm": {
+      "learning_rate": 0.05,
+      "max_leaf_nodes": 7,
+      "min_samples_leaf": 500,
+      "l2_regularization": 1.0
+    }
+  },
+  "data": {
+    "data/raw/ml/participation/2016": "cf5d6f7518c199c3cc75e76bc5a25ab2d32e0b463d9834b6a1e0d2b171997fc0",
+    "data/raw/ml/participation/2017": "c0b9e1e541758f88b03c69085cfcdc27ccc027102b70d1581f136a82b145df1b",
+    "data/raw/ml/participation/2018": "901340151c6bcfcd5e2580555f28b4f3c5e8cbe67afb4dc7a7f5cf17ff5fd5b5",
+    "data/raw/ml/participation/2019": "945e80c4bbd2f452ea5ffa6d8751d5b57dd966c0d5f94d023390863a2baa1ba8",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56"
+  },
+  "git": {
+    "sha": "92ae0848b6b40d85b715b2b4524036bdf5ac0729",
+    "dirty": false
+  },
+  "timestamp": "2026-10-05T18:17:21+00:00",
+  "notes": "",
+  "license": "CC BY-SA 4.0",
+  "note": "CC BY-SA 4.0. Derived from nflverse participation data: NFL Next Gen Stats via nflverse (2016-2022), FTN Data via nflverse (2023+). M6 play outcome model (context/ml-m6-method.md). M7b early-down play type x personnel (context/ml-m7-method.md, section 4).",
+  "plays_hash": "08a6aa8fde050817"
+}
