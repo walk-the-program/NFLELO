@@ -231,6 +231,8 @@ M6_MODULES = {"nflelo/ml/plays/data.py", "nflelo/ml/plays/net.py", "scripts/ml_m
 # (`nflelo.ml.plays`) or the fourth-down module.
 M7A_SA_MODULES = {"nflelo/ml/decisions/fourth.py", "scripts/ml_m7a.py"}
 M7A_BY_MODULES = {"nflelo/ml/wp/__init__.py", "nflelo/ml/wp/model.py", "nflelo/ml/decisions/kicking.py"}
+# M7b (early-down play type x personnel) uses participation personnel through M6: CC BY-SA 4.0.
+M7B_SA_MODULES = {"nflelo/ml/decisions/policy.py", "scripts/ml_m7b.py"}
 
 
 def test_participation_is_read_only_by_the_validation_module():
@@ -240,7 +242,7 @@ def test_participation_is_read_only_by_the_validation_module():
     (A4s, the live pipeline, the M5 features) may touch it or anything derived from it.
     """
     allowed = {ROOT / "nflelo/ml/data.py", ROOT / "nflelo/ml/players/validate.py", ROOT / "scripts/ml_m5.py"}
-    allowed |= {ROOT / p for p in M5B_MODULES | M6_MODULES | M7A_SA_MODULES}
+    allowed |= {ROOT / p for p in M5B_MODULES | M6_MODULES | M7A_SA_MODULES | M7B_SA_MODULES}
     hits = []
     for path in list((ROOT / "nflelo").rglob("*.py")) + list((ROOT / "scripts").glob("*.py")):
         if path in allowed:
@@ -252,8 +254,8 @@ def test_participation_is_read_only_by_the_validation_module():
     # M5 itself still reads participation only through the validation loader
     src5 = (ROOT / "scripts/ml_m5.py").read_text()
     assert "rapm" not in src5 and "players import participation" not in src5
-    # the M5b, M6 and M7a fourth-down modules carry the share-alike license note
-    for p in M5B_MODULES | M6_MODULES | M7A_SA_MODULES:
+    # the M5b, M6, M7a fourth-down and M7b modules carry the share-alike license note
+    for p in M5B_MODULES | M6_MODULES | M7A_SA_MODULES | M7B_SA_MODULES:
         assert "CC BY-SA 4.0" in (ROOT / p).read_text(), p
     src = (ROOT / "scripts/ml_m5.py").read_text()
     tree = ast.parse(src)
@@ -272,7 +274,7 @@ def test_m7a_license_boundary():
         mods = [getattr(n, "module", None) or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)]
         mods += [a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names]
         names = [a.name for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) for a in n.names]
-        assert not any(re.search(r"(^|\.)(plays|participation|rapm|fourth)($|\.)", m) for m in mods + names), p
+        assert not any(re.search(r"(^|\.)(plays|participation|rapm|fourth|policy)($|\.)", m) for m in mods + names), p
         assert not re.search(r"load_participation|players\.participation", src), p
     for p in M7A_SA_MODULES:
         assert "CC BY-SA 4.0" in (ROOT / p).read_text(), p

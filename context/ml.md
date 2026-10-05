@@ -298,7 +298,7 @@ No paid APIs, no cloud.
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | **Holdout run 2026-10-05: primary FAIL.** Beats team ratings, loses to box-score values. Kept as a descriptive player view. |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | **Passed 2026-10-05** (holdout, both views): GBM beats the situational baseline on season-ahead CRPS (-0.018, CI excludes zero); calibration passed on the 0.01 floor. |
 | M7a | WP model + fourth-down decisions | M6 | **Holdout 2026-10-05: primary FAIL** (conversion calibration). The WP model passes and beats nflfastR wp (-0.0099 Brier); FG and punt pass. The audit is published. |
-| M7b | Early-down play type and personnel (causal, Part B of the M7 spec) | M6 | Not started |
+| M7b | Early-down play type and personnel (causal, Part B of the M7 spec) | M6 | Built 2026-10-05 (dev only). Recommended-minus-observed OPE, season-ahead 2018-2019: **+0.074 EPA per early-down play [+0.051, +0.096]**; placebo -0.008 [-0.018, +0.003]; dev preview of the pre-registered rule: PASS. 23-28% of cells have a clear recommendation (nearly all passes, mostly from 12 personnel). Holdout pre-registration proposed, not run. See "M7b build notes". |
 
 ### M1/M2 build notes (2026-10-03)
 
@@ -955,6 +955,7 @@ One holdout run, scored once, with everything frozen in committed code. The resu
 | 2026-10-05 | C2d deployed as a shadow model in the live 2026 pipeline (before and independent of the M3b holdout, which is still not run): frozen fit `C2d-2026-6b53b499` in `experiments/live/shadow_2026.json` (2019 refit reproduces the logged DEV fit exactly), its own append-only ledger `experiments/live/2026_shadow.csv`, scored on the same games as A4s, one line on the site's scorecard. A4s stays the 2026 model; the main ledger is byte-identical with or without the shadow. See "Shadow deployment" in the M3b notes. |
 | 2026-10-05 | M6 built under the standing delegation (dev only). NGS participation leaves the formation missing on fumble plays (83-89% of formation-missing plays, 2016-2018), an outcome leak: missing formations are filled from play-by-play's `shotgun` flag and no missingness flag is a feature. The 2023 NGS-to-FTN switch is handled by one era-free encoding of formation and personnel; the box count still shifts (8+ boxes halve in 2024-2025), so the holdout reports the eras separately. PyTorch goes in a new `requirements-m6.txt`, not `requirements-ml.txt`, so the weekly Action does not install it. The holdout model is fixed from DEV (GBM, both views); pre-registration proposed in "M6 holdout pre-registration", not run. Calibration rules pass if ECE <= null p95 or ECE <= 0.010 (decided before any holdout number: the null band is about 0.005 wide at this n and even the baseline fails it). |
 | 2026-10-05 | M7a built under the standing delegation (dev only): our own WP model (monotone GBM with the walk-forward A4s probability in place of the spread; CC BY), FG and punt models (CC BY), and the go / FG / punt valuation with 50-refit bootstrap bands (CC BY-SA, through M6). The spec's isotonic step is built and reported but not used: it made Brier worse in every dev season. Ties are excluded from the WP target. Go-for-it mixes run and pass by the empirical fourth-down run share by distance. Pre-registration proposed in "M7a holdout pre-registration", not run. Before any holdout number: the post-score kickoff start made as-of (defect fix), punts accepted on CRPS against the by-spot baseline (event calibrations descriptive), isotonic kept off; dev acceptance preview under these rules: PASS. |
+| 2026-10-05 | M7b built under the standing delegation (dev only; CC BY-SA). Actions are personnel (11, 12, 21, 13, 10, others) x run/pass on 1st and 2nd down outside the last two minutes of each half; outcome play EPA (success secondary). The M6 structure fields (offensive and defensive personnel, formation, box) are never nuisance features: they are the action or downstream of it. Team tendencies are as of the week start (shrinkage 25 plays, prior = last season's team mix halfway to the league's) and, with the propensity GBM settings, were chosen on dev by propensity log loss and ECE only, never by an EPA or OPE number. Recommendations pick the candidate with the largest gain over the current mix on the same plays (not the largest raw DR mean), clear only if its CI lower bound is above 0. Pre-registration proposed in "M7b holdout pre-registration", not run. |
 
 ### M5b holdout sign-off (run once, 2026-10-05, commit 21ccd41, clean tree)
 
@@ -1107,3 +1108,112 @@ One holdout run, scored once, with everything frozen in committed code. The resu
 - **Consistency:** the model's value of the chosen option matches the realized next-snap WP for punts (-0.0002 [-0.0006, +0.0002]) and go-for-its (+0.0009 [-0.0013, +0.0032]). Field goals are slightly under-valued (+0.0024 [+0.0009, +0.0038]).
 
 **Reading.** Our own WP model, built without any market input, is clearly better than nflfastR's public WP on unseen seasons, which is a strong standalone result. The fourth-down recommendations agree with realized outcomes, and they say teams still punt too often. But the go-for-it conversion component isn't calibrated well enough to pass as written, so the fourth-down tool ships as "model-estimated, conversion slightly conservative at 4th-and-2."
+
+### M7b build notes (2026-10-05, dev only; holdout not run)
+
+Spec: `context/ml-m7-method.md`, section 4 (Part B) and its part of section 5. Built under Walker's standing delegation. Section 7 above explains why this is a causal problem.
+
+**License: CC BY-SA 4.0.** The actions are offensive personnel groupings from participation data, read through the M6 play table. `nflelo/ml/decisions/policy.py`, `scripts/ml_m7b.py`, `notebooks/10_play_calling.ipynb`, every file in `data/raw/ml/m7b/` (`LICENSE.txt` says so) and every `m7b_*` run record (a `license` key) are CC BY-SA. Boundary tests: `tests/ml/test_m7b.py::test_m7b_license_boundary` (nothing outside M7b imports the policy module), `tests/ml/test_m5.py` (the M7b files are among the only participation readers, carry the share-alike note, and the CC BY WP and kicking modules may not import `policy`), and `tests/ml/test_m6.py` (M7b may import `nflelo.ml.plays`).
+
+**Where things are.** `nflelo/ml/decisions/policy.py` (definitions, tendencies, nuisances, cross-fitting, AIPW, cells, policy, OPE, placebo), `scripts/ml_m7b.py` (`dev`, `leakcheck`, `signoff-dry-run`, `signoff`), `tests/ml/test_m7b.py` (12 tests on a simulated league with goal-line confounding and known effects), `notebooks/10_play_calling.ipynb` (executed; reads the registry). `eval/windows.py` gained `M7B_DEV = (2018, 2019)` (label `m7bdev`, guarded like DEV). Saved in `data/raw/ml/m7b/`: `dev.json`, `plays_m7bdev.parquet` (every dev play with its 12 propensities, outcome predictions and pseudo-outcomes), `cells_m7bdev.parquet`, `recs_m7bdev.parquet`, `leakcheck.json`, `signoff_m7bdev.json`.
+
+**Definitions.**
+- **Sample.** M6 kept plays (the M5b cleaning: scrimmage runs and passes with an EPA, REG and POST, garbage time out by nflfastR wp outside 5-95%), 1st and 2nd down, outside the last two minutes of each half (`half_secs > 120`). 2018-2019: 39,056 plays in 534 games (plays hash `08a6aa8fde050817`); about 19,500 a season.
+- **Actions (12).** Personnel grouping x play type. The grouping is "RB TE" from the M6 harmonized counts when there are exactly five linemen and five skill players, kept for 11, 12, 21, 13 and 10; everything else (22, 20, a sixth lineman, empty backfields) is "oth". Play type is nflfastR `pass` (sacks and scrambles are passes). Dev shares: 11 run 0.215, 11 pass 0.299, 12 run 0.114, 12 pass 0.124, 21 run 0.054, 21 pass 0.049, 13 run 0.021, 13 pass 0.017, 10 run 0.003, 10 pass 0.007, oth run 0.062, oth pass 0.036.
+- **Outcomes.** Play EPA (primary); success = EPA > 0 (nflfastR's definition; secondary).
+- **Situation cells (60)** = down-distance (1st and 10+; 1st and under 10, mostly goal to go; 2nd and 1-3; 2nd and 4-7; 2nd and 8+) x field zone (own 1-20, own 21-50, opponent 49-21, red zone 1-20) x score state (trailing by 4+, within 3, leading by 4+). The models use the exact situation; the cells carry the recommendations.
+
+**Nuisance features (pre-snap, `policy.FEATURES`).** The M6 allowlist's situation fields (down, distance, yard line, score difference, seconds left in the half and game, both teams' timeouts, home, roof, temperature, wind), the M3 ratings as of the week start (the offense's adjusted pass and rush offense, the opponent's adjusted pass and rush defense), and the offense's **team tendencies as of the week start**: its 12-action early-down mix in this season's earlier weeks, shrunk with weight 25 plays toward a prior (last season's team mix, shrunk halfway to last season's league mix; in 2016, the league's mix so far). **The M6 structure fields are never features**: offensive personnel is the action, and defensive personnel, the box and the formation respond to it. Conditioning on them would block part of the effect, and under a counterfactual call they're unknown. `policy.check_features` rejects them, any M6 banned post-snap or outcome pattern, and anything off the list.
+
+**Nuisances** (scikit-learn `HistGradientBoosting*`, seeded, deterministic; early stopping on a fixed 10% of the training games by a CRC32 hash of `game_id`, patience 20, at most 500 trees): the propensity model is multiclass over the 12 actions (learning rate 0.05, 7 leaves, min leaf 500, L2 1; 161-189 trees). The outcome models take the features plus the action as a categorical input: EPA by squared error and success by log loss (learning rate 0.05, 15 leaves, min leaf 400; 62-64 and 115 trees). The tendency settings and the propensity GBM were chosen on dev by season-ahead propensity log loss and per-action ECE only (shrinkage 10-500 plays, prior shrink 0 or 0.5, two GBM settings), never by an EPA or OPE number. The first version (shrinkage 200, full-weight team prior, 15 leaves) was overconfident: predicted 21-personnel propensities of 0.3-0.4 came true 16-19% of the time.
+
+**AIPW, cross-fitting, cells and policy.**
+- Pseudo-outcome: G_ia = mu_a(x_i) + 1[A_i = a] (Y_i - mu_a(x_i)) / e_a(x_i). **Overlap:** action a is eligible for play i only if e_a(x_i) >= 0.05.
+- **Cross-fitting by season.** For target season S, each training season T in 2016..S-1 gets nuisances fit on the other training seasons (so 2018 uses one-season fits). Season S gets nuisances fit on all of 2016..S-1.
+- **Cell estimates** (training seasons): for cell c and action a, over the cell's plays where a is eligible: the DR mean of G_a, the observed mean of Y on the same plays, and **gain = mean(G_a - Y)**, each with a game-cluster bootstrap CI (2,000 reps). A **candidate** is eligible on at least half the cell's plays and was called at least 30 times there.
+- **Recommendation**: the candidate with the largest gain. It is **clear** only if the gain's CI lower bound is above 0 (it beats the current mix); otherwise the cell is "no clear best". The spec says "highest DR-estimated EPA"; ranking by the gain on the same plays is the same thing when actions are eligible on the same plays, and puts actions eligible on different subsets of a cell on an equal footing when they aren't.
+- **OPE of season S**: the recommended policy calls the cell's clear recommendation a* when a* is eligible for the play (S's propensity), and otherwise keeps the team's own call. Per play, d_i = G_i,a* - Y_i where it applies, else 0; mean(d) is EPA per early-down play over the observed policy, with a game-cluster CI. **Observed-policy check**: sum_a e_a G_a minus Y should be 0.
+- **Placebo**: actions shuffled within season x cell (seed 20261010), tendencies rebuilt, the whole pipeline rerun. The true gain of any policy is then 0.
+- **Sensitivity**: overlap 0.10; trimming (propensities floored at 0.10 in the IPW term, so weights are at most 10).
+
+**Dev results** (season-ahead 2018 and 2019, pooled; CIs resample games, 2,000 reps, seed 20261003).
+
+| Quantity | Result |
+|---|---|
+| Overlap, threshold 0.05: plays with 2+ eligible actions | **1.000** (mean 5.28 of 12 eligible; 44.0% of play-action pairs; the observed call is eligible on 88.6%) |
+| Overlap, threshold 0.10 | 0.993 (mean 3.54; pairs 29.5%; observed call 75.7%) |
+| Eligible share by action (0.05) | 11 run 1.00, 11 pass 1.00, 12 run 0.86, 12 pass 0.93, 21 run 0.39, 21 pass 0.37, oth run 0.46, oth pass 0.16, 13 run 0.08, 13 pass 0.02, 10 pass 0.01, 10 run 0.00 |
+| Propensity log loss vs cell-share baseline | 1.8487 vs 1.9610, -0.112 [-0.125, -0.100] |
+| Propensity calibration (rule: ECE <= null p95 or <= 0.010) | 11 of 12 pass; **11 run fails** (ECE 0.0125; predicted 0.228, called 0.215). The rest: 0.0005-0.0079. |
+| Outcome model, EPA MSE vs the cell x action mean | 1.4622 vs 1.4795, -0.0173 [-0.0226, -0.0122]; success Brier 0.2393 vs 0.2433, success ECE 0.0068 |
+| Clear cells | 2018: 14 of 60 (54% of plays), 2019: 17 of 60 (61% of plays) |
+| **OPE, recommended minus observed, EPA per play** | **+0.0743 [+0.0514, +0.0963]** (2018 +0.068 [+0.040, +0.098]; 2019 +0.080 [+0.044, +0.117]) |
+| OPE, success rate | +0.044 [+0.036, +0.053] |
+| Where the policy applies | 55.3% of plays (it changes the call on 45.2%); +0.134 EPA per play where it applies |
+| Observed-policy check | DR 0.0156 vs observed 0.0170: **-0.0015 [-0.0027, -0.0003]** (2018 -0.0024 [-0.0042, -0.0006]; 2019 -0.0005 [-0.0021, +0.0011]) |
+| **Placebo OPE** | **-0.0078 [-0.0181, +0.0025]** (2018 -0.009, 2019 -0.007; success -0.003 [-0.007, +0.001]); 5 of 60 cells "clear" by chance each season |
+| Sensitivity: overlap 0.10 | +0.0651 [+0.0460, +0.0822]; applies to 47.5%; clear cells 11 and 18 |
+| Sensitivity: weights trimmed at 10 | +0.0743 [+0.0518, +0.0959]; clear cells 15 and 17 |
+| **Dev preview of the pre-registered primary** | **PASS** (OPE lower bound +0.051 > 0; placebo CI includes 0) |
+
+Clear recommendations for 2019 (estimated on 2016-2018), the six with the highest CI lower bound:
+
+| Cell | Plays | Best | Gain over current mix (EPA) [95% CI] |
+|---|---|---|---|
+| 1st and 10+, red zone, within 3 | 1,065 | 11 pass | +0.320 [+0.185, +0.462] |
+| 1st and 10+, opp 49-21, within 3 | 3,774 | 12 pass | +0.263 [+0.140, +0.380] |
+| 2nd and 8+, own 1-20, within 3 | 739 | 11 pass | +0.274 [+0.124, +0.443] |
+| 1st and 10+, own 1-20, within 3 | 1,516 | 12 pass | +0.218 [+0.090, +0.344] |
+| 2nd and 8+, own 21-50, within 3 | 3,001 | 12 pass | +0.214 [+0.088, +0.343] |
+| 2nd and 4-7, opp 49-21, leading by 4+ | 450 | 12 pass | +0.349 [+0.077, +0.637] |
+
+- All 14 clear recommendations for 2018 and 15 of 17 for 2019 are passes (12 personnel 10 and 11 times, 11 personnel 4 and 4). The two exceptions in 2019 are 11-personnel runs on short yardage in the red zone (2nd and 1-3, within 3: +0.230 [+0.042, +0.408]). The rest of the cells are "no clear best". This matches the long-standing public finding that early-down passes gain more EPA than early-down runs. The outcome model's average pass-minus-run gap is 0.16-0.23 EPA in every grouping except 10 personnel (too rare to say).
+- **Heavy personnel at the goal line** (the notebook's confounding example): inside the 2-yard line, 53% of early-down calls are heavy (13 or oth) against 12-17% elsewhere, and plays there average 0.55 yards. Raw yards: heavy minus other is -0.70; within a field-position band it shrinks to about -0.25. EPA already prices the spot (heavy is +0.07 EPA inside the 2). The red-zone AIPW contrast of the pooled heavy run vs the 11-personnel run is -0.002 [-0.114, +0.115] EPA.
+- **The observed-policy check misses by 0.0015 EPA per play**, about 2% of the estimated gain, but its CI just excludes zero (it is very precise, because both sides use the same plays). It traces to the one miscalibrated propensity: 11-personnel runs are over-predicted, and they have the lowest outcome predictions. Reported, not fixed further.
+- **Winner's curse, shown by the placebo.** Picking the best of up to 12 noisy cell estimates and requiring its CI to clear zero still labels about 5 of 60 cells "clear" when actions are pure noise. Those picks don't carry into the next season (placebo OPE about 0), which is why the season-ahead OPE, not the cell CIs, is the acceptance test.
+
+**Team view (notebook): Minnesota 2019,** a run-first offense: 622 early-down plays, pass share 0.471 (league 0.528), mean EPA -0.038. It called far more 21 personnel (run 0.18, pass 0.14, against 0.05 each league-wide) and few 11-personnel passes (0.04 vs 0.28). The league's recommended policy on its plays: -0.059 [-0.324, +0.185] EPA per play. Per-action gains on its own plays all have CIs several tenths wide (only 12 run is clearly below its current mix, -0.26 [-0.53, -0.01]). **One team-season can't evaluate its own play calling**; the league-level estimates are the usable output.
+
+**Leakage.** `ml_m7b.py leakcheck` (real 2019, weeks 1, 9 and 17): in the M6 table, every 2019 outcome is scrambled (EPA permuted and noised: 100% of values changed) and, from week w on, the calls (personnel counts and play type, permuted jointly: 82-83% of actions changed) and the downstream structure fields (defensive personnel, formation, box) are permuted. Then the whole pipeline is rerun from `prepare`. For week w's 1,083-1,248 plays, the features (including tendencies), the propensities and both outcome predictions are **identical (max diff 0)**. The 2019 cell tables and recommendations are identical. Positive controls move: the next week's tendencies (0.324, 0.064, 0.024) and nuisances fit through 2019 on the corrupted data (0.23-0.38). The situation and rating features are the M6 table's, already covered by `ml_m6.py leakcheck` and `tests/ml/test_m6.py`. `check_features` keeps every structure, post-snap and outcome field out. Synthetic versions are in `tests/ml/test_m7b.py`: the tendency as-of test, the season-ahead corruption test with a fit-through-S control, and the banned-columns test. The tests also check that AIPW removes simulated goal-line confounding (raw heavy-minus-11 about -0.5, AIPW within 0.15 of the true 0), recovers a +0.3 pass effect, matches the true policy gain within 0.05, and gives about 0 on the placebo.
+
+**Known limits.**
+1. **Unmeasured confounding.** OPE and the placebo test the pipeline, not the no-hidden-confounder assumption. The play caller sees things the features don't (the defense's alignment, injuries during the game, the matchup on that drive).
+2. **Game theory, stated plainly.** If a team always took the "best" action, the defense would adjust. The estimates describe marginal shifts from current tendencies, against defenses playing the mix they actually face, not a fixed strategy to run every time. The best real-world answer is a mix; pushing one call hard would erode its edge.
+3. 10 personnel and 13-personnel passes are almost never eligible; nothing is said about them.
+4. The 11-personnel run propensity is slightly over-predicted season-ahead (the league's early-down run share kept falling).
+5. The dev registry runs (`m7b_*`, label `m7bdev`) were logged from an uncommitted tree (commit 4e509da plus these changes); re-log after the commit for a clean-commit record. `signoff-dry-run` reproduced `dev.json` exactly (max |diff| 0) on that uncommitted tree; it must be rerun on the clean commit.
+
+**Timing** (Apple silicon, CPU): frame 9 s (M6 world from cache); per season main pipeline 13-25 s (cross-fit 7-15 s, final fit and predictions 5-9 s, cells and OPE 1 s), placebo 8-15 s; `dev` 65-76 s end to end; `signoff-dry-run` 69 s; `leakcheck` 146 s; `tests/ml/test_m7b.py` 22 s. **Sign-off runtime estimate: about 25-35 minutes, under 45 at worst.** Season S needs S-2016 cross-fit fits on S-2017 seasons each plus one fit on S-2016 seasons, so 2020-2025 needs about 5.3 million play-fits for the main pipeline (dev: 0.18 million). At dev speeds (0.13-0.15 ms per play-fit) that is 12-14 minutes, up to 20 if larger training sets early-stop later. The placebo adds about 70% of that. Loading the 2016-2025 M6 world adds 1-2 minutes, and the bootstraps a few minutes more.
+
+### M7b holdout pre-registration (proposed 2026-10-05; not yet run)
+
+One holdout run, scored once, with everything frozen in committed code. The result is recorded here whatever it shows; nothing is retuned afterwards.
+
+**Frozen.** `nflelo/ml/decisions/policy.py`: `GROUPS`, `ACTIONS`, the sample (`sample_mask`), `CELLS` (`DD`, `ZONES`, `SCORES`), `FEATURES` and `MEDIATORS`, `OVERLAP` 0.05, `OVERLAP_ALT` 0.10, `TRIM_FLOOR` 0.10, `CAND_SHARE` 0.5, `MIN_TAKEN` 30, `TEND_M` 25, `PRIOR_LEAGUE` 0.5, `PROP_PARAMS`, `OUT_PARAMS`, `MAX_ITER` 500, `VAL_MOD` 10, seed 20261003. `scripts/ml_m7b.py`: `REPS` 2,000, `CAL_REPS` 500, `PLACEBO_SEED` 20261010. Upstream: the M6 play table and M5b cleaning as frozen for the M6 sign-off, and the M3 ratings `oa.TUNED` as of each week's start.
+
+**Window.** Season-ahead for each S in 2020-2025: cells and recommendations from 2016..S-1 (nuisances cross-fit by season), and the OPE of S with nuisances fit on 2016..S-1. Scored on every early-down sample play of 2020-2025, REG and POST. 2016-2019 are training only.
+
+**Primary (exact).** Pooled over all 2020-2025 sample plays, with d_i = G_i,a* - Y_i (EPA) where the recommended policy applies and 0 elsewhere: **M7b Part B PASSES iff the lower end of the 95% game-cluster bootstrap CI of mean(d) is above 0 AND the 95% CI of the placebo's mean(d) includes 0.** If it fails, Part B ships as a descriptive tool with "no clear best" labels and no claimed improvement (spec section 5).
+
+**Secondaries** (each reported; none changes the verdict):
+- The share of cells with a clear recommendation, per season.
+- Overlap: share of plays with 2+ eligible actions, mean eligible, observed call eligible, by action, at 0.05 and 0.10.
+- Success-rate OPE.
+- Sensitivity: overlap 0.10, and weights trimmed at 10.
+- The observed-policy check.
+- Propensity calibration per action (`calibration_check`), and the outcome model's MSE vs the cell x action mean.
+- Per season, and by participation era: 2020-2022 (NGS) vs 2023-2025 (FTN).
+- The game-theory caveat travels with every published number.
+
+**Risks stated before the run.**
+- The OPE can't detect unmeasured confounding.
+- League-wide early-down passing kept rising after 2019, which could shrink the gain or move the recommendations.
+- The FTN personnel encoding (2023+) is harmonized by M6 (group means are steady across the switch), but the box and formation shift. Neither is a nuisance input here.
+
+**Procedure.**
+1. Run `python scripts/ml_m7b.py dev`, then commit.
+2. Run `python scripts/ml_m7b.py signoff-dry-run` on the clean committed tree. It reruns the sign-off code path on 2018-2019 without logging, must print REPRODUCED against `data/raw/ml/m7b/dev.json`, and records the commit.
+3. Then, once, under Walker's standing delegation (CONTEXT.md, 2026-10-05), run `python scripts/ml_m7b.py signoff`. It refuses if any `m7b_signoff_*` run with `holdout: true` exists, and unless the dry run reproduced dev on the same commit with a clean tree. It prints every number and the verdict, writes `data/raw/ml/m7b/signoff_holdout.json`, and logs `m7b_signoff_{ope,ope_thr10,ope_trim10,placebo,propensity,outcome,policy}` with `holdout: true`.
+4. Estimated runtime is 25-35 minutes. Run it detached (M7a's first attempt hit the 2-hour tool limit).
+
+Whatever happens is recorded in this file.

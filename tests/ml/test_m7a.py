@@ -400,6 +400,8 @@ def test_m7a_dev_window_is_guarded(tmp_path):
 def test_signoff_refuses_without_a_reproduced_dry_run(tmp_path, monkeypatch):
     import ml_m7a
     monkeypatch.setattr(ml_m7a, "OUT", tmp_path)
+    # isolate from the real registry (a recorded holdout sign-off would trip the run-once check first)
+    monkeypatch.setattr(ml_m7a, "holdout_signoff_runs", lambda: [])
     with pytest.raises(SystemExit):
         ml_m7a.stage_signoff(ml_m7a.HOLDOUT, allow_holdout=True, log_=False)     # no dev.json
     (tmp_path / "dev.json").write_text('{"boot": 2, "primary": {}}')
