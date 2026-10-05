@@ -294,7 +294,7 @@ No paid APIs, no cloud.
 | M3 | First ML game model beats Elo (paired CI excludes 0) | M2 | **Passed 2026-10-04.** Holdout: A4s beats Elo by 0.0035 Brier (CI [-0.0063, -0.0007]). The ECE of 0.028 is within the noise range for n = 1,615; the 0.02 bar is recorded as flawed. |
 | M4 | Production game model on the site, with live 2026 scorecard and playoff odds | M3 | Phase 1 built 2026-10-04 (weekly predictions, ledger, site, Action). Phase 2 built 2026-10-04; holdout sign-off run once on 2026-10-05: **margin model FAIL** on its primary (MAE vs Elo -0.059, CI [-0.150, +0.035] includes zero), **playoff odds PASS** (made-playoffs ECE 0.028 <= 0.044; Brier vs tau 0 -0.0024, CI upper bound -0.00015 < +0.001). Odds stay gated off the site until Walker decides. |
 | M5a | Player value from CC BY data: QB composite, box-score player value (no participation data) | M2 | Built 2026-10-05 (player values, lineups, ladder on 2012-2019). **No gain over A4s**: B1-B3 within noise, the one-SE rule keeps B0 (A4s). Stopped before the notebook, holdout, shadow and site work; awaiting Walker. See "M5 build notes". |
-| M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | Built 2026-10-05 (cleaning, Bayesian RAPM, tuning, dev evaluation, leakage check, notebooks 05 and 06). Dev, season-ahead 2018-2019 (tuned on the same predictions): RAPM beats team ratings by 0.0027 MSE [-0.0042, -0.0013] and box values by 0.0019 [-0.0032, -0.0005]. Holdout pre-registration proposed; not run. See "M5b build notes". |
+| M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | **Holdout run 2026-10-05: primary FAIL.** Beats team ratings, loses to box-score values. Kept as a descriptive player view. |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | Not started |
 | M7 | Personnel decision support (causal) | M6 | Not started |
 
@@ -757,3 +757,22 @@ One holdout run, scored once, with the settings below frozen in committed code. 
 | 2026-10-04 | M4 Phase 1 built. The live record starts with nflverse week 5 (first kickoff Thursday 2026-10-08; the write-up's "week 6" was off by one). QB change tag threshold 0.08 EPA per dropback. Model series color `--series-3`. |
 | 2026-10-05 | M5 method approved (`context/ml-m5-method.md`). D1: CC BY only, so playing time comes from usage stats and participation is used only for validation. D2: the final injury report and game-day inactives count as pregame facts, and the Friday-only version (B3f) is always reported. D3: the evaluation window is 2012-2019, compared with A4s on the same games. D4: M5 runs as a shadow model in 2026 and can be promoted in 2027. |
 | 2026-10-05 | M5b built under the standing delegation (dev only). Participation sides are rebuilt from `players_on_play` (raw drop rate 12.7% in 2016 and 7.9% in 2018, under 0.5% after). `box_scale` (the prior is 0.25 x the box value) was added to the tuning. Settings frozen in `rapm.TUNED`; holdout pre-registration proposed in "M5b holdout pre-registration", awaiting review before the one run. |
+
+### M5b holdout sign-off (run once, 2026-10-05, commit 21ccd41, clean tree)
+
+Pre-registered rules, season-ahead 2020-2025, 177,545 plays in 1,693 games, game-cluster CIs (2,000 reps, seed 20261003). The dry run reproduced dev exactly before the real run.
+
+| Model | Play EPA MSE | RAPM minus model [95% CI] |
+|---|---|---|
+| RAPM | 1.88705 | |
+| Team ratings (M3) | 1.88883 | -0.00178 [-0.00275, -0.00076] |
+| Box values (M5, summed over on-field players) | **1.88608** | **+0.00097 [+0.00015, +0.00179]** |
+| Intercept | 1.89579 | -0.00874 [-0.01047, -0.00699] |
+
+- **Primary: FAIL.** RAPM beats team ratings but loses to box-score values summed over the same on-field players.
+- **Secondary, team-game EPA margin:** RAPM beats team ratings (-0.0058 [-0.0089, -0.0027], pass) but not box values (-0.0008 [-0.0036, +0.0023], fail).
+- **Per season:** RAPM minus box is worst in 2022 (+0.0022) and 2023 (+0.0032), around the NGS-to-FTN source change. Every other season is within noise.
+- **Game model (descriptive):** A4s 0.2195 vs A4s plus the RAPM lineup term 0.2193, -0.0002 [-0.0007, +0.0003]. The coefficient's sign flips across seasons.
+- **Stability:** single-season year-to-year correlations stay low for OL (0.06-0.24), TE (-0.21 to 0.39) and S (-0.10 to 0.30). Chained fits run 0.6-0.95, mostly through their priors.
+
+**Reading.** Player-level information beats team-level information season-ahead: both player methods beat team ratings, so who is on the field matters. But on-field plus-minus adds nothing beyond box-score credit once you know who played, and dev tuning (box_scale, the ridge strengths) didn't carry to 2020-2025. For a public-data model this is a real finding: with about 28,000 plays a season and five linemen always on the field together, individual on-field effects are too collinear and noisy to beat simple credit. The RAPM ratings stay available as a descriptive player view with intervals; they don't feed the game model.
