@@ -60,3 +60,11 @@ Reads `outputs/elo_games.csv`, `outputs/ratings_current.json`, `outputs/model_re
 ## Open items
 
 - Pages deployment (the weekly Action exists since 2026-10-04; it commits data but does not host).
+
+## Models page (`site/models.html`, added 2026-10-06)
+
+- **What it is:** "The models and their receipts". One card per model with its verdict (pass, fail, negative result, or shadow), the primary metric and CI, a one-line reading, and links to the method doc plus the rules commit and the result commit on GitHub. It also has a game-model holdout chart (Elo vs the model vs the Vegas benchmark), the five findings, an explanation of the receipts, the live 2026 record, and the M7a-v2 forward-test status.
+- **Data:** `scripts/export_research.py` writes `site/data/research.json` deterministically from the committed registry sign-off runs plus a metadata table in the script. `export_site.export()` calls it last and never fails because of it.
+- **Code:** `site/models.js` copies about 80 lines of helpers from `app.js`. A shared `common.js` is the cleanup if more pages are added.
+- **Design:** the verdict chip colors are layer-3 tokens `--st-pass`, `--st-fail`, `--st-neg`, `--st-shadow`. The index nav has a "Models" link; `initNav` ignores links that don't start with `#`.
+- **Upkeep:** when a new sign-off happens, add the model to the metadata table in `export_research.py`.

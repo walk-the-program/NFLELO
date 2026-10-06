@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#1c2126" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7f9" media="(prefers-color-scheme: light)">
+<title>NFLELO: the models and their receipts</title>
+<meta name="description" content="Every NFLELO model and its result on seasons it never saw, failures included, with the public commits that show the rules came first.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script src="models.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#scoreboard">Skip to the scoreboard</a>
+
+<nav class="nav" aria-label="Sections">
+  <div class="wrap nav-inner">
+    <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFL<span>ELO</span></a>
+    <ul class="nav-links">
+      <li><a href="#scoreboard">Scoreboard</a></li>
+      <li><a href="#holdout">Game model</a></li>
+      <li><a href="#evidence">Evidence</a></li>
+      <li><a href="#receipts">Receipts</a></li>
+      <li><a href="index.html">Ratings</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero page" id="top">
+  <div class="wrap">
+    <p class="page-kicker">NFLELO / Models</p>
+    <h1 class="page-title">The models and their receipts</h1>
+    <p class="hero-line" id="hero-line">Loading results</p>
+    <p class="hero-deck" id="hero-deck">Every model was built on earlier seasons, then scored once on 2020 to 2025 under rules committed to a public repository first. Failures are listed with the passes.</p>
+    <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
+  </div>
+</header>
+
+<main>
+  <section class="sec" id="scoreboard" aria-labelledby="scoreboard-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">01 / Scoreboard</p>
+    <h2 class="headline" id="scoreboard-h">Scoreboard</h2>
+    <p class="deck">One card per model: what it does, the number it was judged on, and links to the method and the commits. Lower is better unless a card says otherwise.</p>
+    <div class="chips" id="model-filters" role="group" aria-label="Filter the models"></div>
+    <div id="scoreboard-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
+  </section>
+
+  <section class="sec" id="holdout" aria-labelledby="holdout-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">02 / Game model</p>
+    <h2 class="headline" id="holdout-h">Game model on the locked seasons</h2>
+    <p class="deck">The one game-prediction run on 2020 to 2025: Elo, the NFLELO game model, and the Vegas market as a benchmark. The market is never an input to our models.</p>
+    <div id="holdout-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
+  </section>
+
+  <section class="sec" id="evidence" aria-labelledby="evidence-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">03 / Evidence</p>
+    <h2 class="headline" id="evidence-h">What the evidence says</h2>
+    <p class="deck">Five things the results add up to, in plain terms.</p>
+    <div id="evidence-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
+  </section>
+
+  <section class="sec" id="receipts" aria-labelledby="receipts-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">04 / Receipts</p>
+    <h2 class="headline" id="receipts-h">How the receipts work</h2>
+    <p class="deck">A good result means little if the rules were chosen after the answer was known. Here is how that is ruled out.</p>
+    <div id="receipts-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <p id="credit">Data: nflverse (CC BY 4.0); 1970-1998 results: FiveThirtyEight (CC BY 4.0).</p>
+  <p>Independent project, not affiliated with the NFL or any team.</p>
+  <p><a href="index.html">Ratings and the weekly ladder</a></p>
+  <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
+</footer>
+
+<div id="tip" class="tip" role="presentation" hidden></div>
+<div id="live" class="sr" aria-live="polite"></div>
+</body>
+</html>

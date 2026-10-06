@@ -1211,7 +1211,7 @@
   // ------------------------------------------------------------------ nav highlight
 
   function initNav() {
-    var links = Array.prototype.slice.call(document.querySelectorAll('.nav-links a'));
+    var links = Array.prototype.slice.call(document.querySelectorAll('.nav-links a')).filter(function (a) { return a.getAttribute('href').charAt(0) === '#'; });
     var map = {};
     links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
     if (!('IntersectionObserver' in window)) return;

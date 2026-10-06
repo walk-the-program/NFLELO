@@ -698,6 +698,20 @@ def export_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming
     return write_json("ml.json", build_ml(schedule, ratings, elo, upcoming, live_dir))
 
 
+# --------------------------------------------------------------------------- research page data
+
+def export_research_safely() -> int | None:
+    """Write research.json (the models page) into SITE_DATA. A failure here is reported and swallowed:
+    it must never break the main site export. Returns the bytes written, or None on failure."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))   # sibling script, also when imported
+        import export_research
+        return export_research.export_research(SITE_DATA)
+    except Exception as err:  # noqa: BLE001 - the models page is optional
+        print(f"warning: research.json was not written ({type(err).__name__}: {err})", file=sys.stderr)
+        return None
+
+
 # --------------------------------------------------------------------------- main
 
 def export() -> dict[str, int]:
@@ -728,8 +742,10 @@ def export() -> dict[str, int]:
     if ml_size is not None:
         sizes["ml.json"] = ml_size
     total = sum(sizes.values())
+    research_size = export_research_safely()   # models page; kept out of `sizes` (the main site files)
     print(f"site/data: {len(sizes)} files, {total / 1024:.0f} KB total "
-          f"({', '.join(f'{n} {s / 1024:.0f}K' for n, s in sizes.items())})")
+          f"({', '.join(f'{n} {s / 1024:.0f}K' for n, s in sizes.items())})"
+          + (f"; research.json {research_size / 1024:.0f}K" if research_size else ""))
     return sizes
 
 
