@@ -1204,7 +1204,7 @@ One forward run, scored once, of an engine frozen before the 2026 data exists. T
 | 6+ | 0.05 | 0.03 | 0.04 | 0.06 |
 
 - Everything else is the frozen M7a protocol (see "M7a holdout pre-registration"), refit season-ahead for 2026: WP, FG and punt on 2006-2025, and the M6 call-view GBM on 2016-2025 with its grid and seed 20261003.
-- Frozen at commit: **`<FILL IN AT COMMIT>`**. The artifact's `git` field records the parent commit 9fbb35d with a dirty tree, because it was written before the commit.
+- Frozen at commit: **`5a0b850 (artifact committed in this commit; its internal git field records the pre-commit tree 9fbb35d, dirty)`**. The artifact's `git` field records the parent commit 9fbb35d with a dirty tree, because it was written before the commit.
 
 **Data.** 2026 REG regulation fourth downs, same filters as M7a (`fourth.decision_table`). The test set is the actual go-for-it attempts, against `fourth_down_converted`; with the 2018-2025 rates, expect roughly 750-850. M6 needs the 2026 participation file, which nflverse releases after the Super Bowl. **Earliest date: 2027-02-15** (Super Bowl LXI is 2027-02-14), and only once the 2026 participation file is published. `forward-2026` checks this.
 
