@@ -298,6 +298,7 @@ No paid APIs, no cloud.
 | M5b | On-field adjusted plus-minus (uses CC BY-SA participation data, 2016+) | M5a | **Holdout run 2026-10-05: primary FAIL.** Beats team ratings, loses to box-score values. Kept as a descriptive player view. |
 | M6 | Play outcome distribution model (CC BY-SA) | M1, M5b | **Passed 2026-10-05** (holdout, both views): GBM beats the situational baseline on season-ahead CRPS (-0.018, CI excludes zero); calibration passed on the 0.01 floor. |
 | M7a | WP model + fourth-down decisions | M6 | **Holdout 2026-10-05: primary FAIL** (conversion calibration). The WP model passes and beats nflfastR wp (-0.0099 Brier); FG and punt pass. The audit is published. |
+| M7a-v2 | Corrected go-for-it conversion engine | M7a | Built 2026-10-05 (dev only). Pick under the corrected criterion: **v2ad** (mix by distance × field zone + fourth-down conversion offsets): dev ECE 0.019 vs v1 0.033, 4th-and-2 gap +0.004 vs +0.034. Frozen for a **2026 forward test** (run once from 2027-02-15), plus a pooled 2026+2027 secondary. |
 | M7b | Early-down play type × personnel policy (causal, CC BY-SA) | M6 | **Passed 2026-10-05** (holdout): recommended minus observed +0.052 EPA/play [+0.038, +0.067]; placebo includes 0. |
 
 ### M1/M2 build notes (2026-10-03)
@@ -956,6 +957,7 @@ One holdout run, scored once, with everything frozen in committed code. The resu
 | 2026-10-05 | M6 built under the standing delegation (dev only). NGS participation leaves the formation missing on fumble plays (83-89% of formation-missing plays, 2016-2018), an outcome leak: missing formations are filled from play-by-play's `shotgun` flag and no missingness flag is a feature. The 2023 NGS-to-FTN switch is handled by one era-free encoding of formation and personnel; the box count still shifts (8+ boxes halve in 2024-2025), so the holdout reports the eras separately. PyTorch goes in a new `requirements-m6.txt`, not `requirements-ml.txt`, so the weekly Action does not install it. The holdout model is fixed from DEV (GBM, both views); pre-registration proposed in "M6 holdout pre-registration", not run. Calibration rules pass if ECE <= null p95 or ECE <= 0.010 (decided before any holdout number: the null band is about 0.005 wide at this n and even the baseline fails it). |
 | 2026-10-05 | M7a built under the standing delegation (dev only): our own WP model (monotone GBM with the walk-forward A4s probability in place of the spread; CC BY), FG and punt models (CC BY), and the go / FG / punt valuation with 50-refit bootstrap bands (CC BY-SA, through M6). The spec's isotonic step is built and reported but not used: it made Brier worse in every dev season. Ties are excluded from the WP target. Go-for-it mixes run and pass by the empirical fourth-down run share by distance. Pre-registration proposed in "M7a holdout pre-registration", not run. Before any holdout number: the post-score kickoff start made as-of (defect fix), punts accepted on CRPS against the by-spot baseline (event calibrations descriptive), isotonic kept off; dev acceptance preview under these rules: PASS. |
 | 2026-10-05 | M7b built under the standing delegation (dev only; CC BY-SA). Actions are personnel (11, 12, 21, 13, 10, others) x run/pass on 1st and 2nd down outside the last two minutes of each half; outcome play EPA (success secondary). The M6 structure fields (offensive and defensive personnel, formation, box) are never nuisance features: they are the action or downstream of it. Team tendencies are as of the week start (shrinkage 25 plays, prior = last season's team mix halfway to the league's) and, with the propensity GBM settings, were chosen on dev by propensity log loss and ECE only, never by an EPA or OPE number. Recommendations pick the candidate with the largest gain over the current mix on the same plays (not the largest raw DR mean), clear only if its CI lower bound is above 0. Pre-registration proposed in "M7b holdout pre-registration", not run. |
+| 2026-10-05 | M7a-v2 (corrected conversion engine) built on dev 2018-2019. No evaluation number is reported on 2020-2025. Diagnosis: the stand-in pre-snap structure matches each play's own, and the run/pass mix is minor. The miss comes from M6's call-conditional conversion on fourth down (passes under-predicted at 4th-and-1/2 and 6+, short runs over-predicted) and from garbage-time states M6 never trained on (37% of attempts). The original one-SE rule picked v2a, which leaves calibration unchanged. **Criterion corrected (Claude, under Walker's delegation, on dev evidence, before any 2026 data):** within one SE of the best Brier, both 4th-and-1/2 gaps under 0.02, lowest ECE. That picks **v2ad** (dev ECE 0.0190, gaps -0.007 / +0.004). Its offsets are trained out of fold on 2016-2025, since training on spent seasons is allowed for a forward model, and only the fit is printed. It is frozen in `experiments/m7a_v2/frozen_2026.json`. The forward test is pre-registered: the 2026 primary from 2027-02-15 (stated as weak evidence, null p95 about 0.052), plus a pooled 2026+2027 secondary (calibration + |4th-and-1/2 gap| < 0.03). `fourth.ENGINE_VERSION` stays v1, and v1 reproduces exactly. |
 
 ### M5b holdout sign-off (run once, 2026-10-05, commit 21ccd41, clean tree)
 
@@ -1108,6 +1110,131 @@ One holdout run, scored once, with everything frozen in committed code. The resu
 - **Consistency:** the model's value of the chosen option matches the realized next-snap WP for punts (-0.0002 [-0.0006, +0.0002]) and go-for-its (+0.0009 [-0.0013, +0.0032]). Field goals are slightly under-valued (+0.0024 [+0.0009, +0.0038]).
 
 **Reading.** Our own WP model, built without any market input, is clearly better than nflfastR's public WP on unseen seasons, which is a strong standalone result. The fourth-down recommendations agree with realized outcomes, and they say teams still punt too often. But the go-for-it conversion component isn't calibrated well enough to pass as written, so the fourth-down tool ships as "model-estimated, conversion slightly conservative at 4th-and-2."
+
+### M7a-v2 build notes (2026-10-05, dev 2018-2019 only)
+
+The M7a holdout is spent. Nothing in M7a-v2 reports a conversion, calibration, Brier, selection or decision number on 2020-2025 plays. The frozen 2026 engine is *trained* on seasons through 2025, which is allowed for a forward model (Walker's delegation, 2026-10-05); its freeze prints only the fitted offsets and n by cell. Development uses dev 2018-2019, the mix settings are tuned on training seasons 2010-2017 using the call alone, and the real test is a forward test on 2026. Code: `nflelo/ml/decisions/fourth.py` (the "engine v2" section), `scripts/ml_m7a.py` (`v2-dev`, `v2-freeze`, `forward-2026`, `forward-pooled`), `tests/ml/test_m7a.py` (7 new tests), notebook 09 sections 8-9. Saved outputs: `data/raw/ml/m7a/v2_dev.json` and `v2_dev_go.parquet`; runs `m7a_v2_*` (label `m7adev`). CC BY-SA 4.0 (it is the M7a fourth-down engine).
+
+**Engine versions.** `fourth.ENGINE_VERSION = "v1"` is the default, so every M7a dev, holdout and audit number reproduces. `v2-dev` refits 2018 and 2019 and compares every valuation (WP of each option, conversion, FG make, kicker and punter values, kickoff start) with the saved `fourth_m7adev.parquet`: max |diff| 0 in both seasons. The full `signoff-dry-run` code path (bootstrap bands and the audit included), rerun into a scratch folder, reproduced `dev.json` exactly (max |diff| 0 on every key number, including conversion ECE 0.0332, the toss-up share and the audit totals; uncommitted tree, saved records untouched). `fit_components(..., engine_version="v2")` changes only the go-for-it conversion. A test checks that v2 with the v1 mix and no offsets gives byte-identical valuations.
+
+**Diagnosis (dev go attempts, n 1,118).**
+- **Pre-snap structure.** The engine does not use the play's own personnel, formation or box. It averages 16 typical structures drawn from training-season 3rd and 4th downs of that call and distance bucket, whatever the field position. So a live decision never needs the defense's box, and the box is not a leak. The stand-in structure is not the problem either. On the plays M6 can score with their own structure (n 701), averaged and own structure give the same conversion for the same call. Pass: 4th-and-1 0.546 vs 0.545, 4th-and-2 0.534 vs 0.538, 6+ 0.309 vs 0.310. Run, 4th-and-1: 0.725 vs 0.720. Candidate (c) was therefore not built.
+- **The run/pass mix is a minor contributor.** The engine's run share against the dev share:
+
+| Distance | Engine | Dev |
+|---|---|---|
+| 4th-and-1 | 0.736 | 0.711 |
+| 4th-and-2 | 0.229 | 0.181 |
+| 3-5 | 0.103 | 0.071 |
+| 6+ | 0.092 | 0.047 |
+
+  Older seasons ran more. A perfect league mix (the dev seasons' own share, which no live engine could know) moves ECE only from 0.0332 to 0.0324 and leaves 4th-and-2 at +0.037. Even each play's actual call leaves it at +0.037.
+- **Main source 1: M6's call-conditional conversion on fourth down.** Given the call, it under-predicts passes and over-predicts short runs (actual vs predicted, with the play's own features):
+
+| Call and distance | n | Actual | Predicted |
+|---|---|---|---|
+| Pass, 4th-and-1 | 103 | 0.612 | 0.545 |
+| Pass, 4th-and-2 | 75 | 0.573 | 0.538 |
+| Pass, 6+ | 110 | 0.409 | 0.310 |
+| Run, 4th-and-1 | 241 | 0.693 | 0.720 |
+
+  The same pattern shows on 3rd-and-2: runs 0.618 predicted vs 0.563 actual, passes 0.544 vs 0.583. M6 learns from all downs, and on 3rd-and-long offenses often settle for a short gain, while on 4th down they throw to the sticks. In the mixed engine, the run and pass errors cancel at 4th-and-1 but not at 4th-and-2 (mostly passes), which is the holdout's failing cell.
+- **Main source 2: states M6 never saw.** 417 of the 1,118 attempts (37%) fall outside the M6 table, almost all because of its garbage-time filter (nflfastR wp below 0.05 or above 0.95): 60% of 4th-and-6+ attempts and 19% of 4th-and-1. There, 6+ converts 0.305 vs 0.254 predicted, and 4th-and-1 0.617 vs 0.673.
+- The definition of a conversion is not a factor: penalty first downs are 3 of 1,118, and `fourth_down_converted` matches yards ≥ distance on all but 9.
+
+**Candidates.** Each is fit on seasons before the one it scores. Only the go-for-it conversion changes.
+- **v2a (mix by cell):** run share by distance (1, 2, 3-5, 6+) × field zone (goal 1-5, red 6-20, opponent 21-50, own 51+) from REG fourth-down go attempts 2006..S-1, with season-decay weights (half-life 2 seasons). The cell is shrunk to its distance share (k_cell 100 attempts), and the distance share to the overall share (k_bucket 0). Tuned on 2010-2017 targets, each from 2006..s-1, by the call's log loss: 0.42772, against 0.42958 for the v1 share (n 3,680). The half-life optimum is interior.
+- **v2b:** v2a plus the team's logit offset from its own go attempts in earlier games of S, as of the snap (one Newton step, prior precision k_team 10, tuned the same way: 0.42706).
+- **v2d:** the v1 mix plus fourth-down offsets on each call's conversion odds, by call × distance. They are learned out of fold on the M6 training seasons 2016..S-1: each season is scored by an M6 refit on the other training seasons, with that season's M6 settings and tree count and structure draws from that fold. The fit is a penalized logistic with a N(0, 0.25²) prior, fixed a priori. The offset rescales the call's yards distribution (converting bins by P'/P, the rest by (1-P')/(1-P)), so the valuation and the conversion agree. Offsets for 2019 (run / pass, distance 1, 2, 3-5, 6+): run -0.07, -0.23, -0.11, +0.20; pass +0.13, +0.24, +0.09, +0.15.
+- **v2ad and v2bd:** the offsets on top of v2a or v2b.
+
+**Dev table** (2018-2019 REG, 1,118 go attempts, 461 games, plays hash `824814bdd1dfec3f`). The CI is game-cluster, 2,000 reps, seed 20261003. Calibration uses `calibration_check`. Selection = actual minus predicted.
+
+| Engine | Brier | ECE (null p95) | Minus v1 Brier [95% CI] | Within 1 SE of best | 4th-and-1 | 4th-and-2 | 3-5 | 6+ | 1-2 pooled |
+|---|---|---|---|---|---|---|---|---|---|
+| v1 | 0.23050 | 0.0332 (0.0457) | | no (+0.00024, SE 0.00012) | -0.017 | +0.034 | -0.011 | +0.069 | -0.004 |
+| v2a (original rule) | 0.23030 | 0.0333 (0.0461) | -0.00020 [-0.00039, -0.00002] | yes | -0.014 | +0.037 | -0.012 | +0.067 | -0.001 |
+| v2b | 0.23026 (best) | 0.0351 (0.0450) | -0.00024 [-0.00047, -0.00000] | yes | -0.014 | +0.037 | -0.012 | +0.067 | -0.001 |
+| v2d | 0.23053 | 0.0213 (0.0442) | +0.00003 [-0.00113, +0.00122] | yes | -0.009 | +0.006 | -0.033 | +0.048 | -0.005 |
+| **v2ad (chosen)** | 0.23041 | **0.0190** (0.0435) | -0.00009 [-0.00132, +0.00123] | yes | -0.007 | +0.004 | -0.034 | +0.046 | -0.005 |
+| v2bd | 0.23036 | 0.0194 (0.0440) | -0.00014 [-0.00137, +0.00118] | yes | -0.007 | +0.003 | -0.034 | +0.046 | -0.005 |
+
+Selection check with CIs. v1: 4th-and-1 0.676 predicted vs 0.659 actual, -0.017 [-0.060, +0.029]; 4th-and-2 0.542 vs 0.576, +0.034 [-0.046, +0.115]. v2a: 4th-and-1 -0.014 [-0.058, +0.032]; 4th-and-2 +0.037 [-0.044, +0.117]; 1-2 pooled -0.001 [-0.039, +0.038]. v2d: 4th-and-2 +0.006 [-0.076, +0.086].
+
+**Choice.** Every candidate passes calibration at dev n. The best Brier is v2b; every v2 candidate is within one SE of it, and v1 is not.
+- **The original rule** (set before these numbers: the simplest candidate within one SE of the best conversion Brier, with `calibration_check` passing) picked **v2a**, by the complexity order v2a < v2b < v2d < v2ad < v2bd. **Rejected:** v2a is a small Brier gain over v1 (CI excludes zero) but does not address the diagnosed cause. Its ECE (0.0333) and its 4th-and-2 gap (+0.037) are v1's, and that is exactly the component that failed the holdout.
+- **Criterion correction (2026-10-05, Claude, under Walker's delegation; made on dev evidence, before any 2026 data exists).** The purpose of M7a-v2 is to fix the conversion calibration, and the Brier differences between candidates (about 0.0002) are noise. The corrected rule:
+  1. Keep the candidates within one SE of the best Brier that pass `calibration_check`.
+  2. Of those, keep the ones whose 4th-and-1 and 4th-and-2 selection gaps are both under 0.02 in absolute value (`SEL_GAP_MAX`): v2d, v2ad and v2bd.
+  3. Choose the lowest dev conversion ECE; ties go to the simplest.
+
+  **Chosen: v2ad** (the v2a mix plus fourth-down conversion offsets; `fourth.V2_CHOSEN`): ECE 0.0190, gaps -0.007 and +0.004. `v2-dev` records both picks (`chosen_original_rule`, `chosen`).
+- **Remaining dev weak spots of v2ad:** 4th-and-3-5 is over-predicted by 0.034 and 6+ is still under-predicted by 0.046. The offsets are shrunk, and only part of the 6+ gap is in the training folds.
+- **Decisions change modestly.** v2ad changes the recommendation on 289 of 7,171 dev fourth downs (mean |change in go WP| 0.0027), against 26 for v2a (point estimates, model-estimated).
+
+**Leakage.** The v2 run-share tables read only attempts of seasons < S. The team offsets read only the team's attempts in earlier games of S (`merge_asof`, no exact matches). The offsets read only seasons first_m6..S-1: `oof_conversion` cuts play-by-play at S-1, and M6 at first_m6..S-1.
+- Synthetic tests (`tests/ml/test_m7a.py`):
+  - `test_v2_mix_and_team_offsets_are_as_of`: season S's calls from week w are flipped. The S mix table and the week-w shares are identical. Controls: later weeks' shares move, and so does a mix whose training-season calls are flipped.
+  - `test_v2_offsets_use_training_seasons_only`: S conversions, M6 outcomes and calls are corrupted. The out-of-fold frame and the offsets are identical. Control: corrupting season S-1's conversions moves the offsets.
+- Real data (`v2-dev`, 2019, week 9, 195 decisions): every call from week 9 on is permuted. The mix diff and the week-9 share diff are both 0. Controls: the next week moves (0.019), and so does a mix with 2018's calls flipped (0.299).
+
+**Timing:** `v2-dev` 223 s alone (813 s while the full dry run shared the CPU); offsets 4-7 s per fold; `v2-freeze` under a minute.
+
+### M7a-v2 forward test (2026 season) — pre-registered 2026-10-05
+
+One forward run, scored once, of an engine frozen before the 2026 data exists. The result is recorded here whatever it shows. There is no refit and no retuning afterwards.
+
+**Frozen.**
+- File: `experiments/m7a_v2/frozen_2026.json`. Engine v2, candidate **v2ad**, settings: mix "cell", half-life 2, k_bucket 0, k_cell 100, offsets with prior sd 0.25.
+- Mix training: 11,426 REG fourth-down go attempts 2006-2025, attempts hash `f11bae4eef24d0e7`, plus the pbp manifest hashes.
+- Offset training: out of fold on the M6 seasons 2016-2025. There are 6,656 attempts (hash `e695ead94c52d1a4`), and each season is scored by an M6 refit on the other nine, with the 2026 M6 settings (learning rate 0.1, 15 leaves, 52 trees). Only the fit is kept; no evaluation number on 2020-2025 was computed or reported. Frozen offsets (logit, with n):
+
+| Call | 4th-and-1 | 4th-and-2 | 3-5 | 6+ |
+|---|---|---|---|---|
+| Run | -0.094 (1,898) | -0.095 (190) | -0.053 (83) | +0.141 (88) |
+| Pass | +0.079 (730) | +0.236 (744) | +0.128 (1,404) | +0.253 (1,519) |
+
+- Frozen run-share table (distance × zone: goal 1-5 / red 6-20 / opponent 21-50 / own 51+):
+
+| Distance | Goal 1-5 | Red 6-20 | Opponent 21-50 | Own 51+ |
+|---|---|---|---|---|
+| 1 | 0.66 | 0.74 | 0.72 | 0.78 |
+| 2 | 0.18 | 0.20 | 0.19 | 0.18 |
+| 3-5 | 0.06 | 0.04 | 0.04 | 0.06 |
+| 6+ | 0.05 | 0.03 | 0.04 | 0.06 |
+
+- Everything else is the frozen M7a protocol (see "M7a holdout pre-registration"), refit season-ahead for 2026: WP, FG and punt on 2006-2025, and the M6 call-view GBM on 2016-2025 with its grid and seed 20261003.
+- Frozen at commit: **`<FILL IN AT COMMIT>`**. The artifact's `git` field records the parent commit 9fbb35d with a dirty tree, because it was written before the commit.
+
+**Data.** 2026 REG regulation fourth downs, same filters as M7a (`fourth.decision_table`). The test set is the actual go-for-it attempts, against `fourth_down_converted`; with the 2018-2025 rates, expect roughly 750-850. M6 needs the 2026 participation file, which nflverse releases after the Super Bowl. **Earliest date: 2027-02-15** (Super Bowl LXI is 2027-02-14), and only once the 2026 participation file is published. `forward-2026` checks this.
+
+**Primary (exact).** Conversion calibration of the frozen v2ad engine on actual 2026 go attempts: `plays.metrics.calibration_check(fourth_down_converted, p_conv)` passes (ECE, 10 uniform bins, ≤ the one-sided null p95 at this n, OR ≤ 0.010; 500 null draws, seed 20261003).
+
+**Secondaries** (reported; none changes the verdict):
+1. Brier of v2 minus v1 on the same attempts, with a paired game-cluster CI (2,000 reps, seed 20261003). v1 is the M7a engine refit for 2026 by the same protocol.
+2. The selection check by distance (4th-and-1, 2, 3-5, 6+, and 1-2 pooled), predicted vs actual with CIs, for v2 and v1.
+3. FG make calibration on 2026 REG attempts (`calibration_check`).
+4. Punt CRPS against the by-spot baseline (CI upper bound < 0), plus the two punt event calibrations, descriptive.
+5. Recommendations changed between v1 and v2 (model-estimated).
+6. **Pooled 2026+2027 secondary (pre-registered; run once with `forward-pooled`).** This pools about 1,600 attempts: the 2026 attempts as scored by the forward test (saved in `forward_2026_attempts.csv`) plus the 2027 REG go attempts. The 2027 attempts are scored by the same frozen tables, with WP, FG, punt and M6 refit season-ahead for 2027 by the frozen protocol. It passes iff `calibration_check` passes on the pooled v2 predictions AND the pooled 4th-and-1/2 selection gap (actual minus predicted) has |gap| < 0.03; the gap's game-cluster CI and the pooled Brier vs v1 are reported. It runs once, after the 2027 participation file is out (earliest 2028-02-15). It refuses before then, if the 2026 test has not run, if it has already run, or if the tree is dirty.
+
+**Risk stated before the run: a 2026-only pass is weak evidence.** At about 800 attempts the calibration null band is wide. Resampling the dev predictions gives a null p95 of about 0.052 at n 800, so a miss the size of the M7a holdout's (ECE 0.027) would pass. The 2026 primary can only catch a large miscalibration. The pooled 2026+2027 secondary (null p95 about 0.037 at n 1,600) and its 4th-and-1/2 gap rule are the more informative look. On dev, v2ad still over-predicts 4th-and-3-5 (by 0.034) and under-predicts 6+ (by 0.046).
+
+**Procedure.**
+1. Before 2027-02-15: `python scripts/ml_m7a.py forward-2026 --dry-run` runs the same code on 2019 (v2ad fit from seasons before 2019) and writes `experiments/m7a_v2/forward_dryrun_2019.json`. Never the forward record. Dry run, 2026-10-05 (v2ad). The path works and the gate check correctly reported "too early".
+   - 2019 alone (592 attempts): ECE 0.0583 (null p95 0.0607); Brier v2 minus v1 -0.00006 [-0.00195, +0.00195]; 4th-and-1/2 gap -0.068 [-0.121, -0.014]; 187 of 3,624 recommendations changed.
+   - `forward-pooled --dry-run`, pooling 2019 with 2018 (1,118 attempts): it reproduces the dev v2ad numbers exactly (ECE 0.0190, null p95 0.0428; pooled 4th-and-1/2 gap -0.005 [-0.045, +0.036]; Brier minus v1 -0.00009), so the pooled code agrees with `v2-dev`.
+   - The single seasons swing widely (the 4th-and-1/2 gap is +0.062 in 2018 and -0.068 in 2019), and v1 also sits inside each season's null band. That is the stated risk: one season is weak evidence.
+2. Then, once: `python scripts/ml_m7a.py forward-2026`. It refuses if any of these hold:
+   - the frozen artifact is missing or not committed;
+   - `experiments/m7a_v2/forward_2026.json` exists (run once);
+   - the date is before 2027-02-15;
+   - the 2026 REG schedule is incomplete;
+   - the 2026 participation file is unavailable;
+   - the tree is dirty.
+
+   It uses the frozen tables even if nflverse has since revised 2006-2025, reporting whether the training hash changed. It writes `forward_2026.json` and `forward_2026_attempts.csv`, then prints every number and the verdict. Whatever it shows is recorded here.
+3. After the 2027 participation release (earliest 2028-02-15), once: `python scripts/ml_m7a.py forward-pooled` (secondary 6). It writes `forward_pooled_2026_2027.json`.
 
 ### M7b build notes (2026-10-05, dev only; holdout not run)
 

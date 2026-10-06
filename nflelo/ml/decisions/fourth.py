@@ -43,6 +43,11 @@ home and the pregame A4s probability flipped; the second-half kickoff goes to
 the opponent iff the team does not receive it). The team's kicker and punter
 are the last ones it used before the snap; their values use earlier games only.
 
+Engine versions (`ENGINE_VERSION`, default "v1"): "v1" is the engine above, exactly as in the M7a dev
+and holdout runs. "v2" (M7a-v2, context/ml.md "M7a-v2 build notes") changes only the go-for-it
+conversion: the run/pass mix by distance x field zone (optionally with an as-of team offset) and,
+optionally, fourth-down conversion offsets per call and distance. See the "engine v2" section below.
+
 Uncertainty: `bootstrap` refits the WP model, the M6 bins model, the FG model
 and the punt model on game-resampled training data (the same game draw for all
 four in a replicate; hyperparameters, tree counts, K, run shares, structure
@@ -186,6 +191,248 @@ def structure_configs(train: pd.DataFrame, n: int = N_CONFIGS, seed: int = SEED)
     return out
 
 
+# --------------------------------------------------------------------------- engine v2 (M7a-v2)
+#
+# The v1 engine (the default, `ENGINE_VERSION`) is exactly the engine of the M7a dev and holdout runs.
+# v2 changes only the go-for-it conversion: the run/pass mix and, optionally, a fourth-down offset on
+# each call's conversion probability. Everything else (WP, FG, punt, structure configurations, the state
+# construction) is shared. Spec and dev evidence: context/ml.md, "M7a-v2 build notes".
+#
+#   mix "v1"         the v1 share: league fourth-down go run share by v1 distance bucket (BUCKETS)
+#   mix "cell"       REG fourth-down go attempts of seasons first..S-1, season-decay weights (half-life
+#                    `half_life` seasons), run share by distance bucket (V2_DIST) x field zone (V2_ZONES):
+#                    the bucket share shrunk to the overall share (k_bucket attempts), the cell share
+#                    shrunk to its bucket share (k_cell attempts)
+#   mix "cell_team"  "cell" plus the team's logit offset from its own go attempts in earlier games of
+#                    season S (as of the snap: earlier weeks only), one Newton step with prior precision
+#                    k_team: theta = sum(run - share) / (sum share (1 - share) + k_team)
+#   offsets          beta[call, distance bucket] added to the logit of each call's engine conversion
+#                    probability; estimated from out-of-fold engine predictions on the actual fourth-down go
+#                    attempts of the M6 training seasons first_m6..S-1 (leave one training season out:
+#                    M6 bins model refit on the other training seasons with the season's chosen M6 settings
+#                    and tree count, structure configurations from that fold), penalized logistic with
+#                    prior N(0, offset_prior_sd^2), one cell at a time. The call is nflfastR `pass`.
+#                    The offset rescales the call's yards distribution: converting bins by P'/P, the
+#                    others by (1 - P')/(1 - P), so the WP valuation and the conversion agree.
+# Shares, team offsets and conversion offsets are fixed in the bootstrap replicates (like v1's run share).
+
+ENGINE_VERSIONS = ("v1", "v2")
+ENGINE_VERSION = "v1"                                  # the default: every M7a v1 result reproduces exactly
+V2_DIST = ((1, 1), (2, 2), (3, 5), (6, 99))
+V2_ZONES = ((1, 5), (6, 20), (21, 50), (51, 99))       # yards to the opponent's goal
+SHARE_CLIP = (0.005, 0.995)
+
+
+@dataclass(frozen=True)
+class V2Settings:
+    mix: str = "cell"                    # "v1", "cell" or "cell_team"
+    offsets: bool = False
+    half_life: float | None = 2.0        # seasons (None: equal weights)
+    k_bucket: float = 0.0
+    k_cell: float = 100.0
+    k_team: float = 10.0
+    offset_prior_sd: float = 0.25
+
+    def to_dict(self) -> dict:
+        return {"mix": self.mix, "offsets": self.offsets, "half_life": self.half_life, "k_bucket": self.k_bucket,
+                "k_cell": self.k_cell, "k_team": self.k_team, "offset_prior_sd": self.offset_prior_sd}
+
+
+# Mix settings (half_life 2, k_bucket 0, k_cell 100, k_team 10) were chosen on TRAINING seasons only: each
+# season 2010-2017 predicted from 2006..s-1, log loss of the call on REG fourth-down go attempts. The
+# offset prior sd (0.25 logit) is fixed a priori. Dev 2018-2019 scores the candidates; it tunes nothing.
+V2_CANDIDATES = {
+    "v2a": V2Settings(mix="cell"),
+    "v2b": V2Settings(mix="cell_team"),
+    "v2d": V2Settings(mix="v1", offsets=True),
+    "v2ad": V2Settings(mix="cell", offsets=True),
+    "v2bd": V2Settings(mix="cell_team", offsets=True),
+}
+V2_COMPLEXITY = {"v2a": 1, "v2b": 2, "v2d": 3, "v2ad": 4, "v2bd": 5}
+# Chosen on dev by the CORRECTED rule (2026-10-05, before any 2026 data): within one SE of the best Brier, both
+# 4th-and-1/2 selection gaps under 0.02, lowest ECE; ties simplest. The original rule (simplest within one SE)
+# picked v2a, which does not address the diagnosed cause (context/ml.md, M7a-v2 build notes).
+V2_CHOSEN = "v2ad"
+
+
+def _index(v, bounds) -> np.ndarray:
+    v = np.asarray(v, float)
+    out = np.full(len(v), len(bounds) - 1, int)
+    for i, (a, b) in enumerate(bounds):
+        out[(v >= a) & (v <= b)] = i
+    return out
+
+
+def v2_bucket(ydstogo) -> np.ndarray:
+    return _index(ydstogo, V2_DIST)
+
+
+def v2_zone(yardline_100) -> np.ndarray:
+    return _index(yardline_100, V2_ZONES)
+
+
+def go_attempts(pbp: pd.DataFrame, seasons=None) -> pd.DataFrame:
+    """REG regulation fourth-down go-for-it attempts (run or pass plays) with the call (nflfastR `pass`)."""
+    p = pbp[(pbp["season_type"] == "REG") & (pbp["down"] == 4) & (pbp["qtr"] <= 4)
+            & pbp["play_type"].isin(["run", "pass"]) & pbp["ydstogo"].notna() & pbp["yardline_100"].notna()
+            & pbp["posteam"].notna()]
+    if seasons is not None:
+        p = p[p["season"].isin(list(seasons))]
+    out = pd.DataFrame({"game_id": p["game_id"].to_numpy(object), "play_id": p["play_id"].to_numpy(np.int64),
+                        "season": p["season"].to_numpy(int), "week": p["week"].to_numpy(int),
+                        "posteam": p["posteam"].astype(object).to_numpy(),
+                        "ydstogo": p["ydstogo"].to_numpy(float), "yardline_100": p["yardline_100"].to_numpy(float),
+                        "run": (p["pass"].fillna(0) != 1).to_numpy(float)})
+    out["gkey"] = kk.game_key(out["season"], out["week"])
+    out["dbin"], out["zone"] = v2_bucket(out["ydstogo"]), v2_zone(out["yardline_100"])
+    return out.reset_index(drop=True)
+
+
+def attempts_hash(att: pd.DataFrame) -> str:
+    """Content hash of the attempts a table was fit on (keys, situation and call)."""
+    import hashlib
+    cols = ["game_id", "play_id", "ydstogo", "yardline_100", "run"]
+    a = att.sort_values(["game_id", "play_id"])[cols].reset_index(drop=True)
+    a["play_id"] = a["play_id"].astype(np.int64)
+    a[["ydstogo", "yardline_100", "run"]] = a[["ydstogo", "yardline_100", "run"]].astype(float)
+    a["game_id"] = a["game_id"].astype(str)
+    return hashlib.sha256(pd.util.hash_pandas_object(a, index=False).to_numpy().tobytes()).hexdigest()[:16]
+
+
+@dataclass
+class MixTable:
+    """Run share of fourth-down go attempts by V2_DIST bucket x V2_ZONES zone (fit on seasons < S)."""
+    S: int
+    overall: float
+    bucket: np.ndarray                   # (len(V2_DIST),)
+    cell: np.ndarray                     # (len(V2_DIST), len(V2_ZONES))
+    n_cell: np.ndarray
+    info: dict = field(default_factory=dict)
+
+    def share(self, ydstogo, yardline_100) -> np.ndarray:
+        return self.cell[v2_bucket(ydstogo), v2_zone(yardline_100)]
+
+
+def fit_mix(att: pd.DataFrame, S: int, settings: V2Settings, first: int = wpm.FIRST_TRAIN) -> MixTable:
+    """The cell run-share table from attempts of seasons first..S-1 only."""
+    tr = att[(att["season"] >= first) & (att["season"] <= S - 1)]
+    s = tr["season"].to_numpy(int)
+    w = np.ones(len(tr)) if settings.half_life is None else 0.5 ** ((S - 1 - s) / settings.half_life)
+    r = tr["run"].to_numpy(float)
+    b, z = tr["dbin"].to_numpy(int), tr["zone"].to_numpy(int)
+    overall = float((w * r).sum() / w.sum())
+    nb, nz = len(V2_DIST), len(V2_ZONES)
+    bucket = np.array([((w * r)[b == i].sum() + settings.k_bucket * overall) / (w[b == i].sum() + settings.k_bucket)
+                       if (w[b == i].sum() + settings.k_bucket) > 0 else overall for i in range(nb)])
+    cell, n_cell = np.zeros((nb, nz)), np.zeros((nb, nz), int)
+    for i in range(nb):
+        for j in range(nz):
+            m = (b == i) & (z == j)
+            den = w[m].sum() + settings.k_cell
+            cell[i, j] = ((w * r)[m].sum() + settings.k_cell * bucket[i]) / den if den > 0 else bucket[i]
+            n_cell[i, j] = int(m.sum())
+    return MixTable(S, overall, bucket, np.clip(cell, *SHARE_CLIP), n_cell,
+                    {"seasons": [int(first), int(S - 1)], "n": int(len(tr)), "hash": attempts_hash(tr)})
+
+
+def team_theta(att_S: pd.DataFrame, mix: MixTable, dec: pd.DataFrame, k_team: float) -> np.ndarray:
+    """Each decision's team logit offset from the team's go attempts in EARLIER games of the same season."""
+    out = np.zeros(len(dec))
+    if att_S is None or not len(att_S) or not len(dec):
+        return out
+    a = att_S.copy()
+    sh = mix.share(a["ydstogo"], a["yardline_100"])
+    a["res"], a["inf"] = a["run"].to_numpy(float) - sh, sh * (1 - sh)
+    g = a.groupby(["posteam", "gkey"], sort=True)[["res", "inf"]].sum().reset_index()
+    g[["cres", "cinf"]] = g.groupby("posteam")[["res", "inf"]].cumsum()
+    q = pd.DataFrame({"posteam": dec["posteam"].astype(object).to_numpy(), "gkey": dec["gkey"].to_numpy(np.int64),
+                      "_row": np.arange(len(dec))}).sort_values("gkey")
+    m = pd.merge_asof(q, g[["posteam", "gkey", "cres", "cinf"]].sort_values("gkey"), on="gkey", by="posteam",
+                      allow_exact_matches=False, direction="backward")
+    out[m["_row"].to_numpy(int)] = (m["cres"].fillna(0.0) / (m["cinf"].fillna(0.0) + k_team)).to_numpy(float)
+    return out
+
+
+@dataclass
+class Offsets:
+    """Fourth-down logit offsets on each call's engine conversion probability, beta[call (0 run, 1 pass), V2_DIST]."""
+    beta: np.ndarray
+    n: np.ndarray
+    info: dict = field(default_factory=dict)
+
+
+def fit_offset_cells(y, p, call, dbin, prior_sd: float, iters: int = 25) -> tuple[np.ndarray, np.ndarray]:
+    """Penalized logistic offset per (call, bucket): maximize sum loglik(y | logit p + beta) - beta^2 / (2 sd^2)."""
+    y, p = np.asarray(y, float), np.clip(np.asarray(p, float), 1e-6, 1 - 1e-6)
+    call, dbin = np.asarray(call, int), np.asarray(dbin, int)
+    lg = np.log(p / (1 - p))
+    beta, n = np.zeros((2, len(V2_DIST))), np.zeros((2, len(V2_DIST)), int)
+    tau = 1.0 / prior_sd ** 2
+    for c in (0, 1):
+        for i in range(len(V2_DIST)):
+            m = (call == c) & (dbin == i)
+            n[c, i] = int(m.sum())
+            bt = 0.0
+            for _ in range(iters):
+                q = 1 / (1 + np.exp(-(lg[m] + bt)))
+                g = (y[m] - q).sum() - tau * bt
+                h = (q * (1 - q)).sum() + tau
+                bt += g / h
+            beta[c, i] = bt
+    return beta, n
+
+
+def shift_conversion(P: np.ndarray, beta: np.ndarray, ytg: np.ndarray, yl: np.ndarray) -> np.ndarray:
+    """Rescale folded yards distributions so P(first down or TD) moves by `beta` on the logit scale."""
+    yk = np.concatenate([pdata.BIN_YARDS[:pdata.BIG_BIN], [np.inf]])
+    conv = np.concatenate([yk[None, :] >= np.asarray(ytg, float)[:, None], np.ones((len(P), 1), bool)], axis=1)
+    pc = np.clip((P * conv).sum(axis=1), 1e-9, 1 - 1e-9)
+    pn = 1 / (1 + np.exp(-(np.log(pc / (1 - pc)) + np.asarray(beta, float))))
+    return np.where(conv, P * (pn / pc)[:, None], P * ((1 - pn) / (1 - pc))[:, None])
+
+
+@dataclass
+class EngineV2:
+    settings: V2Settings
+    mix: MixTable | None                  # None when settings.mix == "v1"
+    offsets: Offsets | None
+    att_S: pd.DataFrame | None = None     # season S attempts (team offsets read earlier games only)
+    info: dict = field(default_factory=dict)
+    v1_share: np.ndarray | None = None    # mix "v1": the v1 share table, frozen with the engine
+
+    def share(self, dec: pd.DataFrame, v1_share: np.ndarray) -> np.ndarray:
+        if self.settings.mix == "v1":
+            return (self.v1_share if self.v1_share is not None else v1_share)[bucket(dec["ydstogo"])]
+        s = self.mix.share(dec["ydstogo"], dec["yardline_100"])
+        if self.settings.mix == "cell_team":
+            th = team_theta(self.att_S, self.mix, dec, self.settings.k_team)
+            s = 1 / (1 + np.exp(-(np.log(s / (1 - s)) + th)))
+        return np.clip(s, *SHARE_CLIP)
+
+    def to_json(self) -> dict:
+        out = {"settings": self.settings.to_dict(), "info": self.info}
+        if self.v1_share is not None:
+            out["v1_share"] = {"buckets": [list(b) for b in BUCKETS], "share": self.v1_share.tolist()}
+        if self.mix is not None:
+            out["mix"] = {"S": self.mix.S, "overall": self.mix.overall, "bucket": self.mix.bucket.tolist(),
+                          "cell": self.mix.cell.tolist(), "n_cell": self.mix.n_cell.tolist(), "info": self.mix.info}
+        if self.offsets is not None:
+            out["offsets"] = {"beta": self.offsets.beta.tolist(), "n": self.offsets.n.tolist(),
+                              "info": self.offsets.info}
+        return out
+
+    @classmethod
+    def from_json(cls, d: dict) -> "EngineV2":
+        st = V2Settings(**d["settings"])
+        mx = d.get("mix")
+        mix = (MixTable(int(mx["S"]), float(mx["overall"]), np.array(mx["bucket"], float), np.array(mx["cell"], float),
+                        np.array(mx["n_cell"], int), mx.get("info", {})) if mx else None)
+        of = d.get("offsets")
+        offs = Offsets(np.array(of["beta"], float), np.array(of["n"], int), of.get("info", {})) if of else None
+        v1 = np.array(d["v1_share"]["share"], float) if d.get("v1_share") else None
+        return cls(st, mix, offs, None, d.get("info", {}), v1)
+
+
 @dataclass
 class Components:
     S: int
@@ -199,6 +446,8 @@ class Components:
     configs: np.ndarray
     ko_table: pd.DataFrame | None = None
     info: dict = field(default_factory=dict)
+    engine_version: str = ENGINE_VERSION
+    v2: EngineV2 | None = None
 
     def kickoff(self, dec: pd.DataFrame) -> np.ndarray:
         """Kickoff start as of each decision (earlier weeks of its season only; see kicking.kickoff_asof)."""
@@ -214,14 +463,98 @@ class Tables:
     punt: pd.DataFrame
 
 
+def oof_conversion(S: int, pbp: pd.DataFrame, a4s_home: pd.Series, m6_table: pd.DataFrame, ratings: pd.DataFrame,
+                   m6_params: dict, n_iter: int, first_m6: int = FIRST_M6, log=None) -> pd.DataFrame:
+    """Out-of-fold engine conversion (run call and pass call) on the actual fourth-down go attempts of the M6
+    training seasons first_m6..S-1: for each training season T, the M6 bins model is refit on the OTHER
+    training seasons (< S) with the given settings and tree count, with structure configurations from that fold.
+    Nothing from season S or later is read."""
+    feats = pdata.check_features(pdata.FEATURES["call"])
+    train = m6_table[m6_table["season"].between(first_m6, S - 1)]
+    past = pbp[pbp["season"] <= S - 1]
+    dec = decision_table(past, a4s_home, seasons=range(first_m6, S))
+    go = dec[dec["choice"] == "go"]
+    calls = go_attempts(past, range(first_m6, S))[["game_id", "play_id", "run"]]
+    out = []
+    for T in range(first_m6, S):
+        tr = train[train["season"] != T]
+        d = go[go["season"] == T].reset_index(drop=True)
+        if not len(tr) or not len(d):
+            continue
+        t0 = time.perf_counter()
+        clf = gbm._clf({**gbm.FIXED, **m6_params}, int(n_iter), False).fit(tr[feats], tr["bin"])
+        fr = _go_frames(d, structure_configs(tr), ratings)
+        y = M6Yards(clf)
+        n, k = len(d), fr["k"]
+        ytg, yl = d["ydstogo"].to_numpy(float), d["yardline_100"].to_numpy(float)
+        pr = y.predict_X(fr[0], fr["yl"]).reshape(n, k, -1).mean(axis=1)
+        pp = y.predict_X(fr[1], fr["yl"]).reshape(n, k, -1).mean(axis=1)
+        out.append(d[["game_id", "play_id", "season", "week", "ydstogo", "yardline_100", "out_converted"]].assign(
+            p_run=pm.event_probs(pr, ytg, yl)["first"], p_pass=pm.event_probs(pp, ytg, yl)["first"]))
+        if log:
+            log(f"  v2 offsets {S}: fold {T} ({len(tr):,} M6 plays, {n} attempts, {time.perf_counter() - t0:.0f}s)")
+    o = pd.concat(out, ignore_index=True) if out else pd.DataFrame(
+        columns=["game_id", "play_id", "season", "week", "ydstogo", "yardline_100", "out_converted", "p_run", "p_pass"])
+    o = o.merge(calls, on=["game_id", "play_id"], how="inner", validate="one_to_one")
+    return o
+
+
+def fit_offsets(oof: pd.DataFrame, prior_sd: float) -> Offsets:
+    run = oof["run"].to_numpy(float) == 1
+    p = np.where(run, oof["p_run"].to_numpy(float), oof["p_pass"].to_numpy(float))
+    beta, n = fit_offset_cells(oof["out_converted"].to_numpy(float), p, (~run).astype(int),
+                               v2_bucket(oof["ydstogo"]), prior_sd)
+    seasons = sorted(set(oof["season"].astype(int))) if len(oof) else []
+    return Offsets(beta, n, {"seasons": [seasons[0], seasons[-1]] if seasons else [], "n": int(len(oof)),
+                             "hash": attempts_hash(oof.assign(run=oof["run"])) if len(oof) else None,
+                             "prior_sd": prior_sd})
+
+
+def fit_v2(S: int, pbp: pd.DataFrame, settings: V2Settings, m6_table: pd.DataFrame | None = None,
+           a4s_home: pd.Series | None = None, ratings: pd.DataFrame | None = None, m6_params: dict | None = None,
+           n_iter: int | None = None, first_wp: int = wpm.FIRST_TRAIN, first_m6: int = FIRST_M6,
+           offsets: Offsets | None = None, log=None) -> EngineV2:
+    """The v2 engine for season S from seasons before S (team offsets: earlier games of S only)."""
+    att = go_attempts(pbp[pbp["season"] <= S])
+    mix = fit_mix(att, S, settings, first_wp) if settings.mix != "v1" else None
+    if settings.offsets and offsets is None:
+        if any(v is None for v in (m6_table, a4s_home, ratings, m6_params, n_iter)):
+            raise ValueError("v2 offsets need m6_table, a4s_home, ratings, m6_params and n_iter")
+        offsets = fit_offsets(oof_conversion(S, pbp, a4s_home, m6_table, ratings, m6_params, n_iter, first_m6, log),
+                              settings.offset_prior_sd)
+    return EngineV2(settings, mix, offsets if settings.offsets else None,
+                    att[att["season"] == S].reset_index(drop=True) if settings.mix == "cell_team" else None,
+                    {"S": int(S), "first_wp": int(first_wp), "first_m6": int(first_m6)},
+                    run_share(pbp, range(first_wp, S)) if settings.mix == "v1" else None)
+
+
+def attach_season(v2: EngineV2, pbp: pd.DataFrame, S: int) -> EngineV2:
+    """A frozen v2 engine for season S: the fitted tables as they are, plus S's attempts for the as-of team offsets."""
+    att = go_attempts(pbp[pbp["season"] == S]) if v2.settings.mix == "cell_team" else None
+    return EngineV2(v2.settings, v2.mix, v2.offsets, att, {**v2.info, "S": int(S)}, v2.v1_share)
+
+
+def with_engine(comp: Components, v2: EngineV2 | None) -> Components:
+    """The same fitted components with another go-for-it engine (None: v1)."""
+    from dataclasses import replace
+    return replace(comp, engine_version="v1" if v2 is None else "v2", v2=v2)
+
+
 def fit_components(S: int, pbp: pd.DataFrame, wp_table: pd.DataFrame, m6_table: pd.DataFrame,
                    first_wp: int = wpm.FIRST_TRAIN, first_m6: int = FIRST_M6, m6_grid=gbm.GRID,
                    wp_calibrate: bool = wpm.CALIBRATE, wp: wpm.WPModel | None = None, fg: tuple | None = None,
-                   punt: tuple | None = None) -> tuple[Components, Tables]:
+                   punt: tuple | None = None, engine_version: str = ENGINE_VERSION,
+                   v2_settings: V2Settings | None = None, v2: EngineV2 | None = None,
+                   a4s_home: pd.Series | None = None, ratings: pd.DataFrame | None = None,
+                   log=None) -> tuple[Components, Tables]:
     """Every component for season S, fit on seasons before S only (see the module docstring).
 
     `wp`, `fg` (model, rows) and `punt` (model, rows) may be passed in when already fit for S
-    with the same functions (the dev script scores them first)."""
+    with the same functions (the dev script scores them first). `engine_version` "v1" (default) is the
+    M7a engine; "v2" uses `v2` (a frozen engine; S's attempts are attached for the team offsets) or fits
+    one with `v2_settings` (default: V2_CANDIDATES[V2_CHOSEN]; offsets need `a4s_home` and `ratings`)."""
+    if engine_version not in ENGINE_VERSIONS:
+        raise ValueError(f"engine_version must be one of {ENGINE_VERSIONS}")
     t0 = time.perf_counter()
     wp = wp if wp is not None else wpm.fit_season_ahead(wp_table, S, first_wp, calibrate=wp_calibrate)
     m6_train = m6_table[m6_table["season"].between(first_m6, S - 1)]
@@ -240,13 +573,59 @@ def fit_components(S: int, pbp: pd.DataFrame, wp_table: pd.DataFrame, m6_table: 
     comp.info.update({"ko_spot": comp.ko_spot, "durations": comp.dur, "run_share": comp.run_share.tolist()})
     tables = Tables(wp_table[wp_table["season"].between(first_wp, S - 1)], m6_train,
                     fg_x[fg_x["season"].between(first_wp, S - 1)], punt_x[punt_x["season"].between(first_wp, S - 1)])
+    if engine_version == "v2":
+        t1 = time.perf_counter()
+        if v2 is not None:
+            eng = attach_season(v2, pbp, S)
+        else:
+            eng = fit_v2(S, pbp, v2_settings or V2_CANDIDATES[V2_CHOSEN], m6_table, a4s_home, ratings,
+                         g.info.get("chosen"), g.info["n_iter"], first_wp, first_m6, log=log)
+        comp = with_engine(comp, eng)
+        comp.info = {**comp.info, "engine": {"version": "v2", **eng.to_json(), "seconds": time.perf_counter() - t1}}
     return comp, tables
 
 
 # --------------------------------------------------------------------------- valuation
 
+def _go_frames(dec: pd.DataFrame, configs: np.ndarray, ratings: pd.DataFrame) -> dict:
+    """M6 feature matrices for the run (0) and pass (1) calls of every decision, one row per structure config."""
+    n = len(dec)
+    sit = pd.DataFrame({"down": 4.0, "ydstogo": dec["ydstogo"].to_numpy(float),
+                        "yardline_100": dec["yardline_100"].to_numpy(float),
+                        "score_diff": dec["score_diff"].to_numpy(float), "half_secs": dec["half_secs"].to_numpy(float),
+                        "game_secs": dec["game_secs"].to_numpy(float), "off_timeouts": dec["pos_timeouts"].to_numpy(float),
+                        "def_timeouts": dec["def_timeouts"].to_numpy(float), "home": dec["home"].to_numpy(float),
+                        "roof_indoor": dec["indoor"].to_numpy(float), "roof_open": dec["roof_open"].to_numpy(float),
+                        "temp": dec["temp"].to_numpy(float), "wind": dec["wind"].to_numpy(float)})
+    rat = pdata.rating_features(pd.DataFrame({"season": dec["season"].to_numpy(int), "week": dec["week"].to_numpy(int),
+                                              "off_team": dec["posteam"].to_numpy(object),
+                                              "def_team": dec["defteam"].to_numpy(object)}), ratings)
+    b = bucket(dec["ydstogo"])
+    feats = pdata.check_features(pdata.FEATURES["call"])
+    out = {}
+    for call in (0, 1):
+        struct = configs[call, b]                                        # (n, N_CONFIGS, n_struct)
+        k = struct.shape[1]
+        frame = pd.DataFrame(np.repeat(sit.to_numpy(float), k, axis=0), columns=sit.columns)
+        frame[pdata.STRUCTURE] = struct.reshape(n * k, -1)
+        frame[pdata.RATINGS] = np.repeat(rat[pdata.RATINGS].to_numpy(float), k, axis=0)
+        frame["is_pass"] = float(call)
+        out[call] = frame[feats]
+    out["yl"] = np.repeat(dec["yardline_100"].to_numpy(float), configs.shape[2])
+    out["k"] = configs.shape[2]
+    return out
+
+
 def go_inputs(dec: pd.DataFrame, comp: Components, ratings: pd.DataFrame) -> dict:
     """M6 feature matrices for the run and pass calls of every decision (N_CONFIGS structures each)."""
+    if getattr(comp, "engine_version", "v1") == "v2":
+        out = _go_frames(dec, comp.configs, ratings)
+        out["share_run"] = comp.v2.share(dec, comp.run_share)
+        if comp.v2.offsets is not None:
+            out["beta"] = comp.v2.offsets.beta[:, v2_bucket(dec["ydstogo"])]          # (2 calls, n)
+            out["ytg"] = dec["ydstogo"].to_numpy(float)
+            out["yl_row"] = dec["yardline_100"].to_numpy(float)
+        return out
     n = len(dec)
     sit = pd.DataFrame({"down": 4.0, "ydstogo": dec["ydstogo"].to_numpy(float),
                         "yardline_100": dec["yardline_100"].to_numpy(float),
@@ -280,6 +659,9 @@ def go_distribution(yards: M6Yards, gi: dict, n: int) -> tuple[np.ndarray, np.nd
     k = gi["k"]
     pr = yards.predict_X(gi[0], gi["yl"]).reshape(n, k, -1).mean(axis=1)
     pp = yards.predict_X(gi[1], gi["yl"]).reshape(n, k, -1).mean(axis=1)
+    if "beta" in gi:                                                     # v2 fourth-down offsets
+        pr = shift_conversion(pr, gi["beta"][0], gi["ytg"], gi["yl_row"])
+        pp = shift_conversion(pp, gi["beta"][1], gi["ytg"], gi["yl_row"])
     s = gi["share_run"][:, None]
     return s * pr + (1 - s) * pp, pr, pp
 

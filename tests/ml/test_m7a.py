@@ -413,3 +413,156 @@ def test_signoff_refuses_without_a_reproduced_dry_run(tmp_path, monkeypatch):
     monkeypatch.setattr(ml_m7a, "holdout_signoff_runs", lambda: ["x_m7a_signoff_wp.json"])
     with pytest.raises(SystemExit, match="run once only"):
         ml_m7a.stage_signoff(ml_m7a.HOLDOUT, allow_holdout=True, log_=False)
+
+
+# --------------------------------------------------------------------------- M7a-v2 (conversion engine)
+
+def test_engine_default_is_v1_and_v2_plumbing_is_exact(league, fitted):
+    """The default engine is v1 (every M7a result reproduces); v2 with the v1 mix and no offsets gives the
+    identical valuations, so the v2 code path changes nothing but what its settings change."""
+    comp, _, dec = fitted
+    assert fd.ENGINE_VERSION == "v1" and comp.engine_version == "v1" and comp.v2 is None
+    rat = synth_ratings()
+    v1 = fd.option_values(comp, dec, fd.go_inputs(dec, comp, rat))
+    same = fd.with_engine(comp, fd.fit_v2(2018, league["pbp"], fd.V2Settings(mix="v1"), first_wp=2012))
+    assert same.engine_version == "v2"
+    v2 = fd.option_values(same, dec, fd.go_inputs(dec, same, rat))
+    assert np.array_equal(v1.to_numpy(float), v2.to_numpy(float))
+    cell = fd.with_engine(comp, fd.fit_v2(2018, league["pbp"], fd.V2Settings(mix="cell"), first_wp=2012))
+    v3 = fd.option_values(cell, dec, fd.go_inputs(dec, cell, rat))
+    assert not np.array_equal(v1["share_run"].to_numpy(), v3["share_run"].to_numpy())
+    assert np.array_equal(v1["wp_punt"].to_numpy(), v3["wp_punt"].to_numpy())       # only GO can move
+
+
+def test_shift_conversion_moves_only_the_conversion_odds():
+    rng = np.random.default_rng(0)
+    n = 50
+    yl = rng.integers(5, 95, n).astype(float)
+    ytg = np.minimum(rng.integers(1, 12, n), yl).astype(float)
+    P = pdata.fold(rng.dirichlet(np.ones(pdata.N_BINS), n), yl)
+    from nflelo.ml.plays import metrics as pm
+    p0 = pm.event_probs(P, ytg, yl)["first"]
+    assert np.allclose(fd.shift_conversion(P, np.zeros(n), ytg, yl), P)
+    beta = rng.normal(0, 0.5, n)
+    Q = fd.shift_conversion(P, beta, ytg, yl)
+    assert np.allclose(Q.sum(axis=1), 1) and (Q >= 0).all()
+    assert np.allclose(pm.event_probs(Q, ytg, yl)["first"], 1 / (1 + np.exp(-(np.log(p0 / (1 - p0)) + beta))))
+    b, n_ = fd.fit_offset_cells(np.r_[np.ones(80), np.zeros(20)], np.full(100, 0.5), np.zeros(100, int),
+                                np.zeros(100, int), prior_sd=10.0)
+    assert np.isclose(1 / (1 + np.exp(-b[0, 0])), 0.8, atol=0.01) and n_[0, 0] == 100 and b[1, 0] == 0
+
+
+def _flip_calls(pbp: pd.DataFrame, mask) -> pd.DataFrame:
+    out = pbp.copy()
+    out["pass"] = out["pass"].astype(float)
+    out.loc[mask, "pass"] = 1.0 - out.loc[mask, "pass"].fillna(0).to_numpy(float)
+    return out
+
+
+def test_v2_mix_and_team_offsets_are_as_of(league):
+    """Corrupt every call of season S from week w on: the S mix table and the team offsets of week-w decisions
+    do not move. Positive controls: later weeks' decisions (they see weeks >= w) and a mix whose training calls
+    changed."""
+    pbp, S, w = league["pbp"], 2018, 5
+    st = fd.V2Settings(mix="cell_team", k_team=1.0)
+    m = ((pbp["season"] == S) & (pbp["week"] >= w)).to_numpy()
+    pc = _flip_calls(pbp, m)
+    e0, e1 = fd.fit_v2(S, pbp, st, first_wp=2012), fd.fit_v2(S, pc, st, first_wp=2012)
+    dec = fd.decision_table(pbp, league["a4s"], seasons=[S])
+    dw, dn = dec[dec["week"] == w].reset_index(drop=True), dec[dec["week"] > w].reset_index(drop=True)
+    assert np.array_equal(e0.mix.cell, e1.mix.cell)
+    assert len(dw) and np.array_equal(e0.share(dw, None), e1.share(dw, None))
+    assert np.abs(e0.share(dn, None) - e1.share(dn, None)).max() > 1e-6               # control: later weeks see it
+    e2 = fd.fit_v2(S, _flip_calls(pbp, (pbp["season"] == S - 1).to_numpy()), st, first_wp=2012)
+    assert np.abs(e0.mix.cell - e2.mix.cell).max() > 1e-6                              # control: training calls
+
+
+def test_v2_offsets_use_training_seasons_only(league):
+    """Offsets for S come from out-of-fold engine predictions on seasons first_m6..S-1: corrupting season S
+    (conversions, M6 outcomes, calls) changes nothing; corrupting a training season moves them (control)."""
+    pbp, S = league["pbp"], 2018
+    args = dict(m6_params={"learning_rate": 0.1, "max_leaf_nodes": 7}, n_iter=15)
+    rat = synth_ratings()
+
+    def offsets(p, m6):
+        o = fd.oof_conversion(S, p, league["a4s"], m6, rat, **args)
+        return o, fd.fit_offsets(o, 0.25)
+
+    o0, f0 = offsets(pbp, league["m6"])
+    assert set(o0["season"]) == {2016, 2017} and len(o0) > 20
+    cS = (pbp["season"] == S).to_numpy()
+    pc = _flip_calls(pbp, cS)
+    pc.loc[cS, "fourth_down_converted"] = 1.0 - pc.loc[cS, "fourth_down_converted"].to_numpy(float)
+    m6c = _corrupt_from_week(league["m6"], S, 1, ["bin", "yards", "ev_first"])
+    o1, f1 = offsets(pc, m6c)
+    assert o0.equals(o1) and np.array_equal(f0.beta, f1.beta)
+    c7 = (pbp["season"] == S - 1).to_numpy()
+    p7 = pbp.copy()
+    p7.loc[c7, "fourth_down_converted"] = 1.0 - p7.loc[c7, "fourth_down_converted"].to_numpy(float)
+    _, f2 = offsets(p7, league["m6"])
+    assert np.abs(f0.beta - f2.beta).max() > 1e-3                                      # control: training season
+
+
+def test_frozen_engine_round_trip(league):
+    import json
+    pbp = league["pbp"]
+    eng = fd.fit_v2(2018, pbp, fd.V2Settings(mix="cell_team"), first_wp=2012)
+    eng.offsets = fd.Offsets(np.arange(8, dtype=float).reshape(2, 4) / 10, np.ones((2, 4), int))
+    back = fd.attach_season(fd.EngineV2.from_json(json.loads(json.dumps(eng.to_json()))), pbp, 2018)
+    dec = fd.decision_table(pbp, league["a4s"], seasons=[2018])
+    assert np.array_equal(eng.share(dec, None), back.share(dec, None))
+    assert np.array_equal(eng.offsets.beta, back.offsets.beta) and back.settings == eng.settings
+    v1m = fd.fit_v2(2018, pbp, fd.V2Settings(mix="v1"), first_wp=2012)
+    v1b = fd.EngineV2.from_json(json.loads(json.dumps(v1m.to_json())))
+    assert np.array_equal(v1m.share(dec, np.zeros(6)), v1b.share(dec, np.zeros(6)))   # frozen v1 table, not the arg
+
+
+def test_forward_2026_refuses_before_the_data_and_twice(tmp_path, monkeypatch):
+    import ml_m7a
+    monkeypatch.setattr(ml_m7a, "V2_DIR", tmp_path)
+    monkeypatch.setattr(ml_m7a, "V2_FROZEN", tmp_path / "frozen_2026.json")
+    monkeypatch.setattr(ml_m7a, "V2_FORWARD", tmp_path / "forward_2026.json")
+    monkeypatch.setattr(ml_m7a.config, "ROOT", tmp_path.parent)
+    assert any("no frozen engine" in w for w in ml_m7a.forward_gates(today="2027-03-01"))
+    with pytest.raises(SystemExit, match="refused"):
+        ml_m7a.stage_forward(dry_run=False)
+    (tmp_path / "frozen_2026.json").write_text("{}")
+    why = ml_m7a.forward_gates(today="2026-10-05")
+    assert len(why) == 1 and "too early" in why[0] and ml_m7a.FORWARD_EARLIEST in why[0]
+    with pytest.raises(SystemExit, match="too early"):
+        ml_m7a.stage_forward(dry_run=False)
+    (tmp_path / "forward_2026.json").write_text("{}")
+    assert any("run once only" in w for w in ml_m7a.forward_gates(today="2027-03-01"))
+    with pytest.raises(SystemExit, match="already recorded"):
+        ml_m7a.stage_v2_freeze()
+    (tmp_path / "forward_2026.json").unlink()
+    with pytest.raises(SystemExit, match="exists"):
+        ml_m7a.stage_v2_freeze()
+    # the pooled 2026+2027 secondary needs the 2026 record and attempts, runs once, and not before its date
+    monkeypatch.setattr(ml_m7a, "V2_POOLED", tmp_path / "forward_pooled_2026_2027.json")
+    assert any("has not been run" in w for w in ml_m7a.pooled_gates(today="2028-03-01"))
+    (tmp_path / "forward_2026.json").write_text("{}")
+    ml_m7a.attempts_path(ml_m7a.FORWARD_SEASON).write_text("x")
+    why = ml_m7a.pooled_gates(today="2027-06-01")
+    assert len(why) == 1 and "too early" in why[0] and ml_m7a.POOLED_EARLIEST in why[0]
+    (tmp_path / "forward_pooled_2026_2027.json").write_text("{}")
+    assert any("run once only" in w for w in ml_m7a.pooled_gates(today="2028-03-01"))
+    with pytest.raises(SystemExit, match="refused"):
+        ml_m7a.stage_pooled(dry_run=False)
+
+
+def test_pooled_score_rule():
+    """Pooled secondary: calibration_check on v2 AND |4th-and-1/2 pooled gap| < 0.03 (CI reported)."""
+    import ml_m7a
+    rng = np.random.default_rng(0)
+    n = 1600
+    ytg = rng.choice([1, 2, 3, 5, 8], n).astype(float)
+    p2 = np.clip(0.75 - 0.06 * ytg + rng.normal(0, 0.05, n), 0.05, 0.95)
+    a = pd.DataFrame({"game_id": [f"g{i // 4}" for i in range(n)], "play_id": np.arange(n), "season": 2026, "week": 1,
+                      "ydstogo": ytg, "yardline_100": 40.0, "converted": (rng.uniform(size=n) < p2).astype(float),
+                      "p_v1": p2, "p_v2": p2})
+    r = ml_m7a.pooled_score(a)
+    assert r["calibration_ok"] and r["short_gap_ok"] and r["pass"] and r["n_attempts"] == n
+    assert r["short_gap"]["ci_low"] <= r["short_gap"]["diff"] <= r["short_gap"]["ci_high"]
+    b = a.assign(p_v2=np.where(a["ydstogo"] <= 2, np.clip(a["p_v2"] - 0.08, 0.01, 1), a["p_v2"]))
+    assert not ml_m7a.pooled_score(b)["short_gap_ok"]

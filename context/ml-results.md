@@ -18,6 +18,7 @@ Last updated 2026-10-05.
 | M6 | **Play outcome model** | Yards distribution for a play from pre-snap situation and personnel | CRPS -0.018 vs the situational baseline in both views, in every season and both data eras | **Pass** |
 | M7a | **Win-probability model** | Live WP with no betting-market inputs | Brier **0.1559 vs nflfastR 0.1659** (-0.0099 [-0.0146, -0.0055]); Vegas WP 0.1497 | **Pass** (WP part) |
 | M7a | Fourth-down tool | Go / FG / punt in win probability, with an uncertainty band | Conversion calibration ECE 0.027 missed the bar; FG and punt pass | **Fail** (conversion component). Audit published |
+| M7a-v2 | Corrected conversion engine | Run/pass mix by field zone plus fourth-down conversion offsets, frozen before 2026 | Dev only: conversion ECE 0.019 vs 0.033 for v1; 4th-and-2 gap +0.004 vs +0.034 | **Forward test pending** (2026 from 2027-02-15; pooled 2026+2027 secondary) |
 | M7b | **Early-down play calling** | Run or pass by personnel, using causal methods (propensity, AIPW, off-policy evaluation) | Recommended policy +0.052 EPA/play [+0.038, +0.067] over observed; placebo includes 0 | **Pass** |
 
 ## What the evidence says

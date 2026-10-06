@@ -1,0 +1,212 @@
+{
+ "engine": "M7a-v2",
+ "engine_version": "v2",
+ "candidate": "v2ad",
+ "season": 2026,
+ "settings": {
+  "mix": "cell",
+  "offsets": true,
+  "half_life": 2.0,
+  "k_bucket": 0.0,
+  "k_cell": 100.0,
+  "k_team": 10.0,
+  "offset_prior_sd": 0.25
+ },
+ "tables": {
+  "settings": {
+   "mix": "cell",
+   "offsets": true,
+   "half_life": 2.0,
+   "k_bucket": 0.0,
+   "k_cell": 100.0,
+   "k_team": 10.0,
+   "offset_prior_sd": 0.25
+  },
+  "info": {
+   "S": 2026,
+   "first_wp": 2006,
+   "first_m6": 2016
+  },
+  "mix": {
+   "S": 2026,
+   "overall": 0.33975903776919825,
+   "bucket": [
+    0.7291812104115141,
+    0.18785080373495255,
+    0.04933292141946458,
+    0.04549167064343917
+   ],
+   "cell": [
+    [
+     0.6602442428392257,
+     0.7423416071584467,
+     0.7205636830125484,
+     0.7782765865970008
+    ],
+    [
+     0.1800777614605926,
+     0.19992562523954652,
+     0.18817333139037135,
+     0.18381850897425178
+    ],
+    [
+     0.056249155579762664,
+     0.0391560708380347,
+     0.04437660666345319,
+     0.06168426692815276
+    ],
+    [
+     0.0454514968164217,
+     0.03126778082222957,
+     0.04040338650089209,
+     0.058849225679113125
+    ]
+   ],
+   "n_cell": [
+    [
+     812,
+     659,
+     1984,
+     989
+    ],
+    [
+     220,
+     195,
+     772,
+     278
+    ],
+    [
+     232,
+     338,
+     1366,
+     566
+    ],
+    [
+     1,
+     463,
+     1419,
+     1132
+    ]
+   ],
+   "info": {
+    "seasons": [
+     2006,
+     2025
+    ],
+    "n": 11426,
+    "hash": "f11bae4eef24d0e7"
+   }
+  },
+  "offsets": {
+   "beta": [
+    [
+     -0.09357678136378149,
+     -0.0954633271644247,
+     -0.05308373979596226,
+     0.14084554328615978
+    ],
+    [
+     0.07886278312119142,
+     0.23619190163288364,
+     0.12765119338402503,
+     0.25295718457052846
+    ]
+   ],
+   "n": [
+    [
+     1898,
+     190,
+     83,
+     88
+    ],
+    [
+     730,
+     744,
+     1404,
+     1519
+    ]
+   ],
+   "info": {
+    "seasons": [
+     2016,
+     2025
+    ],
+    "n": 6656,
+    "hash": "e695ead94c52d1a4",
+    "prior_sd": 0.25
+   }
+  }
+ },
+ "training": {
+  "seasons": [
+   2006,
+   2025
+  ],
+  "attempts": 11426,
+  "attempts_hash": "f11bae4eef24d0e7",
+  "pbp_manifest_sha256": {
+   "pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+   "pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+   "pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+   "pbp/2009": "5bfb6559343c04092d1ad66c1479782d085d9f390e6806be0a7ca7ec37124806",
+   "pbp/2010": "74ad605fea53c27afd00eee71c53b86b5cfbf7133d1a7b5b8f0067d817e55785",
+   "pbp/2011": "26727f9d2b0e4f9f616e746b87b9a29359f37a4b484f66f7312baf883d85e958",
+   "pbp/2012": "3277aded9792c419cc853cf307f2206c3fb0908d91750b4e1d3d66b567407c66",
+   "pbp/2013": "2a31a7cd0e7e2306f626a0f1f4bb96679e5b3e92a8729695858adca35d8b2686",
+   "pbp/2014": "c6910558e235dac664b1b7f02654d47ea8d51904ef9ace5d4f015165604e0b12",
+   "pbp/2015": "b3314a52b781a00417528b2e3388d2596098cdbe7b565d3c962d7171a98ae70f",
+   "pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+   "pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+   "pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+   "pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+   "pbp/2020": "d86d1e3f98b64bd839c8533a3867cb0f0e3d6216cd11bddd11efd5bc6c594a04",
+   "pbp/2021": "d2fbf41c83c843e1c6db4ec117ef9b4b49b7730666f21005fc9951dce09d0e0a",
+   "pbp/2022": "311971fb4404dc8759a9f77c50ef2f4933fbd2d24deb5a747987058d0b6788a8",
+   "pbp/2023": "19fc2ce8abb85be47fad16ceff178c67d6581309e87d53bb70c4531373867b1e",
+   "pbp/2024": "e332d33a0c83a33073cde85f8e8f1ac0caebcc552eda7e7c92612ff306bafa73",
+   "pbp/2025": "5ed293fdf54d79e34426133829f3111faf577db29b8cfc25cf910d75eb55b2ef"
+  }
+ },
+ "season_ahead_components": "WP, FG and punt models (2006..2025) and the M6 call-view GBM (2016..2025) are refit by the frozen M7a protocol at evaluation time (nflelo/ml/wp/model.py, nflelo/ml/decisions/kicking.py, nflelo/ml/plays/gbm.py; seed 20261003)",
+ "m6_for_offsets": {
+  "chosen": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 15
+  },
+  "n_iter": 52,
+  "seasons": [
+   2016,
+   2025
+  ]
+ },
+ "dev": {
+  "chosen": "v2ad",
+  "window": [
+   2018,
+   2019
+  ],
+  "n": 1118,
+  "brier": 0.2304095702591596,
+  "ece": 0.019021966869697593,
+  "vs_v1": {
+   "n": 1118,
+   "clusters": 461,
+   "diff": -8.842709039049466e-05,
+   "ci_low": -0.0013150407047070494,
+   "ci_high": 0.0012331767259590122,
+   "level": 0.95,
+   "reps": 2000,
+   "seed": 20261003,
+   "excludes_zero": false,
+   "boot_se": 0.0006495366973121735
+  },
+  "plays_hash": "824814bdd1dfec3f"
+ },
+ "git": {
+  "sha": "9fbb35d3db23f44c5cdcc8acf1dad5c256c65f16",
+  "dirty": true
+ },
+ "frozen_at": "2026-10-06T01:05:36+00:00",
+ "license": "CC BY-SA 4.0",
+ "note": "CC BY-SA 4.0: M7a fourth-down valuations use the M6 play model, built on nflverse participation data (NFL Next Gen Stats via nflverse 2016-2022, FTN Data via nflverse 2023+). Data: nflverse (CC BY 4.0)."
+}

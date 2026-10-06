@@ -13,6 +13,12 @@ context/ml-m7-method.md (sections 2, 3 Part A, 5).
     python scripts/ml_m7a.py leakcheck        # real-data leakage checks on 2019 (weeks 1, 9, 17), positive controls
     python scripts/ml_m7a.py signoff-dry-run  # the sign-off code path on 2018-2019, no logging; must reproduce `dev`
     python scripts/ml_m7a.py signoff          # the ONE pre-registered holdout run, 2020-2025
+    python scripts/ml_m7a.py v2-dev           # M7a-v2: v1 reproduction, diagnosis, candidates on 2018-2019
+    python scripts/ml_m7a.py v2-freeze        # M7a-v2: fit the chosen engine on 2006-2025, write the frozen artifact
+    python scripts/ml_m7a.py forward-2026     # M7a-v2: the ONE 2026 forward test (refuses before the data / twice)
+    python scripts/ml_m7a.py forward-2026 --dry-run   # the same code on 2019, no forward record
+    python scripts/ml_m7a.py forward-pooled   # M7a-v2: the ONE pooled 2026+2027 secondary (after 2027 participation)
+    python scripts/ml_m7a.py forward-pooled --dry-run # pools the 2019 dry run with 2018
     options: --boot B (bootstrap refits per season, default 50), --no-log
 
 `signoff` refuses twice over: if any m7a_signoff_* run flagged holdout exists
@@ -37,6 +43,7 @@ import argparse
 import contextlib
 import glob
 import json
+import subprocess
 import sys
 import time
 import warnings
@@ -61,6 +68,7 @@ from nflelo.ml.eval import bootstrap, calibration, windows  # noqa: E402
 from nflelo.ml.features import opponent_adjust as oa  # noqa: E402
 from nflelo.ml.models import logistic  # noqa: E402
 from nflelo.ml.plays import data as pdata  # noqa: E402
+from nflelo.ml.plays import gbm  # noqa: E402
 from nflelo.ml.plays import metrics as pm  # noqa: E402
 from nflelo.ml.wp import model as wpm  # noqa: E402
 
@@ -178,8 +186,9 @@ def realized_wp(dec: pd.DataFrame, wpf: pd.DataFrame) -> np.ndarray:
     return out
 
 
-def season_work(inp: Inputs, S: int, B: int, bench: pd.DataFrame) -> dict:
-    """Every model and prediction for season S (fit on seasons before S)."""
+def season_work(inp: Inputs, S: int, B: int, bench: pd.DataFrame, v2=None) -> dict:
+    """Every model and prediction for season S (fit on seasons before S). With `v2` (a fitted or frozen
+    M7a-v2 engine) the fourth downs are also valued with it (`fourth_v2`, no bootstrap); the v1 path is unchanged."""
     r, t = {}, {}
     t0 = time.perf_counter()
     wp_iso = wpm.fit_season_ahead(inp.wp_table, S, calibrate=True)
@@ -222,6 +231,12 @@ def season_work(inp: Inputs, S: int, B: int, bench: pd.DataFrame) -> dict:
         vals, boot = fd.value_season(comp, dec, inp.ratings, tables, B=B, seed=SEED, log=log)
         vals["realized_wp"] = realized_wp(vals, wpf)
         r["fourth"], r["boot"] = vals, boot
+        if v2 is not None:                  # a frozen EngineV2, or V2Settings to fit for S from seasons < S
+            eng = (fd.attach_season(v2, inp.pbp, S) if isinstance(v2, fd.EngineV2)
+                   else fd.fit_v2(S, inp.pbp, v2, inp.m6_table, inp.a4s, inp.ratings, comp.info["m6"]["chosen"],
+                                  comp.info["m6"]["n_iter"], log=log))
+            r["fourth_v2"], _ = fd.value_season(fd.with_engine(comp, eng), dec, inp.ratings)
+            r["v2_engine"] = eng.to_json()
         t["fourth"] = time.perf_counter() - t0
         # M6 call view with the plays' own (actual) pre-snap features: 3rd and 4th downs of S
         m6S = inp.m6_table[(inp.m6_table["season"] == S) & (inp.m6_table["down"] >= 3)
@@ -859,12 +874,626 @@ def stage_leakcheck(S: int = 2019, weeks=(1, 9, 17), seed: int = 0) -> int:
     return 0 if ok_all else 1
 
 
+# --------------------------------------------------------------------------- M7a-v2 (corrected conversion engine)
+#
+# context/ml.md, "M7a-v2 build notes" and "M7a-v2 forward test (2026 season)". The 2020-2025 holdout is
+# spent for M7a: nothing here computes a conversion, calibration or decision number on 2020-2025 plays.
+# Development is 2018-2019 (dev); the mix settings are tuned on the call alone in training seasons 2010-2017.
+
+V2_DIR = config.ROOT / "experiments" / "m7a_v2"
+V2_FROZEN = V2_DIR / "frozen_2026.json"
+V2_FORWARD = V2_DIR / "forward_2026.json"
+V2_DRYRUN = V2_DIR / "forward_dryrun_2019.json"
+FORWARD_SEASON = 2026
+FORWARD_EARLIEST = "2027-02-15"      # the day after Super Bowl LXI (2027-02-14); 2026 participation comes later
+DRYRUN_SEASON = 2019
+V2_TUNE = (2010, 2017)               # mix-setting tuning targets (each from 2006..s-1): training seasons only
+V2_TUNE_GRID = {"half_life": (None, 8.0, 4.0, 2.0, 1.0), "k_bucket": (0.0, 10.0, 50.0),
+                "k_cell": (0.0, 20.0, 50.0, 100.0, 200.0, 400.0, 1000.0), "k_team": (1.0, 2.0, 5.0, 10.0, 20.0, 50.0)}
+DIST_GROUPS = (("4th-and-1", 1, 1), ("4th-and-2", 2, 2), ("4th-and-3-5", 3, 5), ("4th-and-6+", 6, 99),
+               ("4th-and-1-2", 1, 2))
+ZONE_NAMES = ("goal 1-5", "red 6-20", "opp 21-50", "own 51+")
+DIST_NAMES = ("1", "2", "3-5", "6+")
+SEL_GAP_MAX = 0.02                   # dev selection rule: |4th-and-1| and |4th-and-2| actual minus predicted
+POOLED_GAP_MAX = 0.03                # pooled 2026+2027 secondary: |4th-and-1-2 pooled gap|
+V2_POOLED = V2_DIR / "forward_pooled_2026_2027.json"
+POOLED_SEASON = 2027
+POOLED_EARLIEST = "2028-02-15"       # after the 2027 season's Super Bowl; 2027 participation comes later
+
+
+def _ll(y, p) -> float:
+    p = np.clip(np.asarray(p, float), 1e-6, 1 - 1e-6)
+    y = np.asarray(y, float)
+    return float(-np.mean(y * np.log(p) + (1 - y) * np.log(1 - p)))
+
+
+def tune_mix(pbp: pd.DataFrame) -> dict:
+    """Mix settings by the call's log loss on REG go attempts of 2010-2017, each season from 2006..s-1.
+    Reads only the call (nflfastR `pass`) and the situation of seasons <= 2017: no outcome, no dev season."""
+    att = fd.go_attempts(pbp[pbp["season"] <= V2_TUNE[1]])
+    tgt = list(range(V2_TUNE[0], V2_TUNE[1] + 1))
+    tests = {S: att[att["season"] == S].reset_index(drop=True) for S in tgt}
+    n = sum(len(t) for t in tests.values())
+
+    def score(st: fd.V2Settings) -> float:
+        tot = 0.0
+        for S, te in tests.items():
+            eng = fd.EngineV2(st, fd.fit_mix(att, S, st, FIRST_WP), None, te if st.mix == "cell_team" else None)
+            tot += _ll(te["run"], eng.share(te, None)) * len(te)
+        return tot / n
+
+    grid = [{"half_life": hl, "k_bucket": kb, "k_cell": kc,
+             "logloss": score(fd.V2Settings(mix="cell", half_life=hl, k_bucket=kb, k_cell=kc))}
+            for hl in V2_TUNE_GRID["half_life"] for kb in V2_TUNE_GRID["k_bucket"] for kc in V2_TUNE_GRID["k_cell"]]
+    best = min(grid, key=lambda g: g["logloss"])
+    base = {k: best[k] for k in ("half_life", "k_bucket", "k_cell")}
+    team = [{"k_team": kt, "logloss": score(fd.V2Settings(mix="cell_team", k_team=kt, **base))}
+            for kt in V2_TUNE_GRID["k_team"]]
+    best_team = min(team, key=lambda g: g["logloss"])
+    v1 = sum(_ll(te["run"], fd.run_share(pbp, range(FIRST_WP, S))[fd.bucket(te["ydstogo"])]) * len(te)
+             for S, te in tests.items()) / n
+    d = fd.V2Settings()
+    matches = bool(d.half_life == best["half_life"] and d.k_bucket == best["k_bucket"] and d.k_cell == best["k_cell"]
+                   and d.k_team == best_team["k_team"])
+    return {"targets": [tgt[0], tgt[-1]], "n": int(n), "grid": grid, "best": best, "team": team,
+            "best_team": best_team, "v1_logloss": v1, "defaults_match_best": matches}
+
+
+def _sel(pred, actual, games, ydstogo) -> dict:
+    y = np.asarray(ydstogo, float)
+    return {name: pred_vs_actual(np.asarray(pred)[(y >= a) & (y <= b)], np.asarray(actual)[(y >= a) & (y <= b)],
+                                 np.asarray(games, dtype=object)[(y >= a) & (y <= b)])
+            for name, a, b in DIST_GROUPS}
+
+
+def conv_block(y, p, games, ydstogo) -> dict:
+    y, p = np.asarray(y, float), np.asarray(p, float)
+    return {"n": int(len(y)), "brier": brier(y, p), "logloss": _ll(y, p),
+            "cal": pm.calibration_check(y, p, reps=CAL_REPS), "selection": _sel(p, y, games, ydstogo)}
+
+
+def v2_diagnosis(g: pd.DataFrame) -> dict:
+    """What drives the v1 engine's conversion miss on dev go attempts (all descriptive)."""
+    y = g["out_converted"].to_numpy(float)
+    out = {"n": int(len(g))}
+    db, zn = fd.v2_bucket(g["ydstogo"]), fd.v2_zone(g["yardline_100"])
+    rs = []
+    for i, dn in enumerate(DIST_NAMES):
+        m = db == i
+        rs.append({"dist": dn, "n": int(m.sum()), "actual_run_share": float(g.loc[m, "run"].mean()),
+                   "engine_run_share": float(g.loc[m, "share_v1"].mean()),
+                   "zones": {ZONE_NAMES[j]: {"n": int((m & (zn == j)).sum()),
+                                             "actual": float(g.loc[m & (zn == j), "run"].mean()) if (m & (zn == j)).any() else None,
+                                             "engine": float(g.loc[m & (zn == j), "share_v1"].mean()) if (m & (zn == j)).any() else None}
+                             for j in range(len(ZONE_NAMES))}})
+    out["run_share"] = rs
+    # oracle mixes: the dev seasons' own run share by bucket (a perfect league mix), and the actual call
+    actual_share = np.array([g.loc[db == i, "run"].mean() for i in range(len(DIST_NAMES))])[db]
+    p_mix_oracle = actual_share * g["p_run"] + (1 - actual_share) * g["p_pass"]
+    p_call = np.where(g["run"] == 1, g["p_run"], g["p_pass"])
+    gid = g["game_id"].to_numpy(object)
+    out["engine"] = conv_block(y, g["p_v1"], gid, g["ydstogo"])
+    out["oracle_mix_dev_share"] = conv_block(y, p_mix_oracle, gid, g["ydstogo"])
+    out["oracle_actual_call"] = conv_block(y, p_call, gid, g["ydstogo"])
+    # structure: averaged configurations vs the play's own structure (M6 actual features), same call
+    s = g[g["pf"].notna()].copy()
+    s["p_call"] = np.where(s["run"] == 1, s["p_run"], s["p_pass"])
+    cells = []
+    for c, cn in ((1, "run"), (0, "pass")):
+        for i, dn in enumerate(DIST_NAMES):
+            m = (s["run"] == c).to_numpy() & (fd.v2_bucket(s["ydstogo"]) == i)
+            if m.any():
+                cells.append({"call": cn, "dist": dn, "n": int(m.sum()), "actual": float(s.loc[m, "out_converted"].mean()),
+                              "engine_avg_structure": float(s.loc[m, "p_call"].mean()),
+                              "m6_actual_structure": float(s.loc[m, "pf"].mean())})
+    out["structure_by_call"] = cells
+    sg = s["game_id"].to_numpy(object)
+    ys = s["out_converted"].to_numpy(float)
+    out["structure_subset"] = {"n": int(len(s)), "engine": conv_block(ys, s["p_v1"], sg, s["ydstogo"]),
+                               "actual_call_avg_structure": conv_block(ys, s["p_call"], sg, s["ydstogo"]),
+                               "actual_call_actual_structure": conv_block(ys, s["pf"], sg, s["ydstogo"])}
+    dom = []
+    for flag, name in ((True, "inside M6 training domain"), (False, "outside (garbage-time filter)")):
+        for i, dn in enumerate(DIST_NAMES):
+            m = (g["pf"].notna().to_numpy() == flag) & (db == i)
+            if m.any():
+                dom.append({"domain": name, "dist": dn, "n": int(m.sum()), "actual": float(y[m].mean()),
+                            "engine": float(g.loc[m, "p_v1"].mean())})
+    out["domain"] = dom
+    return out
+
+
+def v2_leakcheck_real(pbp: pd.DataFrame, dec: pd.DataFrame, S: int = DRYRUN_SEASON, w: int = 9, seed: int = 0) -> dict:
+    """Real 2019: corrupt every call of season S from week w on; the S mix table and the team offsets of week-w
+    decisions must not move. Positive controls: week w+1 decisions (they see week w) and a mix for S fit on
+    seasons that include corrupted calls."""
+    rng = np.random.default_rng(seed)
+    st = fd.V2Settings(mix="cell_team")
+    pc = pbp.copy()
+    m = ((pc["season"] == S) & (pc["week"] >= w)).to_numpy()
+    pc["pass"] = pc["pass"].astype(float)
+    pc.loc[m, "pass"] = rng.permutation(1.0 - pc.loc[m, "pass"].fillna(0).to_numpy(float))
+    e0, e1 = fd.fit_v2(S, pbp, st), fd.fit_v2(S, pc, st)
+    dw = dec[(dec["season"] == S) & (dec["week"] == w)].reset_index(drop=True)
+    dn = dec[(dec["season"] == S) & (dec["week"] == w + 1)].reset_index(drop=True)
+    mix_diff = float(np.abs(e0.mix.cell - e1.mix.cell).max())
+    wk_diff = float(np.abs(e0.share(dw, None) - e1.share(dw, None)).max())
+    ctrl_next = float(np.abs(e0.share(dn, None) - e1.share(dn, None)).max())
+    pc2 = pbp.copy()
+    m2 = (pc2["season"] == S - 1).to_numpy()
+    pc2["pass"] = pc2["pass"].astype(float)
+    pc2.loc[m2, "pass"] = 1.0 - pc2.loc[m2, "pass"].fillna(0).to_numpy(float)
+    ctrl_mix = float(np.abs(e0.mix.cell - fd.fit_v2(S, pc2, st).mix.cell).max())
+    ok = bool(mix_diff == 0 and wk_diff == 0 and ctrl_next > 0 and ctrl_mix > 0)
+    return {"season": S, "week": w, "decisions": int(len(dw)), "mix_max_diff": mix_diff,
+            "week_share_max_diff": wk_diff, "control_next_week_max_diff": ctrl_next,
+            "control_prior_season_mix_max_diff": ctrl_mix, "leak_free": ok}
+
+
+def stage_v2_dev(log_runs_: bool) -> int:
+    """M7a-v2 development on 2018-2019: v1 reproduction, diagnosis, candidates, the one-SE choice."""
+    t_all = time.perf_counter()
+    inp = load_inputs(PRIMARY_DEV[1])
+    tune = tune_mix(inp.pbp)
+    b = tune["best"]
+    log(f"Mix tuning on training seasons {tune['targets'][0]}-{tune['targets'][1]} (call log loss, n {tune['n']:,}): "
+        f"best half-life {b['half_life']}, k_bucket {b['k_bucket']:g}, k_cell {b['k_cell']:g} ({b['logloss']:.5f}); "
+        f"team k {tune['best_team']['k_team']:g} ({tune['best_team']['logloss']:.5f}); v1 share {tune['v1_logloss']:.5f}. "
+        f"Defaults match: {tune['defaults_match_best']}")
+    saved = pd.read_parquet(OUT / "fourth_m7adev.parquet")
+    att = fd.go_attempts(inp.pbp)
+    rows, repro, offs_info, frames = [], {}, {}, {}
+    for S in range(PRIMARY_DEV[0], PRIMARY_DEV[1] + 1):
+        ts = time.perf_counter()
+        comp, _ = fd.fit_components(S, inp.pbp, inp.wp_table, inp.m6_table)
+        dec = fd.decision_table(inp.pbp, inp.a4s, seasons=[S])
+        v1 = fd.option_values(comp, dec, fd.go_inputs(dec, comp, inp.ratings))
+        sv = saved[saved["season"] == S].reset_index(drop=True)
+        same = sv[["game_id", "play_id"]].equals(dec[["game_id", "play_id"]])
+        repro[S] = float(np.abs(v1[VAL_COLS].to_numpy(float) - sv[VAL_COLS].to_numpy(float)).max()) if same else np.inf
+        offs = fd.fit_offsets(fd.oof_conversion(S, inp.pbp, inp.a4s, inp.m6_table, inp.ratings,
+                                                comp.info["m6"]["chosen"], comp.info["m6"]["n_iter"], log=log),
+                              fd.V2Settings().offset_prior_sd)
+        offs_info[S] = {"beta_run": offs.beta[0].tolist(), "beta_pass": offs.beta[1].tolist(), "n": offs.n.tolist(),
+                        **offs.info}
+        full = pd.concat([dec, v1], axis=1)
+        frames[S] = {"v1": full}
+        go = full["choice"].to_numpy() == "go"
+        g = full.loc[go, ["game_id", "play_id", "season", "week", "posteam", "ydstogo", "yardline_100",
+                          "out_converted", "p_conv", "p_conv_run", "p_conv_pass", "share_run"]].rename(
+            columns={"p_conv": "p_v1", "p_conv_run": "p_run", "p_conv_pass": "p_pass", "share_run": "share_v1"})
+        g = g.merge(att[["game_id", "play_id", "run"]], on=["game_id", "play_id"], how="left", validate="one_to_one")
+        # M6 with each play's own (actual) features, fourth downs of S in the M6 table
+        m6S = inp.m6_table[(inp.m6_table["season"] == S) & (inp.m6_table["down"] == 4)
+                           & (inp.m6_table["season_type"] == "REG")].reset_index(drop=True)
+        Pm = comp.yards.predict_X(m6S[pdata.FEATURES["call"]], m6S["yardline_100"].to_numpy(float))
+        m6S = m6S[["game_id", "play_id"]].assign(
+            pf=pm.event_probs(Pm, m6S["ydstogo"].to_numpy(float), m6S["yardline_100"].to_numpy(float))["first"])
+        g = g.merge(m6S, on=["game_id", "play_id"], how="left")
+        for name, st in fd.V2_CANDIDATES.items():
+            eng = fd.fit_v2(S, inp.pbp, st, offsets=offs if st.offsets else None)
+            cv = fd.option_values(fd.with_engine(comp, eng), dec, fd.go_inputs(dec, fd.with_engine(comp, eng),
+                                                                               inp.ratings))
+            g[f"p_{name}"] = cv["p_conv"].to_numpy()[go]
+            g[f"share_{name}"] = cv["share_run"].to_numpy()[go]
+            frames[S][name] = pd.concat([dec, cv], axis=1)
+        rows.append(g)
+        log(f"  season {S} done ({time.perf_counter() - ts:.0f}s); v1 reproduction max |diff| {repro[S]:.3g}")
+    g = pd.concat(rows, ignore_index=True)
+    y, gid = g["out_converted"].to_numpy(float), g["game_id"].to_numpy(object)
+    diag = v2_diagnosis(g)
+    names = ["v1"] + list(fd.V2_CANDIDATES)
+    cand = {k: conv_block(y, g[f"p_{k}"], gid, g["ydstogo"]) for k in names}
+    elig_names = [k for k in fd.V2_CANDIDATES if cand[k]["cal"]["ok"]]
+    best = min(elig_names, key=lambda k: cand[k]["brier"])
+    pb = g[f"p_{best}"].to_numpy(float)
+    for k in names:
+        p = g[f"p_{k}"].to_numpy(float)
+        c = cl((p - y) ** 2 - (pb - y) ** 2, gid)
+        cand[k]["vs_best"] = c
+        cand[k]["within_1se"] = True if k == best else bool(c["diff"] <= c["boot_se"])
+        cand[k]["vs_v1"] = cl((p - y) ** 2 - (g["p_v1"].to_numpy(float) - y) ** 2, gid)
+        cand[k]["complexity"] = fd.V2_COMPLEXITY.get(k, 0)
+        cand[k]["settings"] = fd.V2_CANDIDATES[k].to_dict() if k in fd.V2_CANDIDATES else "v1"
+    eligible = [k for k in fd.V2_CANDIDATES if cand[k]["within_1se"] and cand[k]["cal"]["ok"]]
+    simplest = min(eligible, key=lambda k: (fd.V2_COMPLEXITY[k], cand[k]["brier"]))   # the original rule (superseded)
+    # Criterion as corrected 2026-10-05 (Claude, under Walker's delegation, on dev evidence, before any 2026 data):
+    # the job is the conversion CALIBRATION that failed the holdout, and the Brier differences are noise. Among
+    # candidates within one SE of the best Brier (and passing calibration_check), keep those whose 4th-and-1 and
+    # 4th-and-2 selection gaps are both under SEL_GAP_MAX in absolute value; choose the lowest ECE; ties: simplest.
+    gap_ok = [k for k in eligible if all(abs(cand[k]["selection"][g]["actual_minus_pred"]["diff"]) < SEL_GAP_MAX
+                                         for g in ("4th-and-1", "4th-and-2"))]
+    chosen = min(gap_ok, key=lambda k: (round(cand[k]["cal"]["ece"], 12), fd.V2_COMPLEXITY[k])) if gap_ok else simplest
+    # decisions under the chosen engine vs v1 (point estimates, no bootstrap; model-estimated, descriptive)
+    impact = {}
+    for k in fd.V2_CANDIDATES:
+        a = pd.concat([frames[S]["v1"] for S in frames], ignore_index=True)
+        bfr = pd.concat([frames[S][k] for S in frames], ignore_index=True)
+        ra, rb = fd.recommend(a), fd.recommend(bfr)
+        impact[k] = {"n": int(len(a)), "changed": int((ra["best"] != rb["best"]).sum()),
+                     "v1_recommends": ra["best"].value_counts().to_dict(),
+                     "v2_recommends": rb["best"].value_counts().to_dict(),
+                     "mean_abs_wp_go_change": float(np.abs(a["wp_go"] - bfr["wp_go"]).mean())}
+    leak = v2_leakcheck_real(inp.pbp, pd.concat([frames[S]["v1"] for S in frames], ignore_index=True))
+    res = {"window": list(PRIMARY_DEV), "tune": tune, "v1_reproduction_max_abs_diff": repro,
+           "v1_reproduced": bool(max(repro.values()) == 0), "offsets": offs_info, "diagnosis": diag,
+           "candidates": cand, "best": best, "eligible_1se": eligible, "selection_gap_ok": gap_ok,
+           "chosen_original_rule": simplest, "chosen": chosen,
+           "chosen_matches_code": chosen == fd.V2_CHOSEN, "decision_impact": impact, "leakcheck_real": leak,
+           "plays_hash": registry.games_hash((g["game_id"] + ":" + g["play_id"].astype(str)).tolist()),
+           "seconds": time.perf_counter() - t_all, "license": LIC_SA}
+    print_v2_dev(res)
+    write_license()
+    g.to_parquet(OUT / "v2_dev_go.parquet", index=False)
+    (OUT / "v2_dev.json").write_text(json.dumps(res, indent=1, default=float) + "\n")
+    if log_runs_:
+        fdat = registry.data_fingerprint(games_csv=True, ml_datasets=("pbp", "schedules", "participation"),
+                                         seasons=range(FIRST_PBP, PRIMARY_DEV[1] + 1))
+        for k in names:
+            c = cand[k]
+            registry.log_run(f"m7a_v2_{k}" if k != "v1" else "m7a_v2_ref_v1", label="m7adev",
+                             seasons=PRIMARY_DEV, game_ids=g["game_id"].unique().tolist(),
+                             metrics={"n": c["n"], "brier": c["brier"], "logloss": c["logloss"], "ece": c["cal"]["ece"],
+                                      "cal": c["cal"], "vs_v1": c["vs_v1"], "vs_best": c["vs_best"],
+                                      "within_1se": c["within_1se"]},
+                             features=pdata.FEATURES["call"], data=fdat, params={"settings": c["settings"]},
+                             notes=("M7a-v2 conversion candidate (dev). " + ("CHOSEN (corrected rule: within one SE, 4th-and-1/2 gaps < 0.02, lowest ECE)." if k == chosen
+                                                                             else "")).strip(),
+                             extra={**LIC_SA, "selection": c["selection"]})
+    log(f"\nv2-dev total {res['seconds']:.0f}s")
+    return 0 if res["v1_reproduced"] and leak["leak_free"] else 1
+
+
+def print_v2_dev(r: dict) -> None:
+    d = r["diagnosis"]
+    log(f"\n== v1 reproduction on dev (option values and conversion vs fourth_m7adev.parquet): "
+        f"{r['v1_reproduction_max_abs_diff']} -> {'REPRODUCED' if r['v1_reproduced'] else 'NOT REPRODUCED'}")
+    log(f"\n== Diagnosis, dev go attempts n {d['n']} ==")
+    log("  run share by distance (actual dev / engine v1):")
+    for x in d["run_share"]:
+        z = "; ".join(f"{k} {v['n']}: {v['actual']:.2f}/{v['engine']:.2f}" for k, v in x["zones"].items() if v["n"])
+        log(f"    {x['dist']:>4} n {x['n']:>4}  {x['actual_run_share']:.3f} / {x['engine_run_share']:.3f}   [{z}]")
+    for k in ("engine", "oracle_mix_dev_share", "oracle_actual_call"):
+        c = d[k]
+        log(f"  {k:<24} Brier {c['brier']:.4f}  {fmt_cal(c['cal'])}  " + ", ".join(
+            f"{n} {v['actual_minus_pred']['diff']:+.3f}" for n, v in c["selection"].items() if v.get("n")))
+    log("  structure: same call, averaged configurations vs the play's own structure (M6 subset):")
+    for x in d["structure_by_call"]:
+        log(f"    {x['call']:>4} {x['dist']:>4} n {x['n']:>4}  actual {x['actual']:.3f}  avg-structure "
+            f"{x['engine_avg_structure']:.3f}  own-structure {x['m6_actual_structure']:.3f}")
+    s = d["structure_subset"]
+    log(f"    subset n {s['n']}: engine ECE {s['engine']['cal']['ece']:.4f}, actual call + avg structure "
+        f"{s['actual_call_avg_structure']['cal']['ece']:.4f}, actual call + own structure "
+        f"{s['actual_call_actual_structure']['cal']['ece']:.4f}")
+    log("  M6 training domain (garbage-time filter) by distance (actual / engine):")
+    for x in d["domain"]:
+        log(f"    {x['domain']:<32} {x['dist']:>4} n {x['n']:>4}  {x['actual']:.3f} / {x['engine']:.3f}")
+    log("\n  offsets (logit, run / pass by distance 1, 2, 3-5, 6+):")
+    for S, o in r["offsets"].items():
+        log(f"    {S}: run {np.round(o['beta_run'], 3).tolist()}  pass {np.round(o['beta_pass'], 3).tolist()}  n {o['n']}")
+    log(f"\n== Candidates, dev 2018-2019, conversion on actual go attempts (n {r['candidates']['v1']['n']}) ==")
+    log(f"{'cand':<6}{'Brier':>9}{'ECE':>8}{'p95':>8}{'ok':>4}  {'vs v1 Brier [95% CI]':<34}{'vs best (SE)':>20}{'1SE':>5}"
+        f"   actual-pred: 4th-and-1 / 2 / 3-5 / 6+ / 1-2")
+    for k, c in r["candidates"].items():
+        sel = " / ".join(f"{v['actual_minus_pred']['diff']:+.3f}" for v in c["selection"].values())
+        log(f"{k:<6}{c['brier']:>9.5f}{c['cal']['ece']:>8.4f}{c['cal']['null_p95']:>8.4f}{'y' if c['cal']['ok'] else 'N':>4}  "
+            f"{fmt_ci(c['vs_v1'], 5):<34}{c['vs_best']['diff']:>+10.5f} ({c['vs_best']['boot_se']:.5f})"
+            f"{'yes' if c['within_1se'] else '':>5}   {sel}" + ("  *" if k == r["chosen"] else ""))
+    log(f"Best: {r['best']}. Within one SE (and calibrated): {r['eligible_1se']}. Original rule (simplest): "
+        f"{r['chosen_original_rule']}. 4th-and-1/2 gaps under {SEL_GAP_MAX}: {r['selection_gap_ok']}. "
+        f"CHOSEN (corrected rule, lowest ECE): {r['chosen']} "
+        f"(code V2_CHOSEN {fd.V2_CHOSEN}: {'match' if r['chosen_matches_code'] else 'MISMATCH'})")
+    for k, c in r["candidates"].items():
+        log(f"  {k:<5} selection: " + "; ".join(
+            f"{n} n {v['n']} pred {v['pred']:.3f} act {v['actual']:.3f} {fmt_ci(v['actual_minus_pred'], 3)}"
+            for n, v in c["selection"].items() if n in ("4th-and-1", "4th-and-2", "4th-and-1-2")))
+    log("\n  decisions vs v1 (dev point estimates, model-estimated): " + "; ".join(
+        f"{k} changed {v['changed']} of {v['n']} (mean |dWP go| {v['mean_abs_wp_go_change']:.4f})"
+        for k, v in r["decision_impact"].items()))
+    lk = r["leakcheck_real"]
+    log(f"  real-data leakcheck ({lk['season']} wk {lk['week']}, {lk['decisions']} decisions): mix diff "
+        f"{lk['mix_max_diff']:.3g}, week-share diff {lk['week_share_max_diff']:.3g}; controls: next week "
+        f"{lk['control_next_week_max_diff']:.3g}, prior-season calls {lk['control_prior_season_mix_max_diff']:.3g} -> "
+        f"{'LEAK-FREE' if lk['leak_free'] else 'LEAK'}")
+
+
+def stage_v2_freeze(refreeze: bool = False) -> int:
+    """Fit the chosen v2 engine for 2026 on training data through 2025 and write the frozen artifact."""
+    if V2_FORWARD.exists():
+        raise SystemExit(f"the 2026 forward test is already recorded ({V2_FORWARD.name}); the engine cannot be refrozen")
+    if V2_FROZEN.exists() and not refreeze:
+        raise SystemExit(f"{V2_FROZEN.relative_to(config.ROOT)} exists; pass --refreeze to overwrite it before the "
+                         "forward test")
+    name = fd.V2_CHOSEN
+    st = fd.V2_CANDIDATES[name]
+    S = FORWARD_SEASON
+    m6_fit = None
+    if st.offsets:
+        # Training on the spent seasons is allowed for a forward model (Claude, under Walker's delegation,
+        # 2026-10-05). What stays forbidden is REPORTING any evaluation on 2020-2025: only the fitted offsets and
+        # n by cell are printed or saved, never a calibration, Brier, selection or decision number.
+        inp = load_inputs(S - 1)                                                # through 2025: training only
+        pbp = inp.pbp
+        g = gbm.fit_season_ahead(inp.m6_table[inp.m6_table["season"].between(fd.FIRST_M6, S - 1)], "call")
+        m6_fit = {"chosen": g.info["chosen"], "n_iter": g.info["n_iter"], "seasons": [fd.FIRST_M6, S - 1]}
+        log(f"M6 call view for {S} (the frozen protocol, as at evaluation): {m6_fit}")
+        eng = fd.fit_v2(S, pbp, st, inp.m6_table, inp.a4s, inp.ratings, m6_fit["chosen"], m6_fit["n_iter"], log=log)
+    else:
+        pbp = mldata.load_pbp(range(FIRST_WP, S), columns=fd.PBP_COLUMNS)      # 2006..2025: training only
+        eng = fd.fit_v2(S, pbp, st)
+    att = fd.go_attempts(pbp)
+    tr = att[att["season"].between(FIRST_WP, S - 1)]
+    art = {"engine": "M7a-v2", "engine_version": "v2", "candidate": name, "season": S,
+           "settings": st.to_dict(), "tables": eng.to_json(),
+           "training": {"seasons": [FIRST_WP, S - 1], "attempts": int(len(tr)), "attempts_hash": fd.attempts_hash(tr),
+                        "pbp_manifest_sha256": mldata.manifest_hashes(("pbp",), range(FIRST_WP, S))},
+           "season_ahead_components": "WP, FG and punt models (2006..2025) and the M6 call-view GBM (2016..2025) are "
+                                      "refit by the frozen M7a protocol at evaluation time (nflelo/ml/wp/model.py, "
+                                      "nflelo/ml/decisions/kicking.py, nflelo/ml/plays/gbm.py; seed 20261003)",
+           "m6_for_offsets": m6_fit, "dev": _dev_summary(name), "git": registry.git_commit(),
+           "frozen_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"), **LIC_SA}
+    V2_DIR.mkdir(parents=True, exist_ok=True)
+    V2_FROZEN.write_text(json.dumps(art, indent=1, default=float) + "\n")
+    log(f"froze {name} ({st.to_dict()}) for {S}: {len(tr):,} training attempts {FIRST_WP}-{S - 1}, hash "
+        f"{art['training']['attempts_hash']}; git {art['git']} -> {V2_FROZEN.relative_to(config.ROOT)}")
+    log("  run share by distance x zone: " + "; ".join(
+        f"{DIST_NAMES[i]}: " + "/".join(f"{v:.2f}" for v in row) for i, row in enumerate(eng.mix.cell))
+        if eng.mix is not None else "  (v1 share)")
+    if eng.offsets is not None:                     # fit diagnostics only: the offsets and n by cell
+        o = eng.offsets
+        log(f"  offsets (logit; distance 1 / 2 / 3-5 / 6+), out of fold on {o.info['seasons']}, {o.info['n']:,} "
+            f"attempts, prior sd {o.info['prior_sd']}:")
+        for c, cn in ((0, "run"), (1, "pass")):
+            log(f"    {cn:>4}: " + " / ".join(f"{v:+.3f} (n {k})" for v, k in zip(o.beta[c], o.n[c])))
+    return 0
+
+
+def _dev_summary(name: str) -> dict | None:
+    p = OUT / "v2_dev.json"
+    if not p.exists():
+        return None
+    r = json.loads(p.read_text())
+    c = r["candidates"].get(name, {})
+    return {"chosen": r["chosen"], "window": r["window"], "n": c.get("n"), "brier": c.get("brier"),
+            "ece": c.get("cal", {}).get("ece"), "vs_v1": c.get("vs_v1"), "plays_hash": r.get("plays_hash")}
+
+
+def load_frozen(path: Path = None) -> tuple[dict, "fd.EngineV2"]:
+    path = path or V2_FROZEN
+    art = json.loads(path.read_text())
+    return art, fd.EngineV2.from_json(art["tables"])
+
+
+def forward_score(w: dict) -> dict:
+    """The pre-registered forward-test block for one season (context/ml.md, "M7a-v2 forward test")."""
+    f1, f2 = w["fourth"], w["fourth_v2"]
+    assert f1[["game_id", "play_id"]].equals(f2[["game_id", "play_id"]])
+    go = (f1["choice"] == "go").to_numpy()
+    y = f1.loc[go, "out_converted"].to_numpy(float)
+    p1, p2 = f1.loc[go, "p_conv"].to_numpy(float), f2.loc[go, "p_conv"].to_numpy(float)
+    gid, ytg = f1.loc[go, "game_id"].to_numpy(object), f1.loc[go, "ydstogo"].to_numpy(float)
+    v2b, v1b = conv_block(y, p2, gid, ytg), conv_block(y, p1, gid, ytg)
+    ra, rb = fd.recommend(f1), fd.recommend(f2)
+    out = {"season": int(f1["season"].iloc[0]), "n_attempts": int(go.sum()), "games": int(len(set(gid))),
+           "primary_conversion_v2": v2b["cal"], "primary_pass": bool(v2b["cal"]["ok"]),
+           "conversion_v2": v2b, "conversion_v1": v1b,
+           "brier_v2_minus_v1": cl((p2 - y) ** 2 - (p1 - y) ** 2, gid),
+           "fg": score_fg(w["fg"]), "punt": score_punt(w["punt"]),
+           "recommendations_changed": int((ra["best"] != rb["best"]).sum()), "decisions": int(len(f1)),
+           "plays_hash": registry.games_hash((f1.loc[go, "game_id"] + ":" + f1.loc[go, "play_id"].astype(str)).tolist())}
+    out["fg_calibration_ok"] = bool(out["fg"]["cal"]["ok"])
+    out["punt_crps_ok"] = bool(out["punt"]["crps_vs_baseline"]["ci_high"] < 0)
+    return out
+
+
+def print_forward(r: dict, label: str) -> None:
+    log(f"\n== M7a-v2 forward block, {label}: {r['n_attempts']} go attempts, {r['games']} games ==")
+    c = r["conversion_v2"]
+    log(f"PRIMARY conversion calibration (v2): {fmt_cal(c['cal'])} -> {'PASS' if r['primary_pass'] else 'FAIL'}")
+    log(f"  Brier v2 {c['brier']:.4f} vs v1 {r['conversion_v1']['brier']:.4f}: {fmt_ci(r['brier_v2_minus_v1'], 5)}; "
+        f"v1 {fmt_cal(r['conversion_v1']['cal'])}")
+    for n, v in c["selection"].items():
+        if v.get("n"):
+            v1 = r["conversion_v1"]["selection"][n]
+            log(f"  {n:<12} n {v['n']:>4}  pred v2 {v['pred']:.3f} (v1 {v1['pred']:.3f})  actual {v['actual']:.3f}  "
+                f"v2 {fmt_ci(v['actual_minus_pred'], 3)}")
+    log(f"  FG: {r['fg']['n']} attempts, Brier {r['fg']['brier']:.4f}, {fmt_cal(r['fg']['cal'])}")
+    p = r["punt"]
+    log(f"  Punts: {p['n']} punts, CRPS {p['crps']:.3f} vs baseline {p['crps_baseline']:.3f}, "
+        f"{fmt_ci(p['crps_vs_baseline'], 3)} ({'ok' if r['punt_crps_ok'] else 'FAIL'}); inside-20 "
+        f"{fmt_cal(p['cal_pin'])}; 40+/TD {fmt_cal(p['cal_long'])}")
+    log(f"  recommendations changed v1 -> v2: {r['recommendations_changed']} of {r['decisions']} (model-estimated)")
+
+
+def _season_gates(S: int, earliest: str, today: str | None, sb: str) -> list[str]:
+    """Date, schedule, participation, clean tree and committed artifact for a forward look at season S."""
+    reasons = []
+    today = today or pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d")
+    if today < earliest:
+        return [f"too early: the earliest date is {earliest} (after {sb}), and only once nflverse has published "
+                f"the {S} participation file"]          # nothing else is checked (or fetched) before the date
+    try:
+        sch = mldata.load_schedules([S])
+        reg = sch[sch["game_type"] == "REG"]
+        if len(reg) < 272 or reg["home_score"].isna().any():
+            reasons.append(f"the {S} regular season is not complete in the schedule data")
+    except Exception as e:  # noqa: BLE001
+        reasons.append(f"cannot read the {S} schedule: {e}")
+    if f"participation/{S}" not in mldata.read_manifest():
+        try:
+            mldata.fetch("participation", S)
+        except Exception as e:  # noqa: BLE001
+            reasons.append(f"the {S} participation file is not available yet ({e})")
+    g = registry.git_commit()
+    if g.get("dirty"):
+        reasons.append("the working tree is dirty: commit first (the forward test runs on a clean commit)")
+    tracked = subprocess.run(["git", "ls-files", "--error-unmatch", str(V2_FROZEN.relative_to(config.ROOT))],
+                             cwd=config.ROOT, capture_output=True).returncode == 0
+    if V2_FROZEN.exists() and not tracked:
+        reasons.append("the frozen engine is not committed")
+    return reasons
+
+
+def forward_gates(today: str | None = None) -> list[str]:
+    """Reasons the real 2026 forward test may not run yet (empty: it may run)."""
+    reasons = []
+    if not V2_FROZEN.exists():
+        reasons.append(f"no frozen engine ({V2_FROZEN.relative_to(config.ROOT)}): run `v2-freeze` and commit it")
+    if V2_FORWARD.exists():
+        reasons.append(f"the 2026 forward test is already recorded ({V2_FORWARD.name}): it is run once only")
+    if reasons:
+        return reasons
+    return _season_gates(FORWARD_SEASON, FORWARD_EARLIEST, today, "Super Bowl LXI")
+
+
+def pooled_gates(today: str | None = None) -> list[str]:
+    """Reasons the pooled 2026+2027 secondary may not run yet (empty: it may run)."""
+    reasons = []
+    if not V2_FORWARD.exists() or not attempts_path(FORWARD_SEASON).exists():
+        reasons.append("the 2026 forward test has not been run (its record and attempts file are needed)")
+    if V2_POOLED.exists():
+        reasons.append(f"the pooled 2026+2027 secondary is already recorded ({V2_POOLED.name}): it is run once only")
+    if reasons:
+        return reasons
+    return _season_gates(POOLED_SEASON, POOLED_EARLIEST, today, "the 2027 season's Super Bowl")
+
+
+def attempts_path(S: int, dry_run: bool = False) -> Path:
+    return V2_DIR / (f"forward_dryrun_{S}_attempts.csv" if dry_run else f"forward_{S}_attempts.csv")
+
+
+def forward_attempts(w: dict) -> pd.DataFrame:
+    """The scored go attempts of one forward season: v1 and v2 conversion and the outcome (no other data)."""
+    f1, f2 = w["fourth"], w["fourth_v2"]
+    go = (f1["choice"] == "go").to_numpy()
+    return pd.DataFrame({"game_id": f1.loc[go, "game_id"].to_numpy(object), "play_id": f1.loc[go, "play_id"].to_numpy(),
+                         "season": f1.loc[go, "season"].to_numpy(int), "week": f1.loc[go, "week"].to_numpy(int),
+                         "ydstogo": f1.loc[go, "ydstogo"].to_numpy(float),
+                         "yardline_100": f1.loc[go, "yardline_100"].to_numpy(float),
+                         "converted": f1.loc[go, "out_converted"].to_numpy(float),
+                         "p_v1": f1.loc[go, "p_conv"].to_numpy(float), "p_v2": f2.loc[go, "p_conv"].to_numpy(float)})
+
+
+def pooled_score(a: pd.DataFrame) -> dict:
+    """The pre-registered pooled secondary: calibration_check on v2 AND |pooled 4th-and-1/2 gap| < POOLED_GAP_MAX."""
+    y, p2, p1 = a["converted"].to_numpy(float), a["p_v2"].to_numpy(float), a["p_v1"].to_numpy(float)
+    gid, ytg = a["game_id"].to_numpy(object), a["ydstogo"].to_numpy(float)
+    v2b, v1b = conv_block(y, p2, gid, ytg), conv_block(y, p1, gid, ytg)
+    gap = v2b["selection"]["4th-and-1-2"]["actual_minus_pred"]
+    return {"seasons": sorted(int(s) for s in set(a["season"])), "n_attempts": int(len(a)), "games": int(len(set(gid))),
+            "calibration_ok": bool(v2b["cal"]["ok"]), "short_gap": gap,
+            "short_gap_ok": bool(abs(gap["diff"]) < POOLED_GAP_MAX),
+            "pass": bool(v2b["cal"]["ok"] and abs(gap["diff"]) < POOLED_GAP_MAX),
+            "conversion_v2": v2b, "conversion_v1": v1b, "brier_v2_minus_v1": cl((p2 - y) ** 2 - (p1 - y) ** 2, gid)}
+
+
+def print_pooled(r: dict, label: str) -> None:
+    c = r["conversion_v2"]
+    g = r["short_gap"]
+    log(f"\n== M7a-v2 pooled secondary, {label}: {r['n_attempts']} go attempts ({r['seasons']}), {r['games']} games ==")
+    log(f"  calibration (v2): {fmt_cal(c['cal'])}; 4th-and-1/2 pooled gap {fmt_ci(g, 3)} (|gap| < {POOLED_GAP_MAX}: "
+        f"{'ok' if r['short_gap_ok'] else 'FAIL'}) -> {'PASS' if r['pass'] else 'FAIL'}")
+    log(f"  Brier v2 {c['brier']:.4f} vs v1 {r['conversion_v1']['brier']:.4f}: {fmt_ci(r['brier_v2_minus_v1'], 5)}")
+
+
+def _score_season(S: int, engine) -> tuple[dict, pd.DataFrame, dict]:
+    inp = load_inputs(S)
+    w = season_work(inp, S, 0, benchmarks([S]), v2=engine)
+    return forward_score(w), forward_attempts(w), {"inp": inp, "engine": w["v2_engine"]}
+
+
+def stage_forward(dry_run: bool) -> int:
+    """The 2026 forward test of the frozen v2 engine (run once), or its dry run on 2019 (writes no forward record)."""
+    if dry_run:
+        S = DRYRUN_SEASON
+        windows.check((S, S))
+        engine, art = fd.V2_CANDIDATES[fd.V2_CHOSEN], None   # fit for 2019 from seasons < 2019, frozen settings
+        log(f"DRY RUN on {S} (a dev season; NOT the forward test). Would the real run start? "
+            f"{forward_gates() or 'yes'}")
+    else:
+        why = forward_gates()
+        if why:
+            raise SystemExit("forward-2026 refused:\n  - " + "\n  - ".join(why))
+        S = FORWARD_SEASON
+        art, engine = load_frozen()
+    t0 = time.perf_counter()
+    r, att_rows, extra = _score_season(S, engine)
+    same_training = None
+    if not dry_run:
+        att = fd.go_attempts(extra["inp"].pbp)
+        tr = att[att["season"].between(FIRST_WP, S - 1)]
+        same_training = fd.attempts_hash(tr) == art["training"]["attempts_hash"]
+        log(f"training attempts hash now {fd.attempts_hash(tr)} vs frozen {art['training']['attempts_hash']}: "
+            f"{'same' if same_training else 'CHANGED (nflverse revised past seasons; the frozen tables are used)'}")
+    rec = {"label": "dry run (2019, dev season)" if dry_run else "forward test 2026 (run once)", "season": S,
+           "result": r, "frozen_artifact": None if dry_run else {"candidate": art["candidate"],
+                                                                 "git_at_freeze": art["git"],
+                                                                 "attempts_hash": art["training"]["attempts_hash"],
+                                                                 "training_unchanged": same_training},
+           "engine": extra["engine"], "candidate": fd.V2_CHOSEN if dry_run else art["candidate"],
+           "settings": fd.V2_CANDIDATES[fd.V2_CHOSEN].to_dict() if dry_run else art["settings"],
+           "git": registry.git_commit(), "seconds": time.perf_counter() - t0,
+           "ran_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"), **LIC_SA}
+    V2_DIR.mkdir(parents=True, exist_ok=True)
+    att_rows.to_csv(attempts_path(S, dry_run), index=False)
+    (V2_DRYRUN if dry_run else V2_FORWARD).write_text(json.dumps(rec, indent=1, default=float) + "\n")
+    print_forward(r, rec["label"])
+    log(f"\nrecord: {(V2_DRYRUN if dry_run else V2_FORWARD).relative_to(config.ROOT)} and "
+        f"{attempts_path(S, dry_run).name} ({rec['seconds']:.0f}s)")
+    return 0
+
+
+def stage_pooled(dry_run: bool) -> int:
+    """The pooled 2026+2027 secondary (run once, after the 2027 participation release), or its dry run: the
+    2019 dry-run attempts pooled with 2018 (engine fit from seasons before each)."""
+    if dry_run:
+        first = attempts_path(DRYRUN_SEASON, dry_run=True)
+        if not first.exists():
+            raise SystemExit("run `forward-2026 --dry-run` first (its 2019 attempts file is pooled)")
+        S, engine = 2018, fd.V2_CANDIDATES[fd.V2_CHOSEN]
+        windows.check((S, S))
+        log(f"DRY RUN: pooling 2019 (dry-run attempts) with {S}. Would the real run start? {pooled_gates() or 'yes'}")
+    else:
+        why = pooled_gates()
+        if why:
+            raise SystemExit("forward-pooled refused:\n  - " + "\n  - ".join(why))
+        first, S = attempts_path(FORWARD_SEASON), POOLED_SEASON
+        _, engine = load_frozen()
+    t0 = time.perf_counter()
+    r_S, att_S, extra = _score_season(S, engine)
+    pooled = pd.concat([pd.read_csv(first), att_S], ignore_index=True)
+    r = pooled_score(pooled)
+    label = "dry run (2019 + 2018, dev seasons)" if dry_run else "pooled 2026+2027 (run once)"
+    rec = {"label": label, "result": r, "season_block": r_S, "engine": extra["engine"],
+           "git": registry.git_commit(), "seconds": time.perf_counter() - t0,
+           "ran_at": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"), **LIC_SA}
+    out = V2_DIR / "forward_pooled_dryrun_2018_2019.json" if dry_run else V2_POOLED
+    att_S.to_csv(attempts_path(S, dry_run), index=False)
+    out.write_text(json.dumps(rec, indent=1, default=float) + "\n")
+    print_forward(r_S, f"{S} alone")
+    print_pooled(r, label)
+    log(f"\nrecord: {out.relative_to(config.ROOT)} ({rec['seconds']:.0f}s)")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("stage", choices=["dev", "audit", "leakcheck", "signoff-dry-run", "signoff"])
+    ap.add_argument("stage", choices=["dev", "audit", "leakcheck", "signoff-dry-run", "signoff", "v2-dev", "v2-freeze",
+                                      "forward-2026", "forward-pooled"])
     ap.add_argument("--boot", type=int, default=B_DEFAULT)
     ap.add_argument("--no-log", action="store_true")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="forward-2026 / forward-pooled: the same code on dev seasons, no forward record")
+    ap.add_argument("--refreeze", action="store_true", help="v2-freeze: overwrite the frozen artifact (before the test)")
     a = ap.parse_args()
+    if a.stage == "v2-dev":
+        return stage_v2_dev(not a.no_log)
+    if a.stage == "v2-freeze":
+        return stage_v2_freeze(a.refreeze)
+    if a.stage == "forward-2026":
+        return stage_forward(a.dry_run)
+    if a.stage == "forward-pooled":
+        return stage_pooled(a.dry_run)
     if a.stage == "dev":
         return stage_dev(not a.no_log, a.boot)
     if a.stage == "audit":
