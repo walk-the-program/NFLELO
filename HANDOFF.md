@@ -2,6 +2,24 @@
 
 Newest entry first. Append only; never edit or delete past entries.
 
+## 2026-10-06 · Fourth-down conversion fix (M7a-v2) and the models page
+
+**Did:**
+- **M7a-v2:** `nflelo/ml/decisions/fourth.py` (`ENGINE_VERSION`, `V2_CHOSEN = "v2ad"`) and `scripts/ml_m7a.py` (stages `v2-dev`, `v2-freeze`, `forward-2026`, `forward-pooled`). The frozen artifact is `experiments/m7a_v2/frozen_2026.json`, committed at 5a0b850.
+- **Models page:** `site/models.html`, `site/models.js`, and `scripts/export_research.py`, which writes `site/data/research.json`.
+- Refreshed `CONTEXT.md`'s "what exists" and direction sections.
+
+**Verified:** `pytest -q` 314 passed. v1 M7a dev numbers reproduce exactly. Forward-test dry runs work on 2018-2019 and correctly refuse as too early. I checked the models page in the browser pane (no console errors); the agent checked 390/1440/2000 px in light and dark.
+
+**Decided:**
+- The M7a-v2 selection rule was corrected to target calibration: v2ad (dev ECE 0.019 vs 0.033) was chosen over v2a, which the original Brier-only rule picked but which didn't fix the failure.
+- The offsets are trained through 2025, but no 2020-2025 evaluation was reported.
+- The 2026-only forward test is weak, so a pooled 2026+2027 test is pre-registered.
+
+**Next:** site track. A research section turning the method write-ups into readable papers, then game and team pages. The model side is waiting on 2026 data: the forward test after 2027-02-15, and the Kalman shadow record as games are scored.
+
+**Blocked on Walker:** hosting (Cloudflare account and domain) and the GitHub purge request (needs his signed-in browser).
+
 ## 2026-10-05 · ML build M1-M7 (live predictions, playoff odds, player and play models, decision support)
 
 **Did:**
