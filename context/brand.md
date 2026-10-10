@@ -140,7 +140,7 @@ Surface recipes for this aesthetic, with the real values filled in. Apply them a
 
 ## Patterns
 
-Generative textures made only from the brand colors (the Patterns view in Branding Designer). Use them as hero backgrounds, cover panels, section dividers and swatch walls. Keep body text on a plain `--canvas` area, never on a pattern.
+Generative textures made only from the brand colors (the Patterns view in Branding Designer). Use them as hero backgrounds, section bands, card textures, divider strips and small accent details. Keep body text on a plain `--canvas` area, never on a pattern.
 
 ### Ink mapping
 
@@ -153,14 +153,21 @@ Generative textures made only from the brand colors (the Patterns view in Brandi
 
 ### Families that fit Raw Brutalist
 
-- **Slab grid** (Modular grid, Mono): a seeded grid of modules: solid blocks, dot matrices, line fields, bar ramps and quarter circles.
-- **Hard counter** (Counterchange, Mono): an even bar field with a centred figure where the bars swap places with the gaps.
-- **Stair teeth** (Zigzag, Mono): interlocking teeth in flat colour bands, rounded, chevron or staircase.
-- **Static** (Signal mosaic, Mono): glitched horizontal bands of pixel confetti, block mosaics, vertical smears and scanlines.
-- **Tape rows** (Weave, Mono): stacked ribbons, each ruled with its own vertical stripe rhythm, like cloth tape laid edge to edge.
-- **Block field** (Glyph grid, Mono): a lattice of tiny marks (squares, diamonds, rings and crosses) chosen by the height of a noise field.
+Slab grid, Hard counter, Stair teeth, Static, Tape rows, Block field. Descriptions are in the Branding Designer Patterns view.
 
-No patterns are pinned for this brand yet. Pick from the families above.
+### Chosen pattern (added 2026-10-10)
+
+#### 1. Halftone field: card texture and splashes
+
+- **Family:** Halftone field (`halftone`). A cloudy noise field cut into a few levels and printed through a coarse dot screen. Vector and seamless.
+- **Use:** card texture: a low-contrast texture on a card or media tile, with at most one textured card per view. Labels and body text sit on a solid `--canvas` plate inside the card (4.5:1 or better); the pattern reads as texture, not as content. Walker also wants it used for "interesting splashes": hero and section bands and divider strips, with no text on the pattern.
+- **Colorway:** Brand. The inks are final hexes:
+  - ground `#f9f5f5` (`--canvas`): background
+  - ink1 `#a11413` (`--primary`): main shapes
+  - ink2 `#d14f34` (`--secondary`): secondary shapes
+  - spark `#4a3122` (`--accent`): accent flecks, at most 5% of the area
+- **Settings:** seed `brand`; strength 100% (`tone` 1). Everything else is at the default.
+- **Reproduce:** the exact tile is an exported SVG of about 22 KB from the Patterns view, used as a repeating 160px background. It isn't in the repo yet. Until Walker exports it, the site uses a generated approximation at `site/assets/pattern-halftone.svg`. Dropping his export into the same path replaces it exactly.
 
 ## Do
 
