@@ -1,51 +1,19 @@
-/* NFLELO front end. No dependencies: reads ./data/*.json, draws hand-built SVG/HTML.
-   Charts follow one spec: 2px lines, hairline solid grid, 4px rounded bar ends,
-   2px surface rings on dots, one tooltip style, a table view under each chart. */
+/* NFLELO ratings page. No dependencies: reads ./data/*.json (through common.js), draws hand-built SVG/HTML.
+   Charts follow one spec: 2px lines, hairline solid grid, 2px surface rings on dots, one tooltip style,
+   a table view under each chart, and chart areas set in recessed wells. */
 (function () {
   'use strict';
 
   var FILES = ['meta', 'ladder', 'upcoming', 'history', 'luck', 'tapestry', 'records', 'scorecard', 'headlines'];
-  var SVGNS = 'http://www.w3.org/2000/svg';
-  var BG_DARK = [28, 33, 38], BG_LIGHT = [245, 247, 249];   // --neutral-dark, --neutral-light
+  var BG_DARK = [34, 42, 51], BG_LIGHT = [230, 235, 240];   // --sf-canvas, dark and light
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // ------------------------------------------------------------------ dom helpers
+  // ------------------------------------------------------------------ shared helpers (common.js)
 
-  function $(sel, root) { return (root || document).querySelector(sel); }
-
-  function h(tag, props) {
-    var n = document.createElement(tag);
-    props = props || {};
-    Object.keys(props).forEach(function (k) {
-      var v = props[k];
-      if (v === false || v == null) return;
-      if (k === 'class') n.className = v;
-      else if (k === 'text') n.textContent = v;
-      else if (k === 'style') n.setAttribute('style', v);
-      else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v);
-      else n.setAttribute(k, v === true ? '' : v);
-    });
-    for (var i = 2; i < arguments.length; i++) append(n, arguments[i]);
-    return n;
-  }
-
-  function append(n, kid) {
-    if (kid == null || kid === false) return;
-    if (Array.isArray(kid)) { kid.forEach(function (k) { append(n, k); }); return; }
-    n.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
-  }
-
-  function sv(tag, attrs, parent) {
-    var n = document.createElementNS(SVGNS, tag);
-    Object.keys(attrs || {}).forEach(function (k) {
-      if (attrs[k] == null) return;
-      if (k === 'text') n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]);
-    });
-    if (parent) parent.appendChild(n);
-    return n;
-  }
-
-  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+  var N = window.NFL;
+  var $ = N.$, h = N.h, sv = N.sv, clear = N.clear, well = N.well;
+  var tipShow = N.tipShow, tipHide = N.tipHide, bindTip = N.bindTip;
+  var watch = N.watch, tableView = N.tableView, legend = N.legend;
 
   // ------------------------------------------------------------------ formatting
 
@@ -89,52 +57,6 @@
       colorCache[hex] = '--c-d:' + ensure(c, BG_DARK, [255, 255, 255]) + ';--c-l:' + ensure(c, BG_LIGHT, [0, 0, 0]);
     }
     return colorCache[hex];
-  }
-
-  // ------------------------------------------------------------------ tooltip
-
-  var tip = $('#tip'), live = $('#live');
-
-  function tipContent(title, rows) {
-    clear(tip);
-    if (title) tip.appendChild(h('div', { class: 'tt', text: title }));
-    rows.forEach(function (r) {
-      var key = r.cls ? h('i', { class: r.cls, style: r.style }) : null;
-      tip.appendChild(h('div', { class: 'tr' }, key, h('b', { text: r.value }), r.label ? h('span', { text: r.label }) : null));
-    });
-  }
-
-  function tipPlace(x, y) {
-    tip.hidden = false;
-    var w = tip.offsetWidth, hh = tip.offsetHeight;
-    var left = x + 14, top = y + 14;
-    if (left + w > window.innerWidth - 8) left = x - w - 14;
-    if (left < 8) left = 8;
-    if (top + hh > window.innerHeight - 8) top = y - hh - 14;
-    if (top < 8) top = 8;
-    tip.style.left = left + 'px';
-    tip.style.top = top + 'px';
-  }
-
-  function tipShow(x, y, title, rows) {
-    rows = rows.filter(Boolean);
-    tipContent(title, rows);
-    tipPlace(x, y);
-    live.textContent = (title ? title + '. ' : '') + rows.map(function (r) { return (r.label ? r.label + ' ' : '') + r.value; }).join('. ');
-  }
-
-  function tipHide() { tip.hidden = true; }
-
-  // Per-mark tooltip for rows, bars and cells: pointer and keyboard focus show the same thing.
-  function bindTip(node, build) {
-    function at(e) { var c = build(); if (c) tipShow(e.clientX, e.clientY, c.title, c.rows); }
-    node.addEventListener('pointermove', at);
-    node.addEventListener('pointerleave', tipHide);
-    node.addEventListener('focus', function () {
-      var r = node.getBoundingClientRect(), c = build();
-      if (c) tipShow(r.left + Math.min(r.width, 160), r.top + r.height / 2, c.title, c.rows);
-    });
-    node.addEventListener('blur', tipHide);
   }
 
   // ------------------------------------------------------------------ generic line chart
@@ -274,38 +196,6 @@
     return svg;
   }
 
-  // Re-render charts when their container width changes.
-  var resizers = [];
-  function watch(host, draw) {
-    draw();
-    var last = host.clientWidth;
-    resizers.push(function () {
-      if (!host.isConnected) return false;
-      if (host.clientWidth !== last) { last = host.clientWidth; draw(); }
-      return true;
-    });
-  }
-  var rafId = 0;
-  window.addEventListener('resize', function () {
-    cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(function () { resizers = resizers.filter(function (f) { return f(); }); });
-  });
-
-  // ------------------------------------------------------------------ table views
-
-  function tableView(summary, cols, rowsFn) {
-    var d = h('details', { class: 'tv' }, h('summary', { text: summary }));
-    d.addEventListener('toggle', function () {
-      if (!d.open || d.querySelector('table')) return;
-      var thead = h('thead', {}, h('tr', {}, cols.map(function (c) { return h('th', { class: c.r ? 'r' : '', scope: 'col', text: c.t }); })));
-      var tbody = h('tbody', {}, rowsFn().map(function (r) {
-        return h('tr', {}, r.map(function (v, i) { return h('td', { class: (cols[i].r ? 'r ' : '') + (cols[i].n ? 'n' : ''), text: v }); }));
-      }));
-      d.appendChild(h('div', { class: 'tv-wrap' }, h('table', {}, thead, tbody)));
-    });
-    return d;
-  }
-
   // ------------------------------------------------------------------ state
 
   var D = {};          // loaded data
@@ -348,7 +238,7 @@
     document.querySelectorAll('main > .sec').forEach(function (sec) { io.observe(sec); });
   }
 
-  // ------------------------------------------------------------------ header
+  // ------------------------------------------------------------------ header and matchup instrument
 
   function renderHeader() {
     var meta = D.meta, teams = D.ladder.teams;
@@ -366,7 +256,7 @@
     clear(tiles);
     tiles.append(
       tile('#1 team', [top.team, h('small', {}, countUp(top.rating, 1, '', ''))], top.name + ', ' + ordinalSpots(top.rank_change) + ' this week.'),
-      tile('Biggest riser this week', [riser.team, h('small', {}, '\u25b2 ', countUp(riser.rating_change, 1, '', ''))],
+      tile('Biggest riser this week', [riser.team, h('small', {}, '▲ ', countUp(riser.rating_change, 1, '', ''))],
         riser.name + ', now #' + riser.rank + ' (' + ordinalSpots(riser.rank_change) + ').'),
       tile('Home-field edge now', [countUp(meta.hfa_pts, 1, '', ''), h('small', { text: 'Elo pts' })],
         'Worth ' + pct(meta.hfa_win_pct, 1) + ' to the home team in a game between equal teams.'),
@@ -381,10 +271,168 @@
   }
 
   function tile(label, big, sub, dual) {
-    return h('div', { class: 'tile' },
+    return h('div', { class: 'tile sf-raised' },
       h('h3', { text: label }),
       h('div', { class: 'big' + (dual ? ' dual' : '') }, big),
       h('p', { class: 'sub', text: sub }));
+  }
+
+  // The matchup instrument: one game (or team) on a 0 to 100% track with the model as a raised knob and
+  // Elo and Vegas as ticks. Three views; each builds a plain description `v` that drawInstrument() renders.
+  //   v = { eyebrow, away, awayRole, home, homeRole, pm, pe, pv, knob, stats[], aria, link:{href,text}, ticks }
+  // pm is the knob (model, or Elo when there is no model), pe the Elo tick, pv the Vegas tick; null hides a mark.
+
+  function nameParts(abbr) {
+    var t = byTeam[abbr];
+    if (!t) return { city: abbr, nick: abbr, rec: '' };
+    var w = t.name.split(' '), nick = w.pop();
+    return { city: w.join(' '), nick: nick, rec: rec(t.w, t.l, t.t) + ' · Elo ' + Math.round(t.rating) };
+  }
+
+  var hero = { view: 'week', views: {}, showElo: true, showVegas: true };
+
+  // Unplayed games only (upcoming.json drops played ones), so a game already played never shows.
+  // Picks the largest gap: model vs Vegas, else Elo vs Vegas, else model vs Elo, else the first game.
+  function weekView() {
+    var u = D.upcoming, M = mlWeek();
+    if (!u.week || !u.games.length) return { empty: 'No games are left on the schedule.' };
+    var mlBy = {};
+    if (M) M.games.forEach(function (x) { mlBy[x.game_id] = x; });
+    var best = null;
+    u.games.forEach(function (g) {
+      var mg = mlBy[g.game_id];
+      var pm = mg && mg.p_home_model != null ? mg.p_home_model : null, pe = g.p_home;
+      var pv = g.p_market_home != null ? g.p_market_home : (mg && mg.p_market_home != null ? mg.p_market_home : null);
+      var kind = pm != null && pv != null ? 3 : pv != null ? 2 : pm != null ? 1 : 0;
+      var gap = kind === 3 ? pm - pv : kind === 2 ? pe - pv : kind === 1 ? pm - pe : 0;
+      var c = { g: g, mg: mg, pm: pm, pe: pe, pv: pv, kind: kind, size: Math.abs(gap) };
+      if (!best || c.kind > best.kind || (c.kind === best.kind && c.size > best.size)) best = c;
+    });
+    var g = best.g, hasModel = best.pm != null;
+    var basis = best.kind === 3 ? 'largest model vs Vegas gap' : best.kind === 2 ? 'largest Elo vs Vegas gap' : best.kind === 1 ? 'largest model vs Elo gap' : 'first game up';
+    var p = hasModel ? best.pm : best.pe;
+    var gapPts = best.kind === 3 ? (best.pm - best.pv) * 100 : best.kind === 2 ? (best.pe - best.pv) * 100 : null;
+    var lead = nameParts(g.home).nick;
+    var stats = [{ l: (hasModel ? 'Model' : 'Elo') + ' · ' + lead + ' win', v: pct(p, 1), c: hasModel ? 'var(--sf-model)' : 'var(--sf-elo)', main: true }];
+    if (hasModel) stats.push({ l: 'Elo', v: pct(best.pe, 1), c: 'var(--sf-elo)', key: 'elo' });
+    stats.push(best.pv != null ? { l: 'Vegas', v: pct(best.pv, 1), c: 'var(--sf-vegas)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--sf-vegas)', key: 'vegas', na: true });
+    stats.push({ l: (hasModel ? 'Model' : 'Elo') + ' vs Vegas', v: gapPts == null ? 'Needs a line' : signed(gapPts, 1) + ' pts', gap: true, na: gapPts == null });
+    return {
+      eyebrow: 'Week ' + u.week + ' · ' + shortDay(g.date) + ' · ' + basis,
+      away: g.away, awayRole: 'Away', home: g.home, homeRole: g.neutral ? 'Home, neutral site' : 'Home',
+      pm: p, pe: hasModel ? best.pe : null, pv: best.pv, knob: hasModel ? 'model' : 'elo', stats: stats,
+      aria: g.home + ' win probability. ' + (hasModel ? 'Model ' + pct(best.pm, 1) + ', Elo ' + pct(best.pe, 1) : 'Elo ' + pct(best.pe, 1)) + (best.pv != null ? ', Vegas ' + pct(best.pv, 1) : '. No Vegas line yet') + '.',
+      link: { href: '#week', text: 'All games this week' }, ticks: true
+    };
+  }
+
+  // The team projected for the most wins, and its next game.
+  function restView() {
+    var R = D.ml && D.ml.rest;
+    if (!R || !R.teams.length) return null;
+    var rt = R.teams.slice().sort(function (a, b) { return b.proj_model - a.proj_model || (a.team < b.team ? -1 : 1); })[0];
+    if (!rt.games || !rt.games.length) return null;
+    var gm = rt.games[0], homeAbbr = gm.home ? rt.team : gm.opp, awayAbbr = gm.home ? gm.opp : rt.team;
+    var pm = gm.home ? gm.p_model : 1 - gm.p_model, pe = gm.home ? gm.p_elo : 1 - gm.p_elo, pv = null;
+    var ug = D.upcoming.games.filter(function (x) { return x.game_id === gm.game_id; })[0];
+    if (ug && ug.p_market_home != null) pv = ug.p_market_home;
+    var nick = nameParts(homeAbbr).nick;
+    return {
+      eyebrow: 'Week ' + gm.week + ' · next game for the projected wins leader',
+      away: awayAbbr, awayRole: 'Away', home: homeAbbr, homeRole: gm.neutral ? 'Home, neutral site' : 'Home',
+      pm: pm, pe: pe, pv: pv, knob: 'model',
+      stats: [
+        { l: 'Model · ' + nick + ' win', v: pct(pm, 1), c: 'var(--sf-model)', main: true },
+        { l: 'Elo', v: pct(pe, 1), c: 'var(--sf-elo)', key: 'elo' },
+        pv != null ? { l: 'Vegas', v: pct(pv, 1), c: 'var(--sf-vegas)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--sf-vegas)', key: 'vegas', na: true },
+        { l: nameParts(rt.team).nick + ' projected wins', v: f1(rt.proj_model) }],
+      aria: homeAbbr + ' win probability. Model ' + pct(pm, 1) + ', Elo ' + pct(pe, 1) + (pv != null ? ', Vegas ' + pct(pv, 1) : '. No Vegas line yet') + '.',
+      link: { href: $('#rest') ? '#rest' : '#week', text: 'Rest of season' }, ticks: true
+    };
+  }
+
+  // The team most likely to make the playoffs.
+  function oddsView() {
+    var O = D.ml && D.ml.playoff_odds;
+    if (!O || !O.conferences) return null;
+    var all = [];
+    Object.keys(O.conferences).forEach(function (k) { all = all.concat(O.conferences[k]); });
+    all.sort(function (a, b) { return b.playoffs - a.playoffs || (a.team < b.team ? -1 : 1); });
+    var o = all[0];
+    if (!o) return null;
+    return {
+      eyebrow: 'Season simulation · most likely playoff team',
+      away: o.team, awayRole: 'Chance to make the playoffs', home: null,
+      pm: o.playoffs, pe: null, pv: null, knob: 'model',
+      stats: [
+        { l: 'Make playoffs', v: pct(o.playoffs, 1), c: 'var(--sf-model)', main: true },
+        { l: 'Win division', v: pct(o.division, 1) },
+        { l: 'Reach Super Bowl', v: pct(o.reach_sb, 1) },
+        { l: 'Win Super Bowl', v: pct(o.win_sb, 1) }],
+      aria: byTeam[o.team].name + ' chance to make the playoffs: ' + pct(o.playoffs, 1) + '.',
+      link: { href: '#odds', text: 'Playoff odds' }, ticks: false
+    };
+  }
+
+  function drawTeam(el, abbr, role) {
+    clear(el);
+    if (!abbr) return;
+    var p = nameParts(abbr);
+    el.append(h('p', { class: 'label role', text: role }), h('p', { class: 'city', text: p.city }), h('h3', { class: 'nick', text: p.nick }), h('p', { class: 'mx-rec', text: p.rec }));
+  }
+
+  function setAt(id, p) { var n = $('#' + id); n.style.setProperty('--at', p == null ? 0.5 : Math.max(0, Math.min(1, p))); }
+
+  function drawInstrument() {
+    var v = hero.views[hero.view];
+    $('#mx-view').querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === hero.view)); });
+    var meter = $('#mx-meter'), stats = $('#mx-stats'), sw = $('#mx-switches');
+    if (v.empty) {
+      $('#mx-eyebrow').textContent = v.empty;
+      drawTeam($('#mx-away'), null); drawTeam($('#mx-home'), null);
+      meter.hidden = true; stats.hidden = true; sw.hidden = true;
+      $('#mx-open').hidden = true;
+      return;
+    }
+    meter.hidden = false; stats.hidden = false; $('#mx-open').hidden = false;
+    $('#mx-eyebrow').textContent = v.eyebrow;
+    drawTeam($('#mx-away'), v.away, v.awayRole);
+    drawTeam($('#mx-home'), v.home, v.homeRole || '');
+    $('#mx-meter-img').classList.toggle('knob-elo', v.knob === 'elo');
+    setAt('mx-pos-model', v.pm); setAt('mx-pos-elo', v.pe); setAt('mx-pos-vegas', v.pv);
+    $('#mx-pos-elo').hidden = !(v.ticks && hero.showElo && v.pe != null);
+    $('#mx-pos-vegas').hidden = !(v.ticks && hero.showVegas && v.pv != null);
+    sw.hidden = !v.ticks;
+    $('#mx-meter-img').setAttribute('aria-label', v.aria);
+    clear(stats);
+    v.stats.forEach(function (s) {
+      var off = (s.key === 'elo' && !hero.showElo) || (s.key === 'vegas' && !hero.showVegas);
+      var dd = h('dd', { text: s.v });
+      var wrap = h('div', { class: 'stat' + (s.main ? ' stat-main' : '') + (s.gap ? ' stat-gap' : '') + (s.na ? ' is-na' : '') + (off ? ' is-off' : ''), style: s.c ? '--c:' + s.c + (s.main ? ';--c-ink:' + s.c : '') : null },
+        h('dt', { class: 'label', text: s.l }), dd);
+      stats.appendChild(wrap);
+    });
+    var open = $('#mx-open');
+    open.setAttribute('href', v.link.href);
+    open.firstChild.textContent = v.link.text + ' ';
+  }
+
+  function renderHero() {
+    var bar = $('#mx-view');
+    if (!bar) return;
+    hero.views.week = weekView();
+    var rv = restView(), ov = oddsView();
+    if (rv) hero.views.rest = rv;
+    if (ov) hero.views.playoffs = ov;
+    clear(bar);
+    [['week', 'This week'], ['rest', 'Rest of season'], ['playoffs', 'Playoff odds']].forEach(function (t) {
+      if (!hero.views[t[0]]) return;
+      bar.appendChild(h('button', { type: 'button', 'data-view': t[0], 'aria-pressed': 'false', text: t[1], onclick: function () { hero.view = t[0]; drawInstrument(); } }));
+    });
+    bar.hidden = Object.keys(hero.views).length < 2;
+    $('#mx-sw-elo').addEventListener('change', function (e) { hero.showElo = e.target.checked; drawInstrument(); });
+    $('#mx-sw-vegas').addEventListener('change', function (e) { hero.showVegas = e.target.checked; drawInstrument(); });
+    drawInstrument();
   }
 
   // ------------------------------------------------------------------ ladder
@@ -412,7 +460,7 @@
     function drawChips() {
       clear(chips);
       GROUPS.forEach(function (g, i) {
-        chips.appendChild(h('button', { class: 'chip', type: 'button', 'aria-pressed': i === active ? 'true' : 'false', text: g[0],
+        chips.appendChild(h('button', { type: 'button', 'aria-pressed': i === active ? 'true' : 'false', text: g[0],
           onclick: function () { active = i; drawChips(); drawRows(); } }));
       });
     }
@@ -468,7 +516,7 @@
           h('span', { class: 'r', text: 'Rating' }), h('span', { class: 'r', text: 'Week' }),
           h('span', { class: 'r hide-m', text: 'Rank' }), h('span', { class: 'r hide-m', text: 'W-L' }), h('span', { class: 'hide-m sp', text: 'Last 17' })),
         h('ol', {}, list.map(row))));
-      body.appendChild(h('p', { class: 'fnote', text: 'Week is the rating change over the last 7 days; Rank is places gained or lost. The trend line covers each team\'s last 17 games, with this season in blue.' }));
+      body.appendChild(h('p', { class: 'fnote', text: 'Week is the rating change over the last 7 days; Rank is places gained or lost. The trend line covers each team\'s last 17 games, with this season highlighted.' }));
     }
 
     drawChips();
@@ -824,7 +872,7 @@
       var style = markVars(t.color);
       var bestIdx = lastIndexOfSeason(t, t.best.season), worstIdx = lastIndexOfSeason(t, t.worst.season);
       var left = h('div', {}), split = h('div', { class: 'split' }, left);
-      left.appendChild(host);
+      left.appendChild(well(host));
       body.appendChild(split);
       setHeadline('explorer-h', D.headlines.explorer[code]);
       watch(host, function () {
@@ -921,7 +969,7 @@
     function drawToggle() {
       clear(toggle);
       keys.forEach(function (k) {
-        toggle.appendChild(h('button', { class: 'chip', type: 'button', 'aria-pressed': k === active ? 'true' : 'false', text: labelFor(k),
+        toggle.appendChild(h('button', { type: 'button', 'aria-pressed': k === active ? 'true' : 'false', text: labelFor(k),
           onclick: function () { active = k; drawToggle(); drawBars(); } }));
       });
     }
@@ -976,7 +1024,7 @@
     var wrap = h('div', { class: 'heat-wrap' });
     var heat = h('div', { class: 'heat' });
     wrap.appendChild(heat);
-    body.appendChild(wrap);
+    body.appendChild(well(wrap));
     body.appendChild(scale);
     body.appendChild(h('p', { class: 'fnote', text: 'Each cell is a franchise\'s rating at the end of that regular season. Empty cells are seasons before the franchise existed.' + (T.partial_season ? ' The ' + T.partial_season + ' column is the rating so far.' : '') }));
 
@@ -1046,19 +1094,13 @@
         show(r, c);
       });
     }
-    var last = wrap.clientWidth;
-    draw();
-    resizers.push(function () {
-      if (!wrap.isConnected) return false;
-      if (wrap.clientWidth !== last) { last = wrap.clientWidth; draw(); }
-      return true;
-    });
+    watch(wrap, draw);
 
     // Parity: spread of end-of-season ratings. Lower means a tighter league.
     body.appendChild(h('h3', { class: 'sub-h', text: 'League parity by season' }));
     body.appendChild(h('p', { class: 'deck', style: 'margin-top:-6px;margin-bottom:12px', text: 'Standard deviation of end-of-season ratings. A lower line means the league was more bunched together.' }));
     var pHost = h('div', { class: 'chart' });
-    body.appendChild(pHost);
+    body.appendChild(well(pHost));
     var pts = T.seasons.map(function (s, i) { return { x: s, y: T.parity[i], count: T.teams_count[i] }; }).filter(function (p) { return p.x !== T.partial_season; });
     var pLo = 60, pHi = 150;
     watch(pHost, function () {
@@ -1138,7 +1180,7 @@
     var pair = h('div', { class: 'pair' });
     var brHost = h('div', { class: 'chart' }), hfaHost = h('div', { class: 'chart' });
     pair.appendChild(h('div', {}, h('h3', { text: 'Brier score by season' }), h('p', { class: 'sub', text: 'Elo against the Vegas moneyline, vig removed. Lower is better.' }),
-      legend([['s1', 'Elo v2'], ['s2', 'Vegas market']]), brHost,
+      legend([['s1', 'Elo v2'], ['s2', 'Vegas market']]), well(brHost),
       h('p', { class: 'fnote', text: 'No betting lines in the data for 2008; 2006 is partial.' }),
       tableView('View Brier scores as a table', [{ t: 'Season' }, { t: 'Games', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }, { t: 'Market', r: 1, n: 1 }], function () {
         return S.filter(function (r) { return r.season >= firstMkt; }).reverse().map(function (r) {
@@ -1146,7 +1188,7 @@
         });
       })));
     pair.appendChild(h('div', {}, h('h3', { text: 'Home-field edge by season' }), h('p', { class: 'sub', text: 'Chance the home team wins between equal teams, from Elo\'s learned edge, next to how often home teams actually won.' }),
-      legend([['s1', 'Elo learned edge'], ['sm dot', 'Actual home win rate']]), hfaHost,
+      legend([['s1', 'Elo learned edge'], ['sm dot', 'Actual home win rate']]), well(hfaHost),
       tableView('View home-field edge as a table', [{ t: 'Season' }, { t: 'Elo edge (pts)', r: 1, n: 1 }, { t: 'Implied win %', r: 1, n: 1 }, { t: 'Actual win %', r: 1, n: 1 }], function () {
         return S.slice().reverse().map(function (r) { return [String(r.season), f1(r.hfa_pts), pct(r.hfa_win_pct, 1), pct(r.home_win_rate, 1)]; });
       })));
@@ -1199,35 +1241,9 @@
         h('ul', {},
           h('li', {}, h('a', { href: D.meta.repo, text: 'Code and method on GitHub' }), h('small', { text: 'github.com/walk-the-program/NFLELO' })),
           h('li', {}, h('a', { href: 'https://nflverse.nflverse.com/', text: 'nflverse' }), h('small', { text: 'Schedules, scores, and betting lines, 1999 on. CC BY 4.0.' })),
-          h('li', {}, h('a', { href: 'https://github.com/fivethirtyeight/data', text: 'FiveThirtyEight' }), h('small', { text: 'NFL game results 1970\u20131998: FiveThirtyEight, CC BY 4.0.' })),
+          h('li', {}, h('a', { href: 'https://github.com/fivethirtyeight/data', text: 'FiveThirtyEight' }), h('small', { text: 'NFL game results 1970 to 1998: FiveThirtyEight, CC BY 4.0.' })),
           h('li', {}, h('a', { href: 'data/ladder.json', text: 'Ladder data (JSON)' }), h('small', { text: 'Rebuilt every Wednesday' })),
           D.ml ? h('li', {}, h('a', { href: D.ml.ledger_url, text: 'Prediction ledger (CSV)' }), h('small', { text: 'Every model prediction, written before kickoff' })) : null))));
-  }
-
-  function legend(items) {
-    return h('div', { class: 'legend' }, items.map(function (it) { return h('span', {}, h('i', { class: it[0] }), it[1]); }));
-  }
-
-  // ------------------------------------------------------------------ nav highlight
-
-  function initNav() {
-    var links = Array.prototype.slice.call(document.querySelectorAll('.nav-links a')).filter(function (a) { return a.getAttribute('href').charAt(0) === '#'; });
-    var map = {};
-    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
-    if (!('IntersectionObserver' in window)) return;
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (!en.isIntersecting) return;
-        links.forEach(function (a) { a.removeAttribute('aria-current'); });
-        var a = map[en.target.id];
-        if (a) {
-          a.setAttribute('aria-current', 'true');
-          var box = a.parentNode.parentNode;
-          if (box.scrollWidth > box.clientWidth) box.scrollLeft = a.offsetLeft - 60;
-        }
-      });
-    }, { rootMargin: '-45% 0px -50% 0px' });
-    Object.keys(map).forEach(function (id) { var s = document.getElementById(id); if (s) io.observe(s); });
   }
 
   // ------------------------------------------------------------------ boot
@@ -1242,14 +1258,14 @@
       b.appendChild(h('p', { class: 'note err', text: 'The data files could not be loaded. Serve this folder over http, for example with python3 -m http.server --directory site.' }));
     });
     $('#status').textContent = 'Data unavailable';
+    var eb = $('#mx-eyebrow');
+    if (eb) eb.textContent = 'Data unavailable';
   }
 
   // ml.json is optional: it exists only once the ML prediction ledger does. Without it the page is unchanged.
-  var mlFile = fetch('data/ml.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  var mlFile = N.getJSON('data/ml.json', true);
 
-  Promise.all(FILES.map(function (f) {
-    return fetch('data/' + f + '.json').then(function (r) { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
-  }).concat([mlFile])).then(function (all) {
+  Promise.all(FILES.map(function (f) { return N.getJSON('data/' + f + '.json'); }).concat([mlFile])).then(function (all) {
     FILES.forEach(function (f, i) { D[f] = all[i]; });
     D.ml = all[FILES.length];
     D.ladder.teams.forEach(function (t) { byTeam[t.team] = t; });
@@ -1260,6 +1276,7 @@
     renderHeader();
     renderLadder();
     renderWeek();
+    renderHero();
     renderExplorer();
     renderLuck();
     renderHistory();
@@ -1270,6 +1287,6 @@
     setHeadline('history-h', D.headlines.history);
     setHeadline('records-h', D.headlines.records);
     setHeadline('scorecard-h', D.headlines.scorecard);
-    initNav();
+    N.initNav();
   }).catch(fail);
 })();

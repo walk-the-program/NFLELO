@@ -4,40 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#1c2126" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f5f7f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222a33" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#e6ebf0" media="(prefers-color-scheme: light)">
 <title>NFLELO: the models and their receipts</title>
 <meta name="description" content="Every NFLELO model and its result on seasons it never saw, failures included, with the public commits that show the rules came first.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="soft-form.css">
 <link rel="stylesheet" href="styles.css">
+<script src="theme.js"></script>
+<script src="common.js" defer></script>
 <script src="models.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#scoreboard">Skip to the scoreboard</a>
 
-<nav class="nav" aria-label="Sections">
-  <div class="wrap nav-inner">
-    <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFL<span>ELO</span></a>
-    <ul class="nav-links">
-      <li><a href="#scoreboard">Scoreboard</a></li>
-      <li><a href="#holdout">Game model</a></li>
-      <li><a href="#evidence">Evidence</a></li>
-      <li><a href="#receipts">Receipts</a></li>
-      <li><a href="index.html">Ratings</a></li>
-    </ul>
+<nav class="nav sf-glass" aria-label="Sections">
+  <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFL<span>ELO</span></a>
+  <ul class="nav-links">
+    <li><a href="#scoreboard">Scoreboard</a></li>
+    <li><a href="#holdout">Game model</a></li>
+    <li><a href="#evidence">Evidence</a></li>
+    <li><a href="#receipts">Receipts</a></li>
+    <li><a href="index.html">Ratings</a></li>
+  </ul>
+  <div class="sf-segment theme" role="group" aria-label="Theme">
+    <button type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
   </div>
 </nav>
 
 <header class="hero page" id="top">
   <div class="wrap">
-    <p class="page-kicker">NFLELO / Models</p>
-    <h1 class="page-title">The models and their receipts</h1>
-    <p class="hero-line" id="hero-line">Loading results</p>
-    <p class="hero-deck" id="hero-deck">Every model was built on earlier seasons, then scored once on 2020 to 2025 under rules committed to a public repository first. Failures are listed with the passes.</p>
-    <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
+    <section class="hero-panel sf-glass" aria-labelledby="page-title">
+      <p class="page-kicker">NFLELO / Models</p>
+      <h1 class="page-title" id="page-title">The models and their receipts</h1>
+      <p class="hero-line" id="hero-line">Loading results</p>
+      <p class="hero-deck" id="hero-deck">Every model was built on earlier seasons, then scored once on 2020 to 2025 under rules committed to a public repository first. Failures are listed with the passes.</p>
+      <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
+    </section>
   </div>
 </header>
 
@@ -47,7 +55,7 @@
     <p class="kicker">01 / Scoreboard</p>
     <h2 class="headline" id="scoreboard-h">Scoreboard</h2>
     <p class="deck">One card per model: what it does, the number it was judged on, and links to the method and the commits. Lower is better unless a card says otherwise.</p>
-    <div class="chips" id="model-filters" role="group" aria-label="Filter the models"></div>
+    <div class="sf-segment seg" id="model-filters" role="group" aria-label="Filter the models"></div>
     <div id="scoreboard-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>

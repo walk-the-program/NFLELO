@@ -4,33 +4,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#1c2126" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#f5f7f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222a33" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#e6ebf0" media="(prefers-color-scheme: light)">
 <title>NFLELO: Elo ratings and stats</title>
-<meta name="description" content="Elo ratings for every NFL franchise since 1970, the weekly power ladder, picks against the Vegas line, luck, and league history.">
+<meta name="description" content="Elo ratings for every NFL franchise since 1970, the weekly power ladder, model win chances next to the Vegas benchmark, luck, and league history.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="soft-form.css">
 <link rel="stylesheet" href="styles.css">
+<script src="theme.js"></script>
+<script src="common.js" defer></script>
 <script src="app.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#ladder">Skip to the power ladder</a>
 
-<nav class="nav" aria-label="Sections">
-  <div class="wrap nav-inner">
-    <a class="nav-mark" href="#top" aria-label="NFLELO, back to top">NFL<span>ELO</span></a>
-    <ul class="nav-links">
-      <li><a href="#ladder">Ladder</a></li>
-      <li><a href="#week">This week</a></li>
-      <li><a href="#explorer">Explorer</a></li>
-      <li><a href="#luck">Luck</a></li>
-      <li><a href="#history">History</a></li>
-      <li><a href="#records">Records</a></li>
-      <li><a href="#scorecard">Scorecard</a></li>
-      <li><a href="models.html">Models</a></li>
-    </ul>
+<nav class="nav sf-glass" aria-label="Sections">
+  <a class="nav-mark" href="#top" aria-label="NFLELO, back to top">NFL<span>ELO</span></a>
+  <ul class="nav-links">
+    <li><a href="#ladder">Ladder</a></li>
+    <li><a href="#week">This week</a></li>
+    <li><a href="#explorer">Explorer</a></li>
+    <li><a href="#luck">Luck</a></li>
+    <li><a href="#history">History</a></li>
+    <li><a href="#records">Records</a></li>
+    <li><a href="#scorecard">Scorecard</a></li>
+    <li><a href="models.html">Models</a></li>
+  </ul>
+  <div class="sf-segment theme" role="group" aria-label="Theme">
+    <button type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
   </div>
 </nav>
 
@@ -40,7 +46,36 @@
       <h1 class="wordmark">NFL<span>ELO</span></h1>
       <p class="status" id="status" aria-live="polite">Loading ratings</p>
     </div>
-    <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
+    <div class="hero-grid">
+      <section class="hero-panel sf-glass" aria-labelledby="mx-title">
+        <h2 id="mx-title" class="sr">Matchup instrument</h2>
+        <div class="mx-head">
+          <div class="sf-segment" role="group" aria-label="Matchup view" id="mx-view"></div>
+          <p class="label" id="mx-eyebrow">Loading</p>
+        </div>
+        <div class="mx-teams" aria-live="polite">
+          <div class="mx-team team-away" id="mx-away"></div>
+          <div class="mx-team team-home" id="mx-home"></div>
+        </div>
+        <div class="mx-meter" id="mx-meter">
+          <div class="sf-meter" id="mx-meter-img" role="img" aria-label="">
+            <div class="sf-meter__track" aria-hidden="true"><i>0</i><i>100</i></div>
+            <div class="sf-meter__pos" id="mx-pos-elo" style="--tick: var(--sf-elo)" aria-hidden="true"><span class="sf-meter__tick sf-meter__tick--up"></span><span class="tl tl-top">Elo</span></div>
+            <div class="sf-meter__pos" id="mx-pos-vegas" style="--tick: var(--sf-vegas)" aria-hidden="true"><span class="sf-meter__tick sf-meter__tick--down"></span><span class="tl tl-bottom">Vegas</span></div>
+            <div class="sf-meter__pos" id="mx-pos-model" aria-hidden="true"><span class="sf-meter__knob"></span></div>
+          </div>
+        </div>
+        <dl class="mx-stats" id="mx-stats"></dl>
+        <div class="mx-foot">
+          <a class="sf-primary" id="mx-open" href="#week"><span>All games this week </span><span aria-hidden="true">&#8595;</span></a>
+          <div class="mx-switches" id="mx-switches">
+            <label class="sf-toggleline" for="mx-sw-elo"><span>Show Elo</span><input class="sf-switch" id="mx-sw-elo" type="checkbox" checked></label>
+            <label class="sf-toggleline" for="mx-sw-vegas"><span>Show Vegas benchmark</span><input class="sf-switch" id="mx-sw-vegas" type="checkbox" checked></label>
+          </div>
+        </div>
+      </section>
+      <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
+    </div>
   </div>
 </header>
 
@@ -50,7 +85,7 @@
     <p class="kicker">01 / Power ladder</p>
     <h2 class="headline" id="ladder-h">Power ladder</h2>
     <p class="deck">All 32 teams by Elo rating. Bars show distance from the 1500 league average. Select a team to open it in the explorer.</p>
-    <div class="chips" id="ladder-filters" role="group" aria-label="Filter the ladder"></div>
+    <div class="sf-segment seg" id="ladder-filters" role="group" aria-label="Filter the ladder"></div>
     <div id="ladder-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>
@@ -59,7 +94,7 @@
   <div class="wrap">
     <p class="kicker">02 / This week</p>
     <h2 class="headline" id="week-h">This week</h2>
-    <p class="deck" id="week-deck">Elo picks for the games still to play, next to the Vegas line.</p>
+    <p class="deck" id="week-deck">Elo win chances for the games still to play, next to the Vegas benchmark.</p>
     <div id="week-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>
@@ -82,7 +117,7 @@
     <p class="kicker">04 / Luck board</p>
     <h2 class="headline" id="luck-h">Luck board</h2>
     <p class="deck">Actual wins minus expected wins, where expected wins adds up Elo's pre-game win chance in every game.</p>
-    <div class="chips" id="luck-toggle" role="group" aria-label="Season"></div>
+    <div class="sf-segment seg" id="luck-toggle" role="group" aria-label="Season"></div>
     <div id="luck-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>

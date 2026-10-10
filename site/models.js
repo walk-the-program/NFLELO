@@ -1,49 +1,16 @@
 /* NFLELO models page. Reads ./data/research.json (written by scripts/export_research.py) and draws the
-   scoreboard cards, the game-model holdout chart, the findings and the receipts. No dependencies.
-   The small DOM, tooltip and table-view helpers mirror the ones in app.js (the two pages share styles.css). */
+   scoreboard cards, the game-model holdout chart, the findings and the receipts. No dependencies; the DOM,
+   tooltip, table-view and fetch helpers come from common.js, shared with the ratings page. */
 (function () {
   'use strict';
 
-  var SVGNS = 'http://www.w3.org/2000/svg';
   var REPO = 'https://github.com/walk-the-program/NFLELO';
 
-  // ------------------------------------------------------------------ dom helpers
+  var N = window.NFL;
+  var $ = N.$, h = N.h, sv = N.sv, clear = N.clear, well = N.well;
+  var tipShow = N.tipShow, bindTip = N.bindTip, live = N.live;
+  var watch = N.watch, tableView = N.tableView, legend = N.legend;
 
-  function $(sel, root) { return (root || document).querySelector(sel); }
-
-  function h(tag, props) {
-    var n = document.createElement(tag);
-    props = props || {};
-    Object.keys(props).forEach(function (k) {
-      var v = props[k];
-      if (v === false || v == null) return;
-      if (k === 'class') n.className = v;
-      else if (k === 'text') n.textContent = v;
-      else if (k === 'style') n.setAttribute('style', v);
-      else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v);
-      else n.setAttribute(k, v === true ? '' : v);
-    });
-    for (var i = 2; i < arguments.length; i++) append(n, arguments[i]);
-    return n;
-  }
-
-  function append(n, kid) {
-    if (kid == null || kid === false) return;
-    if (Array.isArray(kid)) { kid.forEach(function (k) { append(n, k); }); return; }
-    n.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
-  }
-
-  function sv(tag, attrs, parent) {
-    var n = document.createElementNS(SVGNS, tag);
-    Object.keys(attrs || {}).forEach(function (k) {
-      if (attrs[k] == null) return;
-      if (k === 'text') n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]);
-    });
-    if (parent) parent.appendChild(n);
-    return n;
-  }
-
-  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
   function setText(id, text) { var n = $('#' + id); if (n && text) n.textContent = text; }
   function done(id) { var n = $('#' + id); if (n) n.removeAttribute('aria-busy'); return n; }
 
@@ -58,79 +25,6 @@
   function limitText(p) { return p.kind === 'calibration' ? 'limit ' + p.limit.toFixed(p.decimals) : intervalText(p); }
   function repoUrl(path) { return REPO + '/blob/main/' + path; }
   function commitUrl(hash) { return REPO + '/commit/' + hash; }
-
-  // ------------------------------------------------------------------ tooltip (same behavior as the main page)
-
-  var tip = $('#tip'), live = $('#live');
-
-  function tipPlace(x, y) {
-    tip.hidden = false;
-    var w = tip.offsetWidth, hh = tip.offsetHeight;
-    var left = x + 14, top = y + 14;
-    if (left + w > window.innerWidth - 8) left = x - w - 14;
-    if (left < 8) left = 8;
-    if (top + hh > window.innerHeight - 8) top = y - hh - 14;
-    if (top < 8) top = 8;
-    tip.style.left = left + 'px';
-    tip.style.top = top + 'px';
-  }
-
-  function tipShow(x, y, title, rows) {
-    clear(tip);
-    if (title) tip.appendChild(h('div', { class: 'tt', text: title }));
-    rows.forEach(function (r) {
-      tip.appendChild(h('div', { class: 'tr' }, r.cls ? h('i', { class: r.cls }) : null, h('b', { text: r.value }), r.label ? h('span', { text: r.label }) : null));
-    });
-    tipPlace(x, y);
-    live.textContent = (title ? title + '. ' : '') + rows.map(function (r) { return (r.label ? r.label + ' ' : '') + r.value; }).join('. ');
-  }
-
-  function tipHide() { tip.hidden = true; }
-
-  function bindTip(node, build) {
-    node.addEventListener('pointermove', function (e) { var c = build(); if (c) tipShow(e.clientX, e.clientY, c.title, c.rows); });
-    node.addEventListener('pointerleave', tipHide);
-    node.addEventListener('focus', function () {
-      var r = node.getBoundingClientRect(), c = build();
-      if (c) tipShow(r.left + Math.min(r.width, 160), r.top + r.height / 2, c.title, c.rows);
-    });
-    node.addEventListener('blur', tipHide);
-  }
-
-  // ------------------------------------------------------------------ resize and table views
-
-  var resizers = [];
-  function watch(host, draw) {
-    draw();
-    var last = host.clientWidth;
-    resizers.push(function () {
-      if (!host.isConnected) return false;
-      if (host.clientWidth !== last) { last = host.clientWidth; draw(); }
-      return true;
-    });
-  }
-  var rafId = 0;
-  window.addEventListener('resize', function () {
-    cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(function () { resizers = resizers.filter(function (f) { return f(); }); });
-  });
-
-  function tableView(summary, cols, rowsFn) {
-    var d = h('details', { class: 'tv' }, h('summary', { text: summary }));
-    d.addEventListener('toggle', function () {
-      if (!d.open || d.querySelector('table')) return;
-      var thead = h('thead', {}, h('tr', {}, cols.map(function (c) { return h('th', { class: c.r ? 'r' : '', scope: 'col', text: c.t }); })));
-      var tbody = h('tbody', {}, rowsFn().map(function (r) {
-        return h('tr', {}, r.map(function (v, i) { return h('td', { class: (cols[i].r ? 'r ' : '') + (cols[i].n ? 'n' : ''), text: v }); }));
-      }));
-      d.appendChild(h('div', { class: 'tv-wrap' }, h('table', {}, thead, tbody)));
-    });
-    return d;
-  }
-
-  function legend(items) {
-    return h('div', { class: 'legend' }, items.map(function (it) { return h('span', {}, h('i', { class: it[0] }), it[1]); }));
-  }
 
   // ------------------------------------------------------------------ state
 
@@ -197,7 +91,7 @@
     clear(chips);
     FILTERS.forEach(function (f, i) {
       var n = M.filter(f[2]).length;
-      var b = h('button', { class: 'chip', type: 'button', 'aria-pressed': i === 0 ? 'true' : 'false', text: f[1] + ' ' + n });
+      var b = h('button', { type: 'button', 'aria-pressed': i === 0 ? 'true' : 'false', text: f[1] + ' ' + n });
       b.addEventListener('click', function () {
         Array.prototype.forEach.call(chips.children, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
         Array.prototype.forEach.call(grid.children, function (el, k) { el.hidden = !f[2](M[k]); });
@@ -294,7 +188,7 @@
     body.appendChild(h('div', { class: 'split' },
       h('div', {},
         legend([['dot s1', 'Elo v2'], ['dot s3', 'NFLELO game model'], ['dot s2', 'Vegas market, benchmark only']]),
-        host,
+        well(host),
         h('p', { class: 'fnote', text: 'Brier score, lower is better; the axis starts at 0.200, not zero. The model\'s own score has no whisker. ' + C.whisker_note }),
         tableView('View the comparison as a table', [{ t: 'Season' }, { t: 'Games', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }, { t: 'Game model', r: 1, n: 1 }, { t: 'Vegas market', r: 1, n: 1 }], function () {
           var all = [[C.window[0] + ' to ' + C.window[1], commas(C.n), elo.brier.toFixed(4), C.rows.filter(function (r) { return r.id === 'model'; })[0].brier.toFixed(4), mkt.brier.toFixed(4)]];
@@ -377,28 +271,6 @@
         h('ul', {}, links))));
   }
 
-  // ------------------------------------------------------------------ nav highlight
-
-  function initNav() {
-    var links = Array.prototype.slice.call(document.querySelectorAll('.nav-links a')).filter(function (a) { return a.getAttribute('href').charAt(0) === '#'; });
-    var map = {};
-    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
-    if (!('IntersectionObserver' in window)) return;
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (!en.isIntersecting) return;
-        links.forEach(function (a) { a.removeAttribute('aria-current'); });
-        var a = map[en.target.id];
-        if (a) {
-          a.setAttribute('aria-current', 'true');
-          var box = a.parentNode.parentNode;
-          if (box.scrollWidth > box.clientWidth) box.scrollLeft = a.offsetLeft - 60;
-        }
-      });
-    }, { rootMargin: '-45% 0px -50% 0px' });
-    Object.keys(map).forEach(function (id) { var s = document.getElementById(id); if (s) io.observe(s); });
-  }
-
   // ------------------------------------------------------------------ boot
 
   function fail(err) {
@@ -412,17 +284,17 @@
     setText('hero-line', 'Results unavailable');
   }
 
-  fetch('data/meta.json').then(function (r) { return r.ok ? r.json() : null; }).then(function (m) {
+  N.getJSON('data/meta.json', true).then(function (m) {
     if (m && m.credit) setText('credit', m.credit);
-  }).catch(function () {});
+  });
 
-  fetch('data/research.json').then(function (r) { if (!r.ok) throw new Error('research.json ' + r.status); return r.json(); }).then(function (d) {
+  N.getJSON('data/research.json').then(function (d) {
     R = d;
     renderHero();
     renderScoreboard();
     renderHoldout();
     renderEvidence();
     renderReceipts();
-    initNav();
+    N.initNav();
   }).catch(fail);
 })();
