@@ -44,7 +44,7 @@ Walker wants to understand this at a deep technical level, not just receive a mo
 
 1. **Explain before building.** At each milestone I write up the method: the math, why this approach and not the alternatives, and what could go wrong. Walker reads it and decides any open questions. Then I build.
 2. **Two kinds of code.**
-   - `notebooks/` holds numbered Jupyter notebooks for exploring and teaching: plots, intuition, and small experiments Walker can run cell by cell.
+   - `notebooks/` holds numbered Jupyter notebooks for exploring and teaching: plots, intuition, and small experiments Walker can run cell by cell. **Master notebook:** `notebooks/00_nflelo_walkthrough.ipynb` is the start-here tour of the whole project (data through M7, the live pipeline and a glossary); it loads every 2020-2025 result from `experiments/runs/` and links to `01`-`10` for depth.
    - `nflelo/ml/` holds the real, tested package code that the website and weekly build use.
    Ideas start in a notebook and graduate into the package.
 3. **Every experiment is logged.** Each training run writes a small JSON record: data version, features, parameters, scores, and the git commit. Results can be compared and reproduced later, and nothing is decided on vibes.

@@ -2,7 +2,7 @@
 
 This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
 
-Last updated: 2026-10-09 (Soft Form site redesign)
+Last updated: 2026-10-10 (master notebook added)
 
 ## What this project is
 
@@ -35,6 +35,8 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 **ML models (M1-M7, built 2026-10-03 to 2026-10-05).** `nflelo/ml/` holds the data cache, leak-proof features, evaluation harness, and every model. **The results scoreboard is `context/ml-results.md`.** Every model was scored once on the locked 2020-2025 seasons under pre-committed rules. Passed: the game model (A4s), playoff odds, the play model (M6), our no-market WP model (M7a), and early-down play calling (M7b). Failed or negative: the margin model, box-score and on-field player values, and fourth-down conversion calibration.
 
 **Live 2026 pipeline.** `.github/workflows/weekly.yml` runs Wednesday and Sunday: Elo rebuild, `scripts/ml_predict.py` (A4s predictions plus the Kalman shadow model, logged before kickoff in `experiments/live/`), the playoff simulation, and the site export. The site in `site/` is not hosted yet.
+
+**Master notebook.** `notebooks/00_nflelo_walkthrough.ipynb` walks through the whole project end to end (data, Elo, features, testing, every model and its result, the live pipeline, what's waiting on data, and a glossary). It calls the real package and script code, recomputes what's cheap on allowed seasons, and loads every 2020-2025 result from `experiments/runs/`. It runs top to bottom in about 3 minutes. Notebooks `01` to `10` go deeper on each milestone.
 
 ### Legacy Elo model (2025)
 
@@ -94,7 +96,6 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 
 - **Hosting.** Recommended: Cloudflare Pages, connected to the repo, publishing `site/` with no build step. Walker creates the Cloudflare account and picks the domain; Claude does the rest.
 - **GitHub cache purge.** The support request is drafted in `context/pending/github-purge-request.txt` and needs Walker's signed-in Chrome to submit.
-- **One master notebook** (Walker, 2026-10-05): a single `.ipynb` that walks through the WHOLE project end to end: data, Elo, features, models, evaluation, the live pipeline, and the simulation. It calls the real package code instead of copying it. This is a wish for later, not the working method.
 
 ## Decision log
 
@@ -136,6 +137,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-05 | M3b's C2d (Elo + Kalman filter + QB delta) runs as a shadow model in the weekly pipeline: logged before kickoff in `experiments/live/2026_shadow.csv` and scored next to A4s on the same games, with one line on the site's scorecard once games are scored. A4s stays the 2026 model; candidate for 2027. Details in `context/ml.md` ("Shadow deployment"). |
 | 2026-10-05 | M6 play model built (dev only, awaiting Walker's review). It predicts the whole yard distribution of a play from pre-snap facts. Every model beats the historical down-distance-field baseline, by a small margin (about 0.4% CRPS), and the gradient-boosted model is the pick in both views. Knowing the 22 players adds almost nothing once personnel, formation, box count and team ratings are known. Found and fixed a leak: the NGS formation field is missing mostly on fumble plays. PyTorch lives in `requirements-m6.txt` so the weekly Action stays light. Holdout pre-registration proposed in `context/ml.md`, not run. CC BY-SA. |
 | 2026-10-05 | M7a fourth-down decision support built (dev only, awaiting Walker's review). Our own win-probability model uses the A4s pregame probability instead of the betting line and beats nflfastR's win probability on 2018-2019 (Brier 0.1429 vs 0.1527). Field-goal and punt models plus the M6 play model value going for it, kicking and punting, with bootstrap bands that mark close calls as toss-ups. Model-estimated: teams matched the recommendation on 65% of fourth downs (81% of clear calls) and gave up about 16 wins a season league-wide. The WP model is CC BY; the fourth-down outputs are CC BY-SA. Holdout pre-registration proposed in `context/ml.md`, not run. |
+| 2026-10-10 | Master notebook built: `notebooks/00_nflelo_walkthrough.ipynb`, the single end-to-end walkthrough Walker asked for on 2026-10-05 (moved out of "Parked"). It calls the real code, computes live only on training, development and live 2026 data, and loads every locked 2020-2025 result from the run registry (no new holdout numbers). Executed with outputs saved; about 3 minutes, 0.7 MB. Treated as CC BY-SA because sections 8, 10 and 11 show participation-derived outputs. |
 
 ## Context file index
 
