@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#222a33" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#e6ebf0" media="(prefers-color-scheme: light)">
+<title>NFLELO: play calling</title>
+<meta name="description" content="What early-down play type and personnel the data says gains the most EPA, tested on 2020 to 2025 seasons it never saw, with the caveats in plain words.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="soft-form.css">
+<link rel="stylesheet" href="styles.css">
+<script src="theme.js"></script>
+<script src="common.js" defer></script>
+<script src="playcalling.js" defer></script>
+</head>
+<body class="mp mp-playcalling">
+<a class="skip" href="#caveats">Skip to the caveats</a>
+
+<nav class="nav sf-glass" aria-label="Sections">
+  <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFL<span>ELO</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Ratings</a></li>
+    <li class="nav-sep" aria-hidden="true"></li>
+    <li><a href="plays.html">Plays</a></li>
+    <li><a href="winprob.html">Win prob</a></li>
+    <li><a href="fourth.html">Fourth down</a></li>
+    <li><a href="playcalling.html" aria-current="page">Play calling</a></li>
+    <li><a href="models.html">Receipts</a></li>
+  </ul>
+  <div class="sf-segment theme" role="group" aria-label="Theme">
+    <button type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+  </div>
+</nav>
+
+<header class="hero page" id="top">
+  <div class="wrap">
+    <section class="hero-panel sf-glass" aria-labelledby="page-title">
+      <p class="page-kicker">NFLELO / Models / Play calling <span class="lic" id="lic"></span></p>
+      <h1 class="page-title" id="page-title">Play calling</h1>
+      <p class="hero-line" id="hero-line">Loading results</p>
+      <p class="hero-deck" id="hero-deck">On first and second down, which mix of run or pass and personnel group gained the most expected points in each situation, estimated from earlier seasons and tested on later ones.</p>
+      <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
+    </section>
+  </div>
+</header>
+
+<main>
+  <section class="wrap caveat-wrap" id="caveats" aria-label="Caveats" tabindex="-1">
+    <div id="caveats-body" aria-busy="true"></div>
+  </section>
+  <section class="sec" id="ope" aria-labelledby="ope-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">01 / The test</p>
+    <h2 class="headline" id="ope-h">The test</h2>
+    <p class="deck">The estimated gain from following the recommendations on seasons the method never saw, with a placebo and two stress tests.</p>
+    <div id="ope-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
+  </section>
+  <section class="sec" id="cells" aria-labelledby="cells-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">02 / Situation grid</p>
+    <h2 class="headline" id="cells-h">Situation grid</h2>
+    <p class="deck">60 situations: five down-and-distance groups, four field zones and three score states. Choose a score state and a season. The recommendation for a season uses earlier seasons only.</p>
+    <div id="cells-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
+  </section>
+  <section class="sec" id="teams" aria-labelledby="teams-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">03 / Team view</p>
+    <h2 class="headline" id="teams-h">Team view, 2025</h2>
+    <p class="deck">Descriptive only: how often each team passed in the situations where 2025's recommendation was a pass. This is observed play calling, not a model evaluation.</p>
+    <div id="teams-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
+  </section>
+  <section class="sec" id="how" aria-labelledby="how-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">04 / How this works</p>
+    <h2 class="headline" id="how-h">How this works</h2>
+    <div class="method how">
+      <div>
+        <p><b>What it does.</b> Teams call plays based on things the data partly captures. The method estimates, for each situation, what the average play would have gained had the team called each candidate action, by correcting for how often teams chose each action (a doubly robust, "AIPW", estimate). An action is a personnel group plus run or pass.</p><p><b>What the gain means.</b> Gain is expected points added per play, compared with the teams' current mix on the same plays. A situation is marked "clear best" only when the best action's interval sits above zero. "No clear best" means the data cannot rank the actions, not that they are equal.</p><p><b>The test.</b> Recommendations for each season come from earlier seasons only. The policy is then scored on the later season by off-policy evaluation. A placebo with shuffled actions should show no gain, and it does not.</p><p><b>The limits.</b> This is an observational estimate. Read the caveats at the top of the page before using any single number.</p>
+        <div id="how-dyn" class="how-dyn"></div>
+      </div>
+      <div>
+        <h3>Receipts and links</h3>
+        <ul class="linklist">
+          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-m7-method.md">Method: decision support (M7b)</a><small>Propensity model, cross-fitting, off-policy evaluation</small></li>
+          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-pages.md">Data contract for this page</a><small>Every field in playcalling.json and what it means</small></li>
+          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-results.md">Full scoreboard</a><small>Every model and its locked result, failures included</small></li>
+          <li><a href="models.html">All models and receipts</a><small>Pass and fail, with the commits that prove the order</small></li>
+        <li id="how-rcpt" class="rcpt-li"></li>
+        </ul>
+        <p class="fnote" id="how-credit"></p>
+      </div>
+    </div>
+  </div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <p id="credit">Data: nflverse (CC BY 4.0).</p>
+  <p>Independent project, not affiliated with the NFL or any team.</p>
+  <p><a href="index.html">Ratings and the weekly ladder</a></p>
+  <p><a href="models.html">Every model and its receipts</a></p>
+  <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
+</footer>
+
+<div id="tip" class="tip" role="presentation" hidden></div>
+<div id="live" class="sr" aria-live="polite"></div>
+</body>
+</html>

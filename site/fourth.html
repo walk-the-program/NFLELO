@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#222a33" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#e6ebf0" media="(prefers-color-scheme: light)">
+<title>NFLELO: fourth downs</title>
+<meta name="description" content="A model-estimated fourth-down decision map (go, field goal or punt) and how 2026 teams compare, with the status of its forward test.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="soft-form.css">
+<link rel="stylesheet" href="styles.css">
+<script src="theme.js"></script>
+<script src="common.js" defer></script>
+<script src="fourth.js" defer></script>
+</head>
+<body class="mp mp-fourth">
+<a class="skip" href="#status">Skip to the status notice</a>
+
+<nav class="nav sf-glass" aria-label="Sections">
+  <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFL<span>ELO</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Ratings</a></li>
+    <li class="nav-sep" aria-hidden="true"></li>
+    <li><a href="plays.html">Plays</a></li>
+    <li><a href="winprob.html">Win prob</a></li>
+    <li><a href="fourth.html" aria-current="page">Fourth down</a></li>
+    <li><a href="playcalling.html">Play calling</a></li>
+    <li><a href="models.html">Receipts</a></li>
+  </ul>
+  <div class="sf-segment theme" role="group" aria-label="Theme">
+    <button type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
+    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+  </div>
+</nav>
+
+<header class="hero page" id="top">
+  <div class="wrap">
+    <section class="hero-panel sf-glass" aria-labelledby="page-title">
+      <p class="page-kicker">NFLELO / Models / Fourth downs <span class="lic" id="lic"></span></p>
+      <h1 class="page-title" id="page-title">Fourth downs</h1>
+      <p class="hero-line" id="hero-line">Loading results</p>
+      <p class="hero-deck" id="hero-deck">For each yard line and distance, which option gives the team the best chance to win: go for it, kick the field goal, or punt. Every number on this page is model-estimated.</p>
+      <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
+    </section>
+  </div>
+</header>
+
+<main>
+  <section class="wrap status-wrap" id="status" aria-label="Status of this model" tabindex="-1">
+    <div id="status-body" class="notice" role="note" aria-busy="true"><p class="note">Loading</p></div>
+  </section>
+  <section class="sec" id="chart" aria-labelledby="chart-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">01 / Decision chart</p>
+    <h2 class="headline" id="chart-h">Decision chart</h2>
+    <p class="deck">Pick a game state. Each square is one yard line and distance, colored by the best option; faint squares are close calls. Point estimates, no uncertainty band.</p>
+    <div id="chart-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
+  </section>
+  <section class="sec" id="ytd" aria-labelledby="ytd-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">02 / 2026 so far</p>
+    <h2 class="headline" id="ytd-h">2026 so far</h2>
+    <p class="deck">Each completed fourth down this season, compared with what the model would have chosen. Model-estimated: the option not chosen is never observed.</p>
+    <div id="ytd-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
+  </section>
+  <section class="sec" id="how" aria-labelledby="how-h" tabindex="-1">
+  <div class="wrap">
+    <p class="kicker">03 / How this works</p>
+    <h2 class="headline" id="how-h">How this works</h2>
+    <div class="method how">
+      <div>
+        <p><b>What it does.</b> The engine values each fourth-down option by the team's win probability afterward. Going for it uses the play model (run and pass mix by field zone, with conversion offsets); a field goal uses a kicker-aware make model; a punt uses a punter-aware net-yards model. The best option is the one with the highest win probability.</p><p><b>Toss-ups.</b> When the best option beats the second best by less than 0.02 win probability, the call is a toss-up. The cut-off is fixed; there is no uncertainty band, so treat any close call as a coin flip.</p><p><b>Why it is not validated yet.</b> The first version of the conversion model failed its 2020 to 2025 test. The fix was built on development seasons only, frozen before any 2026 game, and will be scored once, after the 2026 participation data is released. Until then these are a model's view, not a validated tool.</p><p><b>What it ignores.</b> Teams know things the model does not: injuries, matchups, weather at the spot, the game plan. Penalties, kneel-downs, ties and overtime are excluded.</p>
+        <div id="how-dyn" class="how-dyn"></div>
+      </div>
+      <div>
+        <h3>Receipts and links</h3>
+        <ul class="linklist">
+          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-m7-method.md">Method: decision support (M7)</a><small>Rules, the first engine's failure, and the frozen fix</small></li>
+          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml.md">Project record (ml.md)</a><small>The forward-test registration and its dates</small></li>
+          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-pages.md">Data contract for this page</a><small>Every field in fourth.json and what it means</small></li>
+          <li><a href="models.html">All models and receipts</a><small>Pass and fail, with the commits that prove the order</small></li>
+        <li id="how-rcpt" class="rcpt-li"></li>
+        </ul>
+        <p class="fnote" id="how-credit"></p>
+      </div>
+    </div>
+  </div>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <p id="credit">Data: nflverse (CC BY 4.0).</p>
+  <p>Independent project, not affiliated with the NFL or any team.</p>
+  <p><a href="index.html">Ratings and the weekly ladder</a></p>
+  <p><a href="models.html">Every model and its receipts</a></p>
+  <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
+</footer>
+
+<div id="tip" class="tip" role="presentation" hidden></div>
+<div id="live" class="sr" aria-live="polite"></div>
+</body>
+</html>
