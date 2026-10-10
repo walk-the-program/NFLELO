@@ -233,6 +233,9 @@ M7A_SA_MODULES = {"nflelo/ml/decisions/fourth.py", "scripts/ml_m7a.py"}
 M7A_BY_MODULES = {"nflelo/ml/wp/__init__.py", "nflelo/ml/wp/model.py", "nflelo/ml/decisions/kicking.py"}
 # M7b (early-down play type x personnel) uses participation personnel through M6: CC BY-SA 4.0.
 M7B_SA_MODULES = {"nflelo/ml/decisions/policy.py", "scripts/ml_m7b.py"}
+# The model-page exporter publishes CC BY-SA pages (plays, fourth, playcalling) and one CC BY page (winprob);
+# tests/test_export_ml_pages.py checks that the winprob code path never touches M6, M7b or the fourth-down module.
+SITE_EXPORTERS = {"scripts/export_ml_pages.py"}
 
 
 def test_participation_is_read_only_by_the_validation_module():
@@ -281,7 +284,7 @@ def test_m7a_license_boundary():
     hits = []
     for path in list((ROOT / "nflelo").rglob("*.py")) + list((ROOT / "scripts").glob("*.py")):
         rel = str(path.relative_to(ROOT))
-        if rel in M7A_SA_MODULES:
+        if rel in M7A_SA_MODULES or rel in SITE_EXPORTERS:
             continue
         if re.search(r"decisions import fourth|decisions\.fourth|from \. import fourth|import fourth", path.read_text()):
             hits.append(rel)

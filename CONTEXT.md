@@ -2,7 +2,7 @@
 
 This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
 
-Last updated: 2026-10-10 (master notebook added)
+Last updated: 2026-10-10 (master notebook added; model-page exporters)
 
 ## What this project is
 
@@ -138,6 +138,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-05 | M6 play model built (dev only, awaiting Walker's review). It predicts the whole yard distribution of a play from pre-snap facts. Every model beats the historical down-distance-field baseline, by a small margin (about 0.4% CRPS), and the gradient-boosted model is the pick in both views. Knowing the 22 players adds almost nothing once personnel, formation, box count and team ratings are known. Found and fixed a leak: the NGS formation field is missing mostly on fumble plays. PyTorch lives in `requirements-m6.txt` so the weekly Action stays light. Holdout pre-registration proposed in `context/ml.md`, not run. CC BY-SA. |
 | 2026-10-05 | M7a fourth-down decision support built (dev only, awaiting Walker's review). Our own win-probability model uses the A4s pregame probability instead of the betting line and beats nflfastR's win probability on 2018-2019 (Brier 0.1429 vs 0.1527). Field-goal and punt models plus the M6 play model value going for it, kicking and punting, with bootstrap bands that mark close calls as toss-ups. Model-estimated: teams matched the recommendation on 65% of fourth downs (81% of clear calls) and gave up about 16 wins a season league-wide. The WP model is CC BY; the fourth-down outputs are CC BY-SA. Holdout pre-registration proposed in `context/ml.md`, not run. |
 | 2026-10-10 | Master notebook built: `notebooks/00_nflelo_walkthrough.ipynb`, the single end-to-end walkthrough Walker asked for on 2026-10-05 (moved out of "Parked"). It calls the real code, computes live only on training, development and live 2026 data, and loads every locked 2020-2025 result from the run registry (no new holdout numbers). Executed with outputs saved; about 3 minutes, 0.7 MB. Treated as CC BY-SA because sections 8, 10 and 11 show participation-derived outputs. |
+| 2026-10-10 | Model-page data exporters built: `scripts/export_ml_pages.py` writes `site/data/plays.json` (M6 play explorer, static), `winprob.json` (M7a WP charts and an excitement list, weekly), `fourth.json` (frozen M7a-v2 engine: a static decision chart plus every 2026 fourth down, weekly, all labeled model-estimated, with the forward-test status) and `playcalling.json` (M7b, static, from the logged holdout run). Holdout numbers are loaded from the registry, never recomputed. The weekly Action runs the live parts fail-soft (`continue-on-error`, 20-minute timeout) between `ml_predict.py` and `export_site.py`. Claude, under delegation: without a bootstrap, a fourth-down call is a toss-up when the margin is under 0.02 WP (the cut that best matches the bootstrap toss-up flags on dev 2018-2019). Contract: `context/ml-pages.md`. |
 
 ## Context file index
 
@@ -156,3 +157,4 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 - `context/ml-m3b-method.md`: M3b game-model refinement (week-varying weights, Kalman-filter team strength, a better QB term).
 - `context/ml-m6-method.md`: M6 play outcome model (a yards distribution from pre-snap situation and personnel; CRPS; a player-identity ablation; CC BY-SA).
 - `context/ml-m7-method.md`: M7 decision support (our own WP model, fourth-down go/FG/punt with uncertainty, early-down play type and personnel through propensity/AIPW/OPE).
+- `context/ml-pages.md`: the data contract for the four model pages (`plays.json`, `winprob.json`, `fourth.json`, `playcalling.json`): paths, refresh, schemas, licenses, headline numbers and required caveats.

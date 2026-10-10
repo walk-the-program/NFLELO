@@ -349,6 +349,9 @@ M6_FILES = {"nflelo/ml/plays/__init__.py", "nflelo/ml/plays/data.py", "nflelo/ml
 M7A_SA_FILES = {"nflelo/ml/decisions/fourth.py", "scripts/ml_m7a.py"}
 # M7b reads the M6 play table (personnel actions) and is CC BY-SA 4.0 itself (tests/ml/test_m7b.py checks it).
 M7B_SA_FILES = {"nflelo/ml/decisions/policy.py", "scripts/ml_m7b.py"}
+# The model-page exporter publishes CC BY-SA pages (plays, fourth, playcalling) and one CC BY page (winprob);
+# tests/test_export_ml_pages.py checks that the winprob code path never touches M6, M7b or the fourth-down module.
+SITE_EXPORTERS = {"scripts/export_ml_pages.py"}
 
 
 def test_m6_stays_inside_its_license_boundary():
@@ -358,7 +361,7 @@ def test_m6_stays_inside_its_license_boundary():
     hits = []
     for path in list((ROOT / "nflelo").rglob("*.py")) + list((ROOT / "scripts").glob("*.py")):
         rel = str(path.relative_to(ROOT))
-        if rel in M6_FILES or rel in M7A_SA_FILES or rel in M7B_SA_FILES:
+        if rel in M6_FILES or rel in M7A_SA_FILES or rel in M7B_SA_FILES or rel in SITE_EXPORTERS:
             continue
         tree = ast.parse(path.read_text())
         for n in ast.walk(tree):

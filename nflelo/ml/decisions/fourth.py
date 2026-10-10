@@ -546,19 +546,26 @@ def fit_components(S: int, pbp: pd.DataFrame, wp_table: pd.DataFrame, m6_table: 
                    punt: tuple | None = None, engine_version: str = ENGINE_VERSION,
                    v2_settings: V2Settings | None = None, v2: EngineV2 | None = None,
                    a4s_home: pd.Series | None = None, ratings: pd.DataFrame | None = None,
-                   log=None) -> tuple[Components, Tables]:
+                   log=None, m6: gbm.GBMModel | None = None,
+                   configs: np.ndarray | None = None) -> tuple[Components, Tables]:
     """Every component for season S, fit on seasons before S only (see the module docstring).
 
     `wp`, `fg` (model, rows) and `punt` (model, rows) may be passed in when already fit for S
     with the same functions (the dev script scores them first). `engine_version` "v1" (default) is the
     M7a engine; "v2" uses `v2` (a frozen engine; S's attempts are attached for the team offsets) or fits
-    one with `v2_settings` (default: V2_CANDIDATES[V2_CHOSEN]; offsets need `a4s_home` and `ratings`)."""
+    one with `v2_settings` (default: V2_CANDIDATES[V2_CHOSEN]; offsets need `a4s_home` and `ratings`).
+
+    `m6` (the call-view GBM from `gbm.fit_season_ahead` on first_m6..S-1) and `configs`
+    (`structure_configs` of that training table) may be passed in too (the site exporter caches them).
+    With `wp`, `m6` and `configs` given, `wp_table` and `m6_table` may be None; the returned Tables
+    then hold None for them and cannot drive a bootstrap."""
     if engine_version not in ENGINE_VERSIONS:
         raise ValueError(f"engine_version must be one of {ENGINE_VERSIONS}")
     t0 = time.perf_counter()
     wp = wp if wp is not None else wpm.fit_season_ahead(wp_table, S, first_wp, calibrate=wp_calibrate)
-    m6_train = m6_table[m6_table["season"].between(first_m6, S - 1)]
-    g = gbm.fit_season_ahead(m6_train, "call", grid=m6_grid)
+    m6_train = m6_table[m6_table["season"].between(first_m6, S - 1)] if m6_table is not None else None
+    g = m6 if m6 is not None else gbm.fit_season_ahead(m6_train, "call", grid=m6_grid)
+    configs = configs if configs is not None else structure_configs(m6_train)
     fg_model, fg_x = fg if fg is not None else kk.fit_fg_season_ahead(kk.fg_table(pbp[pbp["season"] <= S]), S, first_wp)
     punt_model, punt_x = (punt if punt is not None
                           else kk.fit_punt_season_ahead(kk.punt_table(pbp[pbp["season"] <= S]), S, first_wp))
@@ -566,12 +573,13 @@ def fit_components(S: int, pbp: pd.DataFrame, wp_table: pd.DataFrame, m6_table: 
     comp = Components(S, wp, M6Yards(g.bins), fg_model, punt_model,
                       float(ko_table.loc[ko_table["season"] == S - 1, "start"].mean()),
                       kk.durations(pbp, range(max(first_wp, S - 3), S)), run_share(pbp, range(first_wp, S)),
-                      structure_configs(m6_train), ko_table,
+                      configs, ko_table,
                       {"wp": wp.info, "m6": {"chosen": g.info.get("chosen"), "n_iter": g.info["n_iter"],
                                              "seconds": g.info.get("total_seconds")},
                        "fg": fg_model.info, "punt": punt_model.info, "seconds": time.perf_counter() - t0})
     comp.info.update({"ko_spot": comp.ko_spot, "durations": comp.dur, "run_share": comp.run_share.tolist()})
-    tables = Tables(wp_table[wp_table["season"].between(first_wp, S - 1)], m6_train,
+    wp_train = wp_table[wp_table["season"].between(first_wp, S - 1)] if wp_table is not None else None
+    tables = Tables(wp_train, m6_train,
                     fg_x[fg_x["season"].between(first_wp, S - 1)], punt_x[punt_x["season"].between(first_wp, S - 1)])
     if engine_version == "v2":
         t1 = time.perf_counter()

@@ -390,6 +390,27 @@ def test_fourth_down_valuations_ignore_season_from_the_week(league, fitted):
     assert np.abs(v_pc["wp_go"].to_numpy() - v1["wp_go"].to_numpy()).max() > 1e-6
 
 
+def test_fit_components_with_prefit_m6_and_configs_is_exact(league, fitted, monkeypatch):
+    """Passing the cached M6 GBM, its structure configurations and the WP model (no training tables)
+    gives the identical components: the site exporter's cache changes nothing but the runtime."""
+    from nflelo.ml.plays import gbm
+    comp, _, dec = fitted
+    m6_train = league["m6"][league["m6"]["season"].between(fd.FIRST_M6, 2017)]
+    g = gbm.fit_season_ahead(m6_train, "call", grid=GRID1)
+    cfg = fd.structure_configs(m6_train)
+
+    def boom(*a, **k):
+        raise AssertionError("the M6 GBM must not be refit when it is passed in")
+    monkeypatch.setattr(gbm, "fit_season_ahead", boom)
+    comp2, tables2 = fd.fit_components(2018, league["pbp"], None, None, first_wp=2012, wp=comp.wp, m6=g,
+                                       configs=cfg)
+    assert tables2.wp is None and tables2.m6 is None and np.array_equal(comp2.configs, comp.configs)
+    rat = synth_ratings()
+    v1 = fd.option_values(comp, dec, fd.go_inputs(dec, comp, rat))
+    v2 = fd.option_values(comp2, dec, fd.go_inputs(dec, comp2, rat))
+    assert np.array_equal(v1.to_numpy(float), v2.to_numpy(float))
+
+
 def test_m7a_dev_window_is_guarded(tmp_path):
     assert windows.M7A_DEV == (2016, 2019) and not windows.touches_holdout(windows.M7A_DEV)
     with pytest.raises(windows.HoldoutError):

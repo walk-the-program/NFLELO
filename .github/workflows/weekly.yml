@@ -34,7 +34,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Check out main
         uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # experiments/live holds the ledger, latest_<season>.json, model_/margin_<season>.json, sim_<season>.csv,
-          # and the M3b shadow model: shadow_<season>.json and its own ledger <season>_shadow.csv
+          # and the M3b shadow model: shadow_<season>.json and its own ledger <season>_shadow.csv.
           git add experiments/live site/data outputs data/games.csv
           if git diff --cached --quiet; then
             echo "No changes to commit."
@@ -83,5 +83,27 @@ jobs:
           fi
           rows=$(git diff --cached --numstat -- experiments/live/*.csv | awk '{s += $1} END {print s + 0}')
           git commit -m "Weekly update $(date -u +%Y-%m-%dT%H:%MZ): ${rows} ledger rows, site data refreshed"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
+
+      # Model pages, live parts (site/data/winprob.json and fourth.json; context/ml-pages.md).
+      # Runs AFTER the ledger commit above, so it can never delay the pre-kickoff ledger push
+      # (those timestamps are the audit trail). Fail-soft: an error or timeout leaves the committed
+      # page files as they were. Warm runs take about a minute; a cold cache also builds the M6 play
+      # table and fits the WP and M6 models, bounded by --budget and the timeout.
+      - name: Model pages, live parts (win probability, fourth downs), fail-soft
+        continue-on-error: true
+        timeout-minutes: 20
+        run: python scripts/export_ml_pages.py live --no-refresh --budget 900
+
+      - name: Commit and push model pages
+        continue-on-error: true
+        run: |
+          git add site/data/winprob.json site/data/fourth.json
+          if git diff --cached --quiet; then
+            echo "No model-page changes."
+            exit 0
+          fi
+          git commit -m "Model pages update $(date -u +%Y-%m-%dT%H:%MZ): win probability and fourth downs"
           git pull --rebase --autostash origin main
           git push origin HEAD:main

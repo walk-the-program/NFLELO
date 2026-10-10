@@ -10,3 +10,4 @@ legacy_2025/Other/
 legacy_2025/NFLELO_data.xlsx
 legacy_2025/Outputs/comprehensive_nfl_data.csv
 legacy_2025/Outputs_Addendum/comprehensive_nfl_data.csv
+site/data/*.tmp

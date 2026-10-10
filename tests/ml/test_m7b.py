@@ -295,6 +295,9 @@ def test_signoff_refuses_without_a_reproduced_dry_run(tmp_path, monkeypatch):
 
 
 M7B_FILES = {"nflelo/ml/decisions/policy.py", "scripts/ml_m7b.py"}
+# The model-page exporter publishes CC BY-SA pages (plays, fourth, playcalling) and one CC BY page (winprob);
+# tests/test_export_ml_pages.py checks that the winprob code path never touches M6, M7b or the fourth-down module.
+SITE_EXPORTERS = {"scripts/export_ml_pages.py"}
 
 
 def test_m7b_license_boundary():
@@ -305,7 +308,7 @@ def test_m7b_license_boundary():
     hits = []
     for path in list((ROOT / "nflelo").rglob("*.py")) + list((ROOT / "scripts").glob("*.py")):
         rel = str(path.relative_to(ROOT))
-        if rel in M7B_FILES:
+        if rel in M7B_FILES or rel in SITE_EXPORTERS:
             continue
         tree = ast.parse(path.read_text())
         for n in ast.walk(tree):
