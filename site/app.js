@@ -1,11 +1,10 @@
 /* NFLELO ratings page. No dependencies: reads ./data/*.json (through common.js), draws hand-built SVG/HTML.
    Charts follow one spec: 2px lines, hairline solid grid, 2px surface rings on dots, one tooltip style,
-   a table view under each chart, and chart areas set in recessed wells. */
+   a table view under each chart, and chart areas set in bordered wells. Series are told apart by color, shape and dash. */
 (function () {
   'use strict';
 
   var FILES = ['meta', 'ladder', 'upcoming', 'history', 'luck', 'tapestry', 'records', 'scorecard', 'headlines'];
-  var BG_DARK = [34, 42, 51], BG_LIGHT = [230, 235, 240];   // --sf-canvas, dark and light
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ------------------------------------------------------------------ shared helpers (common.js)
@@ -13,7 +12,7 @@
   var N = window.NFL;
   var $ = N.$, h = N.h, sv = N.sv, clear = N.clear, well = N.well;
   var tipShow = N.tipShow, tipHide = N.tipHide, bindTip = N.bindTip;
-  var watch = N.watch, tableView = N.tableView, legend = N.legend;
+  var watch = N.watch, tableView = N.tableView, legend = N.legend, mark = N.mark, moveMark = N.moveMark;
 
   // ------------------------------------------------------------------ formatting
 
@@ -33,31 +32,6 @@
     return ((hr + 11) % 12 + 1) + ':' + p[1] + ' ' + (hr < 12 ? 'AM' : 'PM') + ' ET';
   }
   function ordinalSpots(n) { return n === 0 ? 'unchanged' : (n > 0 ? 'up ' : 'down ') + plural(Math.abs(n), 'spot', 'spots'); }
-
-  // ------------------------------------------------------------------ team colors for data marks
-  // Team colors are only used inside marks. Dark team colors are lifted (or light ones
-  // darkened) until they hold 3:1 against the page surface. Both variants go in as CSS
-  // custom properties so the theme switches without a redraw.
-
-  function rgb(hex) { var n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
-  function toHex(c) { return '#' + c.map(function (v) { return ('0' + v.toString(16)).slice(-2); }).join(''); }
-  function lin(c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
-  function lum(c) { return 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]); }
-  function contrast(a, b) { var x = lum(a), y = lum(b); if (x < y) { var t = x; x = y; y = t; } return (x + 0.05) / (y + 0.05); }
-  function mixc(a, b, t) { return a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }); }
-  function ensure(c, surface, toward) {
-    var t = 0, out = c;
-    while (contrast(out, surface) < 3 && t < 1) { t += 0.04; out = mixc(c, toward, t); }
-    return toHex(out);
-  }
-  var colorCache = {};
-  function markVars(hex) {
-    if (!colorCache[hex]) {
-      var c = rgb(hex);
-      colorCache[hex] = '--c-d:' + ensure(c, BG_DARK, [255, 255, 255]) + ';--c-l:' + ensure(c, BG_LIGHT, [0, 0, 0]);
-    }
-    return colorCache[hex];
-  }
 
   // ------------------------------------------------------------------ generic line chart
 
@@ -121,19 +95,19 @@
         pen = true;
       });
       if (s.dotsOnly) {
-        s.pts.forEach(function (p) { if (p.y != null) sv('circle', { class: 'dot ' + s.cls + ' plain', cx: sx(p.x), cy: sy(p.y), r: 3 }, svg); });
+        s.pts.forEach(function (p) { if (p.y != null) mark(svg, s.cls, sx(p.x), sy(p.y), 3.5, 'plain'); });
       } else {
-        sv('path', { class: 'line ' + s.cls, style: s.style, d: d }, svg);
+        sv('path', { class: 'line ' + s.cls, d: d }, svg);
       }
       var last = s.pts.filter(function (p) { return p.y != null; }).pop();
-      if (!s.dotsOnly) sv('circle', { class: 'dot ' + s.cls, style: s.style, cx: sx(last.x), cy: sy(last.y), r: 4 }, svg);
+      if (!s.dotsOnly) mark(svg, s.cls, sx(last.x), sy(last.y), 5);
       if (o.endLabels) {
         sv('text', { class: 'lbl', x: sx(last.x) + 10, y: sy(last.y) + 4, text: s.short || s.label }, svg);
       }
     });
 
     (o.markers || []).forEach(function (mk) {
-      sv('circle', { class: 'dot ' + mk.cls, style: mk.style, cx: sx(mk.x), cy: sy(mk.y), r: 5 }, svg);
+      mark(svg, mk.cls, sx(mk.x), sy(mk.y), 6);
       var anchor = sx(mk.x) > W - 90 ? 'end' : sx(mk.x) < m.l + 70 ? 'start' : 'middle';
       sv('text', { class: 'lbl', x: sx(mk.x), y: sy(mk.y) + mk.dy, 'text-anchor': anchor, text: mk.text }, svg);
     });
@@ -142,7 +116,7 @@
     var maps = o.series.map(function (s) { var mp = new Map(); s.pts.forEach(function (p) { mp.set(p.x, p); }); return mp; });
     var xs = Array.from(new Set([].concat.apply([], o.series.map(function (s) { return s.pts.map(function (p) { return p.x; }); })))).sort(function (a, b) { return a - b; });
     var cross = sv('line', { class: 'cross', y1: m.t, y2: m.t + ih, visibility: 'hidden' }, svg);
-    var dots = o.series.map(function (s) { return sv('circle', { class: 'dot ' + s.cls, style: s.style, r: 5, visibility: 'hidden' }, svg); });
+    var dots = o.series.map(function (s) { var d = mark(svg, s.cls, 0, 0, 6); d.setAttribute('visibility', 'hidden'); return d; });
     var cur = xs.length - 1;
 
     function nearest(px) {
@@ -159,7 +133,7 @@
       o.series.forEach(function (s, k) {
         var p = maps[k].get(x);
         if (!p || p.y == null) { dots[k].setAttribute('visibility', 'hidden'); if (p) rows.push({ p: p, s: s }); return; }
-        dots[k].setAttribute('cx', sx(x)); dots[k].setAttribute('cy', sy(p.y)); dots[k].setAttribute('visibility', 'visible');
+        moveMark(dots[k], sx(x), sy(p.y)); dots[k].setAttribute('visibility', 'visible');
         rows.push({ p: p, s: s });
       });
       var c = o.tip(x, rows);
@@ -267,11 +241,11 @@
         sc.test_seasons[0] + '-' + sc.test_seasons[1] + ' regular seasons, ' + sc.n_market.toLocaleString('en-US') + ' games with a moneyline.', true)
     );
     document.title = 'NFLELO: ' + top.team + ' leads at ' + f1(top.rating) + ', through ' + meta.season + ' Week ' + meta.week;
-    $('#credit').textContent = meta.credit;
+    $('#credit').textContent = meta.credit.replace(/(\d)[\u2013\u2014](\d)/g, '$1 to $2');   // house style: no dashes in copy
   }
 
   function tile(label, big, sub, dual) {
-    return h('div', { class: 'tile sf-raised' },
+    return h('div', { class: 'tile' },
       h('h3', { text: label }),
       h('div', { class: 'big' + (dual ? ' dual' : '') }, big),
       h('p', { class: 'sub', text: sub }));
@@ -313,9 +287,9 @@
     var p = hasModel ? best.pm : best.pe;
     var gapPts = best.kind === 3 ? (best.pm - best.pv) * 100 : best.kind === 2 ? (best.pe - best.pv) * 100 : null;
     var lead = nameParts(g.home).nick;
-    var stats = [{ l: (hasModel ? 'Model' : 'Elo') + ' · ' + lead + ' win', v: pct(p, 1), c: hasModel ? 'var(--sf-model)' : 'var(--sf-elo)', main: true }];
-    if (hasModel) stats.push({ l: 'Elo', v: pct(best.pe, 1), c: 'var(--sf-elo)', key: 'elo' });
-    stats.push(best.pv != null ? { l: 'Vegas', v: pct(best.pv, 1), c: 'var(--sf-vegas)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--sf-vegas)', key: 'vegas', na: true });
+    var stats = [{ l: (hasModel ? 'Model' : 'Elo') + ' · ' + lead + ' win', v: pct(p, 1), c: hasModel ? 'var(--primary)' : 'var(--ink)', clip: hasModel ? 'none' : 'circle(50%)', main: true }];
+    if (hasModel) stats.push({ l: 'Elo', v: pct(best.pe, 1), c: 'var(--ink)', clip: 'circle(50%)', key: 'elo' });
+    stats.push(best.pv != null ? { l: 'Vegas', v: pct(best.pv, 1), c: 'var(--secondary)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--secondary)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas', na: true });
     stats.push({ l: (hasModel ? 'Model' : 'Elo') + ' vs Vegas', v: gapPts == null ? 'Needs a line' : signed(gapPts, 1) + ' pts', gap: true, na: gapPts == null });
     return {
       eyebrow: 'Week ' + u.week + ' · ' + shortDay(g.date) + ' · ' + basis,
@@ -342,9 +316,9 @@
       away: awayAbbr, awayRole: 'Away', home: homeAbbr, homeRole: gm.neutral ? 'Home, neutral site' : 'Home',
       pm: pm, pe: pe, pv: pv, knob: 'model',
       stats: [
-        { l: 'Model · ' + nick + ' win', v: pct(pm, 1), c: 'var(--sf-model)', main: true },
-        { l: 'Elo', v: pct(pe, 1), c: 'var(--sf-elo)', key: 'elo' },
-        pv != null ? { l: 'Vegas', v: pct(pv, 1), c: 'var(--sf-vegas)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--sf-vegas)', key: 'vegas', na: true },
+        { l: 'Model · ' + nick + ' win', v: pct(pm, 1), c: 'var(--primary)', clip: 'none', main: true },
+        { l: 'Elo', v: pct(pe, 1), c: 'var(--ink)', clip: 'circle(50%)', key: 'elo' },
+        pv != null ? { l: 'Vegas', v: pct(pv, 1), c: 'var(--secondary)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--secondary)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas', na: true },
         { l: nameParts(rt.team).nick + ' projected wins', v: f1(rt.proj_model) }],
       aria: homeAbbr + ' win probability. Model ' + pct(pm, 1) + ', Elo ' + pct(pe, 1) + (pv != null ? ', Vegas ' + pct(pv, 1) : '. No Vegas line yet') + '.',
       link: { href: $('#rest') ? '#rest' : '#week', text: 'Rest of season' }, ticks: true
@@ -365,7 +339,7 @@
       away: o.team, awayRole: 'Chance to make the playoffs', home: null,
       pm: o.playoffs, pe: null, pv: null, knob: 'model',
       stats: [
-        { l: 'Make playoffs', v: pct(o.playoffs, 1), c: 'var(--sf-model)', main: true },
+        { l: 'Make playoffs', v: pct(o.playoffs, 1), c: 'var(--primary)', clip: 'none', main: true },
         { l: 'Win division', v: pct(o.division, 1) },
         { l: 'Reach Super Bowl', v: pct(o.reach_sb, 1) },
         { l: 'Win Super Bowl', v: pct(o.win_sb, 1) }],
@@ -408,7 +382,7 @@
     v.stats.forEach(function (s) {
       var off = (s.key === 'elo' && !hero.showElo) || (s.key === 'vegas' && !hero.showVegas);
       var dd = h('dd', { text: s.v });
-      var wrap = h('div', { class: 'stat' + (s.main ? ' stat-main' : '') + (s.gap ? ' stat-gap' : '') + (s.na ? ' is-na' : '') + (off ? ' is-off' : ''), style: s.c ? '--c:' + s.c + (s.main ? ';--c-ink:' + s.c : '') : null },
+      var wrap = h('div', { class: 'stat' + (s.main ? ' stat-main' : '') + (s.gap ? ' stat-gap' : '') + (s.na ? ' is-na' : '') + (off ? ' is-off' : ''), style: s.c ? '--c:' + s.c + ';--clip:' + (s.clip || 'none') : null },
         h('dt', { class: 'label', text: s.l }), dd);
       stats.appendChild(wrap);
     });
@@ -487,8 +461,7 @@
 
     function row(t) {
       var dev = t.rating - 1500, wPct = Math.min(50, Math.abs(dev) / R * 50);
-      var fill = h('span', { class: 'fill mk ' + (dev >= 0 ? 'pos' : 'neg'), style: markVars(t.color) + ';' +
-        (dev >= 0 ? 'left:50%;' : 'left:' + (50 - wPct) + '%;') + 'width:' + wPct + '%' });
+      var fill = h('span', { class: 'fill ' + (dev >= 0 ? 'pos' : 'neg'), style: (dev >= 0 ? 'left:50%;' : 'left:' + (50 - wPct) + '%;') + 'width:' + wPct + '%' });
       var up = t.rating_change > 0, flat = t.rating_change === 0;
       var label = t.name + ', rank ' + t.rank + ', rating ' + f1(t.rating) + ', ' + (flat ? 'no change' : (up ? 'up ' : 'down ') + f1(Math.abs(t.rating_change))) +
         ' this week, record ' + rec(t.w, t.l, t.t) + '. Open in the team explorer.';
@@ -566,8 +539,8 @@
         h('div', { class: 'vs' }, g.away, h('span', { class: 'at', text: 'at' }), g.home),
         mg && mg.qb_change ? h('p', { class: 'qbtag', text: qbText(mg.qb_change) }) : null,
         h('div', { class: 'pbar', role: 'img', 'aria-hidden': 'true' },
-          h('i', { class: 'mk', style: markVars(byTeam[g.away].color) + ';width:' + (away * 100).toFixed(1) + '%' }),
-          h('i', { class: 'mk', style: markVars(byTeam[g.home].color) + ';width:' + (home * 100).toFixed(1) + '%' })),
+          h('i', { style: 'width:' + (away * 100).toFixed(1) + '%' }),
+          h('i', { style: 'width:' + (home * 100).toFixed(1) + '%' })),
         h('div', { class: 'plabels' },
           h('span', {}, g.away + ' ', h('b', { text: pct(away) })),
           h('span', {}, h('b', { text: pct(home) }), ' ' + g.home)),
@@ -622,8 +595,9 @@
     after.parentNode.insertBefore(sec, after.nextSibling);
     var navAfter = document.querySelector('.nav-links a[href="#' + afterId + '"]');
     if (navAfter) navAfter.parentNode.parentNode.insertBefore(h('li', {}, h('a', { href: '#' + sec.id, text: navText })), navAfter.parentNode.nextSibling);
+    N.initSlabs();
     document.querySelectorAll('main > .sec .kicker').forEach(function (k, i) {
-      k.textContent = (i < 9 ? '0' : '') + (i + 1) + ' / ' + k.textContent.replace(/^\d+\s*\/\s*/, '');
+      k.textContent = '[' + (i < 9 ? '0' : '') + (i + 1) + '] ' + k.textContent.replace(/^\[\d+\]\s*/, '');
     });
   }
 
@@ -869,7 +843,6 @@
       body.removeAttribute('aria-busy');
       var pts = t.s.map(function (s, i) { return { x: s + (t.w[i] - 1) / 19, y: t.r[i], s: s, w: t.w[i], i: i }; });
       var host = h('div', { class: 'chart' });
-      var style = markVars(t.color);
       var bestIdx = lastIndexOfSeason(t, t.best.season), worstIdx = lastIndexOfSeason(t, t.worst.season);
       var left = h('div', {}), split = h('div', { class: 'split' }, left);
       left.appendChild(well(host));
@@ -877,7 +850,7 @@
       setHeadline('explorer-h', D.headlines.explorer[code]);
       watch(host, function () {
         lineChart(host, {
-          series: [{ id: code, label: t.name, cls: 'mk', style: style, pts: pts }],
+          series: [{ id: code, label: t.name, cls: 's1', pts: pts }],
           x: [1970, xMax], y: [yLo, yHi],
           height: function (w) { return w < 560 ? 280 : w > 900 ? 460 : 380; },
           xTicks: YEAR_TICKS, yTicks: ticksFor(yLo, yHi, 6),
@@ -885,12 +858,12 @@
           ref: { y: 1500, label: '1500 average' },
           aria: t.name + ' Elo rating by game week since ' + t.first_season + '. Best season ' + t.best.season + ' at ' + f1(t.best.rating) + ', worst ' + t.worst.season + ' at ' + f1(t.worst.rating) + '. Focus the chart and use the arrow keys to read values.',
           markers: [
-            { x: pts[bestIdx].x, y: pts[bestIdx].y, cls: 'mk', style: style, text: 'Best ' + t.best.season, dy: -12 },
-            { x: pts[worstIdx].x, y: pts[worstIdx].y, cls: 'mk', style: style, text: 'Worst ' + t.worst.season, dy: 20 }
+            { x: pts[bestIdx].x, y: pts[bestIdx].y, cls: 's1', text: 'Best ' + t.best.season, dy: -12 },
+            { x: pts[worstIdx].x, y: pts[worstIdx].y, cls: 's1', text: 'Worst ' + t.worst.season, dy: 20 }
           ],
           tip: function (x, rows) {
             var p = rows[0].p;
-            return { title: p.s + ' Week ' + p.w, rows: [{ value: f1(p.y), label: signed(p.y - 1500) + ' vs 1500', cls: 'mk', style: style }] };
+            return { title: p.s + ' Week ' + p.w, rows: [{ value: f1(p.y), label: signed(p.y - 1500) + ' vs 1500', cls: 's1' }] };
           }
         });
       });
@@ -985,7 +958,7 @@
         var t = byTeam[r.team], w = Math.min(50, Math.abs(r.luck) / R * 50);
         var item = h('li', { class: 'lk-row', tabindex: 0, 'aria-label': t.name + ': ' + r.actual + ' wins, ' + f1(r.expected) + ' expected, luck ' + signed(r.luck) },
           h('span', { class: 'abbr', text: r.team }),
-          h('span', { class: 'bar' }, h('span', { class: 'fill mk ' + (r.luck >= 0 ? 'pos' : 'neg'), style: markVars(t.color) + ';' + (r.luck >= 0 ? 'left:50%' : 'left:' + (50 - w) + '%') + ';width:' + w + '%' })),
+          h('span', { class: 'bar' }, h('span', { class: 'fill ' + (r.luck >= 0 ? 'pos' : 'neg'), style: (r.luck >= 0 ? 'left:50%' : 'left:' + (50 - w) + '%') + ';width:' + w + '%' })),
           h('span', { class: 'val', text: signed(r.luck) }));
         bindTip(item, function () {
           return { title: t.name + ', ' + plural(r.games, 'game', 'games'), rows: [
@@ -1007,19 +980,28 @@
 
   // ------------------------------------------------------------------ history: tapestry + parity
 
-  function heatFill(v) {
-    var dev = (v - 1500) / 250, a = Math.min(1, Math.abs(dev)), p = Math.round(Math.pow(a, 0.8) * 100);
-    return 'color-mix(in oklab, var(--h-mid) ' + (100 - p) + '%, var(' + (dev >= 0 ? '--h-pos' : '--h-neg') + ') ' + p + '%)';
-  }
+  // Seven discrete bins, tokens only. Below 1500: ink, muted, line. Near 1500: canvas. Above: tint, secondary, primary.
+  // Lightness steps the same way on both sides, so the scale reads without color.
+  var HEAT = [
+    { max: 1350, fill: 'var(--ink)', label: 'Below 1350' },
+    { max: 1425, fill: 'var(--muted)', label: '1350 to 1425' },
+    { max: 1475, fill: 'var(--line)', label: '1425 to 1475' },
+    { max: 1525, fill: 'var(--canvas)', label: '1475 to 1525' },
+    { max: 1575, fill: 'var(--pri-tint)', label: '1525 to 1575' },
+    { max: 1650, fill: 'var(--secondary)', label: '1575 to 1650' },
+    { max: Infinity, fill: 'var(--primary)', label: 'Above 1650' }
+  ];
+  function heatBin(v) { for (var i = 0; i < HEAT.length; i++) if (v < HEAT[i].max) return HEAT[i]; return HEAT[HEAT.length - 1]; }
+  function heatFill(v) { return heatBin(v).fill; }
 
   function renderHistory() {
     var body = $('#history-body'), T = D.tapestry;
     clear(body);
     body.removeAttribute('aria-busy');
 
-    var scale = h('div', { class: 'scale', 'aria-label': 'Color scale: red below 1500, gray at 1500, blue above' }, h('span', { text: 'Rating' }));
-    [1250, 1350, 1500, 1650, 1750].forEach(function (v) {
-      scale.appendChild(h('span', { class: 'sw' }, h('i', { style: 'background:' + heatFill(v) }), String(v)));
+    var scale = h('div', { class: 'scale', 'aria-label': 'Color scale in seven steps: dark gray below 1350, lighter gray to 1475, white from 1475 to 1525, then pink, orange and red above 1525' }, h('span', { text: 'Rating' }));
+    HEAT.forEach(function (b) {
+      scale.appendChild(h('span', { class: 'sw' }, h('i', { style: 'background:' + b.fill }), b.label));
     });
     var wrap = h('div', { class: 'heat-wrap' });
     var heat = h('div', { class: 'heat' });

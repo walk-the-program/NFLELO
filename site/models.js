@@ -164,7 +164,7 @@
         sv('line', { class: 'wh ' + r.series, x1: sx(r.whisker_low), x2: sx(r.whisker_low), y1: cy - 6, y2: cy + 6 }, g);
         sv('line', { class: 'wh ' + r.series, x1: sx(r.whisker_high), x2: sx(r.whisker_high), y1: cy - 6, y2: cy + 6 }, g);
       }
-      sv('circle', { class: 'dot ' + r.series, cx: sx(r.brier), cy: cy, r: 7 }, g);
+      N.mark(g, r.series, sx(r.brier), cy, 7);
       bindTip(g, function () {
         var rowsT = [{ value: r.brier.toFixed(4), label: 'Brier score', cls: r.series }, { value: r.logloss.toFixed(4), label: 'Log loss' }];
         if (r.gap != null) rowsT.push({ value: signed(r.gap, 4), label: 'gap to the game model, 95% interval ' + signed(r.gap_ci_low, 4) + ' to ' + signed(r.gap_ci_high, 4) });

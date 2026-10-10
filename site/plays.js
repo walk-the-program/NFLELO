@@ -101,7 +101,7 @@
     var input = h('input', { type: 'range', min: 0, max: yls.length - 1, step: 1, value: yls.indexOf(S.yl), 'aria-label': 'Field position' });
     input.addEventListener('input', function () { S.yl = yls[Number(input.value)]; update(); });
     ui.slider = input;
-    ui.range = h('div', { class: 'sf-range single' }, h('div', { class: 'sf-range__track' }), h('div', { class: 'sf-range__fill' }), input);
+    ui.range = h('div', { class: 'b-range single' }, h('div', { class: 'b-range__track' }), h('div', { class: 'b-range__fill' }), input);
     var ticks = h('div', { class: 'ticks', 'aria-hidden': 'true' }, yls.map(function (y, i) { return h('span', { style: '--i:' + i, text: N.fieldLabel(y).replace('midfield', '50') }); }));
 
     ui.fieldVal = h('span', { class: 'val' });
@@ -133,7 +133,7 @@
       ui.title, ui.sub, ui.thin, well(ui.chart), ui.bigs, ui.tv.el,
       h('p', { class: 'held', text: heldText(false) + ' Result probabilities are model estimates for the snap, not promises.' }));
 
-    body.appendChild(h('div', { class: 'console sf-glass' }, controls, out));
+    body.appendChild(h('div', { class: 'console' }, controls, out));
     watch(ui.chart, function () { drawChart(); });
     update();
   }
@@ -266,10 +266,10 @@
       var p = binP(c, k);
       if (p > modalP) { modalP = p; modal = k; }
       if (p <= 0) continue;
-      sv('rect', { class: 'yb', x: sx(k) + 0.5, y: sy(p), width: Math.max(1.5, bw - 1), height: Math.max(1, m.t + ih - sy(p)), rx: Math.min(2, bw / 2) }, svg);
+      sv('rect', { class: 'yb', x: sx(k) + 0.5, y: sy(p), width: Math.max(1.5, bw - 1), height: Math.max(1, m.t + ih - sy(p)) }, svg);
     }
-    sv('rect', { class: 'yb', x: sx(SLOT_TD) + 1, y: sy(c.p_td), width: Math.max(2, bw - 2), height: Math.max(1, m.t + ih - sy(c.p_td)), rx: 2 }, svg);
-    sv('rect', { class: 'yb tov', x: sx(SLOT_TOV) + 1.5, y: sy(c.p_turnover), width: Math.max(2, bw - 3), height: Math.max(1, m.t + ih - sy(c.p_turnover)), rx: 2 }, svg);
+    sv('rect', { class: 'yb', x: sx(SLOT_TD) + 1, y: sy(c.p_td), width: Math.max(2, bw - 2), height: Math.max(1, m.t + ih - sy(c.p_td))}, svg);
+    sv('rect', { class: 'yb tov', x: sx(SLOT_TOV) + 1.5, y: sy(c.p_turnover), width: Math.max(2, bw - 3), height: Math.max(1, m.t + ih - sy(c.p_turnover))}, svg);
 
     // pinned outline: a stepped line over the yard bars, rectangles for TD and turnover
     if (pc) {
@@ -279,8 +279,8 @@
         d += (j === 0 ? 'M' : 'L') + x0 + ',' + y + ' L' + x1 + ',' + y + ' ';
       }
       sv('path', { d: d, fill: 'none', stroke: 'var(--ink)', 'stroke-width': 1.6, 'stroke-linejoin': 'round' }, svg);
-      sv('rect', { class: 'yb pin', x: sx(SLOT_TD) + 1, y: sy(pc.p_td), width: Math.max(2, bw - 2), height: Math.max(1, m.t + ih - sy(pc.p_td)), rx: 2 }, svg);
-      sv('rect', { class: 'yb pin', x: sx(SLOT_TOV) + 1.5, y: sy(pc.p_turnover), width: Math.max(2, bw - 3), height: Math.max(1, m.t + ih - sy(pc.p_turnover)), rx: 2, 'stroke-dasharray': '3 2' }, svg);
+      sv('rect', { class: 'yb pin', x: sx(SLOT_TD) + 1, y: sy(pc.p_td), width: Math.max(2, bw - 2), height: Math.max(1, m.t + ih - sy(pc.p_td))}, svg);
+      sv('rect', { class: 'yb pin', x: sx(SLOT_TOV) + 1.5, y: sy(pc.p_turnover), width: Math.max(2, bw - 3), height: Math.max(1, m.t + ih - sy(pc.p_turnover)), 'stroke-dasharray': '3 2' }, svg);
     }
 
     // axis labels
@@ -289,8 +289,8 @@
       sv('text', { class: 'tick a-mid', x: sx(t[0]) + bw / 2, y: m.t + ih + 16, text: t[1] }, svg);
     });
     sv('text', { class: 'tick a-end', x: sx(52), y: m.t + ih + 16, text: '41+' }, svg);
-    sv('text', { class: 'tick a-start', x: sx(SLOT_TD) + 1, y: m.t + ih + 16, text: 'TD', style: 'fill:var(--ink-2);font-weight:700' }, svg);
-    sv('text', { class: 'tick a-end', x: sx(SLOT_TOV + 1), y: m.t + ih + (narrow ? 50 : 32), text: 'Turnover (separate model)', style: 'fill:var(--ink-2);font-weight:700' }, svg);
+    sv('text', { class: 'tick a-start', x: sx(SLOT_TD) + 1, y: m.t + ih + 16, text: 'TD', style: 'fill:var(--ink);font-weight:700' }, svg);
+    sv('text', { class: 'tick a-end', x: sx(SLOT_TOV + 1), y: m.t + ih + (narrow ? 50 : 32), text: 'Turnover (separate model)', style: 'fill:var(--ink);font-weight:700' }, svg);
     sv('text', { class: 'tick a-start', x: m.l, y: m.t + ih + 32, text: 'Yards gained on the snap' }, svg);
 
     // direct labels: the most likely yard result, the touchdown and the turnover
@@ -303,7 +303,7 @@
     vlabel(SLOT_TOV, c.p_turnover, 'end');
 
     // cursor
-    var cursor = sv('rect', { class: 'cursor-bar', x: 0, y: m.t, width: bw, height: ih, rx: 2, visibility: 'hidden' }, svg);
+    var cursor = sv('rect', { class: 'cursor-bar', x: 0, y: m.t, width: bw, height: ih, visibility: 'hidden' }, svg);
     function showSlot(slot, cx, cy) {
       var name = slotName(c, slot);
       if (name == null) { cursor.setAttribute('visibility', 'hidden'); tipHide(); return; }

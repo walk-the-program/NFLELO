@@ -3,52 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#222a33" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#e6ebf0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f9f5f5">
 <title>NFLELO: the models and their receipts</title>
 <meta name="description" content="Every NFLELO model and its result on seasons it never saw, failures included, with the public commits that show the rules came first.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="soft-form.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="brand.css">
 <link rel="stylesheet" href="styles.css">
-<script src="theme.js"></script>
 <script src="common.js" defer></script>
 <script src="models.js" defer></script>
 </head>
-<body>
+<body class="pg-models">
 <a class="skip" href="#scoreboard">Skip to the scoreboard</a>
 
-<nav class="nav sf-glass" aria-label="Sections">
-  <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFL<span>ELO</span></a>
+<nav class="nav" aria-label="Sections">
+  <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFLELO</a>
+  <span class="nav-tag">Machine Learning applied to Football</span>
   <ul class="nav-links">
     <li><a href="#scoreboard">Scoreboard</a></li>
     <li><a href="#holdout">Game model</a></li>
     <li><a href="#evidence">Evidence</a></li>
     <li><a href="#receipts">Receipts</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
-    <li><a href="plays.html">Plays</a></li>
-    <li><a href="winprob.html">Win prob</a></li>
-    <li><a href="fourth.html">Fourth down</a></li>
-    <li><a href="playcalling.html">Play calling</a></li>
-    <li><a href="index.html">Ratings</a></li>
+    <li><a href="index.html"><span class="n">[01]</span> Ratings</a></li>
+    <li><a href="plays.html"><span class="n">[02]</span> Plays</a></li>
+    <li><a href="winprob.html"><span class="n">[03]</span> Win prob</a></li>
+    <li><a href="fourth.html"><span class="n">[04]</span> Fourth down</a></li>
+    <li><a href="playcalling.html"><span class="n">[05]</span> Play calling</a></li>
   </ul>
-  <div class="sf-segment theme" role="group" aria-label="Theme">
-    <button type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
-    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
-    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
-  </div>
 </nav>
 
 <header class="hero page" id="top">
   <div class="wrap">
-    <section class="hero-panel sf-glass" aria-labelledby="page-title">
-      <p class="page-kicker">NFLELO / Models</p>
-      <h1 class="page-title" id="page-title">The models and their receipts</h1>
+    <div class="splash splash-hero sm" aria-hidden="true"></div>
+    <section class="hero-panel" aria-labelledby="page-title">
+      <p class="page-kicker">NFLELO &rarr; Models</p>
+      <p class="tagline">Machine Learning applied to Football</p>
+      <h1 class="page-title long" id="page-title">The models and their <span class="hl">receipts</span></h1>
       <p class="hero-line" id="hero-line">Loading results</p>
       <p class="hero-deck" id="hero-deck">Every model was built on earlier seasons, then scored once on 2020 to 2025 under rules committed to a public repository first. Failures are listed with the passes.</p>
+      <p class="cta"><a class="b-primary" href="#scoreboard">See the scoreboard <span aria-hidden="true">&darr;</span></a></p>
       <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
     </section>
   </div>
@@ -57,17 +53,17 @@
 <main>
   <section class="sec" id="scoreboard" aria-labelledby="scoreboard-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">01 / Scoreboard</p>
+    <p class="kicker">[01] Scoreboard</p>
     <h2 class="headline" id="scoreboard-h">Scoreboard</h2>
     <p class="deck">One card per model: what it does, the number it was judged on, and links to the method and the commits. Lower is better unless a card says otherwise.</p>
-    <div class="sf-segment seg" id="model-filters" role="group" aria-label="Filter the models"></div>
+    <div class="b-seg seg" id="model-filters" role="group" aria-label="Filter the models"></div>
     <div id="scoreboard-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>
 
   <section class="sec" id="holdout" aria-labelledby="holdout-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">02 / Game model</p>
+    <p class="kicker">[02] Game model</p>
     <h2 class="headline" id="holdout-h">Game model on the locked seasons</h2>
     <p class="deck">The one game-prediction run on 2020 to 2025: Elo, the NFLELO game model, and the Vegas market as a benchmark. The market is never an input to our models.</p>
     <div id="holdout-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -76,7 +72,7 @@
 
   <section class="sec" id="evidence" aria-labelledby="evidence-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">03 / Evidence</p>
+    <p class="kicker">[03] Evidence</p>
     <h2 class="headline" id="evidence-h">What the evidence says</h2>
     <p class="deck">Five things the results add up to, in plain terms.</p>
     <div id="evidence-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -85,7 +81,7 @@
 
   <section class="sec" id="receipts" aria-labelledby="receipts-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">04 / Receipts</p>
+    <p class="kicker">[04] Receipts</p>
     <h2 class="headline" id="receipts-h">How the receipts work</h2>
     <p class="deck">A good result means little if the rules were chosen after the answer was known. Here is how that is ruled out.</p>
     <div id="receipts-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -94,6 +90,7 @@
 </main>
 
 <footer class="foot wrap">
+  <p class="motto">Nothing hidden. Nothing soft.</p>
   <p id="credit">Data: nflverse (CC BY 4.0); 1970-1998 results: FiveThirtyEight (CC BY 4.0).</p>
   <p>Independent project, not affiliated with the NFL or any team.</p>
   <p><a href="index.html">Ratings and the weekly ladder</a></p>

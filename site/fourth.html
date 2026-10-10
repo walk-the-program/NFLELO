@@ -3,49 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#222a33" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#e6ebf0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f9f5f5">
 <title>NFLELO: fourth downs</title>
 <meta name="description" content="A model-estimated fourth-down decision map (go, field goal or punt) and how 2026 teams compare, with the status of its forward test.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="soft-form.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="brand.css">
 <link rel="stylesheet" href="styles.css">
-<script src="theme.js"></script>
 <script src="common.js" defer></script>
 <script src="fourth.js" defer></script>
 </head>
 <body class="mp mp-fourth">
 <a class="skip" href="#status">Skip to the status notice</a>
 
-<nav class="nav sf-glass" aria-label="Sections">
-  <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFL<span>ELO</span></a>
+<nav class="nav" aria-label="Sections">
+  <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFLELO</a>
+  <span class="nav-tag">Machine Learning applied to Football</span>
   <ul class="nav-links">
-    <li><a href="index.html">Ratings</a></li>
+    <li><a href="index.html"><span class="n">[01]</span> Ratings</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
-    <li><a href="plays.html">Plays</a></li>
-    <li><a href="winprob.html">Win prob</a></li>
-    <li><a href="fourth.html" aria-current="page">Fourth down</a></li>
-    <li><a href="playcalling.html">Play calling</a></li>
-    <li><a href="models.html">Receipts</a></li>
+    <li><a href="plays.html"><span class="n">[02]</span> Plays</a></li>
+    <li><a href="winprob.html"><span class="n">[03]</span> Win prob</a></li>
+    <li><a href="fourth.html" aria-current="page"><span class="n">[04]</span> Fourth down</a></li>
+    <li><a href="playcalling.html"><span class="n">[05]</span> Play calling</a></li>
+    <li><a href="models.html"><span class="n">[06]</span> Receipts</a></li>
   </ul>
-  <div class="sf-segment theme" role="group" aria-label="Theme">
-    <button type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
-    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
-    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
-  </div>
 </nav>
 
 <header class="hero page" id="top">
   <div class="wrap">
-    <section class="hero-panel sf-glass" aria-labelledby="page-title">
-      <p class="page-kicker">NFLELO / Models / Fourth downs <span class="lic" id="lic"></span></p>
-      <h1 class="page-title" id="page-title">Fourth downs</h1>
+    <div class="splash splash-hero sm" aria-hidden="true"></div>
+    <section class="hero-panel" aria-labelledby="page-title">
+      <p class="page-kicker">NFLELO &rarr; Models &rarr; Fourth downs <span class="lic" id="lic"></span></p>
+      <p class="tagline">Machine Learning applied to Football</p>
+      <h1 class="page-title" id="page-title">Fourth <span class="hl">downs</span></h1>
       <p class="hero-line" id="hero-line">Loading results</p>
       <p class="hero-deck" id="hero-deck">For each yard line and distance, which option gives the team the best chance to win: go for it, kick the field goal, or punt. Every number on this page is model-estimated.</p>
+      <p class="cta"><a class="b-primary" href="#chart">Open the decision chart <span aria-hidden="true">&darr;</span></a></p>
       <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
     </section>
   </div>
@@ -57,15 +53,15 @@
   </section>
   <section class="sec" id="chart" aria-labelledby="chart-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">01 / Decision chart</p>
+    <p class="kicker">[01] Decision chart</p>
     <h2 class="headline" id="chart-h">Decision chart</h2>
-    <p class="deck">Pick a game state. Each square is one yard line and distance, colored by the best option; faint squares are close calls. Point estimates, no uncertainty band.</p>
+    <p class="deck">Pick a game state. Each square is one yard line and distance, colored by the best option; pale squares are close calls. Point estimates, no uncertainty band.</p>
     <div id="chart-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>
   <section class="sec" id="ytd" aria-labelledby="ytd-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">02 / 2026 so far</p>
+    <p class="kicker">[02] 2026 so far</p>
     <h2 class="headline" id="ytd-h">2026 so far</h2>
     <p class="deck">Each completed fourth down this season, compared with what the model would have chosen. Model-estimated: the option not chosen is never observed.</p>
     <div id="ytd-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -73,7 +69,7 @@
   </section>
   <section class="sec" id="how" aria-labelledby="how-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">03 / How this works</p>
+    <p class="kicker">[03] How this works</p>
     <h2 class="headline" id="how-h">How this works</h2>
     <div class="method how">
       <div>
@@ -97,6 +93,7 @@
 </main>
 
 <footer class="foot wrap">
+  <p class="motto">Nothing hidden. Nothing soft.</p>
   <p id="credit">Data: nflverse (CC BY 4.0).</p>
   <p>Independent project, not affiliated with the NFL or any team.</p>
   <p><a href="index.html">Ratings and the weekly ladder</a></p>

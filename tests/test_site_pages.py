@@ -64,3 +64,22 @@ def test_no_dashes_or_betting_words_in_page_copy(page):
     lowered = re.sub(r"[^a-z ]", " ", text.lower())
     for word in ("sportsbook", "parlay", "wager", "units"):
         assert word not in lowered.split(), word
+
+
+@pytest.mark.parametrize("page", PAGES)
+def test_brand_stylesheet_and_no_retired_theme_code(page):
+    """Soft Form and the dark theme are retired: every page links brand.css, and no page loads theme.js or soft-form.css."""
+    html = read(f"{page}.html")
+    assert 'href="brand.css"' in html and 'href="styles.css"' in html
+    assert "soft-form" not in html and "theme.js" not in html and "data-theme-choice" not in html
+    assert not (SITE / "soft-form.css").exists() and not (SITE / "theme.js").exists()
+
+
+@pytest.mark.parametrize("page", PAGES)
+def test_one_primary_action_per_page(page):
+    assert read(f"{page}.html").count('class="b-primary"') == 1
+
+
+def test_no_hex_colors_outside_the_brand_tokens():
+    for name in ("styles.css", "common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
+        assert not re.search(r"#[0-9a-fA-F]{3,8}\b", read(name)), name

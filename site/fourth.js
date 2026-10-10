@@ -88,7 +88,7 @@
     var SHORT = { tied_q2: 'Tied, Q2', down4_early_q4: 'Down 4, early Q4', up3_late_q4: 'Up 3, late Q4' };
     ui.preset = N.seg('Game state', C.presets.map(function (p) { return { value: p.key, label: SHORT[p.key] || p.label, title: p.label + ' (' + p.state.averaged_over + ')' }; }),
       presetKey, function (v) { presetKey = v; drawHeat(); ui.tv.refresh(); updateState(); });
-        var sw = h('input', { type: 'checkbox', class: 'sf-switch', id: 'mark-toss', role: 'switch' });
+        var sw = h('input', { type: 'checkbox', class: 'b-switch', id: 'mark-toss', role: 'switch' });
     sw.addEventListener('change', function () { marks = sw.checked; if (ui.svg) ui.svg.classList.toggle('tossups', marks); });
     ui.state = h('p', { class: 'fnote', style: 'margin-top:12px' });
     ui.detail = h('div', { class: 'pdetail fx-detail', 'aria-live': 'polite', text: 'Move over a square, tap one, or use the arrow keys on the chart to read its numbers.' });
@@ -105,17 +105,17 @@
       });
     body.appendChild(h('div', { class: 'fx-bar' },
       h('div', {}, h('p', { class: 'label', style: 'margin-bottom:8px', text: 'Game state' }), ui.preset.el),
-      h('label', { class: 'sf-toggleline', for: 'mark-toss', style: 'gap:14px;flex-direction:row-reverse;justify-content:flex-end' }, h('span', { text: 'Mark toss-ups with a dot' }), sw)));
+      h('label', { class: 'b-toggle', for: 'mark-toss', style: 'flex-direction:row-reverse;justify-content:flex-end' }, h('span', { text: 'Mark toss-ups with a dot' }), sw)));
     body.appendChild(ui.state);
-    body.appendChild(h('p', { class: 'fnote' }, me(), ' ' + C.label + '. Squares are colored by the best option; the fainter the square, the closer the call. Held fixed: ' + C.as_of.replace(/^week \d+ of \d+: /, '') + '.'));
+    body.appendChild(h('p', { class: 'fnote' }, me(), ' ' + C.label + '. Squares are colored by the best option: a pale square is a toss-up, an outlined square a lean, a solid square a clear call. Held fixed: ' + C.as_of.replace(/^week \d+ of \d+: /, '') + '.'));
     body.appendChild(h('div', { style: 'margin-top:14px' },
       h('div', { class: 'scale', style: 'margin:0 0 14px' },
         h('span', { class: 'sw' }, h('i', { class: 'sw-go' }), 'Go for it'),
         h('span', { class: 'sw' }, h('i', { class: 'sw-fg' }), 'Field goal'),
         h('span', { class: 'sw' }, h('i', { class: 'sw-punt' }), 'Punt'),
         h('span', { class: 'sw' }, 'Margin over the second best:',
-          h('span', { class: 'ramp', 'aria-hidden': 'true' }, [0.3, 0.55, 0.8, 1].map(function (k) { return h('i', { style: '--k:' + Math.round(k * 55) + '%' }); })),
-          'under 0.02 (toss-up) to 0.10 or more'))));
+          h('span', { class: 'steps', 'aria-hidden': 'true' }, h('i', { class: 's0' }), h('i', { class: 's1' }), h('i', { class: 's2' })),
+          'pale = toss-up (under 0.02), outlined = lean (to 0.04), solid = clear'))));
     body.appendChild(well(ui.heat));
     body.appendChild(ui.detail);
     body.appendChild(ui.tv.el);
@@ -150,17 +150,17 @@
     var rects = {};
     for (var i = 0; i < q.n; i++) {
       var yl = p.yardline_100[i], dd = p.ydstogo[i];
-      var k = Math.round(40 + 55 * Math.min(p.margin[i] / 0.1, 1));
-      var r = sv('rect', { class: 'hc c-' + p.best[i], x: cx(yl) + 0.3, y: cy(dd) + 0.3, width: Math.max(1, cw - 0.6), height: ch - 0.6, rx: 1.5, style: '--k:' + (k / 100) }, svg);
+      var lv = p.close_call[i] ? 0 : p.margin[i] < 0.04 ? 1 : 2;   // three discrete steps: toss-up, lean, clear
+      var r = sv('rect', { class: 'hc c-' + p.best[i] + ' lv-' + lv, x: cx(yl) + 0.3, y: cy(dd) + 0.3, width: Math.max(1, cw - 0.6), height: ch - 0.6 }, svg);
       rects[yl + '|' + dd] = r;
       if (p.close_call[i]) sv('circle', { class: 'tm', cx: cx(yl) + cw / 2, cy: cy(dd) + ch / 2, r: Math.max(1.3, Math.min(cw / 3.2, 3)) }, svg);
     }
     [90, 80, 70, 60, 50, 40, 30, 20, 10].forEach(function (yl) {
       sv('text', { class: 'tick a-mid', x: cx(yl) + cw / 2, y: m.t + 10 * ch + 16, text: N.fieldLabel(yl).replace('midfield', '50') }, svg);
     });
-    sv('text', { class: 'tick a-start', x: m.l, y: Ht - 10, text: 'Own goal line', style: 'fill:var(--ink-3)' }, svg);
-    sv('text', { class: 'tick a-end', x: Wd - m.r, y: Ht - 10, text: 'Opponent\'s goal line', style: 'fill:var(--ink-3)' }, svg);
-    sv('text', { class: 'tick a-mid', x: m.l + iw / 2, y: Ht - 10, text: 'Field position (yards from the goal line the offense is attacking)', style: 'fill:var(--ink-3)' }, svg);
+    sv('text', { class: 'tick a-start', x: m.l, y: Ht - 10, text: 'Own goal line', style: 'fill:var(--muted)' }, svg);
+    sv('text', { class: 'tick a-end', x: Wd - m.r, y: Ht - 10, text: 'Opponent\'s goal line', style: 'fill:var(--muted)' }, svg);
+    sv('text', { class: 'tick a-mid', x: m.l + iw / 2, y: Ht - 10, text: 'Field position (yards from the goal line the offense is attacking)', style: 'fill:var(--muted)' }, svg);
 
     var sel = null;
     function mark(yl, dd) {

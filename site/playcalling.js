@@ -111,8 +111,8 @@
     body.appendChild(h('div', { class: 'legend', style: 'margin-top:20px;margin-bottom:0' },
       h('span', {}, h('i', { class: 'sc pass' }), 'Clear best is a pass'),
       h('span', {}, h('i', { class: 'sc run' }), 'Clear best is a run'),
-      h('span', {}, h('i', { class: 'sc', style: 'border:1px dashed var(--rule-strong)' }), 'No clear best: the data cannot rank the actions'),
-      h('span', { text: 'Deeper color means a larger estimated gain' })));
+      h('span', {}, h('i', { class: 'sc none' }), 'No clear best: the data cannot rank the actions'),
+      h('span', {}, h('i', { class: 'sc pass t0' }), h('i', { class: 'sc pass t1' }), h('i', { class: 'sc pass' }), 'Gain: pale under 0.07, outlined to 0.14, solid above (EPA per play)')));
     body.appendChild(ui.grid);
     body.appendChild(ui.detail);
     body.appendChild(h('p', { class: 'fnote', text: 'Gain is expected points added per play against the teams\' current mix on the same plays. A situation is "clear best" only when the best action\'s 95% interval is above zero. "No clear best" is not evidence that the actions are equal. Recommendations for a season use earlier seasons only.' }));
@@ -135,10 +135,10 @@
       ZONES.forEach(function (z) {
         var c = cellOf(d[0], z[0], score), b = c.by_season[season];
         var on = selCell.dd === d[0] && selCell.zone === z[0];
-        var cls, k = '';
-        if (b.clear) { cls = /_pass$/.test(b.best) ? 'pass' : 'run'; k = '--k:' + (0.22 + 0.4 * Math.min(Math.max(b.gain, 0) / 0.2, 1)).toFixed(2); }
+        var cls, tier = '';
+        if (b.clear) { cls = /_pass$/.test(b.best) ? 'pass' : 'run'; tier = ' t' + (b.gain < 0.07 ? 0 : b.gain < 0.14 ? 1 : 2); }   // gain in three discrete steps
         else cls = 'none';
-        var btn = h('button', { type: 'button', class: 'pcell k-' + cls, style: k, 'aria-pressed': on ? 'true' : 'false',
+        var btn = h('button', { type: 'button', class: 'pcell k-' + cls + tier, 'aria-pressed': on ? 'true' : 'false',
           'aria-label': d[1] + ', ' + z[1] + ': ' + (b.clear ? actName(b.best) + ', gain ' + epa(b.gain) + ' EPA per play' : 'no clear best') },
           b.clear ? [h('span', { class: 'pa', text: actName(b.best) }), h('span', { class: 'pg2' }, epa(b.gain), h('small', { text: 'EPA per play' }))]
                   : [h('span', { class: 'pa', text: 'No clear best' }), h('span', { class: 'pn', text: 'n ' + commas(b.n_train_plays) })]);

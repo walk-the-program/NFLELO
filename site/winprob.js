@@ -145,7 +145,7 @@
     });
     [900, 1800, 2700].forEach(function (t) { sv('line', { class: t === 1800 ? 'wp-half' : 'wp-q', x1: sx(t), x2: sx(t), y1: m.t, y2: m.t + ih }, svg); });
     ['Q1', 'Q2', 'Q3', 'Q4'].forEach(function (q, i) { sv('text', { class: 'tick a-mid', x: sx(i * 900 + 450), y: Ht - 18, text: q }, svg); });
-    sv('text', { class: 'tick a-mid', x: m.l + iw / 2, y: Ht - 3, text: 'Regulation game time', style: 'fill:var(--ink-3)' }, svg);
+    sv('text', { class: 'tick a-mid', x: m.l + iw / 2, y: Ht - 3, text: 'Regulation game time', style: 'fill:var(--muted)' }, svg);
     sv('text', { class: 'wp-side', x: m.l + 8, y: m.t + 16, text: g.home + ' win' }, svg);
     sv('text', { class: 'wp-side', x: m.l + 8, y: m.t + ih - 8, text: g.away + ' win' }, svg);
 
@@ -158,20 +158,20 @@
     var bi = 0, bd = -1;
     for (i = 0; i < g.wp.length - 1; i++) { var dd = Math.abs(g.wp[i + 1] - g.wp[i]); if (dd > bd) { bd = dd; bi = i; } }
     var bx = sx(g.t[bi + 1]), by = sy(g.wp[bi + 1]);
-    sv('line', { x1: sx(g.t[bi]), y1: sy(g.wp[bi]), x2: bx, y2: by, stroke: 'var(--ink)', 'stroke-width': 3.5, 'stroke-linecap': 'round' }, svg);
+    sv('line', { x1: sx(g.t[bi]), y1: sy(g.wp[bi]), x2: bx, y2: by, stroke: 'var(--ink)', 'stroke-width': 3.5, 'stroke-linecap': 'butt' }, svg);
     sv('circle', { class: 'wp-swing', cx: bx, cy: by, r: 7 }, svg);
     var above = g.wp[bi + 1] < 0.7, anchorEnd = bx > Wd - 130, anchorStart = bx < m.l + 70;
     sv('text', { class: 'tick halo', x: bx + (anchorEnd ? -12 : anchorStart ? 12 : 0), y: above ? by - 14 : by + 22, 'text-anchor': anchorEnd ? 'end' : anchorStart ? 'start' : 'middle', text: 'Biggest swing', style: 'fill:var(--ink);font-weight:700' }, svg);
     var end = g.wp.length - 1;
-    sv('circle', { class: 'dot s3', cx: sx(g.t[end]), cy: sy(g.wp[end]), r: 5 }, svg);
+    N.mark(svg, 's3', sx(g.t[end]), sy(g.wp[end]), 6);
 
     var cross = sv('line', { class: 'cross', x1: 0, x2: 0, y1: m.t, y2: m.t + ih, visibility: 'hidden' }, svg);
-    var dot = sv('circle', { class: 'dot s3', cx: 0, cy: 0, r: 6, visibility: 'hidden' }, svg);
+    var dot = N.mark(svg, 's3', 0, 0, 7); dot.setAttribute('visibility', 'hidden');
     function showIdx(k, cx, cy) {
       cursorIdx = k;
       var x = sx(g.t[k]);
       cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.setAttribute('visibility', 'visible');
-      dot.setAttribute('cx', x); dot.setAttribute('cy', sy(g.wp[k])); dot.setAttribute('visibility', 'visible');
+      N.moveMark(dot, x, sy(g.wp[k])); dot.setAttribute('visibility', 'visible');
       var rows = [{ value: pct(g.wp[k]), label: g.home + ' win', cls: 's3' }, { value: pct(1 - g.wp[k]), label: g.away + ' win' }];
       if (k === bi) rows.push({ value: '', label: 'Biggest swing starts here: ' + g.swing.desc });
       else if (k === bi + 1) rows.push({ value: '', label: 'After the biggest swing (' + g.swing.clock + ')' });

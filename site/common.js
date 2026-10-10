@@ -55,8 +55,40 @@
 
   function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
 
-  // Chart area: a recessed well around a chart host (the host keeps its own width for drawing).
+  // Chart area: a bordered well around a chart host (the host keeps its own width for drawing).
   function well(host) { return h('div', { class: 'well' }, host); }
+
+
+  // ------------------------------------------------------------------ series marks
+  // One shape per series so color is never the only cue: Elo circle, Model square, Vegas triangle, third series diamond.
+  var SHAPE = { s1: 'circle', s3: 'square', s2: 'triangle', sm: 'diamond' };
+  function markPath(shape, r) {
+    if (shape === 'square') return 'M' + (-r) + ' ' + (-r) + 'H' + r + 'V' + r + 'H' + (-r) + 'Z';
+    if (shape === 'triangle') return 'M0 ' + (-r * 1.2).toFixed(2) + 'L' + (r * 1.15).toFixed(2) + ' ' + (r * 0.9).toFixed(2) + 'L' + (-r * 1.15).toFixed(2) + ' ' + (r * 0.9).toFixed(2) + 'Z';
+    if (shape === 'diamond') return 'M0 ' + (-r * 1.25).toFixed(2) + 'L' + (r * 1.25).toFixed(2) + ' 0L0 ' + (r * 1.25).toFixed(2) + 'L' + (-r * 1.25).toFixed(2) + ' 0Z';
+    return 'M' + (-r) + ' 0A' + r + ' ' + r + ' 0 1 0 ' + r + ' 0A' + r + ' ' + r + ' 0 1 0 ' + (-r) + ' 0Z';
+  }
+  // Adds a series mark to an SVG parent at (cx, cy). extra: more classes, e.g. 'plain'.
+  function mark(parent, series, cx, cy, r, extra) {
+    return sv('path', { class: 'dot ' + series + (extra ? ' ' + extra : ''), d: markPath(SHAPE[series] || 'circle', r), transform: 'translate(' + cx + ' ' + cy + ')' }, parent);
+  }
+  function moveMark(el, cx, cy) { el.setAttribute('transform', 'translate(' + cx + ' ' + cy + ')'); }
+
+  // ------------------------------------------------------------------ Halftone field dividers
+  // A strip of the brand's Halftone field pattern (see brand.css .splash) before every section but the first.
+  // Decorative only. Safe to call again after sections are inserted.
+  function initSlabs() {
+    var secs = document.querySelectorAll('main > .sec');
+    Array.prototype.forEach.call(secs, function (sec, i) {
+      if (i === 0) return;
+      var prev = sec.previousElementSibling;
+      if (prev && prev.classList.contains('splash-div')) return;
+      var d = document.createElement('div');
+      d.className = 'splash splash-div';
+      d.setAttribute('aria-hidden', 'true');
+      sec.parentNode.insertBefore(d, sec);
+    });
+  }
 
   // ------------------------------------------------------------------ tooltip
 
@@ -177,10 +209,10 @@
   function setText(id, text) { var n = $('#' + id); if (n && text != null) n.textContent = text; return n; }
   function done(id) { var n = $('#' + id); if (n) n.removeAttribute('aria-busy'); return n; }
 
-  // Segmented control (recessed track, ink-colored selected pill). options: [{value, label, title}].
+  // Segmented control (joined boxes, ink-filled selected segment). options: [{value, label, title}].
   // Returns {el, set(value), value(), disable(fn)}; onchange(value) fires on user choice only.
   function seg(label, options, value, onchange, cls) {
-    var el = h('div', { class: 'sf-segment ' + (cls || ''), role: 'group', 'aria-label': label });
+    var el = h('div', { class: 'b-seg ' + (cls || ''), role: 'group', 'aria-label': label });
     var cur = value, btns = {};
     options.forEach(function (o) {
       var b = h('button', { type: 'button', 'aria-pressed': o.value === cur ? 'true' : 'false', title: o.title, text: o.label });
@@ -271,7 +303,7 @@
       sv('line', { class: 'wh ' + (r.series || 's3'), x1: sx(ci.lo), x2: sx(ci.hi), y1: cy, y2: cy }, g);
       sv('line', { class: 'wh ' + (r.series || 's3'), x1: sx(ci.lo), x2: sx(ci.lo), y1: cy - 6, y2: cy + 6 }, g);
       sv('line', { class: 'wh ' + (r.series || 's3'), x1: sx(ci.hi), x2: sx(ci.hi), y1: cy - 6, y2: cy + 6 }, g);
-      sv('circle', { class: 'dot ' + (r.series || 's3'), cx: sx(ci.diff), cy: cy, r: 7 }, g);
+      mark(g, r.series || 's3', sx(ci.diff), cy, 7);
       bindTip(g, function () {
         var t = [{ value: signed(ci.diff, d), label: opts.measure || 'estimate', cls: r.series === 'sm' ? 'sm' : 's3' },
           { value: ciText(ci, d), label: '95% interval, ' + (ci.excludes_zero ? 'excludes zero' : 'includes zero') }];
@@ -323,6 +355,7 @@
     if (box.scrollWidth > box.clientWidth) box.scrollLeft = Math.max(0, a.offsetLeft - 60);
   }
   navCurrent();
+  initSlabs();
 
   window.NFL = {
     getJSON: getJSON, $: $, h: h, append: append, sv: sv, clear: clear, well: well,
@@ -331,6 +364,7 @@
     REPO: REPO, repoUrl: repoUrl, commitUrl: commitUrl, signed: signed, commas: commas, pct: pct, ciText: ciText,
     setText: setText, done: done, seg: seg, heroTiles: heroTiles, licenseUI: licenseUI, receiptLinks: receiptLinks,
     caveatBox: caveatBox, unavailable: unavailable, ciChart: ciChart, tableViewLive: tableViewLive,
-    loadTeamNames: loadTeamNames, teamName: teamName, fieldLabel: fieldLabel, ordinal: ordinal
+    loadTeamNames: loadTeamNames, teamName: teamName, fieldLabel: fieldLabel, ordinal: ordinal,
+    mark: mark, moveMark: moveMark, initSlabs: initSlabs
   };
 })();

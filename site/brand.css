@@ -1,0 +1,209 @@
+/* ==========================================================================
+   NFLELO brand tokens and materials: Raw Brutalist, light mode only.
+   Source of truth: context/brand.md (Walker's brand brief, 2026-10-10). It replaces Soft Form completely.
+   Every hex below is the brief's value and nothing else is added. styles.css builds the pages on top of this.
+
+   Materials: radius 0, 2px ink borders, a hard 6px 6px 0 ink shadow on raised things, pressed =
+   translate(6px, 6px) with no shadow. No gradients, no blur, no glass.
+   Coverage: canvas 60-70%, ink 15-20%, primary about 10%, secondary 10-15%, accent 5% or less.
+   Exactly one primary-filled action per view (.b-primary); primary is otherwise only the "on" state.
+   ========================================================================== */
+
+/* ---- the brief's CSS variables, verbatim ---- */
+:root {
+  --primary: #a11413;
+  --secondary: #d14f34;
+  --accent: #4a3122;
+  --neutral-dark: #261c1c;
+  --neutral-light: #f9f5f5;
+  --on-primary: #ffffff;
+  --on-accent: #ffffff;
+  --font-heading: "Figtree", -apple-system, sans-serif;
+  --font-body: "Nunito Sans", -apple-system, sans-serif;
+  --heading-size: 52px;
+  --body-size: 17px;
+  --heading-weight: 700;
+  --body-weight: 400;
+  --heading-tracking: 2.5px;
+  --body-tracking: 0.5px;
+  --heading-transform: none;
+  --body-transform: none;
+  --radius: 0px;
+  --radius-lg: 0px;
+}
+
+/* Derived tokens for the light-mode Raw Brutalist aesthetic. */
+:root {
+  --canvas: #f9f5f5;
+  --ink: #261c1c;
+  --muted: #706868;
+  --line: #d9d4d4;
+  --on-secondary: #ffffff;
+  --accent-ink: #4a3122;
+  --pri-tint: #eedada;
+  --sec-tint: #f3dad6;
+}
+
+/* Raw Brutalist material variables. */
+:root {
+  --ab-type-pick-w: 400;
+  --ab-tr: 1;
+  --ab-grid: rgba(38,28,28,0.06);
+}
+
+/* Interface type is system monospace (the brief's stack). */
+:root {
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --shadow: 6px 6px 0 var(--ink);
+  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 40%, transparent);
+  color-scheme: light;
+}
+
+/* ---- focus: always primary ---- */
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+
+/* ---- hard surface, raised and pressed ---- */
+.b-surface { background: var(--canvas); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; }
+.b-raised { background: var(--canvas); color: var(--ink); border: 2px solid var(--ink); border-radius: 0; box-shadow: var(--shadow); }
+.b-press { transition: transform 90ms linear, box-shadow 90ms linear; }
+.b-press:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
+.b-press:active { transform: translate(6px, 6px); box-shadow: none; }
+
+/* ---- the one primary action block per view ---- */
+.b-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  min-height: 52px; padding: 0 22px; cursor: pointer; text-decoration: none;
+  background: var(--primary); color: var(--on-primary);
+  border: 2px solid var(--ink); border-radius: 0; box-shadow: var(--shadow);
+  font: 600 13px ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: 0.04em; text-transform: uppercase;
+  transition: transform 90ms linear, box-shadow 90ms linear;
+}
+.b-primary:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
+.b-primary:active { transform: translate(6px, 6px); box-shadow: none; }
+.b-primary[hidden] { display: none; }
+
+/* ---- secondary button: transparent, ink text, secondary edge ---- */
+.b-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 42px; padding: 0 16px; cursor: pointer; text-decoration: none;
+  background: transparent; color: var(--ink);
+  border: 2px solid var(--secondary); border-radius: 0;
+  font: 600 12px/1.2 var(--font-mono); letter-spacing: 0.05em; text-transform: uppercase;
+}
+.b-btn:hover { background: var(--sec-tint); }
+.b-btn:active { background: var(--sec-tint); border-color: var(--ink); }
+.b-btn:disabled { color: var(--muted); border-color: var(--line); cursor: not-allowed; background: transparent; }
+/* an "on" state is the one other place primary fills */
+.b-btn[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--ink); }
+
+/* ---- ghost link ---- */
+.b-link { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- segmented control: joined boxes sharing 2px ink borders ---- */
+.b-seg { display: flex; background: var(--canvas); border: 2px solid var(--ink); border-radius: 0; }
+.b-seg button {
+  flex: 1 1 0; min-width: 0; min-height: 40px; padding: 0 14px; margin: 0;
+  background: transparent; color: var(--muted); border: 0; border-left: 2px solid var(--ink); border-radius: 0;
+  font: 600 12px/1.2 var(--font-mono); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; cursor: pointer;
+}
+.b-seg button:first-child { border-left: 0; }
+.b-seg button:hover:not([aria-pressed="true"]):not(:disabled) { background: var(--sec-tint); color: var(--ink); }
+.b-seg button[aria-pressed="true"] { background: var(--ink); color: var(--canvas); }
+.b-seg button:focus-visible { outline-offset: -5px; }
+.b-seg button.is-off, .b-seg button:disabled { color: var(--muted); background: var(--line); cursor: not-allowed; text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* ---- field ---- */
+.b-field {
+  width: 100%; min-height: 48px; padding: 10px 14px;
+  background: var(--canvas); color: var(--ink); caret-color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 0;
+  font: 15px ui-monospace, "SF Mono", Menlo, monospace;
+}
+.b-field::placeholder { color: var(--muted); }
+.b-field:focus, .b-field:focus-visible { outline: none; border-color: var(--primary); box-shadow: var(--ring); }
+
+/* ---- toggle: on = primary track with an on-primary knob; off = line track with a muted knob ---- */
+.b-switch {
+  appearance: none; -webkit-appearance: none; position: relative; flex: none;
+  width: 56px; height: 30px; margin: 0; cursor: pointer;
+  background: var(--line); border: 2px solid var(--ink); border-radius: 0;
+}
+.b-switch::before { content: ''; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; background: var(--muted); }
+.b-switch:checked { background: var(--primary); }
+.b-switch:checked::before { background: var(--on-primary); transform: translateX(26px); }
+.b-toggle { display: flex; align-items: center; gap: 14px; min-height: 44px; cursor: pointer; color: var(--ink); font: 600 12px/1.3 var(--font-mono); letter-spacing: 0.05em; text-transform: uppercase; }
+
+/* ---- tag / chip (secondary fill). Text on secondary is 4.30:1, so it is set at 18.66px bold or larger ---- */
+.b-chip {
+  display: inline-block; flex: none; padding: 4px 10px; white-space: nowrap;
+  background: var(--secondary); color: var(--on-secondary); border: 0; border-radius: 0;
+  font: 700 19px/1.1 var(--font-mono); letter-spacing: 0.02em; text-transform: uppercase;
+}
+/* badge (accent fill) */
+.b-badge {
+  display: inline-block; flex: none; padding: 4px 8px; white-space: nowrap;
+  background: var(--accent); color: var(--on-accent); border-radius: 0;
+  font: 700 11px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase;
+}
+/* outlined tag: ink text, secondary edge */
+.b-tag {
+  display: inline-block; flex: none; padding: 3px 8px; white-space: nowrap;
+  background: transparent; color: var(--ink); border: 2px solid var(--secondary); border-radius: 0;
+  font: 700 11px/1.2 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase;
+}
+
+/* ---- headline highlighter band: accent behind one word, never accent-colored text ---- */
+.hl { display: inline-block; line-height: 0.9; background: var(--accent); color: var(--on-accent); padding: 0 0.06em; }
+
+/* ---- progress / data bar ---- */
+.b-bar { background: var(--line); border: 2px solid var(--ink); height: 16px; }
+.b-bar > i { display: block; height: 100%; background: var(--primary); }
+.b-bar > i + i { background: var(--secondary); }
+
+/* ---- slider: bordered track, primary fill, square thumb ---- */
+.b-range { --r: 14px; --lo: 0; --hi: 1; position: relative; height: 44px; }
+.b-range__track { position: absolute; left: 0; right: 0; top: 50%; height: 16px; transform: translateY(-50%); background: var(--canvas); border: 2px solid var(--ink); }
+.b-range__fill {
+  position: absolute; top: 50%; height: 8px; transform: translateY(-50%); background: var(--primary);
+  left: calc(var(--r) + (100% - 2 * var(--r)) * var(--lo));
+  right: calc(var(--r) + (100% - 2 * var(--r)) * (1 - var(--hi)));
+}
+.b-range input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; appearance: none; -webkit-appearance: none; background: transparent; pointer-events: none; }
+.b-range input::-webkit-slider-runnable-track { background: transparent; height: 100%; }
+.b-range input::-moz-range-track { background: transparent; height: 100%; }
+.b-range input::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; pointer-events: auto; cursor: grab;
+  width: 28px; height: 28px; margin-top: 8px; background: var(--canvas); border: 2px solid var(--ink); border-radius: 0; box-shadow: 3px 3px 0 var(--ink);
+}
+.b-range input::-moz-range-thumb {
+  pointer-events: auto; cursor: grab; box-sizing: border-box;
+  width: 28px; height: 28px; background: var(--canvas); border: 2px solid var(--ink); border-radius: 0; box-shadow: 3px 3px 0 var(--ink);
+}
+.b-range input:active::-webkit-slider-thumb { background: var(--ink); cursor: grabbing; }
+.b-range input:focus-visible { outline: none; }
+.b-range input:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--primary); outline-offset: 3px; }
+.b-range input:focus-visible::-moz-range-thumb { outline: 3px solid var(--primary); outline-offset: 3px; }
+
+/* ---- probability meter: bordered track, square model knob, shaped ticks for Elo and Vegas ---- */
+.b-meter { --pad: 20px; position: relative; height: 34px; }
+.b-meter__track { position: absolute; left: 0; right: 0; top: 50%; height: 26px; transform: translateY(-50%); background: var(--canvas); border: 2px solid var(--ink); }
+.b-meter__track::after { content: ''; position: absolute; left: 50%; top: 3px; bottom: 3px; width: 2px; margin-left: -1px; background: var(--line); }
+.b-meter__pos { position: absolute; top: 0; bottom: 0; width: 0; left: calc(var(--pad) + (100% - 2 * var(--pad)) * var(--at, 0.5)); }
+.b-meter__pos[hidden] { display: none; }
+.b-meter__tick { position: absolute; left: -2px; width: 4px; background: var(--tick, var(--ink)); }
+.b-meter__tick--up { top: -28px; bottom: 50%; }
+.b-meter__tick--down { top: 50%; bottom: -28px; }
+.b-meter__knob { position: absolute; left: -16px; top: 50%; width: 32px; height: 32px; margin-top: -16px; background: var(--primary); border: 2px solid var(--ink); }
+.b-meter.knob-elo .b-meter__knob { background: var(--ink); border-color: var(--ink); }
+
+/* ---- Halftone field pattern (brief: Patterns, "Chosen pattern"). A seamless 160px SVG tile in the Brand colorway,
+   used for hero bands and divider strips. Text never sits on it; a textured card keeps its text on a solid --canvas plate. ---- */
+.splash { display: block; background: var(--canvas) url("assets/pattern-halftone.svg") 0 0 / 160px 160px repeat; border: 2px solid var(--ink); border-radius: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .b-press, .b-primary { transition: none; }
+}
+@media (forced-colors: active) {
+  .b-primary, .b-btn, .b-raised, .b-surface, .b-seg, .b-field, .b-switch, .b-chip, .b-badge, .b-tag, .b-meter__track, .b-range__track { border: 2px solid ButtonText; forced-color-adjust: auto; }
+  .b-seg button[aria-pressed="true"] { background: Highlight; color: HighlightText; }
+}

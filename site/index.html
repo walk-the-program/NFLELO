@@ -3,26 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#222a33" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#e6ebf0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f9f5f5">
 <title>NFLELO: Elo ratings and stats</title>
 <meta name="description" content="Elo ratings for every NFL franchise since 1970, the weekly power ladder, model win chances next to the Vegas benchmark, luck, and league history.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="soft-form.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="brand.css">
 <link rel="stylesheet" href="styles.css">
-<script src="theme.js"></script>
 <script src="common.js" defer></script>
 <script src="app.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#ladder">Skip to the power ladder</a>
 
-<nav class="nav sf-glass" aria-label="Sections">
-  <a class="nav-mark" href="#top" aria-label="NFLELO, back to top">NFL<span>ELO</span></a>
+<nav class="nav" aria-label="Sections">
+  <a class="nav-mark" href="#top" aria-label="NFLELO, back to top">NFLELO</a>
+  <span class="nav-tag">Machine Learning applied to Football</span>
   <ul class="nav-links">
     <li><a href="#ladder">Ladder</a></li>
     <li><a href="#week">This week</a></li>
@@ -32,30 +30,27 @@
     <li><a href="#records">Records</a></li>
     <li><a href="#scorecard">Scorecard</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
-    <li><a href="plays.html">Plays</a></li>
-    <li><a href="winprob.html">Win prob</a></li>
-    <li><a href="fourth.html">Fourth down</a></li>
-    <li><a href="playcalling.html">Play calling</a></li>
-    <li><a href="models.html">Receipts</a></li>
+    <li><a href="plays.html"><span class="n">[02]</span> Plays</a></li>
+    <li><a href="winprob.html"><span class="n">[03]</span> Win prob</a></li>
+    <li><a href="fourth.html"><span class="n">[04]</span> Fourth down</a></li>
+    <li><a href="playcalling.html"><span class="n">[05]</span> Play calling</a></li>
+    <li><a href="models.html"><span class="n">[06]</span> Receipts</a></li>
   </ul>
-  <div class="sf-segment theme" role="group" aria-label="Theme">
-    <button type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
-    <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
-    <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
-  </div>
 </nav>
 
 <header class="hero" id="top">
   <div class="wrap">
+    <p class="tagline">Machine Learning applied to Football</p>
     <div class="hero-top">
-      <h1 class="wordmark">NFL<span>ELO</span></h1>
+      <h1 class="wordmark">NFL<span class="hl">ELO</span></h1>
       <p class="status" id="status" aria-live="polite">Loading ratings</p>
     </div>
+    <div class="splash splash-hero" aria-hidden="true"></div>
     <div class="hero-grid">
-      <section class="hero-panel sf-glass" aria-labelledby="mx-title">
+      <section class="hero-panel" aria-labelledby="mx-title">
         <h2 id="mx-title" class="sr">Matchup instrument</h2>
         <div class="mx-head">
-          <div class="sf-segment" role="group" aria-label="Matchup view" id="mx-view"></div>
+          <div class="b-seg" role="group" aria-label="Matchup view" id="mx-view"></div>
           <p class="label" id="mx-eyebrow">Loading</p>
         </div>
         <div class="mx-teams" aria-live="polite">
@@ -63,19 +58,19 @@
           <div class="mx-team team-home" id="mx-home"></div>
         </div>
         <div class="mx-meter" id="mx-meter">
-          <div class="sf-meter" id="mx-meter-img" role="img" aria-label="">
-            <div class="sf-meter__track" aria-hidden="true"><i>0</i><i>100</i></div>
-            <div class="sf-meter__pos" id="mx-pos-elo" style="--tick: var(--sf-elo)" aria-hidden="true"><span class="sf-meter__tick sf-meter__tick--up"></span><span class="tl tl-top">Elo</span></div>
-            <div class="sf-meter__pos" id="mx-pos-vegas" style="--tick: var(--sf-vegas)" aria-hidden="true"><span class="sf-meter__tick sf-meter__tick--down"></span><span class="tl tl-bottom">Vegas</span></div>
-            <div class="sf-meter__pos" id="mx-pos-model" aria-hidden="true"><span class="sf-meter__knob"></span></div>
+          <div class="b-meter" id="mx-meter-img" role="img" aria-label="">
+            <div class="b-meter__track" aria-hidden="true"><i>0</i><i>100</i></div>
+            <div class="b-meter__pos" id="mx-pos-elo" style="--tick: var(--ink)" aria-hidden="true"><span class="b-meter__tick b-meter__tick--up"></span><span class="tl tl-top">Elo</span></div>
+            <div class="b-meter__pos" id="mx-pos-vegas" style="--tick: var(--secondary)" aria-hidden="true"><span class="b-meter__tick b-meter__tick--down"></span><span class="tl tl-bottom">Vegas</span></div>
+            <div class="b-meter__pos" id="mx-pos-model" aria-hidden="true"><span class="b-meter__knob"></span></div>
           </div>
         </div>
         <dl class="mx-stats" id="mx-stats"></dl>
         <div class="mx-foot">
-          <a class="sf-primary" id="mx-open" href="#week"><span>All games this week </span><span aria-hidden="true">&#8595;</span></a>
+          <a class="b-primary" id="mx-open" href="#week"><span>All games this week </span><span aria-hidden="true">&#8595;</span></a>
           <div class="mx-switches" id="mx-switches">
-            <label class="sf-toggleline" for="mx-sw-elo"><span>Show Elo</span><input class="sf-switch" id="mx-sw-elo" type="checkbox" checked></label>
-            <label class="sf-toggleline" for="mx-sw-vegas"><span>Show Vegas benchmark</span><input class="sf-switch" id="mx-sw-vegas" type="checkbox" checked></label>
+            <label class="b-toggle" for="mx-sw-elo"><span>Show Elo</span><input class="b-switch" id="mx-sw-elo" type="checkbox" checked></label>
+            <label class="b-toggle" for="mx-sw-vegas"><span>Show Vegas benchmark</span><input class="b-switch" id="mx-sw-vegas" type="checkbox" checked></label>
           </div>
         </div>
       </section>
@@ -87,17 +82,17 @@
 <main>
   <section class="sec" id="ladder" aria-labelledby="ladder-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">01 / Power ladder</p>
+    <p class="kicker">[01] Power ladder</p>
     <h2 class="headline" id="ladder-h">Power ladder</h2>
     <p class="deck">All 32 teams by Elo rating. Bars show distance from the 1500 league average. Select a team to open it in the explorer.</p>
-    <div class="sf-segment seg" id="ladder-filters" role="group" aria-label="Filter the ladder"></div>
+    <div class="b-seg seg" id="ladder-filters" role="group" aria-label="Filter the ladder"></div>
     <div id="ladder-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>
 
   <section class="sec" id="week" aria-labelledby="week-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">02 / This week</p>
+    <p class="kicker">[02] This week</p>
     <h2 class="headline" id="week-h">This week</h2>
     <p class="deck" id="week-deck">Elo win chances for the games still to play, next to the Vegas benchmark.</p>
     <div id="week-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -106,7 +101,7 @@
 
   <section class="sec" id="explorer" aria-labelledby="explorer-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">03 / Team explorer</p>
+    <p class="kicker">[03] Team explorer</p>
     <h2 class="headline" id="explorer-h">Team explorer</h2>
     <p class="deck">One line per franchise, every regular-season game since 1970. Hover or use the arrow keys to read a game week.</p>
     <div class="field">
@@ -119,17 +114,17 @@
 
   <section class="sec" id="luck" aria-labelledby="luck-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">04 / Luck board</p>
+    <p class="kicker">[04] Luck board</p>
     <h2 class="headline" id="luck-h">Luck board</h2>
     <p class="deck">Actual wins minus expected wins, where expected wins adds up Elo's pre-game win chance in every game.</p>
-    <div class="sf-segment seg" id="luck-toggle" role="group" aria-label="Season"></div>
+    <div class="b-seg seg" id="luck-toggle" role="group" aria-label="Season"></div>
     <div id="luck-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>
 
   <section class="sec" id="history" aria-labelledby="history-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">05 / League history</p>
+    <p class="kicker">[05] League history</p>
     <h2 class="headline" id="history-h">League history</h2>
     <p class="deck">End-of-season rating for every franchise since 1970, then how tightly the league was bunched each year.</p>
     <div id="history-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -138,7 +133,7 @@
 
   <section class="sec" id="records" aria-labelledby="records-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">06 / Records</p>
+    <p class="kicker">[06] Records</p>
     <h2 class="headline" id="records-h">Records</h2>
     <p class="deck">Extremes since 1970, from the same ratings.</p>
     <div id="records-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -147,7 +142,7 @@
 
   <section class="sec" id="scorecard" aria-labelledby="scorecard-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">07 / Model scorecard</p>
+    <p class="kicker">[07] Model scorecard</p>
     <h2 class="headline" id="scorecard-h">Model scorecard</h2>
     <p class="deck">How well Elo predicts games, scored against the betting market, and how its home-field estimate has moved.</p>
     <div id="scorecard-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -156,7 +151,8 @@
 </main>
 
 <footer class="foot wrap">
-  <p id="credit">Data: nflverse (CC BY 4.0); 1970–1998 results: FiveThirtyEight (CC BY 4.0).</p>
+  <p class="motto">Nothing hidden. Nothing soft.</p>
+  <p id="credit">Data: nflverse (CC BY 4.0); 1970 to 1998 results: FiveThirtyEight (CC BY 4.0).</p>
   <p>Independent project, not affiliated with the NFL or any team.</p>
   <p><a href="models.html">The models and their receipts</a></p>
   <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
