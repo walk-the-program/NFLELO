@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f7f2ee">
+<meta name="theme-color" content="#f9f5f5">
 <title>NFLELO: the models and their receipts</title>
 <meta name="description" content="Every NFLELO model and its result on seasons it never saw, failures included, with the public commits that show the rules came first.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital,wght@0,400;1,400&family=Newsreader:ital,wght@0,400;0,600;1,400&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="brand.css">
 <link rel="stylesheet" href="styles.css">
 <script src="common.js" defer></script>
@@ -19,30 +19,29 @@
 <a class="skip" href="#scoreboard">Skip to the scoreboard</a>
 
 <nav class="nav" aria-label="Sections">
-  <div class="nav-bar">
-    <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFLELO</a>
-    <span class="nav-tag">Machine Learning applied to Football</span>
-    <ul class="nav-links">
-      <li><a href="#scoreboard">Scoreboard</a></li>
-      <li><a href="#holdout">Game model</a></li>
-      <li><a href="#evidence">Evidence</a></li>
-      <li><a href="#receipts">Receipts</a></li>
-      <li class="nav-sep" aria-hidden="true"></li>
-      <li><a href="index.html">Ratings</a></li>
-      <li><a href="plays.html">Plays</a></li>
-      <li><a href="winprob.html">Win prob</a></li>
-      <li><a href="fourth.html">Fourth down</a></li>
-      <li><a href="playcalling.html">Play calling</a></li>
-    </ul>
-  </div>
-  <span class="masthead-rule" aria-hidden="true"></span>
+  <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFLELO</a>
+  <span class="nav-tag">Machine Learning applied to Football</span>
+  <ul class="nav-links">
+    <li><a href="#scoreboard">Scoreboard</a></li>
+    <li><a href="#holdout">Game model</a></li>
+    <li><a href="#evidence">Evidence</a></li>
+    <li><a href="#receipts">Receipts</a></li>
+    <li class="nav-sep" aria-hidden="true"></li>
+    <li><a href="index.html"><span class="n">[01]</span> Ratings</a></li>
+    <li><a href="plays.html"><span class="n">[02]</span> Plays</a></li>
+    <li><a href="winprob.html"><span class="n">[03]</span> Win prob</a></li>
+    <li><a href="fourth.html"><span class="n">[04]</span> Fourth down</a></li>
+    <li><a href="playcalling.html"><span class="n">[05]</span> Play calling</a></li>
+  </ul>
 </nav>
 
-<header class="hero page flow-bg" id="top">
+<header class="hero page" id="top">
   <div class="wrap">
+    <div class="splash splash-hero sm" aria-hidden="true"></div>
     <section class="hero-panel" aria-labelledby="page-title">
       <p class="page-kicker">NFLELO &rarr; Models</p>
-      <h1 class="page-title long" id="page-title">The models and their <em class="hl">receipts</em></h1>
+      <p class="tagline">Machine Learning applied to Football</p>
+      <h1 class="page-title long" id="page-title">The models and their <span class="hl">receipts</span></h1>
       <p class="hero-line" id="hero-line">Loading results</p>
       <p class="hero-deck" id="hero-deck">Every model was built on earlier seasons, then scored once on 2020 to 2025 under rules committed to a public repository first. Failures are listed with the passes.</p>
       <p class="cta"><a class="b-primary" href="#scoreboard">See the scoreboard <span aria-hidden="true">&darr;</span></a></p>
@@ -52,24 +51,9 @@
 </header>
 
 <main>
-  <section class="sec" id="contents" aria-labelledby="contents-h" tabindex="-1">
-  <div class="wrap">
-    <p class="kicker"><span class="no">00</span> Contents</p>
-    <h2 class="headline" id="contents-h">On this page</h2>
-    <p class="deck">The four parts of this page, in order.</p>
-    <div class="contents-wrap texcard texcard--glyph">
-      <div class="texplate contents-list">
-        <a class="contents-row" href="#scoreboard"><span class="cr-name">Scoreboard</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">One card per model</span><span class="cr-no">01</span></a>
-        <a class="contents-row" href="#holdout"><span class="cr-name">Game model on the locked seasons</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Holdout</span><span class="cr-no">02</span></a>
-        <a class="contents-row" href="#evidence"><span class="cr-name">What the evidence says</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Findings</span><span class="cr-no">03</span></a>
-        <a class="contents-row" href="#receipts"><span class="cr-name">How the receipts work</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Commits</span><span class="cr-no">04</span></a>
-      </div>
-    </div>
-  </div>
-  </section>
   <section class="sec" id="scoreboard" aria-labelledby="scoreboard-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">01</span> Scoreboard</p>
+    <p class="kicker">[01] Scoreboard</p>
     <h2 class="headline" id="scoreboard-h">Scoreboard</h2>
     <p class="deck">One card per model: what it does, the number it was judged on, and links to the method and the commits. Lower is better unless a card says otherwise.</p>
     <div class="b-seg seg" id="model-filters" role="group" aria-label="Filter the models"></div>
@@ -79,7 +63,7 @@
 
   <section class="sec" id="holdout" aria-labelledby="holdout-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">02</span> Game model</p>
+    <p class="kicker">[02] Game model</p>
     <h2 class="headline" id="holdout-h">Game model on the locked seasons</h2>
     <p class="deck">The one game-prediction run on 2020 to 2025: Elo, the NFLELO game model, and the Vegas market as a benchmark. The market is never an input to our models.</p>
     <div id="holdout-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -88,7 +72,7 @@
 
   <section class="sec" id="evidence" aria-labelledby="evidence-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">03</span> Evidence</p>
+    <p class="kicker">[03] Evidence</p>
     <h2 class="headline" id="evidence-h">What the evidence says</h2>
     <p class="deck">Five things the results add up to, in plain terms.</p>
     <div id="evidence-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -97,7 +81,7 @@
 
   <section class="sec" id="receipts" aria-labelledby="receipts-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">04</span> Receipts</p>
+    <p class="kicker">[04] Receipts</p>
     <h2 class="headline" id="receipts-h">How the receipts work</h2>
     <p class="deck">A good result means little if the rules were chosen after the answer was known. Here is how that is ruled out.</p>
     <div id="receipts-body" class="body" aria-busy="true"><p class="note">Loading</p></div>

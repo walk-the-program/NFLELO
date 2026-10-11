@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f7f2ee">
+<meta name="theme-color" content="#f9f5f5">
 <title>NFLELO: Elo ratings and stats</title>
 <meta name="description" content="Elo ratings for every NFL franchise since 1970, the weekly power ladder, model win chances next to the Vegas benchmark, luck, and league history.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital,wght@0,400;1,400&family=Newsreader:ital,wght@0,400;0,600;1,400&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="brand.css">
 <link rel="stylesheet" href="styles.css">
 <script src="common.js" defer></script>
@@ -19,47 +19,33 @@
 <a class="skip" href="#ladder">Skip to the power ladder</a>
 
 <nav class="nav" aria-label="Sections">
-  <div class="nav-bar">
-    <a class="nav-mark" href="#top" aria-label="NFLELO, back to top">NFLELO</a>
-    <span class="nav-tag">Machine Learning applied to Football</span>
-    <ul class="nav-links">
-      <li><a href="#ladder">Ladder</a></li>
-      <li><a href="#week">This week</a></li>
-      <li><a href="#explorer">Explorer</a></li>
-      <li><a href="#luck">Luck</a></li>
-      <li><a href="#history">History</a></li>
-      <li><a href="#records">Records</a></li>
-      <li><a href="#scorecard">Scorecard</a></li>
-      <li class="nav-sep" aria-hidden="true"></li>
-      <li><a href="plays.html">Plays</a></li>
-      <li><a href="winprob.html">Win prob</a></li>
-      <li><a href="fourth.html">Fourth down</a></li>
-      <li><a href="playcalling.html">Play calling</a></li>
-      <li><a href="models.html">Receipts</a></li>
-    </ul>
-  </div>
-  <span class="masthead-rule" aria-hidden="true"></span>
+  <a class="nav-mark" href="#top" aria-label="NFLELO, back to top">NFLELO</a>
+  <span class="nav-tag">Machine Learning applied to Football</span>
+  <ul class="nav-links">
+    <li><a href="#ladder">Ladder</a></li>
+    <li><a href="#week">This week</a></li>
+    <li><a href="#explorer">Explorer</a></li>
+    <li><a href="#luck">Luck</a></li>
+    <li><a href="#history">History</a></li>
+    <li><a href="#records">Records</a></li>
+    <li><a href="#scorecard">Scorecard</a></li>
+    <li class="nav-sep" aria-hidden="true"></li>
+    <li><a href="plays.html"><span class="n">[02]</span> Plays</a></li>
+    <li><a href="winprob.html"><span class="n">[03]</span> Win prob</a></li>
+    <li><a href="fourth.html"><span class="n">[04]</span> Fourth down</a></li>
+    <li><a href="playcalling.html"><span class="n">[05]</span> Play calling</a></li>
+    <li><a href="models.html"><span class="n">[06]</span> Receipts</a></li>
+  </ul>
 </nav>
 
 <header class="hero" id="top">
-  <div class="hero-cover flow-bg">
-    <div class="wrap hero-cover-in">
-      <div class="lede-panel">
-        <p class="page-kicker">Elo ratings, 1970 to now</p>
-        <h1 class="page-title" id="page-title">Machine learning applied to <em class="hl">football</em></h1>
-        <p class="status" id="status" aria-live="polite">Loading ratings</p>
-        <p class="hero-deck" id="hero-deck">Elo ratings for every NFL franchise since 1970, rebuilt each week, with model win chances set beside the Vegas benchmark. Every model is scored on seasons it never saw, and the failures are published with the passes.</p>
-      </div>
-      <figure class="cover">
-        <div class="b-plate" role="img" aria-label="Cover plate with a cropped letter N">
-          <span class="cover-n" aria-hidden="true">N</span>
-          <p class="coverline">Every franchise, ranked every week since 1970.</p>
-        </div>
-        <figcaption class="figcap"><b>Fig. 1.</b> One rating scale for all 32 teams, rebuilt after every week of games.</figcaption>
-      </figure>
-    </div>
-  </div>
   <div class="wrap">
+    <p class="tagline">Machine Learning applied to Football</p>
+    <div class="hero-top">
+      <h1 class="wordmark">NFL<span class="hl">ELO</span></h1>
+      <p class="status" id="status" aria-live="polite">Loading ratings</p>
+    </div>
+    <div class="splash splash-hero" aria-hidden="true"></div>
     <div class="hero-grid">
       <section class="hero-panel" aria-labelledby="mx-title">
         <h2 id="mx-title" class="sr">Matchup instrument</h2>
@@ -94,32 +80,9 @@
 </header>
 
 <main>
-  <section class="sec" id="contents" aria-labelledby="contents-h" tabindex="-1">
-  <div class="wrap">
-    <p class="kicker"><span class="no">00</span> Contents</p>
-    <h2 class="headline" id="contents-h">In this issue</h2>
-    <p class="deck">Seven sections on this page, then the five model pages. Everything updates from the same weekly rebuild.</p>
-    <div class="contents-wrap texcard texcard--halftone">
-      <div class="texplate contents-list">
-        <a class="contents-row" href="#ladder"><span class="cr-name">Power ladder</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Weekly</span><span class="cr-no">01</span></a>
-        <a class="contents-row" href="#week"><span class="cr-name">This week</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Live</span><span class="cr-no">02</span></a>
-        <a class="contents-row" href="#explorer"><span class="cr-name">Team explorer</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Interactive</span><span class="cr-no">03</span></a>
-        <a class="contents-row" href="#luck"><span class="cr-name">Luck board</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Weekly</span><span class="cr-no">04</span></a>
-        <a class="contents-row" href="#history"><span class="cr-name">League history</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Since 1970</span><span class="cr-no">05</span></a>
-        <a class="contents-row" href="#records"><span class="cr-name">Records</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Since 1970</span><span class="cr-no">06</span></a>
-        <a class="contents-row" href="#scorecard"><span class="cr-name">Model scorecard</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Scored</span><span class="cr-no">07</span></a>
-        <a class="contents-row" href="plays.html"><span class="cr-name">Play outcomes</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Model</span><span class="cr-no">08</span></a>
-        <a class="contents-row" href="winprob.html"><span class="cr-name">Win probability</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Model</span><span class="cr-no">09</span></a>
-        <a class="contents-row" href="fourth.html"><span class="cr-name">Fourth downs</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Model</span><span class="cr-no">10</span></a>
-        <a class="contents-row" href="playcalling.html"><span class="cr-name">Play calling</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Model</span><span class="cr-no">11</span></a>
-        <a class="contents-row" href="models.html"><span class="cr-name">The models and their receipts</span><span class="cr-dots" aria-hidden="true"></span><span class="cr-status">Receipts</span><span class="cr-no">12</span></a>
-      </div>
-    </div>
-  </div>
-  </section>
   <section class="sec" id="ladder" aria-labelledby="ladder-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">01</span> Power ladder</p>
+    <p class="kicker">[01] Power ladder</p>
     <h2 class="headline" id="ladder-h">Power ladder</h2>
     <p class="deck">All 32 teams by Elo rating. Bars show distance from the 1500 league average. Select a team to open it in the explorer.</p>
     <div class="b-seg seg" id="ladder-filters" role="group" aria-label="Filter the ladder"></div>
@@ -129,7 +92,7 @@
 
   <section class="sec" id="week" aria-labelledby="week-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">02</span> This week</p>
+    <p class="kicker">[02] This week</p>
     <h2 class="headline" id="week-h">This week</h2>
     <p class="deck" id="week-deck">Elo win chances for the games still to play, next to the Vegas benchmark.</p>
     <div id="week-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -138,7 +101,7 @@
 
   <section class="sec" id="explorer" aria-labelledby="explorer-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">03</span> Team explorer</p>
+    <p class="kicker">[03] Team explorer</p>
     <h2 class="headline" id="explorer-h">Team explorer</h2>
     <p class="deck">One line per franchise, every regular-season game since 1970. Hover or use the arrow keys to read a game week.</p>
     <div class="field">
@@ -151,7 +114,7 @@
 
   <section class="sec" id="luck" aria-labelledby="luck-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">04</span> Luck board</p>
+    <p class="kicker">[04] Luck board</p>
     <h2 class="headline" id="luck-h">Luck board</h2>
     <p class="deck">Actual wins minus expected wins, where expected wins adds up Elo's pre-game win chance in every game.</p>
     <div class="b-seg seg" id="luck-toggle" role="group" aria-label="Season"></div>
@@ -161,7 +124,7 @@
 
   <section class="sec" id="history" aria-labelledby="history-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">05</span> League history</p>
+    <p class="kicker">[05] League history</p>
     <h2 class="headline" id="history-h">League history</h2>
     <p class="deck">End-of-season rating for every franchise since 1970, then how tightly the league was bunched each year.</p>
     <div id="history-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -170,7 +133,7 @@
 
   <section class="sec" id="records" aria-labelledby="records-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">06</span> Records</p>
+    <p class="kicker">[06] Records</p>
     <h2 class="headline" id="records-h">Records</h2>
     <p class="deck">Extremes since 1970, from the same ratings.</p>
     <div id="records-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
@@ -179,7 +142,7 @@
 
   <section class="sec" id="scorecard" aria-labelledby="scorecard-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker"><span class="no">07</span> Model scorecard</p>
+    <p class="kicker">[07] Model scorecard</p>
     <h2 class="headline" id="scorecard-h">Model scorecard</h2>
     <p class="deck">How well Elo predicts games, scored against the betting market, and how its home-field estimate has moved.</p>
     <div id="scorecard-body" class="body" aria-busy="true"><p class="note">Loading</p></div>

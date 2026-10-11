@@ -595,9 +595,9 @@
     after.parentNode.insertBefore(sec, after.nextSibling);
     var navAfter = document.querySelector('.nav-links a[href="#' + afterId + '"]');
     if (navAfter) navAfter.parentNode.parentNode.insertBefore(h('li', {}, h('a', { href: '#' + sec.id, text: navText })), navAfter.parentNode.nextSibling);
-    document.querySelectorAll('main > .sec:not(#contents) .kicker').forEach(function (k, i) {
-      var no = k.querySelector('.no');
-      if (no) no.textContent = (i < 9 ? '0' : '') + (i + 1);
+    N.initSlabs();
+    document.querySelectorAll('main > .sec .kicker').forEach(function (k, i) {
+      k.textContent = '[' + (i < 9 ? '0' : '') + (i + 1) + '] ' + k.textContent.replace(/^\[\d+\]\s*/, '');
     });
   }
 
@@ -610,7 +610,7 @@
     var body = h('div', { id: 'rest-body', class: 'body' });
     var sec = h('section', { class: 'sec', id: 'rest', 'aria-labelledby': 'rest-h', tabindex: '-1' },
       h('div', { class: 'wrap' },
-        h('p', { class: 'kicker' }, h('span', { class: 'no', text: '00' }), ' Rest of season'),
+        h('p', { class: 'kicker', text: 'Rest of season' }),
         h('h2', { class: 'headline', id: 'rest-h', text: R.headline || 'Rest of season' }),
         h('p', { class: 'deck', text: 'Projected final wins: wins so far plus the model\'s win chance in every game left, with Elo\'s projection beside it. Open a team for its remaining games.' }),
         body));
@@ -694,7 +694,7 @@
     var body = h('div', { id: 'odds-body', class: 'body' });
     var sec = h('section', { class: 'sec', id: 'odds', 'aria-labelledby': 'odds-h', tabindex: '-1' },
       h('div', { class: 'wrap' },
-        h('p', { class: 'kicker' }, h('span', { class: 'no', text: '00' }), ' Playoff odds'),
+        h('p', { class: 'kicker', text: 'Playoff odds' }),
         h('h2', { class: 'headline', id: 'odds-h', text: O.headline || 'Playoff odds' }),
         h('p', { class: 'deck', text: 'Each team\'s chances from ' + O.n_sims.toLocaleString('en-US') + ' simulations of the rest of the season, seeded with the NFL\'s tiebreakers. ' +
           (hasBase ? 'Change is in percentage points since the run on ' + runTime(O.baseline_run_utc) + '.' : 'Change since last week appears after the next Wednesday run.') + ' Select a column to sort.' }),
