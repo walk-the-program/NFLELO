@@ -990,8 +990,8 @@
     { max: 1425, fill: 'var(--muted)', label: '1350 to 1425' },
     { max: 1475, fill: 'var(--line)', label: '1425 to 1475', pale: true },
     { max: 1525, fill: 'var(--canvas)', label: '1475 to 1525', pale: true },
-    { max: 1575, fill: 'var(--pri-tint)', label: '1525 to 1575', pale: true },
-    { max: 1650, fill: 'var(--secondary)', label: '1575 to 1650', pale: true },
+    { max: 1575, fill: 'var(--ab-tile-pri)', label: '1525 to 1575', pale: true },
+    { max: 1650, fill: 'var(--pri-tint)', label: '1575 to 1650', pale: true },
     { max: Infinity, fill: 'var(--primary)', label: 'Above 1650' }
   ];
   function heatBin(v) { for (var i = 0; i < HEAT.length; i++) if (v < HEAT[i].max) return HEAT[i]; return HEAT[HEAT.length - 1]; }

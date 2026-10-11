@@ -1,6 +1,6 @@
 /* ==========================================================================
    NFLELO brand tokens and materials: Bento Grid, light mode only.
-   Source of truth: context/brand-bento.md (Walker's brand brief, 2026-10-10). Every hex below is the brief's value and
+   Source of truth: context/brand.md (Walker's brand brief, 2026-10-10). Every hex below is the brief's value and
    nothing else is added. styles.css builds the pages on top of this.
 
    Materials: tiles are radius 28 on the canvas board with 14px gaps, no borders and one soft shadow. Sub-tiles are radius 18,
@@ -11,8 +11,8 @@
 /* ---- the brief's CSS variables ---- */
 :root {
   --primary: #7db7eb;
-  --secondary: #f0c5c6;
-  --accent: #f0ec5e;
+  --secondary: #ffffff;
+  --accent: #fbffa0;
   --neutral-dark: #1c2126;
   --neutral-light: #f5f7f9;
   --on-primary: #141414;
@@ -35,11 +35,11 @@
   --ink: #1c2126;
   --muted: #64686c;
   --line: #cbced0;
-  --accent-ink: #aa810e;
+  --accent-ink: #a38400;
   --pri-tint: #dde6ee;
-  --sec-tint: #ebe6e8;
+  --sec-tint: #edeff1;
   --ab-tile: #fbfbfc;
-  --ab-tile-sec: #f9f0f1;
+  --ab-tile-sec: #fcfcfd;
   --ab-tile-pri: #e9f1fa;
   --ab-sub: #f1f1f2;
   --ab-pri-hover: #8dc0ed;
@@ -134,12 +134,21 @@
 /* ---- tag (secondary fill, on-secondary text) ---- */
 .b-chip, .b-tag {
   display: inline-block; flex: none; padding: 4px 12px; white-space: nowrap;
-  background: var(--secondary); color: var(--on-secondary); border: 0; border-radius: 999px;
+  background: var(--secondary); color: var(--on-secondary); border: 0; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line);
   font: 700 12px/1.2 var(--font-body); letter-spacing: 0.02em;
 }
 
-/* ---- highlight word: accent-ink as large text, once per view ---- */
-.hl { color: var(--accent-ink); }
+/* ---- highlight word, once per view (Walker override 2026-10-10): the accent #fbffa0 with an ink outline ----
+   One-line switch to blue: change --hl-fill to var(--primary). */
+:root {
+  --hl-fill: var(--accent);
+  /* --hl-fill: var(--primary); */
+  --hl-stroke: var(--ink);
+}
+.hl { color: var(--hl-fill); -webkit-text-stroke: 0.07em var(--hl-stroke); paint-order: stroke fill; }
+@supports not ((-webkit-text-stroke: 1px black) or (text-stroke: 1px black)) {
+  .hl { color: var(--ink); background: var(--hl-fill); border-radius: 8px; padding: 0 .08em; }
+}
 
 /* ---- data bar: line track, secondary fill with an ink edge so it reads (secondary is 1.1:1 on the line) ---- */
 .b-bar { background: var(--line); height: 14px; border-radius: 999px; overflow: hidden; }
@@ -182,11 +191,8 @@
 .b-meter.knob-elo .b-meter__knob { background: var(--primary); border-color: var(--ink); border-radius: 50%; }
 
 /* ---- pattern materials. Text never sits on a pattern: it sits on a tile plate. ---- */
-.pat-aura { background: var(--canvas) url("assets/hero-aura.png") center / cover no-repeat; }
 .pat-terrain { background: var(--canvas) url("assets/hero-terrain.png") center / cover no-repeat; }
 .pat-pebbles { background: var(--canvas) url("assets/tex-pebbles.png") center / cover no-repeat; }
-.pat-halftone { background: var(--canvas) url("assets/tile-halftone.svg") 0 0 / 160px 160px repeat; }
-.pat-band { background: var(--canvas) url("assets/band-gradpanes.svg") center / cover no-repeat; }
 /* a plate carries text over a pattern: a sub-level tile, so radius 18 */
 .plate { background: var(--ab-tile); color: var(--ink); border-radius: var(--r-sub); box-shadow: var(--ab-shadow); }
 

@@ -90,13 +90,14 @@ def test_no_hex_colors_outside_the_brand_tokens():
         assert not re.search(r"#[0-9a-fA-F]{3,8}\b", read(name)), name
 
 
-# The Bento Grid brief (context/brand-bento.md): every hex the site may contain, and nothing else.
+# The final Bento Grid brief (context/brand.md, Walker 2026-10-10): every hex the site may contain, and nothing else.
 BRIEF_HEXES = {
-    "#7db7eb", "#f0c5c6", "#f0ec5e", "#1c2126", "#f5f7f9", "#eaecee", "#64686c", "#cbced0", "#141414", "#aa810e",
-    "#dde6ee", "#ebe6e8", "#fbfbfc", "#f9f0f1", "#e9f1fa", "#f1f1f2", "#8dc0ed", "#6796c1",
+    "#7db7eb", "#ffffff", "#fbffa0", "#1c2126", "#f5f7f9", "#eaecee", "#64686c", "#cbced0", "#141414", "#a38400",
+    "#dde6ee", "#edeff1", "#fbfbfc", "#fcfcfd", "#e9f1fa", "#f1f1f2", "#8dc0ed", "#6796c1",
 }
 RETIRED_HEXES = {
-    "#20436b", "#eff8a5", "#ff4d37", "#26221c", "#f9f8f5", "#706d68", "#d9d8d4", "#ffffff", "#dfe2e4", "#f7f8e8",
+    "#20436b", "#eff8a5", "#ff4d37", "#26221c", "#f9f8f5", "#706d68", "#d9d8d4", "#dfe2e4", "#f7f8e8",
+    "#f0c5c6", "#f0ec5e", "#aa810e", "#ebe6e8", "#f9f0f1",
 }
 
 
@@ -106,12 +107,13 @@ def test_brand_css_defines_only_the_bento_brief_hexes():
     assert not (found & RETIRED_HEXES)
 
 
-def test_highlight_and_on_tokens_match_the_brief():
+def test_highlight_word_is_the_yellow_accent_with_an_ink_outline():
     css = read("brand.css")
     assert re.search(r"--on-primary:\s*#141414", css) and re.search(r"--on-secondary:\s*#141414", css) and re.search(r"--on-accent:\s*#141414", css)
-    assert re.search(r"--accent-ink:\s*#aa810e", css)
-    assert re.search(r"\.hl \{[^}]*color: var\(--accent-ink\)", css)
-    assert not re.search(r"\.hl \{[^}]*background", css)
+    assert re.search(r"--accent:\s*#fbffa0", css) and re.search(r"--secondary:\s*#ffffff", css)
+    assert re.search(r"--hl-fill:\s*var\(--accent\)", css) and re.search(r"--hl-stroke:\s*var\(--ink\)", css)
+    assert re.search(r"\.hl \{[^}]*color: var\(--hl-fill\)[^}]*-webkit-text-stroke", css)
+    assert "var(--accent-ink)" not in css + read("styles.css")   # Walker: the darker accent-ink is not used
 
 
 def test_bento_materials_match_the_brief():
@@ -133,31 +135,24 @@ def test_light_only_no_monospace_and_the_two_brand_fonts():
 def test_pages_use_only_brief_hexes_and_one_pattern_hero(page):
     html = read(f"{page}.html")
     assert {h.lower() for h in re.findall(r"#[0-9a-fA-F]{6}\b", html)} <= BRIEF_HEXES
-    heroes = re.findall(r'class="[^"]*hero-art (pat-(?:aura|terrain))', html)
-    assert heroes == [("pat-aura" if page in ("index", "models") else "pat-terrain")]
-    assert html.count("pat-band") == 1                      # one gradient-pane section band
-    assert html.count("pat-halftone") + html.count("pat-pebbles") == 1   # at most one textured tile
+    heroes = re.findall(r'class="[^"]*hero-art (pat-[a-z]+)', html)
+    assert heroes == ["pat-terrain"]                         # posterised terrain hero, one per page
+    assert html.count("pat-pebbles") == 1                    # one pebble-field textured tile
+    for gone in ("pat-aura", "pat-band", "pat-halftone"):
+        assert gone not in html
     assert html.count('class="b-tag"') <= 1
-
-
-@pytest.mark.parametrize("asset", ["tile-halftone.svg", "band-gradpanes.svg"])
-def test_vector_pattern_assets_are_in_the_brief_colorway(asset):
-    svg = (SITE / "assets" / asset).read_text()
-    assert {h.lower() for h in re.findall(r"#[0-9a-fA-F]{6}\b", svg)} <= BRIEF_HEXES
-    if asset == "band-gradpanes.svg":
-        assert 'preserveAspectRatio="xMidYMid slice"' in svg[:300]
 
 
 def test_raster_pattern_assets_exist_at_the_brief_sizes():
     import struct
-    for name, size in {"hero-aura.png": (2560, 1440), "hero-terrain.png": (2560, 1440)}.items():
+    for name, size in {"hero-terrain.png": (2560, 1440), "tex-pebbles.png": (1280, 720)}.items():
         head = (SITE / "assets" / name).read_bytes()[:24]
         assert head[:8] == b"\x89PNG\r\n\x1a\n"
         assert struct.unpack(">II", head[16:24]) == size, name
 
 
 def test_retired_brutalist_assets_are_gone_and_all_assets_are_used():
-    for old in ("hero-flow.svg", "pattern-glyphgrid.svg", "pattern-halftone.svg"):
+    for old in ("hero-flow.svg", "pattern-glyphgrid.svg", "pattern-halftone.svg", "hero-aura.png", "band-gradpanes.svg", "tile-halftone.svg"):
         assert not (SITE / "assets" / old).exists()
     css = read("brand.css")
     for asset in (SITE / "assets").iterdir():

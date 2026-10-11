@@ -10,7 +10,7 @@
      and areas, and every fill that has to be read carries an ink edge.
      Fourth-down GO / FG / PUNT = primary / secondary / line fills with an ink outline; toss-ups are --ab-sub with a
      dotted ink outline. Heatmap = seven discrete token bins, pale cells outlined in ink.
-     Accent: the one headline word (as --accent-ink text), plus a dot in the footer. */
+     Accent: the one headline word (the accent with an ink outline, see .hl in brand.css), plus a dot in the footer. */
 
 :root {
   --gutter: clamp(14px, 2vw, 28px);
@@ -932,3 +932,10 @@ tr.is-sel .nm { color: var(--ink); }
 .tvrow .up, .tvrow .down { font-weight: 700; }
 .tvrow .em { color: var(--muted); font-weight: 600; }
 @media (max-width: 759px) { .tvrow { grid-template-columns: 70px minmax(0, 1fr) 56px 64px; } .tvrow .em, .tvhead .em { display: none; } .tvrow .nm { display: none; } }
+
+/* ---- white secondary (2026-10-10): white fills get an edge so they read on white tiles ---- */
+.kn, .tag-fill, .game .when .tag, .v-pass, .me, .find .fn { box-shadow: inset 0 0 0 1px var(--line); }
+.sw-fg, .opt-fg::before, .sc.run { box-shadow: inset 0 0 0 1.5px var(--ink); }
+
+/* footer tile: plain tile (the one pebble texture per page is the mid-page band) */
+.foot-plain { background: var(--ab-tile); }

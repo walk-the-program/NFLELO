@@ -23,6 +23,15 @@ Reads `outputs/elo_games.csv`, `outputs/ratings_current.json`, `outputs/model_re
 
 ## Design decisions (Bento Grid, applied 2026-10-10)
 
+> **Final design (Walker, 2026-10-10): Bento Grid**, per `context/brand.md`. Walker's overrides:
+> - **Highlight word:** the one highlight word per page (e.g. "ELO") is the accent `#fbffa0` with an ink text outline (`.hl` in `brand.css`). The `--hl-fill` variable switches it to blue in one line.
+> - **Secondary is pure white:** the pink is gone. White chips get a `--line` edge, and white bars and FG swatches get an ink edge.
+> - **Patterns:** posterised terrain (`assets/hero-terrain.png`) is the hero on every page, and pebble field (`assets/tex-pebbles.png`) is the one mid-page band per page. The footer is a plain tile. Aura, gradient panes and halftone are retired.
+> - **Elo heatmap bins** above average use `--ab-tile-pri`, then `--pri-tint`, then primary.
+> - **Archived designs:** `context/archive/`, and tags `design-bento` (v1), `design-ascii`, `design-brutalist-navy`, `design-brutalist`, `design-editorial`.
+>
+> Older lines below that mention the pink secondary, aura, gradient panes or halftone describe Bento v1 and are superseded by this note.
+
 The current design is **Bento Grid** (Modular, Clear, Product-proud): a board of rounded tiles, each making one point. It is a trial version of the whole site (all six pages), following Walker's brief `context/brand-bento.md` exactly. Same data, scripts and features as before; the markup gained board wrappers, and `brand.css` and `styles.css` were rewritten. Light mode only (no dark theme, no theme toggle, no `localStorage`). Fonts: Figtree 700 for headings and numerals, Nunito Sans for everything else; there is no monospace anywhere.
 
 **Archive tags (restore with `git checkout <tag> -- site context`):**
