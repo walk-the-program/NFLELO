@@ -35,7 +35,7 @@
   function renderHero() {
     var c = R.counts, hl = R.headlines;
     setText('hero-line', hl.hero);
-    setText('hero-deck', hl.hero_deck + ' Every model was built on earlier seasons, then scored once on ' + R.holdout_seasons[0] + ' to ' + R.holdout_seasons[1] + ' under rules committed to a public repository first.');
+    setText('hero-deck', 'Every model was built on earlier seasons, then scored once on ' + R.holdout_seasons[0] + ' to ' + R.holdout_seasons[1] + ' under rules committed to a public repository first. ' + hl.hero_deck);
     var tiles = $('#tiles');
     clear(tiles);
     function tile(label, big, sub) {

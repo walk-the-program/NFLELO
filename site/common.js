@@ -74,22 +74,6 @@
   }
   function moveMark(el, cx, cy) { el.setAttribute('transform', 'translate(' + cx + ' ' + cy + ')'); }
 
-  // ------------------------------------------------------------------ Halftone field dividers
-  // A strip of the brand's Halftone field pattern (see brand.css .splash) before every section but the first.
-  // Decorative only. Safe to call again after sections are inserted.
-  function initSlabs() {
-    var secs = document.querySelectorAll('main > .sec');
-    Array.prototype.forEach.call(secs, function (sec, i) {
-      if (i === 0) return;
-      var prev = sec.previousElementSibling;
-      if (prev && prev.classList.contains('splash-div')) return;
-      var d = document.createElement('div');
-      d.className = 'splash splash-div';
-      d.setAttribute('aria-hidden', 'true');
-      sec.parentNode.insertBefore(d, sec);
-    });
-  }
-
   // ------------------------------------------------------------------ tooltip
 
   var tip = $('#tip'), live = $('#live');
@@ -209,7 +193,7 @@
   function setText(id, text) { var n = $('#' + id); if (n && text != null) n.textContent = text; return n; }
   function done(id) { var n = $('#' + id); if (n) n.removeAttribute('aria-busy'); return n; }
 
-  // Segmented control (joined boxes, ink-filled selected segment). options: [{value, label, title}].
+  // Segmented control (joined hairline boxes, primary-filled selected segment). options: [{value, label, title}].
   // Returns {el, set(value), value(), disable(fn)}; onchange(value) fires on user choice only.
   function seg(label, options, value, onchange, cls) {
     var el = h('div', { class: 'b-seg ' + (cls || ''), role: 'group', 'aria-label': label });
@@ -355,7 +339,6 @@
     if (box.scrollWidth > box.clientWidth) box.scrollLeft = Math.max(0, a.offsetLeft - 60);
   }
   navCurrent();
-  initSlabs();
 
   window.NFL = {
     getJSON: getJSON, $: $, h: h, append: append, sv: sv, clear: clear, well: well,
@@ -365,6 +348,6 @@
     setText: setText, done: done, seg: seg, heroTiles: heroTiles, licenseUI: licenseUI, receiptLinks: receiptLinks,
     caveatBox: caveatBox, unavailable: unavailable, ciChart: ciChart, tableViewLive: tableViewLive,
     loadTeamNames: loadTeamNames, teamName: teamName, fieldLabel: fieldLabel, ordinal: ordinal,
-    mark: mark, moveMark: moveMark, initSlabs: initSlabs
+    mark: mark, moveMark: moveMark
   };
 })();
