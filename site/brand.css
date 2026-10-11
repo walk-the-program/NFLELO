@@ -11,13 +11,13 @@
 
 /* ---- the brief's CSS variables, verbatim ---- */
 :root {
-  --primary: #a11413;
-  --secondary: #d14f34;
-  --accent: #4a3122;
-  --neutral-dark: #261c1c;
-  --neutral-light: #f9f5f5;
+  --primary: #20436b;
+  --secondary: #eff8a5;
+  --accent: #ff4d37;
+  --neutral-dark: #26221c;
+  --neutral-light: #f9f8f5;
   --on-primary: #ffffff;
-  --on-accent: #ffffff;
+  --on-accent: #141414;
   --font-heading: "Figtree", -apple-system, sans-serif;
   --font-body: "Nunito Sans", -apple-system, sans-serif;
   --heading-size: 52px;
@@ -34,21 +34,21 @@
 
 /* Derived tokens for the light-mode Raw Brutalist aesthetic. */
 :root {
-  --canvas: #f9f5f5;
-  --ink: #261c1c;
-  --muted: #706868;
-  --line: #d9d4d4;
-  --on-secondary: #ffffff;
-  --accent-ink: #4a3122;
-  --pri-tint: #eedada;
-  --sec-tint: #f3dad6;
+  --canvas: #f9f8f5;
+  --ink: #26221c;
+  --muted: #706d68;
+  --line: #d9d8d4;
+  --on-secondary: #141414;
+  --accent-ink: #ff4d37;
+  --pri-tint: #dfe2e4;
+  --sec-tint: #f7f8e8;
 }
 
 /* Raw Brutalist material variables. */
 :root {
   --ab-type-pick-w: 400;
   --ab-tr: 1;
-  --ab-grid: rgba(38,28,28,0.06);
+  --ab-grid: rgba(38,34,28,0.06);
 }
 
 /* Interface type is system monospace (the brief's stack). */
@@ -82,12 +82,13 @@
 .b-primary:active { transform: translate(6px, 6px); box-shadow: none; }
 .b-primary[hidden] { display: none; }
 
-/* ---- secondary button: transparent, ink text, secondary edge ---- */
+/* ---- secondary button: transparent, ink text. The brief gives it a --secondary edge, but pale yellow is 1.1:1 on the
+   canvas, so the 2px edge is --ink and the hover wash is --sec-tint. ---- */
 .b-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 42px; padding: 0 16px; cursor: pointer; text-decoration: none;
   background: transparent; color: var(--ink);
-  border: 2px solid var(--secondary); border-radius: 0;
+  border: 2px solid var(--ink); border-radius: 0;
   font: 600 12px/1.2 var(--font-mono); letter-spacing: 0.05em; text-transform: uppercase;
 }
 .b-btn:hover { background: var(--sec-tint); }
@@ -133,22 +134,17 @@
 .b-switch:checked::before { background: var(--on-primary); transform: translateX(26px); }
 .b-toggle { display: flex; align-items: center; gap: 14px; min-height: 44px; cursor: pointer; color: var(--ink); font: 600 12px/1.3 var(--font-mono); letter-spacing: 0.05em; text-transform: uppercase; }
 
-/* ---- tag / chip (secondary fill). Text on secondary is 4.30:1, so it is set at 18.66px bold or larger ---- */
+/* ---- tag / chip (secondary fill). On-secondary on secondary is 16.35:1, so any size passes. The accent is not used
+   for badges: it appears only as the one headline highlighter band per view. ---- */
 .b-chip {
   display: inline-block; flex: none; padding: 4px 10px; white-space: nowrap;
   background: var(--secondary); color: var(--on-secondary); border: 0; border-radius: 0;
-  font: 700 19px/1.1 var(--font-mono); letter-spacing: 0.02em; text-transform: uppercase;
+  font: 700 12px/1.2 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase;
 }
-/* badge (accent fill) */
-.b-badge {
-  display: inline-block; flex: none; padding: 4px 8px; white-space: nowrap;
-  background: var(--accent); color: var(--on-accent); border-radius: 0;
-  font: 700 11px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase;
-}
-/* outlined tag: ink text, secondary edge */
+/* outlined tag: ink text on a quiet secondary wash with an ink edge */
 .b-tag {
   display: inline-block; flex: none; padding: 3px 8px; white-space: nowrap;
-  background: transparent; color: var(--ink); border: 2px solid var(--secondary); border-radius: 0;
+  background: var(--sec-tint); color: var(--ink); border: 2px solid var(--ink); border-radius: 0;
   font: 700 11px/1.2 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase;
 }
 
@@ -158,7 +154,7 @@
 /* ---- progress / data bar ---- */
 .b-bar { background: var(--line); border: 2px solid var(--ink); height: 16px; }
 .b-bar > i { display: block; height: 100%; background: var(--primary); }
-.b-bar > i + i { background: var(--secondary); }
+.b-bar > i + i { background: var(--secondary); box-shadow: inset 0 0 0 2px var(--ink); }
 
 /* ---- slider: bordered track, primary fill, square thumb ---- */
 .b-range { --r: 14px; --lo: 0; --hi: 1; position: relative; height: 44px; }
@@ -199,6 +195,17 @@
 /* ---- Halftone field pattern (brief: Patterns, "Chosen pattern"). A seamless 160px SVG tile in the Brand colorway,
    used for hero bands and divider strips. Text never sits on it; a textured card keeps its text on a solid --canvas plate. ---- */
 .splash { display: block; background: var(--canvas) url("assets/pattern-halftone.svg") 0 0 / 160px 160px repeat; border: 2px solid var(--ink); border-radius: 0; }
+
+/* ---- Flow filaments pattern: the hero background, one per page, full bleed, background-size cover. The headline and copy
+   always sit on a solid --canvas plate (.plate or .hero-panel), never on the filaments. ---- */
+.hero-flow { background: var(--canvas) url("assets/hero-flow.svg") center / cover no-repeat; border-bottom: 2px solid var(--ink); }
+
+/* ---- Glyph grid pattern: card texture. At most ONE textured card per view; its text sits on a solid --canvas plate. ---- */
+.tex-glyph { background: var(--canvas) url("assets/pattern-glyphgrid.svg") 0 0 / 160px 160px repeat; border: 2px solid var(--ink); border-radius: 0; box-shadow: var(--shadow); }
+.tex-glyph > .plate { background: var(--canvas); border: 2px solid var(--ink); margin: 18px; padding: 16px 20px; }
+
+/* a solid canvas plate that carries hero text over the flow background */
+.plate { background: var(--canvas); border: 2px solid var(--ink); box-shadow: var(--shadow); }
 
 @media (prefers-reduced-motion: reduce) {
   .b-press, .b-primary { transition: none; }

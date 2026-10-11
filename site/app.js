@@ -289,7 +289,7 @@
     var lead = nameParts(g.home).nick;
     var stats = [{ l: (hasModel ? 'Model' : 'Elo') + ' · ' + lead + ' win', v: pct(p, 1), c: hasModel ? 'var(--primary)' : 'var(--ink)', clip: hasModel ? 'none' : 'circle(50%)', main: true }];
     if (hasModel) stats.push({ l: 'Elo', v: pct(best.pe, 1), c: 'var(--ink)', clip: 'circle(50%)', key: 'elo' });
-    stats.push(best.pv != null ? { l: 'Vegas', v: pct(best.pv, 1), c: 'var(--secondary)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--secondary)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas', na: true });
+    stats.push(best.pv != null ? { l: 'Vegas', v: pct(best.pv, 1), c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas', na: true });
     stats.push({ l: (hasModel ? 'Model' : 'Elo') + ' vs Vegas', v: gapPts == null ? 'Needs a line' : signed(gapPts, 1) + ' pts', gap: true, na: gapPts == null });
     return {
       eyebrow: 'Week ' + u.week + ' · ' + shortDay(g.date) + ' · ' + basis,
@@ -318,7 +318,7 @@
       stats: [
         { l: 'Model · ' + nick + ' win', v: pct(pm, 1), c: 'var(--primary)', clip: 'none', main: true },
         { l: 'Elo', v: pct(pe, 1), c: 'var(--ink)', clip: 'circle(50%)', key: 'elo' },
-        pv != null ? { l: 'Vegas', v: pct(pv, 1), c: 'var(--secondary)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--secondary)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas', na: true },
+        pv != null ? { l: 'Vegas', v: pct(pv, 1), c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas', na: true },
         { l: nameParts(rt.team).nick + ' projected wins', v: f1(rt.proj_model) }],
       aria: homeAbbr + ' win probability. Model ' + pct(pm, 1) + ', Elo ' + pct(pe, 1) + (pv != null ? ', Vegas ' + pct(pv, 1) : '. No Vegas line yet') + '.',
       link: { href: $('#rest') ? '#rest' : '#week', text: 'Rest of season' }, ticks: true
@@ -981,14 +981,15 @@
   // ------------------------------------------------------------------ history: tapestry + parity
 
   // Seven discrete bins, tokens only. Below 1500: ink, muted, line. Near 1500: canvas. Above: tint, secondary, primary.
+  // Pale bins (pale: true) get an ink outline so they stay visible next to the canvas and next to each other.
   // Lightness steps the same way on both sides, so the scale reads without color.
   var HEAT = [
     { max: 1350, fill: 'var(--ink)', label: 'Below 1350' },
     { max: 1425, fill: 'var(--muted)', label: '1350 to 1425' },
-    { max: 1475, fill: 'var(--line)', label: '1425 to 1475' },
-    { max: 1525, fill: 'var(--canvas)', label: '1475 to 1525' },
-    { max: 1575, fill: 'var(--pri-tint)', label: '1525 to 1575' },
-    { max: 1650, fill: 'var(--secondary)', label: '1575 to 1650' },
+    { max: 1475, fill: 'var(--line)', label: '1425 to 1475', pale: true },
+    { max: 1525, fill: 'var(--canvas)', label: '1475 to 1525', pale: true },
+    { max: 1575, fill: 'var(--pri-tint)', label: '1525 to 1575', pale: true },
+    { max: 1650, fill: 'var(--secondary)', label: '1575 to 1650', pale: true },
     { max: Infinity, fill: 'var(--primary)', label: 'Above 1650' }
   ];
   function heatBin(v) { for (var i = 0; i < HEAT.length; i++) if (v < HEAT[i].max) return HEAT[i]; return HEAT[HEAT.length - 1]; }
@@ -999,7 +1000,7 @@
     clear(body);
     body.removeAttribute('aria-busy');
 
-    var scale = h('div', { class: 'scale', 'aria-label': 'Color scale in seven steps: dark gray below 1350, lighter gray to 1475, white from 1475 to 1525, then pink, orange and red above 1525' }, h('span', { text: 'Rating' }));
+    var scale = h('div', { class: 'scale', 'aria-label': 'Color scale in seven steps: dark gray below 1350, lighter gray to 1475, white from 1475 to 1525, then pale blue-gray, pale yellow and navy above 1525' }, h('span', { text: 'Rating' }));
     HEAT.forEach(function (b) {
       scale.appendChild(h('span', { class: 'sw' }, h('i', { style: 'background:' + b.fill }), b.label));
     });
@@ -1038,7 +1039,7 @@
         sv('text', { class: 'tick a-end', x: LBL - 8, y: rowY[r] + CH - 3, text: code }, svg);
         T.values[r].forEach(function (v, c) {
           if (v == null) return;
-          sv('rect', { class: 'cell', x: LBL + c * cw, y: rowY[r], width: cw - 1, height: CH - 1, style: 'fill:' + heatFill(v) }, svg);
+          sv('rect', { class: 'cell' + (heatBin(v).pale ? ' pale' : ''), x: LBL + c * cw, y: rowY[r], width: cw - 1, height: CH - 1, style: 'fill:' + heatFill(v) }, svg);
         });
       });
       var cursor = sv('rect', { class: 'cursor', width: cw - 1, height: CH - 1, visibility: 'hidden' }, svg);

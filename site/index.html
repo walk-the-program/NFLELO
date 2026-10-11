@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f9f5f5">
+<meta name="theme-color" content="#f9f8f5">
 <title>NFLELO: Elo ratings and stats</title>
 <meta name="description" content="Elo ratings for every NFL franchise since 1970, the weekly power ladder, model win chances next to the Vegas benchmark, luck, and league history.">
 <link rel="icon" href="data:,">
@@ -38,14 +38,15 @@
   </ul>
 </nav>
 
-<header class="hero" id="top">
+<header class="hero hero-flow" id="top">
   <div class="wrap">
-    <p class="tagline">Machine Learning applied to Football</p>
-    <div class="hero-top">
-      <h1 class="wordmark">NFL<span class="hl">ELO</span></h1>
-      <p class="status" id="status" aria-live="polite">Loading ratings</p>
+    <div class="plate hero-plate">
+      <p class="tagline">Machine Learning applied to Football</p>
+      <div class="hero-top">
+        <h1 class="wordmark">NFL<span class="hl">ELO</span></h1>
+        <p class="status" id="status" aria-live="polite">Loading ratings</p>
+      </div>
     </div>
-    <div class="splash splash-hero" aria-hidden="true"></div>
     <div class="hero-grid">
       <section class="hero-panel" aria-labelledby="mx-title">
         <h2 id="mx-title" class="sr">Matchup instrument</h2>
@@ -61,7 +62,7 @@
           <div class="b-meter" id="mx-meter-img" role="img" aria-label="">
             <div class="b-meter__track" aria-hidden="true"><i>0</i><i>100</i></div>
             <div class="b-meter__pos" id="mx-pos-elo" style="--tick: var(--ink)" aria-hidden="true"><span class="b-meter__tick b-meter__tick--up"></span><span class="tl tl-top">Elo</span></div>
-            <div class="b-meter__pos" id="mx-pos-vegas" style="--tick: var(--secondary)" aria-hidden="true"><span class="b-meter__tick b-meter__tick--down"></span><span class="tl tl-bottom">Vegas</span></div>
+            <div class="b-meter__pos" id="mx-pos-vegas" style="--tick: var(--muted)" aria-hidden="true"><span class="b-meter__tick b-meter__tick--down"></span><span class="tl tl-bottom">Vegas</span></div>
             <div class="b-meter__pos" id="mx-pos-model" aria-hidden="true"><span class="b-meter__knob"></span></div>
           </div>
         </div>
@@ -151,7 +152,7 @@
 </main>
 
 <footer class="foot wrap">
-  <p class="motto">Nothing hidden. Nothing soft.</p>
+  <div class="foot-card tex-glyph"><p class="motto plate">Nothing hidden. Nothing soft.</p></div>
   <p id="credit">Data: nflverse (CC BY 4.0); 1970 to 1998 results: FiveThirtyEight (CC BY 4.0).</p>
   <p>Independent project, not affiliated with the NFL or any team.</p>
   <p><a href="models.html">The models and their receipts</a></p>
