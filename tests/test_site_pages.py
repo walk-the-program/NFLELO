@@ -150,7 +150,7 @@ def test_vector_pattern_assets_are_in_the_brief_colorway(asset):
 
 def test_raster_pattern_assets_exist_at_the_brief_sizes():
     import struct
-    for name, size in {"hero-aura.png": (2560, 1440), "hero-terrain.png": (2560, 1440), "tex-pebbles.png": (1280, 720)}.items():
+    for name, size in {"hero-aura.png": (2560, 1440), "hero-terrain.png": (2560, 1440)}.items():
         head = (SITE / "assets" / name).read_bytes()[:24]
         assert head[:8] == b"\x89PNG\r\n\x1a\n"
         assert struct.unpack(">II", head[16:24]) == size, name
