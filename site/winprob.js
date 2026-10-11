@@ -34,7 +34,7 @@
     setText('hero-deck', 'Pick any completed ' + W.season + ' game and watch each team\'s chance of winning move snap by snap. The model reads the game state and a pregame strength estimate, nothing from the betting market.');
     var swingMax = G.reduce(function (a, g) { return !a || g.swing.abs > a.swing.abs ? g : a; }, null);
     N.heroTiles([
-      { label: 'Games charted', big: commas(G.length), bar: W.updated_through.week / 18, barText: 'Through week ' + W.updated_through.week + ' of 18', sub: 'completed ' + W.season + ' regular-season games, through week ' + W.updated_through.week + ' (last game ' + W.updated_through.last_game_date + ')' },
+      { label: 'Games charted', big: commas(G.length), sub: 'completed ' + W.season + ' regular-season games, through week ' + W.updated_through.week + ' (last game ' + W.updated_through.last_game_date + ')' },
       { label: 'Most exciting game', big: top ? top.away + ' at ' + top.home : 'n/a', sub: top ? 'Week ' + top.week + ', final ' + top.away_score + '-' + top.home_score + ', excitement index ' + top.excitement.toFixed(1) : '' },
       { label: 'Biggest single swing', big: swingMax ? pts(swingMax.swing.abs) + ' pts' : 'n/a', sub: swingMax ? 'win probability on one play, ' + matchup(swingMax) + ', week ' + swingMax.week + ', ' + swingMax.swing.clock : '' },
       { label: 'Test against nflfastR', big: signed(d.diff, 4), sub: 'Brier on ' + commas(H.plays) + ' plays, 2020 to 2025. Negative is better.' }

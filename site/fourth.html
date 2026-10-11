@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#eaecee">
+<meta name="theme-color" content="#1c2126">
 <title>NFLELO: fourth downs</title>
 <meta name="description" content="A model-estimated fourth-down decision map (go, field goal or punt) and how 2026 teams compare, with the status of its forward test.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="brand.css">
 <link rel="stylesheet" href="styles.css">
 <script src="common.js" defer></script>
+<script src="ascii.js" defer></script>
 <script src="fourth.js" defer></script>
 </head>
 <body class="mp mp-fourth">
@@ -22,33 +23,34 @@
   <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFLELO</a>
   <span class="nav-tag">Machine Learning applied to Football</span>
   <ul class="nav-links">
-    <li><a href="index.html">Ratings</a></li>
+    <li><a href="index.html"><span class="n">[01]</span> Ratings</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
-    <li><a href="plays.html">Plays</a></li>
-    <li><a href="winprob.html">Win prob</a></li>
-    <li><a href="fourth.html" aria-current="page">Fourth down</a></li>
-    <li><a href="playcalling.html">Play calling</a></li>
-    <li><a href="models.html">Receipts</a></li>
+    <li><a href="plays.html"><span class="n">[02]</span> Plays</a></li>
+    <li><a href="winprob.html"><span class="n">[03]</span> Win prob</a></li>
+    <li><a href="fourth.html" aria-current="page"><span class="n">[04]</span> Fourth down</a></li>
+    <li><a href="playcalling.html"><span class="n">[05]</span> Play calling</a></li>
+    <li><a href="models.html"><span class="n">[06]</span> Receipts</a></li>
   </ul>
 </nav>
 
-<header class="hero page" id="top">
+<header class="hero" id="top">
   <div class="wrap">
-    <div class="board hero-board">
-      <section class="tile-m hero-art pat-terrain" aria-labelledby="page-title">
-        <div class="plate hero-plate">
-          <p class="page-kicker">NFLELO &rarr; Models &rarr; Fourth downs <span class="lic" id="lic"></span></p>
-          <h1 class="page-title" id="page-title">Fourth <span class="hl">downs</span></h1>
-          <p class="hero-line" id="hero-line">Loading results</p>
-          <p class="hero-deck" id="hero-deck">For each yard line and distance, which option gives the team the best chance to win: go for it, kick the field goal, or punt. Every number on this page is model-estimated.</p>
-          <p class="tagline"><span class="b-tag">Machine Learning applied to Football</span></p>
-        </div>
+    <div class="hero-split">
+      <section class="panel hero-copy" data-title="Fourth downs" aria-labelledby="page-title">
+        <p class="page-kicker"><span class="pr">//</span>NFLELO / Models / Fourth downs <span class="lic" id="lic"></span></p>
+        <p class="tagline"><span class="pr">$</span>Machine Learning applied to Football</p>
+        <h1 class="page-title" id="page-title">Fourth <span class="hl">downs</span><span class="caret hl-caret" aria-hidden="true">&#9608;</span></h1>
+        <p class="hero-line" id="hero-line">Loading results</p>
+        <p class="hero-deck" id="hero-deck">For each yard line and distance, which option gives the team the best chance to win: go for it, kick the field goal, or punt. Every number on this page is model-estimated.</p>
+        <p class="cta"><a class="b-primary" href="#chart">&gt; Open the decision chart <span class="caret" aria-hidden="true">&#9608;</span></a></p>
       </section>
-      <a class="b-primary" href="#chart"><span class="b-primary__n" aria-hidden="true">01</span><span class="b-primary__go" aria-hidden="true">&darr;</span><span class="b-primary__label">Open the decision chart</span></a>
-      <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
+      <figure class="ascii" id="ascii" data-win="0.35,0.25" aria-hidden="true"><pre class="ascii-pre"></pre></figure>
     </div>
+    <section class="panel tiles-panel" data-title="Headline numbers"><div class="tiles" id="tiles" aria-label="Headline numbers"></div></section>
   </div>
 </header>
+
+<div class="band"><p class="plate band-plate"><span class="pr">//</span> Go, kick or punt: the model's pick, with the close calls marked.</p></div>
 
 <main>
   <section class="wrap status-wrap" id="status" aria-label="Status of this model" tabindex="-1">
@@ -56,43 +58,25 @@
   </section>
   <section class="sec" id="chart" aria-labelledby="chart-h" tabindex="-1">
   <div class="wrap">
-  <div class="board sec-board">
-  <header class="sec-head tile-m">
-    <div class="sec-copy">
-      <p class="kicker"><span class="kn">01</span><span class="kt">Decision chart</span></p>
-      <h2 class="headline" id="chart-h">Decision chart</h2>
-      <p class="deck">Pick a game state. Each square is one yard line and distance, colored by the best option; pale squares are close calls. Point estimates, no uncertainty band.</p>
-    </div>
-  </header>
-<div id="chart-body" class="tile-m tile-stage body" aria-busy="true"><p class="note">Loading</p></div>
-  </div>
+    <p class="kicker">01 Decision chart</p>
+    <h2 class="headline" id="chart-h">Decision chart</h2>
+    <p class="deck">Pick a game state. Each square is one yard line and distance, colored by the best option; pale squares are close calls. Point estimates, no uncertainty band.</p>
+    <div id="chart-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>
   <section class="sec" id="ytd" aria-labelledby="ytd-h" tabindex="-1">
   <div class="wrap">
-  <div class="board sec-board">
-  <header class="sec-head tile-m">
-    <div class="sec-copy">
-      <p class="kicker"><span class="kn">02</span><span class="kt">2026 so far</span></p>
-      <h2 class="headline" id="ytd-h">2026 so far</h2>
-      <p class="deck">Each completed fourth down this season, compared with what the model would have chosen. Model-estimated: the option not chosen is never observed.</p>
-    </div>
-  </header>
-<div id="ytd-body" class="tile-m body" aria-busy="true"><p class="note">Loading</p></div>
-  </div>
+    <p class="kicker">02 2026 so far</p>
+    <h2 class="headline" id="ytd-h">2026 so far</h2>
+    <p class="deck">Each completed fourth down this season, compared with what the model would have chosen. Model-estimated: the option not chosen is never observed.</p>
+    <div id="ytd-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </section>
-  <div class="wrap band-wrap"><div class="band pat-band"><p class="plate">Every number on this page is model-estimated.</p></div></div>
   <section class="sec" id="how" aria-labelledby="how-h" tabindex="-1">
   <div class="wrap">
-  <div class="board sec-board">
-  <header class="sec-head tile-m">
-    <div class="sec-copy">
-      <p class="kicker"><span class="kn">03</span><span class="kt">How this works</span></p>
-      <h2 class="headline" id="how-h">How this works</h2>
-    </div>
-  </header>
-<div class="method how">
+    <p class="kicker">03 How this works</p>
+    <h2 class="headline" id="how-h">How this works</h2>
+    <div class="method how">
       <div>
         <p><b>What it does.</b> The engine values each fourth-down option by the team's win probability afterward. Going for it uses the play model (run and pass mix by field zone, with conversion offsets); a field goal uses a kicker-aware make model; a punt uses a punter-aware net-yards model. The best option is the one with the highest win probability.</p><p><b>Toss-ups.</b> When the best option beats the second best by less than 0.02 win probability, the call is a toss-up. The cut-off is fixed; there is no uncertainty band, so treat any close call as a coin flip.</p><p><b>Why it is not validated yet.</b> The first version of the conversion model failed its 2020 to 2025 test. The fix was built on development seasons only, frozen before any 2026 game, and will be scored once, after the 2026 participation data is released. Until then these are a model's view, not a validated tool.</p><p><b>What it ignores.</b> Teams know things the model does not: injuries, matchups, weather at the spot, the game plan. Penalties, kneel-downs, ties and overtime are excluded.</p>
         <div id="how-dyn" class="how-dyn"></div>
@@ -110,22 +94,18 @@
       </div>
     </div>
   </div>
-  </div>
   </section>
 </main>
 
-<footer class="wrap foot">
-  <div class="board foot-board">
-    <div class="tile-m foot-art pat-halftone"><p class="motto plate">One tile, one idea.</p></div>
-    <div class="tile-m foot-links">
-      <p class="foot-dot"><i aria-hidden="true"></i>NFLELO, Machine Learning applied to Football</p>
-      <p id="credit">Data: nflverse (CC BY 4.0).</p>
-      <p>Independent project, not affiliated with the NFL or any team.</p>
-      <p><a href="index.html">Ratings and the weekly ladder</a></p>
-      <p><a href="models.html">Every model and its receipts</a></p>
-      <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
-    </div>
-  </div>
+<footer class="foot wrap">
+  <div class="foot-card tex-halftone"><div class="plate foot-plate">
+    <p class="motto"><span class="pr">&gt;</span> Everything is a character.<span class="acc-block" aria-hidden="true">&#9608;</span></p>
+    <p id="credit">Data: nflverse (CC BY 4.0).</p>
+    <p>Independent project, not affiliated with the NFL or any team.</p>
+    <p><a href="index.html">Ratings and the weekly ladder</a></p>
+    <p><a href="models.html">Every model and its receipts</a></p>
+    <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
+  </div></div>
 </footer>
 
 <div id="tip" class="tip" role="presentation" hidden></div>
