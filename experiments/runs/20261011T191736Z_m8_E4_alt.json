@@ -1,0 +1,364 @@
+{
+  "name": "m8_E4_alt",
+  "label": "dev",
+  "window": {
+    "seasons": [
+      2006,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 3450,
+  "games_hash": "52b8194df3a2ebf4",
+  "metrics": {
+    "n": 3450,
+    "brier": 0.2143129859687479,
+    "logloss": 0.6180764120955831,
+    "accuracy": 0.6506829410055216,
+    "ece": 0.012757991464138705,
+    "ece_null_p95": 0.02601736545631972,
+    "ece_pass": true
+  },
+  "features": [
+    "elo_logit",
+    "kf_margin",
+    "qb_delta_diff",
+    "alt_diff"
+  ],
+  "params": {
+    "ratings": {
+      "lam": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "qb": {
+      "k": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "rookie_dropbacks": 100,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "kalman": {
+      "q_week": 0.72158,
+      "gamma": 0.48317,
+      "q_season": 14.431,
+      "sigma_m": 12.361,
+      "sigma_e": 13.52,
+      "rho": 0.80709,
+      "scale": 39.921,
+      "q_hfa": 0.00034383,
+      "epa_home": 0.0085843,
+      "p0": 36.0,
+      "h0": 0.0,
+      "ph0": 9.0,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "train_start": 2001,
+    "season_half_life": 8.0,
+    "ties": "two half-weight rows",
+    "elo_config": {
+      "start": 1500.0,
+      "k": 20.0,
+      "lam": 0.4,
+      "hfa_mode": "online",
+      "hfa": 55.0,
+      "hfa_init": 65.0,
+      "k_hfa": 0.5,
+      "hfa_mov": false,
+      "mov_mode": "winner",
+      "mov_cap": null,
+      "expansion_start": 1300.0,
+      "include_playoffs": false
+    },
+    "model": "logistic",
+    "target": null,
+    "method": null,
+    "bases": []
+  },
+  "data": {
+    "data/games.csv": "70869b81fd8b785cdaa436cc4955cbd30139b8aae9b4ede68e01673761790779",
+    "data/raw/ml/pbp/1999": "6263ca0dcafed4110f1da80be5126eedc2fba948b3de111dc2e8dd94165ce595",
+    "data/raw/ml/pbp/2000": "29a0904f123de7fe9c10ff07e7605bb29d753ff87f2026659605e60b2c0aa243",
+    "data/raw/ml/pbp/2001": "7b34b78901915ca98449190a1a911308275cc764eb3e565376c3d44667933dc1",
+    "data/raw/ml/pbp/2002": "46fe8b49e4f94e479cf8e5dbb87d90b577d76d0a503d6bf4f2191902f95391a2",
+    "data/raw/ml/pbp/2003": "c45fa61ddb3eba8c316f8c680362284ed01174728ca6e22bdfdba6083d5ec707",
+    "data/raw/ml/pbp/2004": "c95a80bffc740d438965320a6014f9cb839fa57e92e114b2783fc76d8acce653",
+    "data/raw/ml/pbp/2005": "c7e4b4984af805df9719a23004a967593e7d503025b1c301973606e0e4f7cc61",
+    "data/raw/ml/pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+    "data/raw/ml/pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+    "data/raw/ml/pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+    "data/raw/ml/pbp/2009": "5bfb6559343c04092d1ad66c1479782d085d9f390e6806be0a7ca7ec37124806",
+    "data/raw/ml/pbp/2010": "74ad605fea53c27afd00eee71c53b86b5cfbf7133d1a7b5b8f0067d817e55785",
+    "data/raw/ml/pbp/2011": "26727f9d2b0e4f9f616e746b87b9a29359f37a4b484f66f7312baf883d85e958",
+    "data/raw/ml/pbp/2012": "3277aded9792c419cc853cf307f2206c3fb0908d91750b4e1d3d66b567407c66",
+    "data/raw/ml/pbp/2013": "2a31a7cd0e7e2306f626a0f1f4bb96679e5b3e92a8729695858adca35d8b2686",
+    "data/raw/ml/pbp/2014": "c6910558e235dac664b1b7f02654d47ea8d51904ef9ace5d4f015165604e0b12",
+    "data/raw/ml/pbp/2015": "b3314a52b781a00417528b2e3388d2596098cdbe7b565d3c962d7171a98ae70f",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/1999": "b590c0c595ae702489068ed30d25460a1da2f129ce47c4143c8c28618fbb2749",
+    "data/raw/ml/schedules/2000": "d11ca64a246a9b9ce98beb15af6a337887f1a31658a1271d510ef62e094fd927",
+    "data/raw/ml/schedules/2001": "59deb3483354d8e24a55eef5e508f4824a3cdfff44936adea6d02af34c64fffd",
+    "data/raw/ml/schedules/2002": "b394de36fc6286647bdfa1a82383b0fec5f83a5e0aeaefc010336c72f1365545",
+    "data/raw/ml/schedules/2003": "70b3c8a10df7a205ee8bc446fa40dca4f7408f3900d063f1881860119de4834c",
+    "data/raw/ml/schedules/2004": "64d26bdf22af5736b507a04b82c73b17ded7765ad2940c02d880abbe5779d978",
+    "data/raw/ml/schedules/2005": "3535ab82c2c6b866d94623aba9f37eac3b7497fd5ff61898904e03420d80795a",
+    "data/raw/ml/schedules/2006": "04e8c1a0394137e8493db6bf228a75ab1e0e8104eca4056380c13168174fca98",
+    "data/raw/ml/schedules/2007": "ed35269017c5342a04e621717760da8ccdc68421f7a38685eaa355af90d875b2",
+    "data/raw/ml/schedules/2008": "76a274f12d0efbdc6220870e083597fe6669f33bf5f94d30ade9d11efbc3423d",
+    "data/raw/ml/schedules/2009": "b720c554d58f8e8bc4ef4fe3ada0528f1f4065bde6926395f5c4ed46f6c19579",
+    "data/raw/ml/schedules/2010": "c6eb6d6390b8808ab6fe7a1c177d45b2d31c4dc3f7b5ccf3a9ff525c9afe758f",
+    "data/raw/ml/schedules/2011": "367cd43a9a9499d875a00dc12d2476ea3bfabc36dfbb82399a695f5230618232",
+    "data/raw/ml/schedules/2012": "94fd313c6126390c47c936cc04c986ec6a2526cad776f078e61c8e740171ceb0",
+    "data/raw/ml/schedules/2013": "48b55301b46a4acc55b1263555b01d62475fce5196f943176cf5bb23b5b979b6",
+    "data/raw/ml/schedules/2014": "56c8544f26975a429dd1dcd67996b28cb3680c742c79c2367bfea1e35ae93940",
+    "data/raw/ml/schedules/2015": "68c3bf6df90e969fe80aa46eb3351ad624e5e7c3f85c664644811508bbb647c3",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56",
+    "data/sources/stadiums.csv": "e4df8b30c01110788e9d4b492cf570587853c1c17c1242ba6601b22b0faa8e79"
+  },
+  "git": {
+    "sha": "f710e6f75c81e3c1f35b3b9e73ae01fb3db21b06",
+    "dirty": true
+  },
+  "timestamp": "2026-10-11T19:17:36+00:00",
+  "notes": "context: alt_diff",
+  "group": "E4",
+  "deployable": true,
+  "comparisons": {
+    "vs_a4s": {
+      "n": 3450,
+      "diff": -0.0007729432626423291,
+      "ci_low": -0.0018047529216222015,
+      "ci_high": 0.0002508215311634446,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.000525509256338185,
+      "metric": "brier"
+    },
+    "vs_c2d": {
+      "n": 3450,
+      "diff": 0.00018101700443646436,
+      "ci_low": -0.00017488529167338185,
+      "ci_high": 0.0005561908361211273,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.00019127687474843017,
+      "metric": "brier"
+    },
+    "vs_a4s_logloss": {
+      "n": 3450,
+      "diff": -0.00158912081324111,
+      "ci_low": -0.0038712914540334374,
+      "ci_high": 0.0006824664532396485,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.0011744375048458155,
+      "metric": "logloss"
+    },
+    "vs_c2d_logloss": {
+      "n": 3450,
+      "diff": 0.0005692942233234924,
+      "ci_low": -0.0002665644926314628,
+      "ci_high": 0.001462513313290292,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.00044766753557125966,
+      "metric": "logloss"
+    },
+    "vs_market": {
+      "n": 3450,
+      "diff": 0.0037147532639858006,
+      "ci_low": 0.0013831687871083875,
+      "ci_high": 0.006053262743156569,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.001213287410690567,
+      "metric": "brier"
+    },
+    "vs_best": {
+      "n": 3450,
+      "diff": 0.00037024374070772196,
+      "ci_low": -0.0001530721822463006,
+      "ci_high": 0.0009214113929440856,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.00027721518242738665,
+      "metric": "brier"
+    }
+  },
+  "one_se": {
+    "best": "E3b",
+    "within": false,
+    "chosen": false,
+    "eligible": [
+      "C2d",
+      "E1_C2d_margin_normal",
+      "E1_C2d_margin_logit",
+      "E1_C2d_epa_logit",
+      "E1_C2d_blend_normal",
+      "E1_C2d_blend_logit",
+      "E3b",
+      "E3c",
+      "E3abc",
+      "E4_travel",
+      "E4_body",
+      "E4_rest",
+      "E5",
+      "E5m"
+    ],
+    "complexity": 4
+  },
+  "accepted": null,
+  "splits": null,
+  "coefficients": [
+    {
+      "season": 2006,
+      "n_train": 1272,
+      "intercept": -0.02935472969590559,
+      "elo_logit": 0.28121975504083946,
+      "kf_margin": 0.09481599604889192,
+      "qb_delta_diff": 2.8246609683261,
+      "alt_diff": -0.6544696427768539
+    },
+    {
+      "season": 2007,
+      "n_train": 1528,
+      "intercept": -0.057479850656902656,
+      "elo_logit": 0.4163755291075068,
+      "kf_margin": 0.06907692903588855,
+      "qb_delta_diff": 2.9206246555794335,
+      "alt_diff": -0.3778848957083489
+    },
+    {
+      "season": 2008,
+      "n_train": 1784,
+      "intercept": -0.060368695967094106,
+      "elo_logit": 0.3454269151771549,
+      "kf_margin": 0.08356030901746507,
+      "qb_delta_diff": 3.066119563849203,
+      "alt_diff": -0.37922746081969816
+    },
+    {
+      "season": 2009,
+      "n_train": 2040,
+      "intercept": -0.052999040049085754,
+      "elo_logit": 0.3853166035670079,
+      "kf_margin": 0.080193752845081,
+      "qb_delta_diff": 3.3116637599370247,
+      "alt_diff": -0.21134654610511192
+    },
+    {
+      "season": 2010,
+      "n_train": 2296,
+      "intercept": -0.04871379612806364,
+      "elo_logit": 0.4267926117247058,
+      "kf_margin": 0.07751213956013162,
+      "qb_delta_diff": 3.265363555184316,
+      "alt_diff": -0.11815215541514444
+    },
+    {
+      "season": 2011,
+      "n_train": 2552,
+      "intercept": -0.04423660184839241,
+      "elo_logit": 0.34990664284539197,
+      "kf_margin": 0.08418974885108228,
+      "qb_delta_diff": 2.593722155631336,
+      "alt_diff": -0.05931517106294508
+    },
+    {
+      "season": 2012,
+      "n_train": 2808,
+      "intercept": -0.04967815947399964,
+      "elo_logit": 0.2627692407655948,
+      "kf_margin": 0.09952616517686767,
+      "qb_delta_diff": 2.7210890616789514,
+      "alt_diff": -0.028082388825827892
+    },
+    {
+      "season": 2013,
+      "n_train": 3064,
+      "intercept": -0.05090377380262727,
+      "elo_logit": 0.1987412785859377,
+      "kf_margin": 0.10881897494407416,
+      "qb_delta_diff": 2.8191523863843444,
+      "alt_diff": -0.16994665476168397
+    },
+    {
+      "season": 2014,
+      "n_train": 3320,
+      "intercept": -0.03514022073153827,
+      "elo_logit": 0.17069420493037524,
+      "kf_margin": 0.11446391771260508,
+      "qb_delta_diff": 3.202879581168679,
+      "alt_diff": -0.1835950978302059
+    },
+    {
+      "season": 2015,
+      "n_train": 3576,
+      "intercept": -0.04564178048555292,
+      "elo_logit": 0.2589977684774784,
+      "kf_margin": 0.1056073048746101,
+      "qb_delta_diff": 3.1454716837768357,
+      "alt_diff": -0.3423095403331968
+    },
+    {
+      "season": 2016,
+      "n_train": 3832,
+      "intercept": -0.054019583818892616,
+      "elo_logit": 0.3522009780555353,
+      "kf_margin": 0.09086675306393882,
+      "qb_delta_diff": 3.1514122949234236,
+      "alt_diff": -0.36812805488221234
+    },
+    {
+      "season": 2017,
+      "n_train": 4088,
+      "intercept": -0.04092768750407095,
+      "elo_logit": 0.48355622016688043,
+      "kf_margin": 0.07385994808617385,
+      "qb_delta_diff": 3.1775382116185478,
+      "alt_diff": -0.3058083344827988
+    },
+    {
+      "season": 2018,
+      "n_train": 4344,
+      "intercept": -0.03782457437375713,
+      "elo_logit": 0.4788905159487808,
+      "kf_margin": 0.076588621298864,
+      "qb_delta_diff": 3.6507612839362618,
+      "alt_diff": -0.24385221701157814
+    },
+    {
+      "season": 2019,
+      "n_train": 4600,
+      "intercept": -0.018421951506447928,
+      "elo_logit": 0.4295855810815346,
+      "kf_margin": 0.08322371457716542,
+      "qb_delta_diff": 3.485000585860663,
+      "alt_diff": -0.15169643855765685
+    }
+  ],
+  "timing": null
+}
