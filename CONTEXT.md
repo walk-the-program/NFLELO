@@ -144,6 +144,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-10 | The site is redesigned to the Editorial Serif brief (`context/brand.md`). Raw Brutalist is saved at git tag `design-brutalist`, with its brief in `context/brand-brutalist.md`. Fonts are Instrument Serif and Newsreader (the brief's recommended pairing, since its rules require serif) with Nunito Sans for interface text. The patterns are generated exactly from Walker's Branding Designer engine (`site/assets/`). |
 | 2026-10-10 | Walker reverted the site to Raw Brutalist (`context/brand.md`). Editorial Serif is saved at tag `design-editorial`, with its brief in `context/brand-editorial.md`. |
 | 2026-10-10 | The site is updated to the navy Raw Brutalist brief: primary #20436b, secondary #eff8a5, accent #ff4d37. The patterns (flow hero, halftone dividers, one glyph-grid card) are generated exactly from Walker's engine. The pale secondary is never used for lines or text; the Vegas series is muted and dashed. |
+| 2026-10-10 | Walker's final design choice is Bento Grid. Other designs are archived (tags plus `context/archive/`). Overrides: the highlight word is #fbffa0 with an ink outline (one variable to switch to blue), the secondary is white (no pink), and the patterns are pebble field plus posterised terrain only. |
 
 ## Context file index
 
@@ -151,7 +152,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 - `HANDOFF.md`: append-only session handoff log, newest first.
 - `context/data-and-elo.md`: the data pipeline, franchise mapping, the Elo v2 config, and evaluation results.
 - `context/elo-site.md`: the NFLELO one-page site (`site/`, data exported by `scripts/export_site.py`).
-- `context/brand-*.md`: Walker's brand briefs. Trying now: `brand-bento.md` and `brand-ascii.md`. Saved designs: navy Brutalist (`brand-brutalist-navy.md`, tag `design-brutalist-navy`), red Brutalist (`brand-brutalist-red.md`, tag `design-brutalist`), and Editorial Serif (`brand-editorial.md`, tag `design-editorial`).
+- `context/brand.md`: the FINAL brand brief, Bento Grid with Walker's overrides (a yellow highlight word, white secondary, pebble and terrain patterns). Older briefs are in `context/archive/`, and their sites are at tags `design-bento` (v1), `design-ascii`, `design-brutalist-navy`, `design-brutalist`, and `design-editorial`.
 - `context/competitor-nfelo.md`: review of nfeloapp.com (features, model behavior, design), where we're ahead, and the gaps to close.
 - `context/ml-results.md`: **start here for results.** A one-page scoreboard of every model and its pre-registered 2020-2025 result, failures included.
 - `context/ml.md`: the machine learning plan and living record (game model, then player value, play model, and personnel decision support), with milestones M1-M7 and open decisions.

@@ -1,141 +1,155 @@
 /* ==========================================================================
-   NFLELO brand tokens and materials: ASCII Art, dark mode only.
-   Source of truth: context/brand-ascii.md (Walker's brand brief, 2026-10-10). Every hex below is the brief's value
-   and nothing else is added. styles.css builds the pages on top of this.
+   NFLELO brand tokens and materials: Bento Grid, light mode only.
+   Source of truth: context/brand-bento.md (Walker's brand brief, 2026-10-10). Every hex below is the brief's value and
+   nothing else is added. styles.css builds the pages on top of this.
 
-   Materials (characters): everything is monospace text on a grid. Panels are --ab-panel with a 1px --line edge and their
-   title in the top edge as "┤ TITLE ├". Controls are written as text: "[ Design ]  Build", "[■ ON ]", "> Save direction █".
-   Radius 0, no shadows, no glows. Progress is 1ch cells (filled secondary, empty --line).
-   Coverage: canvas 60-70%, ink 15-20%, primary about 10%, secondary 10-15%, accent 5% or less.
-   Exactly one primary-filled action per view (.b-primary); primary is otherwise only text: the selected [ segment ],
-   the [■ ON ] switch and the start of the density-map gradient.
+   Materials: tiles are radius 28 on the canvas board with 14px gaps, no borders and one soft shadow. Sub-tiles are radius 18,
+   controls are pills. Exactly one solid primary tile (.b-primary, the "01" action tile) per view.
+   Coverage: canvas 25-35%, ink 15-20%, primary 10-12%, secondary 10-15%, accent 3% or less.
    ========================================================================== */
 
+/* ---- the brief's CSS variables ---- */
 :root {
   --primary: #7db7eb;
   --secondary: #f0c5c6;
   --accent: #f0ec5e;
   --neutral-dark: #1c2126;
   --neutral-light: #f5f7f9;
-  --canvas: #1c2126;
-  --ink: #f5f7f9;
-  --muted: #9ea1a5;
-  --line: #3d4146;
   --on-primary: #141414;
   --on-secondary: #141414;
   --on-accent: #141414;
-  --accent-ink: #f0ec5e;
-  --pri-tint: #28333e;
-  --sec-tint: #3e3b40;
-  --ab-panel: #292e33;
-  --ab-frame: #595d61;
-  --aa-sec: #f0c5c6;
-  --aa-font: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --aa-adv: 0.6;
-  --aa-line: 1.14;
-  --ab-font-ui: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --ab-font-label: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  /* reading paragraphs only; the headline, labels, interface, numerals and art are JetBrains Mono */
-  --font-read: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --ring: 0 0 0 3px color-mix(in srgb, var(--primary) 40%, transparent);
-  color-scheme: dark;
+  --font-heading: "Figtree", -apple-system, sans-serif;
+  --font-body: "Nunito Sans", -apple-system, sans-serif;
+  --heading-size: 52px;
+  --body-size: 17px;
+  --heading-weight: 700;
+  --body-weight: 400;
+  --heading-tracking: 2.5px;
+  --radius: 12px;
+  --radius-lg: 16px;
 }
 
-/* ---- focus: always primary ---- */
-:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
-
-/* ---- blinking block caret (static under reduced motion) ---- */
-.caret { display: inline-block; font-weight: 400; animation: caret-blink 1.1s steps(1, end) infinite; }
-@keyframes caret-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .caret { animation: none; opacity: 1; } }
-
-/* ---- panel: --ab-panel, a 1px --line edge, the title in the top edge as "┤ TITLE ├" ---- */
-.panel { position: relative; background: var(--ab-panel); color: var(--ink); border: 1px solid var(--line); border-radius: 0; }
-.panel[data-title]::before {
-  content: "┤ " attr(data-title) " ├"; position: absolute; left: 2ch; top: 0; z-index: 2; transform: translateY(-52%);
-  padding: 0 0.5ch; background: var(--canvas); color: var(--muted); white-space: pre;
-  font: 600 11px/1 var(--aa-font); letter-spacing: 0.08em; text-transform: uppercase;
+/* ---- derived tokens ---- */
+:root {
+  --canvas: #eaecee;
+  --ink: #1c2126;
+  --muted: #64686c;
+  --line: #cbced0;
+  --accent-ink: #aa810e;
+  --pri-tint: #dde6ee;
+  --sec-tint: #ebe6e8;
+  --ab-tile: #fbfbfc;
+  --ab-tile-sec: #f9f0f1;
+  --ab-tile-pri: #e9f1fa;
+  --ab-sub: #f1f1f2;
+  --ab-pri-hover: #8dc0ed;
+  --ab-pri-press: #6796c1;
+  --ab-on-pri-press: #141414;
 }
 
-/* ---- primary action: the one CTA bar per view ---- */
+/* ---- materials ---- */
+:root {
+  --ab-shadow: 0 1px 2px rgba(28,33,38,0.04), 0 14px 30px -18px rgba(28,33,38,0.22);
+  --ab-shadow-hi: 0 2px 4px rgba(28,33,38,0.05), 0 22px 40px -16px rgba(28,33,38,0.3);
+  --ab-tile-line: rgba(28,33,38,0.08);
+  --ab-pri-glow: rgba(125,183,235,0.4);
+  --r-tile: 28px;
+  --r-sub: 18px;
+  --gap: 14px;
+  --ring: 0 0 0 3px var(--ab-pri-glow);
+  color-scheme: light;
+}
+
+/* ---- focus: 3px primary with an outer 1px ink ring ---- */
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 0; box-shadow: 0 0 0 4px var(--ink); }
+
+/* ---- tile and sub-tile ---- */
+.tile-m { background: var(--ab-tile); color: var(--ink); border: 0; border-radius: var(--r-tile); box-shadow: var(--ab-shadow); }
+.tile-m.is-lift { transition: transform 140ms ease, box-shadow 140ms ease; }
+.tile-m.is-lift:hover { transform: translateY(-2px); box-shadow: var(--ab-shadow-hi); }
+.tile-stage { background: var(--ab-tile-sec); }
+.tile-lead { background: var(--sec-tint); }
+.sub-tile { background: var(--ab-sub); border-radius: var(--r-sub); }
+
+/* ---- the one primary action tile: label bottom-left (22px, 600), a 40px arrow circle top-right at on-primary 18% ---- */
 .b-primary {
-  display: inline-flex; align-items: center; gap: 1ch; min-height: 44px; padding: 0 2ch; cursor: pointer; text-decoration: none;
-  background: var(--primary); color: var(--on-primary); border: 0; border-radius: 0;
-  font: 700 14px/1.2 var(--aa-font); white-space: pre-wrap;
+  position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-height: 190px; padding: 22px;
+  background: var(--primary); color: var(--on-primary); border: 0; border-radius: var(--r-tile); box-shadow: var(--ab-shadow);
+  text-decoration: none; cursor: pointer; transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
 }
-.b-primary:hover { background: var(--primary); text-decoration: underline; text-underline-offset: 4px; }
+.b-primary:hover { background: var(--ab-pri-hover); transform: translateY(-2px); box-shadow: var(--ab-shadow-hi); }
+.b-primary:active { background: var(--ab-pri-press); color: var(--ab-on-pri-press); transform: none; }
+.b-primary__n { position: absolute; left: 22px; top: 22px; font: 700 15px/40px var(--font-heading); letter-spacing: 0.04em; }
+.b-primary__go { position: absolute; right: 22px; top: 22px; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(20,20,20,0.18); font: 700 20px/1 var(--font-heading); }
+.b-primary__label { font: 600 22px/1.2 var(--font-heading); letter-spacing: -0.01em; max-width: 12em; }
 .b-primary[hidden] { display: none; }
-.b-primary:focus-visible { outline-offset: 3px; }
 
-/* ---- secondary button: transparent, secondary edge, hover --sec-tint ---- */
+/* ---- secondary button: transparent, ink text, secondary edge (ink edge for the contrast the secondary lacks) ---- */
 .b-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 1ch;
-  min-height: 40px; padding: 0 2ch; cursor: pointer; text-decoration: none;
-  background: transparent; color: var(--ink); border: 1px solid var(--secondary); border-radius: 0;
-  font: 600 13px/1.2 var(--aa-font);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 42px; padding: 0 18px; cursor: pointer; text-decoration: none;
+  background: transparent; color: var(--ink); border: 2px solid var(--secondary); border-radius: 999px;
+  font: 600 14px/1.2 var(--font-body);
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
-.b-btn:hover, .b-btn:active { background: var(--sec-tint); }
-.b-btn:disabled { color: var(--muted); border-color: var(--line); cursor: not-allowed; background: transparent; }
-.b-btn[aria-pressed="true"] { color: var(--primary); border-color: var(--primary); }
-.b-btn[aria-pressed="true"]::before { content: "[■ ON ] "; white-space: pre; }
-.b-btn[aria-pressed="false"]::before { content: "[□ OFF] "; white-space: pre; color: var(--muted); }
+.b-btn:hover { background: var(--sec-tint); }
+.b-btn:disabled { color: var(--muted); box-shadow: none; border-color: var(--line); cursor: not-allowed; }
+/* an "on" state is the other place primary fills (a small control, not a tile) */
+.b-btn[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
 
 /* ---- ghost link ---- */
 .b-link { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 
-/* ---- segmented control, written as text: "[ Design ]  Build   Launch". Brackets mark the selected item; the
-   others keep the same width without brackets. Selected is set in primary, the rest in muted. ---- */
-.b-seg { display: flex; flex-wrap: wrap; align-items: center; background: transparent; border: 0; border-radius: 0; font: 600 13px/1.3 var(--aa-font); }
+/* ---- segmented control: a pill on a sub-tile; selected is a primary fill with on-primary text ---- */
+.b-seg { display: flex; gap: 2px; padding: 4px; background: var(--ab-sub); border-radius: 999px; }
 .b-seg button {
-  display: inline-flex; align-items: center; flex: none; min-width: 0; min-height: 36px; margin: 0; padding: 0;
-  background: transparent; color: var(--muted); border: 0; border-radius: 0;
-  font: inherit; white-space: pre; cursor: pointer;
+  flex: 1 1 0; min-width: 0; min-height: 38px; padding: 0 16px; margin: 0;
+  background: transparent; color: var(--muted); border: 0; border-radius: 999px;
+  font: 600 14px/1.2 var(--font-body); white-space: nowrap; cursor: pointer;
 }
-.b-seg button::before { content: "  "; white-space: pre; }
-.b-seg button::after { content: "  "; white-space: pre; }
-.b-seg button:hover:not([aria-pressed="true"]):not(:disabled) { color: var(--ink); background: var(--pri-tint); }
-.b-seg button[aria-pressed="true"] { color: var(--primary); }
-.b-seg button[aria-pressed="true"]::before { content: "[ "; }
-.b-seg button[aria-pressed="true"]::after { content: " ]"; }
-.b-seg button:focus-visible { outline-offset: 0; }
-.b-seg button.is-off, .b-seg button:disabled { color: var(--line); cursor: not-allowed; text-decoration: line-through; text-decoration-thickness: 1px; }
+.b-seg button:hover:not([aria-pressed="true"]):not(:disabled) { background: var(--sec-tint); color: var(--ink); }
+.b-seg button[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); font-weight: 700; box-shadow: inset 0 0 0 1px var(--ink); }
+.b-seg button.is-off, .b-seg button:disabled { color: var(--muted); background: transparent; cursor: not-allowed; text-decoration: line-through; text-decoration-thickness: 1px; opacity: 0.7; }
 
-/* ---- field / select ---- */
+/* ---- field: canvas background, line edge; focus is a primary edge plus a 3px primary ring at 40% ---- */
 .b-field {
-  width: 100%; min-height: 44px; padding: 8px 12px;
-  background: var(--canvas); color: var(--ink); caret-color: var(--primary);
-  border: 1px solid var(--line); border-radius: 0; font: 14px var(--aa-font);
+  width: 100%; min-height: 48px; padding: 10px 18px;
+  background: var(--canvas); color: var(--ink); caret-color: var(--ink);
+  border: 1px solid var(--line); border-radius: 999px; font: 16px var(--font-body);
 }
 .b-field::placeholder { color: var(--muted); }
 .b-field:focus, .b-field:focus-visible { outline: none; border-color: var(--primary); box-shadow: var(--ring); }
 
-/* ---- switch, written as text: [■ ON ] in primary, [□ OFF] in muted. No track, no knob. ---- */
-.b-switch { appearance: none; -webkit-appearance: none; flex: none; margin: 0; padding: 0; cursor: pointer; background: none; border: 0; border-radius: 0; font: 600 13px/1.3 var(--aa-font); }
-.b-switch::before { content: "[□ OFF]"; color: var(--muted); white-space: pre; }
-.b-switch:checked::before { content: "[■ ON ]"; color: var(--primary); }
-.b-toggle { display: flex; align-items: center; gap: 1.5ch; min-height: 40px; cursor: pointer; color: var(--ink); font: 600 12px/1.3 var(--aa-font); }
+/* ---- toggle: on = primary track with an on-primary knob; off = line track with a muted knob ---- */
+.b-switch {
+  appearance: none; -webkit-appearance: none; position: relative; flex: none;
+  width: 52px; height: 30px; margin: 0; cursor: pointer;
+  background: var(--line); border: 0; border-radius: 999px; transition: background-color 140ms ease;
+}
+.b-switch::before { content: ''; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--muted); transition: transform 140ms ease; }
+.b-switch:checked { background: var(--primary); box-shadow: inset 0 0 0 1px var(--ink); }
+.b-switch:checked::before { background: var(--on-primary); transform: translateX(22px); }
+.b-toggle { display: flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; color: var(--ink); font: 600 14px/1.3 var(--font-body); }
 
 /* ---- tag (secondary fill, on-secondary text) ---- */
-.b-chip { display: inline-block; flex: none; padding: 3px 1ch; white-space: nowrap; background: var(--secondary); color: var(--on-secondary); border: 0; border-radius: 0; font: 700 11px/1.3 var(--aa-font); letter-spacing: 0.04em; }
-.b-tag { display: inline-block; flex: none; padding: 2px 1ch; white-space: nowrap; background: var(--sec-tint); color: var(--ink); border: 1px solid var(--secondary); border-radius: 0; font: 700 11px/1.3 var(--aa-font); letter-spacing: 0.04em; }
+.b-chip, .b-tag {
+  display: inline-block; flex: none; padding: 4px 12px; white-space: nowrap;
+  background: var(--secondary); color: var(--on-secondary); border: 0; border-radius: 999px;
+  font: 700 12px/1.2 var(--font-body); letter-spacing: 0.02em;
+}
 
-/* ---- highlight word: the LAST headline word in --accent-ink, then a blinking block caret. No fill, no band. ---- */
+/* ---- highlight word: accent-ink as large text, once per view ---- */
 .hl { color: var(--accent-ink); }
-.hl-caret { color: var(--accent-ink); }
 
-/* ---- prompts in secondary: $ > // ---- */
-.pr { color: var(--secondary); font-weight: 700; }
+/* ---- data bar: line track, secondary fill with an ink edge so it reads (secondary is 1.1:1 on the line) ---- */
+.b-bar { background: var(--line); height: 14px; border-radius: 999px; overflow: hidden; }
+.b-bar > i { display: block; height: 100%; background: var(--secondary); box-shadow: inset 0 0 0 1.5px var(--ink); border-radius: 999px; }
 
-/* ---- progress / data bar: 1ch cells, filled secondary, empty --line (█████░░░░░) ---- */
-.b-bar { display: block; height: 14px; --cell: 1ch; background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px var(--cell)); }
-.b-bar > i { display: block; height: 100%; background: var(--secondary); -webkit-mask: repeating-linear-gradient(90deg, black 0 6px, transparent 6px var(--cell)); mask: repeating-linear-gradient(90deg, black 0 6px, transparent 6px var(--cell)); }
-.b-bar > i + i { background: var(--primary); }
-
-/* ---- slider: 1px track, primary fill, square thumb ---- */
-.b-range { --r: 8px; --lo: 0; --hi: 1; position: relative; height: 44px; }
-.b-range__track { position: absolute; left: 0; right: 0; top: 50%; height: 10px; transform: translateY(-50%); background: var(--canvas); border: 1px solid var(--line); }
+/* ---- slider: line track, primary fill, round thumb ---- */
+.b-range { --r: 14px; --lo: 0; --hi: 1; position: relative; height: 44px; }
+.b-range__track { position: absolute; left: 0; right: 0; top: 50%; height: 10px; transform: translateY(-50%); background: var(--line); border-radius: 999px; }
 .b-range__fill {
-  position: absolute; top: 50%; height: 4px; transform: translateY(-50%); background: var(--primary);
+  position: absolute; top: 50%; height: 10px; transform: translateY(-50%); background: var(--primary); border-radius: 999px; box-shadow: inset 0 0 0 1px var(--ink);
   left: calc(var(--r) + (100% - 2 * var(--r)) * var(--lo));
   right: calc(var(--r) + (100% - 2 * var(--r)) * (1 - var(--hi)));
 }
@@ -144,36 +158,43 @@
 .b-range input::-moz-range-track { background: transparent; height: 100%; }
 .b-range input::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none; pointer-events: auto; cursor: grab;
-  width: 16px; height: 22px; margin-top: 11px; background: var(--ink); border: 0; border-radius: 0;
+  width: 28px; height: 28px; margin-top: 8px; background: var(--ab-tile); border: 2px solid var(--ink); border-radius: 50%; box-shadow: var(--ab-shadow);
 }
-.b-range input::-moz-range-thumb { pointer-events: auto; cursor: grab; box-sizing: border-box; width: 16px; height: 22px; background: var(--ink); border: 0; border-radius: 0; }
+.b-range input::-moz-range-thumb {
+  pointer-events: auto; cursor: grab; box-sizing: border-box;
+  width: 28px; height: 28px; background: var(--ab-tile); border: 2px solid var(--ink); border-radius: 50%; box-shadow: var(--ab-shadow);
+}
 .b-range input:active::-webkit-slider-thumb { background: var(--primary); cursor: grabbing; }
-.b-range input:focus-visible { outline: none; }
-.b-range input:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--primary); outline-offset: 3px; }
-.b-range input:focus-visible::-moz-range-thumb { outline: 3px solid var(--primary); outline-offset: 3px; }
+.b-range input:focus-visible { outline: none; box-shadow: none; }
+.b-range input:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--primary); outline-offset: 0; box-shadow: 0 0 0 4px var(--ink); }
+.b-range input:focus-visible::-moz-range-thumb { outline: 3px solid var(--primary); outline-offset: 0; box-shadow: 0 0 0 4px var(--ink); }
 
-/* ---- probability meter: 1px frame, a square model marker, shaped ticks for Elo and Vegas ---- */
-.b-meter { --pad: 14px; position: relative; height: 34px; }
-.b-meter__track { position: absolute; left: 0; right: 0; top: 50%; height: 22px; transform: translateY(-50%); background: var(--canvas); border: 1px solid var(--ab-frame); }
-.b-meter__track::after { content: ''; position: absolute; left: 50%; top: 3px; bottom: 3px; width: 1px; background: var(--line); }
+/* ---- probability meter: line track, ink model knob, circle (Elo, primary) and triangle (Vegas, muted) ticks ---- */
+.b-meter { --pad: 20px; position: relative; height: 34px; }
+.b-meter__track { position: absolute; left: 0; right: 0; top: 50%; height: 22px; transform: translateY(-50%); background: var(--line); border-radius: 999px; }
+.b-meter__track::after { content: ''; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 2px; margin-left: -1px; background: var(--ab-tile); }
 .b-meter__pos { position: absolute; top: 0; bottom: 0; width: 0; left: calc(var(--pad) + (100% - 2 * var(--pad)) * var(--at, 0.5)); }
 .b-meter__pos[hidden] { display: none; }
-.b-meter__tick { position: absolute; left: -1px; width: 2px; background: var(--tick, var(--ink)); }
+.b-meter__tick { position: absolute; left: -2px; width: 4px; border-radius: 2px; background: var(--tick, var(--ink)); box-shadow: 0 0 0 1px var(--ink); }
 .b-meter__tick--up { top: -28px; bottom: 50%; }
 .b-meter__tick--down { top: 50%; bottom: -28px; }
-.b-meter__knob { position: absolute; left: -9px; top: 50%; width: 18px; height: 18px; margin-top: -9px; background: var(--primary); border: 0; }
-.b-meter.knob-elo .b-meter__knob { background: var(--ink); }
+.b-meter__knob { position: absolute; left: -16px; top: 50%; width: 32px; height: 32px; margin-top: -16px; background: var(--ink); border: 3px solid var(--ab-tile-sec); border-radius: 0; box-shadow: var(--ab-shadow); }
+.b-meter.knob-elo .b-meter__knob { background: var(--primary); border-color: var(--ink); border-radius: 50%; }
 
-/* ---- Gradient panes: ONE section band per page, copy on a canvas plate (text never sits on the pattern) ---- */
-.band { position: relative; display: grid; place-items: center; min-height: clamp(150px, 16vw, 260px); padding: clamp(20px, 3vw, 48px) var(--gutter, 24px); background: var(--canvas) url("assets/band-gradpanes.svg") center / cover no-repeat; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+/* ---- pattern materials. Text never sits on a pattern: it sits on a tile plate. ---- */
+.pat-aura { background: var(--canvas) url("assets/hero-aura.png") center / cover no-repeat; }
+.pat-terrain { background: var(--canvas) url("assets/hero-terrain.png") center / cover no-repeat; }
+.pat-pebbles { background: var(--canvas) url("assets/tex-pebbles.png") center / cover no-repeat; }
+.pat-halftone { background: var(--canvas) url("assets/tile-halftone.svg") 0 0 / 160px 160px repeat; }
+.pat-band { background: var(--canvas) url("assets/band-gradpanes.svg") center / cover no-repeat; }
+/* a plate carries text over a pattern: a sub-level tile, so radius 18 */
+.plate { background: var(--ab-tile); color: var(--ink); border-radius: var(--r-sub); box-shadow: var(--ab-shadow); }
 
-/* ---- Halftone: at most one textured panel per page; its text sits on a solid plate ---- */
-.tex-halftone { background: var(--canvas) url("assets/tile-halftone.svg") 0 0 / 160px 160px repeat; border: 1px solid var(--line); border-radius: 0; }
-
-/* a solid plate that carries text over a pattern */
-.plate { background: var(--ab-panel); border: 1px solid var(--line); color: var(--ink); }
-
+@media (prefers-reduced-motion: reduce) {
+  .b-primary, .tile-m.is-lift, .b-switch, .b-switch::before { transition: none; }
+  .b-primary:hover, .tile-m.is-lift:hover { transform: none; }
+}
 @media (forced-colors: active) {
-  .b-primary, .b-btn, .panel, .b-field, .b-chip, .b-tag, .b-meter__track, .b-range__track { border: 1px solid ButtonText; forced-color-adjust: auto; }
-  .b-seg button[aria-pressed="true"] { color: Highlight; }
+  .b-primary, .b-btn, .tile-m, .b-seg, .b-field, .b-switch, .b-chip, .b-tag, .b-meter__track, .b-range__track { border: 1px solid ButtonText; forced-color-adjust: auto; }
+  .b-seg button[aria-pressed="true"] { background: Highlight; color: HighlightText; }
 }

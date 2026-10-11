@@ -38,12 +38,12 @@
     setText('hero-deck', hl.hero_deck + ' Every model was built on earlier seasons, then scored once on ' + R.holdout_seasons[0] + ' to ' + R.holdout_seasons[1] + ' under rules committed to a public repository first.');
     var tiles = $('#tiles');
     clear(tiles);
-    function tile(label, big, sub) {
-      return h('div', { class: 'tile' }, h('h3', { text: label }), h('div', { class: 'big' }, String(big)), h('p', { class: 'sub' }, sub));
+    function tile(label, big, sub, bar, barText) {
+      return h('div', { class: 'tile' }, h('h3', { text: label }), h('div', { class: 'big' }, String(big)), bar != null ? N.tileBar(bar, barText) : null, h('p', { class: 'sub' }, sub));
     }
     var dev = c.negative + c.shadow;
     tiles.append(
-      tile('Tested once', c.holdout_tested, 'models scored on seasons they never saw'),
+      tile('Tested once', c.holdout_tested, 'models scored on seasons they never saw', c.holdout_tested ? c.holdout_pass / c.holdout_tested : null, c.holdout_pass + ' of ' + c.holdout_tested + ' passed'),
       tile('Passed', c.holdout_pass, 'met every rule set in advance'),
       tile('Failed', c.holdout_fail, 'missed a rule, published anyway'),
       tile('Not on the holdout', dev, c.negative + ' negative result, ' + c.shadow + ' shadow model running live'));

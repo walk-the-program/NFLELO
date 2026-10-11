@@ -47,7 +47,7 @@
     setText('hero-line', 'Model-estimated: through week ' + L.updated_through.week + ' of ' + F.season + ', teams chose what the model prefers on ' + pct(s.matched_share, 0) + ' of ' + commas(s.fourth_downs) + ' fourth downs, giving up an estimated ' + s.wp_lost_per_team_game.toFixed(3) + ' wins per team-game. In 2020 to 2025 it was ' + pct(a.matched_share, 0) + ' and ' + a.wp_lost_per_team_game.toFixed(3) + ', mostly by punting.');
     setText('hero-deck', 'For each yard line and distance, which option gives the team the best chance to win: go for it, kick a field goal or punt. Every number on this page is model-estimated, and the conversion model is still under a pre-registered test.');
     N.heroTiles([
-      { label: 'Matched the model', big: pct(s.matched_share, 0), sub: 'of ' + commas(s.fourth_downs) + ' fourth downs in ' + commas(s.games) + ' games. Model-estimated.' },
+      { label: 'Matched the model', big: pct(s.matched_share, 0), bar: s.matched_share, barText: 'Teams matched the model on ' + pct(s.matched_share, 0) + ' of fourth downs', sub: 'of ' + commas(s.fourth_downs) + ' fourth downs in ' + commas(s.games) + ' games. Model-estimated.' },
       { label: 'Close calls', big: pct(s.tossup_share, 0), sub: 'toss-ups: the best option beats the second best by under ' + F.tossup_rule.margin_below + ' win probability. Model-estimated.' },
       { label: 'Win probability given up', big: s.wp_lost_per_team_game.toFixed(3), sub: 'wins per team-game, ' + s.wp_lost_total.toFixed(1) + ' in total, by not taking the model\'s best option. Model-estimated.' },
       { label: '2020 to 2025 audit', big: a.wp_lost_per_team_game.toFixed(3), sub: 'wins per team-game over ' + commas(a.fourth_downs) + ' fourth downs; ' + a.wp_lost_by_choice.punt.toFixed(0) + ' of ' + a.wp_lost_total.toFixed(0) + ' wins from punts. Model-estimated, first engine.' }
@@ -158,10 +158,9 @@
     [90, 80, 70, 60, 50, 40, 30, 20, 10].forEach(function (yl) {
       sv('text', { class: 'tick a-mid', x: cx(yl) + cw / 2, y: m.t + 10 * ch + 16, text: N.fieldLabel(yl).replace('midfield', '50') }, svg);
     });
-    var narrowAxis = Wd < 720;   // monospace captions are wide: shorten them rather than let them overlap
-    sv('text', { class: 'tick a-start', x: m.l, y: Ht - 10, text: narrowAxis ? 'Own goal' : 'Own goal line', style: 'fill:var(--muted)' }, svg);
-    sv('text', { class: 'tick a-end', x: Wd - m.r, y: Ht - 10, text: narrowAxis ? 'Opp. goal' : 'Opponent\'s goal line', style: 'fill:var(--muted)' }, svg);
-    if (!narrowAxis) sv('text', { class: 'tick a-mid', x: m.l + iw / 2, y: Ht - 10, text: 'Field position (yards from the goal line the offense is attacking)', style: 'fill:var(--muted)' }, svg);
+    sv('text', { class: 'tick a-start', x: m.l, y: Ht - 10, text: 'Own goal line', style: 'fill:var(--muted)' }, svg);
+    sv('text', { class: 'tick a-end', x: Wd - m.r, y: Ht - 10, text: 'Opponent\'s goal line', style: 'fill:var(--muted)' }, svg);
+    sv('text', { class: 'tick a-mid', x: m.l + iw / 2, y: Ht - 10, text: 'Field position (yards from the goal line the offense is attacking)', style: 'fill:var(--muted)' }, svg);
 
     var sel = null;
     function mark(yl, dd) {

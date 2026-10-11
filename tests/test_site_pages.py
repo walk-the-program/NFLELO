@@ -1,7 +1,5 @@
 """Static checks on the site's HTML pages: the shared nav, local asset links, and that every element id a page
-script looks up exists in its HTML, plus the ASCII Art brand brief (context/brand-ascii.md): its hexes, monospace-only
-type, one primary CTA, the accent highlight word with its caret, and the generated pattern assets. The behavior is checked
-in a browser (see context/elo-site.md)."""
+script looks up exists in its HTML. The behavior is checked in a browser (see context/elo-site.md)."""
 import re
 from pathlib import Path
 
@@ -70,7 +68,7 @@ def test_no_dashes_or_betting_words_in_page_copy(page):
 
 @pytest.mark.parametrize("page", PAGES)
 def test_brand_stylesheet_and_no_retired_theme_code(page):
-    """Soft Form and the theme switcher are retired: every page links brand.css, and no page loads theme.js or soft-form.css."""
+    """Soft Form and the dark theme are retired: every page links brand.css, and no page loads theme.js or soft-form.css."""
     html = read(f"{page}.html")
     assert 'href="brand.css"' in html and 'href="styles.css"' in html
     assert "soft-form" not in html and "theme.js" not in html and "data-theme-choice" not in html
@@ -79,108 +77,104 @@ def test_brand_stylesheet_and_no_retired_theme_code(page):
 
 @pytest.mark.parametrize("page", PAGES)
 def test_one_primary_action_per_page(page):
-    assert read(f"{page}.html").count('class="b-primary"') == 1
-
-
-JS_FILES = ("common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js", "ascii.js")
+    """Exactly one solid primary action tile (the "01" tile) per page, and only the page markup may carry it."""
+    html = read(f"{page}.html")
+    assert html.count('class="b-primary"') == 1
+    assert html.count("b-primary__n") == 1 and html.count("b-primary__go") == 1 and html.count("b-primary__label") == 1
+    for name in ("common.js", f"{SCRIPT[page]}.js"):
+        assert "b-primary" not in read(name)
 
 
 def test_no_hex_colors_outside_the_brand_tokens():
-    for name in ("styles.css",) + JS_FILES:
+    for name in ("styles.css", "common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
         assert not re.search(r"#[0-9a-fA-F]{3,8}\b", read(name)), name
 
 
-# The ASCII Art brief (context/brand-ascii.md): every hex the site may contain, and nothing else.
+# The Bento Grid brief (context/brand-bento.md): every hex the site may contain, and nothing else.
 BRIEF_HEXES = {
-    "#7db7eb", "#f0c5c6", "#f0ec5e", "#1c2126", "#f5f7f9", "#9ea1a5", "#3d4146",
-    "#141414", "#28333e", "#3e3b40", "#292e33", "#595d61",
+    "#7db7eb", "#f0c5c6", "#f0ec5e", "#1c2126", "#f5f7f9", "#eaecee", "#64686c", "#cbced0", "#141414", "#aa810e",
+    "#dde6ee", "#ebe6e8", "#fbfbfc", "#f9f0f1", "#e9f1fa", "#f1f1f2", "#8dc0ed", "#6796c1",
 }
 RETIRED_HEXES = {
-    "#20436b", "#eff8a5", "#ff4d37", "#26221c", "#f9f8f5", "#706d68", "#d9d8d4", "#dfe2e4", "#f7f8e8", "#ffffff",
-    "#eaecee", "#64686c", "#cbced0", "#aa810e", "#fbfbfc",
+    "#20436b", "#eff8a5", "#ff4d37", "#26221c", "#f9f8f5", "#706d68", "#d9d8d4", "#ffffff", "#dfe2e4", "#f7f8e8",
 }
 
 
-def test_brand_css_defines_only_the_ascii_brief_hexes():
+def test_brand_css_defines_only_the_bento_brief_hexes():
     found = {h.lower() for h in re.findall(r"#[0-9a-fA-F]{3,8}\b", read("brand.css"))}
     assert found <= BRIEF_HEXES, found - BRIEF_HEXES
-    assert BRIEF_HEXES <= found, BRIEF_HEXES - found
     assert not (found & RETIRED_HEXES)
 
 
-def test_on_tokens_dark_canvas_and_highlight_word_match_the_brief():
+def test_highlight_and_on_tokens_match_the_brief():
     css = read("brand.css")
-    for tok in ("--on-primary", "--on-secondary", "--on-accent"):
-        assert re.search(tok + r":\s*#141414", css)
-    assert re.search(r"--canvas:\s*#1c2126", css) and re.search(r"--ink:\s*#f5f7f9", css) and re.search(r"--accent-ink:\s*#f0ec5e", css)
-    # the highlight word is accent text with no fill and no band
-    hl = re.search(r"\.hl \{([^}]*)\}", css).group(1)
-    assert "color: var(--accent-ink)" in hl and "background" not in hl
-    assert "color-scheme: dark" in css
+    assert re.search(r"--on-primary:\s*#141414", css) and re.search(r"--on-secondary:\s*#141414", css) and re.search(r"--on-accent:\s*#141414", css)
+    assert re.search(r"--accent-ink:\s*#aa810e", css)
+    assert re.search(r"\.hl \{[^}]*color: var\(--accent-ink\)", css)
+    assert not re.search(r"\.hl \{[^}]*background", css)
 
 
-def test_carets_are_static_under_reduced_motion():
+def test_bento_materials_match_the_brief():
     css = read("brand.css")
-    assert "@keyframes caret-blink" in css
-    assert re.search(r"@media \(prefers-reduced-motion: reduce\) \{ \.caret \{ animation: none", css)
+    assert "--r-tile: 28px" in css and "--r-sub: 18px" in css and "--gap: 14px" in css
+    assert "outline: 3px solid var(--primary)" in css and "0 0 0 4px var(--ink)" in css
 
 
-def test_monospace_only_no_proportional_faces():
-    """JetBrains Mono for the headline, labels, interface and art; IBM Plex Mono for reading text; nothing proportional."""
-    css = read("brand.css") + read("styles.css")
-    assert "JetBrains Mono" in css and "IBM Plex Mono" in css
-    assert not re.search(r"Figtree|Nunito|Inter\b|Helvetica|Arial|sans-serif|system-ui|-apple-system|Georgia|Times", css)
-    for decl in re.findall(r"font-family:\s*([^;}]+)", css):
-        assert "monospace" in decl or decl.strip().startswith("var(--"), decl
-    for page in PAGES:
-        html = read(f"{page}.html")
-        assert "family=IBM+Plex+Mono" in html and "family=JetBrains+Mono" in html
-        assert "Figtree" not in html and "Nunito" not in html
+def test_light_only_no_monospace_and_the_two_brand_fonts():
+    for name in ("brand.css", "styles.css", "common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
+        text = read(name).lower()
+        assert "monospace" not in text and "--font-mono" not in text and "ui-monospace" not in text, name
+    css = read("brand.css")
+    assert "Figtree" in css and "Nunito Sans" in css
+    assert "prefers-color-scheme: dark" not in css + read("styles.css")
 
 
 @pytest.mark.parametrize("page", PAGES)
-def test_pages_use_only_brief_hexes_and_the_ascii_hero(page):
+def test_pages_use_only_brief_hexes_and_one_pattern_hero(page):
     html = read(f"{page}.html")
     assert {h.lower() for h in re.findall(r"#[0-9a-fA-F]{6}\b", html)} <= BRIEF_HEXES
-    assert html.count('id="ascii"') == 1 and 'src="ascii.js"' in html
-    assert "hero-flow" not in html and "tex-glyph" not in html
-    # the headline panel and the art are separate: the figure is not inside the copy panel
-    copy = re.search(r'<section class="panel hero-copy".*?</section>', html, re.S).group(0)
-    assert "ascii-pre" not in copy
-    # exactly one blinking-caret highlight word in the h1: the last word, in accent text, then the caret
-    h1 = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S).group(1)
-    assert h1.count('class="hl"') == 1 and re.search(r'</span><span class="caret hl-caret" aria-hidden="true">', h1)
-    # one section band and at most one textured panel per page; the CTA is a text bar with a caret
-    assert html.count('class="band"') == 1 and html.count("tex-halftone") <= 1
-    cta = re.search(r'<a class="b-primary"[^>]*>(.*?)</a>', html, re.S).group(1)
-    assert cta.lstrip().startswith("<span>&gt; ") or cta.lstrip().startswith("&gt; ")
-    assert 'class="caret"' in cta
-    assert '<span class="acc-block"' in html
+    heroes = re.findall(r'class="[^"]*hero-art (pat-(?:aura|terrain))', html)
+    assert heroes == [("pat-aura" if page in ("index", "models") else "pat-terrain")]
+    assert html.count("pat-band") == 1                      # one gradient-pane section band
+    assert html.count("pat-halftone") + html.count("pat-pebbles") == 1   # at most one textured tile
+    assert html.count('class="b-tag"') <= 1
 
 
 @pytest.mark.parametrize("asset", ["tile-halftone.svg", "band-gradpanes.svg"])
-def test_pattern_assets_are_in_the_brief_colorway(asset):
+def test_vector_pattern_assets_are_in_the_brief_colorway(asset):
     svg = (SITE / "assets" / asset).read_text()
     assert {h.lower() for h in re.findall(r"#[0-9a-fA-F]{6}\b", svg)} <= BRIEF_HEXES
-    if asset.startswith("band"):
-        assert 'preserveAspectRatio="xMidYMid slice"' in svg
+    if asset == "band-gradpanes.svg":
+        assert 'preserveAspectRatio="xMidYMid slice"' in svg[:300]
 
 
-def test_ascii_hero_field_is_a_digit_grid_on_the_density_ramp():
-    import json
-    d = json.loads((SITE / "assets" / "ascii-hero.json").read_text())
-    assert d["ramp"] == " .:-=+*#%@"
-    assert len(d["field"]) == d["rows"] and all(len(r) == d["cols"] and set(r) <= set("0123456789") for r in d["field"])
-    assert {c for r in d["field"] for c in r} == set("0123456789")   # the whole ramp is used
-    for gone in ("hero-flow.svg", "pattern-glyphgrid.svg", "pattern-halftone.svg", "hero-aura.png", "hero-terrain.png"):
-        assert not (SITE / "assets" / gone).exists()
+def test_raster_pattern_assets_exist_at_the_brief_sizes():
+    import struct
+    for name, size in {"hero-aura.png": (2560, 1440), "hero-terrain.png": (2560, 1440)}.items():
+        head = (SITE / "assets" / name).read_bytes()[:24]
+        assert head[:8] == b"\x89PNG\r\n\x1a\n"
+        assert struct.unpack(">II", head[16:24]) == size, name
 
 
-def test_secondary_never_sets_body_text():
-    """Hard rule 2: secondary is for prompts, progress, status brackets and chart marks, never body text."""
-    css = read("styles.css")
-    body_selectors = (".deck", ".hero-deck", ".method p", ".note", ".fnote", ".find p", ".mc-what", ".mc-read", ".tile .sub", "body")
-    for sel in body_selectors:
-        for rule in re.findall(re.escape(sel) + r"\s*\{([^}]*)\}", css):
-            assert not re.search(r"(?<![-a-z])color:\s*var\(--secondary\)", rule), sel
-    assert not re.search(r"\.(?:b-primary|cta)[^{]*\{[^}]*background:\s*var\(--(?:secondary|accent)\)", css + read("brand.css"))
+def test_retired_brutalist_assets_are_gone_and_all_assets_are_used():
+    for old in ("hero-flow.svg", "pattern-glyphgrid.svg", "pattern-halftone.svg"):
+        assert not (SITE / "assets" / old).exists()
+    css = read("brand.css")
+    for asset in (SITE / "assets").iterdir():
+        assert f"assets/{asset.name}" in css, f"{asset.name} is not used"
+
+
+def test_secondary_is_never_a_line_dot_or_text_color():
+    """Pale pink is about 1.1:1 on the surface: no stroke, text color or marker uses it. The brief's secondary button edge
+    is allowed only in a rule that also carries an ink inset ring, so the control still reads."""
+    for name in ("styles.css", "brand.css"):
+        css = read(name)
+        for sel, block in re.findall(r"([^{}]+)\{([^{}]*)\}", css):
+            for decl in re.findall(r"(?:^|[;\s])((?:stroke|color)\s*:[^;}]*var\(--secondary\)[^;}]*)", block):
+                assert False, (name, sel.strip(), decl)
+            if re.search(r"border(?:-[a-z]+)?\s*:[^;}]*var\(--secondary\)", block):
+                assert "inset 0 0 0 1px var(--ink)" in block, (name, sel.strip())
+    for name in ("common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
+        for line in read(name).splitlines():
+            if "var(--secondary)" in line:
+                assert "fill:" in line and "pale: true" in line, (name, line.strip())
