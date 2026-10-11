@@ -2,7 +2,7 @@
 
 This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
 
-Last updated: 2026-10-10 (master notebook added; model-page exporters)
+Last updated: 2026-10-11 (M8 built on DEV)
 
 ## What this project is
 
@@ -146,6 +146,8 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-10 | The site is updated to the navy Raw Brutalist brief: primary #20436b, secondary #eff8a5, accent #ff4d37. The patterns (flow hero, halftone dividers, one glyph-grid card) are generated exactly from Walker's engine. The pale secondary is never used for lines or text; the Vegas series is muted and dashed. |
 | 2026-10-10 | Walker's final design choice is Bento Grid. Other designs are archived (tags plus `context/archive/`). Overrides: the highlight word is #fbffa0 with an ink outline (one variable to switch to blue), the secondary is white (no pink), and the patterns are pebble field plus posterised terrain only. |
 | 2026-10-11 | Walker approved M8 (`context/ml-m8-method.md`): margin/EPA targets, model blending, QB v2 (opponent-adjusted, injury-exit cleaning), early-season and context features. If M8 beats A4s on DEV 2006-2019, it becomes the site's headline model; A4s keeps logging as the frozen 2026 baseline, and a forward test is pre-registered. |
+| 2026-10-11 | M8 (game model v2, `context/ml-m8-method.md`) built on DEV only: margin targets, QB v2 (opponent adjustment, injury-exit cleaning), early-season features (new QB, new head coach, carry-over), context (travel, time zones, body clock, rest, altitude, venue; new `data/sources/stadiums.csv`), and stacking. Nothing beats C2d beyond noise; the one-SE pick is C2d again (-0.0010 vs A4s, CI [-0.0019, +0.0000]), so the DEV bar is not met: A4s stays the headline, C2d the shadow, nothing frozen. Weather is excluded from live use (nflverse fills it after the game). The forward-test pre-registration is written in `context/ml.md` ("M8 forward test"); whether to freeze anything is Walker's call. |
+| 2026-10-11 | M8 result on DEV: no candidate beats C2d beyond noise. The best slivers were the margin/blend target (-0.0002 vs C2d), head-coach change (-0.0002), and E5 = C2d + coach (-0.0002), all with CIs including zero. Opponent-adjusted QB, injury-exit cleaning, carry-over retune, stacking, and travel/time-zone/altitude/rest/surface features did not help (all context together overfit). Weather is filled only after games, so it is unusable live. A4s stays the headline and C2d the shadow; nothing frozen. |
 
 ## Context file index
 

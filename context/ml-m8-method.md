@@ -2,7 +2,7 @@
 
 Written 2026-10-11. Walker approved items 1, 2, 3, 5 and 6 and asked for them to be included in the master model. Read `context/ml-m3-method.md`, `context/ml-m3b-method.md` and the M3/M3b/No-Elo notes in `context/ml.md` first.
 
-Status: **approved by Walker 2026-10-11; build in progress.**
+Status: **approved by Walker 2026-10-11; built 2026-10-11 (DEV only).** Result: nothing beats C2d beyond noise; the one-SE pick is C2d (-0.0010 vs A4s, CI [-0.0019, +0.0000]), so DEV acceptance is not met and nothing is frozen. See "M8 build notes" and "M8 forward test" in `context/ml.md`.
 
 ## Goal
 

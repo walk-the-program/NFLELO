@@ -29,6 +29,9 @@
   window (context/ml-m7-method.md, section 4): season-ahead off-policy
   evaluation of 2018 (nuisances cross-fit on 2016-2017) and 2019 (2016-2018).
   Guarded like DEV.
+- FORWARD, 2026-2027: the M8 live forward test (context/ml.md, "M8 forward
+  test"), scored from the public prediction ledgers once a regular season is
+  complete. Guarded like DEV (it cannot include a holdout season).
 """
 from __future__ import annotations
 
@@ -45,11 +48,12 @@ M5B_DEV = (2018, 2019)
 M6_DEV = (2018, 2019)
 M7A_DEV = (2016, 2019)
 M7B_DEV = (2018, 2019)
+FORWARD = (2026, 2027)
 
 LABELS = {"dev": DEV, "holdout": HOLDOUT, "reproduction": REPRODUCTION, "tune": TUNE, "m5dev": M5_DEV, "m5bdev": M5B_DEV,
-          "m6dev": M6_DEV, "m7adev": M7A_DEV, "m7bdev": M7B_DEV}
+          "m6dev": M6_DEV, "m7adev": M7A_DEV, "m7bdev": M7B_DEV, "forward": FORWARD}
 # Labels whose runs may never touch the holdout.
-NON_HOLDOUT_LABELS = frozenset({"dev", "tune", "m5dev", "m5bdev", "m6dev", "m7adev", "m7bdev"})
+NON_HOLDOUT_LABELS = frozenset({"dev", "tune", "m5dev", "m5bdev", "m6dev", "m7adev", "m7bdev", "forward"})
 
 
 class HoldoutError(RuntimeError):

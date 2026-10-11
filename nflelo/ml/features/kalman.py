@@ -263,7 +263,8 @@ def log_likelihood(gt: pd.DataFrame, res: FilterResult, cfg: KalmanConfig,
 
 
 def joint_log_likelihood(gt: pd.DataFrame, res: FilterResult, cfg: KalmanConfig,
-                         seasons: tuple[int, int] = TUNE_SEASONS) -> tuple[float, int]:
+                         seasons: tuple[int, int] = TUNE_SEASONS, mask: np.ndarray | None = None
+                         ) -> tuple[float, int]:
     """Sum of the pre-week predictive log density of BOTH measurements (margin and scaled EPA margin).
 
     Games without play-by-play contribute the margin term alone. This is the
@@ -271,6 +272,8 @@ def joint_log_likelihood(gt: pd.DataFrame, res: FilterResult, cfg: KalmanConfig,
     EPA measurement's scale, noise, and correlation.
     """
     m = gt["season"].between(*seasons).to_numpy()
+    if mask is not None:  # M8: restrict to a subset of games (e.g. REG weeks 1-4)
+        m = m & np.asarray(mask, bool)
     nn = (~gt["neutral"].to_numpy(bool)).astype(float)[m]
     ym = gt["margin"].to_numpy(float)[m]
     e = gt["epa_margin"].to_numpy(float)[m]
@@ -471,3 +474,36 @@ def _unplayed(gt: pd.DataFrame, cfg: KalmanConfig, sched: pd.DataFrame, ids) -> 
         a[-1] = 0.0 if r.get("location", "Home") == "Neutral" else 1.0
         rows[gid] = (float(a @ fr.x_final), float(np.sqrt(a @ fr.P_final @ a)))
     return pd.DataFrame(rows, index=FEATURES).T
+
+
+# --------------------------------------------------------------------------- M8: early-season carry-over
+
+CARRYOVER_KEYS = ("gamma", "q_season")
+# Frozen by `scripts/ml_m8.py tune`; see context/ml.md, "M8 build notes".
+# REG weeks 1-4 of 2000-2005 (356 games), every other knob at TUNED: -loglik 1409.37 vs 1410.55 at TUNED.
+TUNED_CARRYOVER = replace(TUNED, gamma=0.50096, q_season=23.106)
+
+
+def tune_carryover(gt: pd.DataFrame, base: KalmanConfig = TUNED, seasons: tuple[int, int] = TUNE_SEASONS,
+                   weeks: tuple[int, int] = (1, 4)) -> dict:
+    """M8 component 4: the between-season carry-over (gamma, q_season) re-tuned for the early season.
+
+    Maximum joint likelihood (`joint_log_likelihood`) of REG games in weeks `weeks` of `seasons` only,
+    every other knob fixed at `base`. Never reads DEV (2006+) when `gt` stops at 2005.
+    """
+    t0 = time.perf_counter()
+    early = gt["week"].between(*weeks).to_numpy()  # REG weeks; postseason weeks are numbered 18+
+
+    def nll(z):
+        c = replace(base, gamma=float(1 / (1 + math.exp(-z[0]))), q_season=float(math.exp(z[1])))
+        return -joint_log_likelihood(gt, run_filter(gt, c), c, seasons, early)[0]
+    z0 = np.array([math.log(base.gamma / (1 - base.gamma)), math.log(base.q_season)])
+    r = optimize.minimize(nll, z0, method="Nelder-Mead", options={"xatol": 1e-4, "fatol": 1e-4, "maxiter": 400})
+    best = replace(base, gamma=float(1 / (1 + math.exp(-r.x[0]))), q_season=float(math.exp(r.x[1])))
+    grid = []
+    for g in (0.3, 0.4, 0.5, 0.6, 0.7, 0.8):
+        grid.append({"gamma": g, "q_season": base.q_season, "nll": nll(np.array([math.log(g / (1 - g)),
+                                                                                  math.log(base.q_season)]))})
+    return {"config": best, "nll": float(r.fun), "nll_base": float(nll(z0)), "n_games": int(
+        (early & gt["season"].between(*seasons).to_numpy()).sum()), "gamma_profile": grid,
+        "evaluations": int(r.nfev), "seconds": time.perf_counter() - t0}

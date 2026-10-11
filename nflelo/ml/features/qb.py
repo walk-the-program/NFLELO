@@ -94,6 +94,8 @@ def dropback_plays(pbp: pd.DataFrame, sched: pd.DataFrame, cfg: QBConfig = QBCon
                         "order": np.arange(len(db))})
     if "play_id" in db.columns:
         out["order"] = db["play_id"].to_numpy(float)
+    if "defteam" in db.columns:  # M8 QB v2 only (opponent adjustment); the M3 aggregation ignores it
+        out["defteam"] = db["defteam"].to_numpy(object)
     if "cpoe" in db.columns:  # M3b C3a only; the M3 aggregation ignores it
         out["cpoe"] = pd.to_numeric(db["cpoe"], errors="coerce").to_numpy(float)
     out["season"] = out["game_id"].map(info["season"]).astype(int)
@@ -552,3 +554,225 @@ TUNED_EXTRAS = QBExtras(cpoe_weight=0.01, cpoe_k=400.0, experience=(-0.0541, 0.0
                         aging=(31.0, 0.14, 0.0))
 # (b) re-tuned on 2000-2005 starter-games where the team's starter changed from its previous game (variant 'd').
 TUNED_EXPERIENCE_CHANGED: tuple = (-0.0651, 0.08, 0.0329, 0.0318)
+
+
+# =========================================================================== M8: QB v2 (off by default)
+#
+# context/ml-m8-method.md, component 3. Nothing above changes: with `QBv2()` (inactive) every M3 and M3b
+# function returns exactly what it did, and `build_features_v2` with an inactive config IS `build_features`
+# (tests/ml/test_m8.py checks A4s's qb_delta byte for byte).
+#
+# (a) Opponent adjustment (`lam_d` > 0). One weighted ridge per (season, week) on the QB-game-defense rows
+#     that kicked off before the week's as_of, over the last `window_seasons` seasons:
+#
+#         EPA(dropback) = Q[passer] + D[defense, season] + h * (passer's team at home) + noise
+#
+#     with the M3 weights (half-life, rho), Q shrunk toward the season's replacement level with k
+#     pseudo-dropbacks (exactly M3's shrinkage when D = h = 0), and D shrunk toward 0 with `lam_d`
+#     pseudo-dropbacks; h is unpenalized. A QB's value is Q, so a QB who faced weak pass defenses is not
+#     credited for them. QBs with no rows inside the window keep the M3 formula.
+# (b) Injury-exit cleaning (`exit_weight` < 1). A QB-game row is "partial" when the QB had under
+#     `exit_share` of his team's dropbacks in the game, or he was the schedule's starter and another QB
+#     threw at least `exit_after` dropbacks after his last one (he left early). Partial rows get weight
+#     x `exit_weight` in his rating and weight 0 in the team baseline (they are not "his" games).
+#
+# Garbage time is excluded throughout, as in M3, so mop-up snaps do not count as an exit.
+
+
+@dataclass(frozen=True)
+class QBv2:
+    lam_d: float = 0.0          # (a) ridge penalty on defense-season effects, pseudo-dropbacks; 0 = off
+    exit_weight: float = 1.0    # (b) weight of partial QB-games in the QB's rating; 1 = off
+    exit_share: float = 0.5
+    exit_after: int = 5
+    window_seasons: int = 8     # (a) seasons of history in each joint fit
+
+    def active(self) -> bool:
+        return self.lam_d > 0 or self.exit_weight != 1.0
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+def qb_game_table_v2(db: pd.DataFrame, sched: pd.DataFrame) -> pd.DataFrame:
+    """One row per (game, team, qb, defense): n, EPA sum, home flag, timeline, plus the partial-game inputs.
+
+    `share` is the QB's share of his team's (non-garbage) dropbacks in the game; `after` is, for the
+    schedule's starter, the number of team dropbacks by other QBs after his last one (0 for everyone else).
+    """
+    d = db.copy()
+    info = sched.drop_duplicates("game_id").set_index("game_id")
+    if "defteam" in d.columns:
+        d["def"] = [franchise(c, int(y)) for c, y in zip(d["defteam"], d["season"])]
+    else:
+        d["def"] = ""
+    home_fr = pd.Series([franchise(c, int(y)) for c, y in zip(info["home_team"], info["season"])], index=info.index)
+    neutral = (info["location"] == "Neutral") if "location" in info.columns else pd.Series(False, index=info.index)
+    d["home"] = ((d["team"].to_numpy() == d["game_id"].map(home_fr).to_numpy())
+                 & ~d["game_id"].map(neutral).fillna(False).astype(bool).to_numpy()).astype(float)
+    g = d.groupby(["game_id", "team", "qb", "def"], sort=False).agg(
+        n=("epa", "size"), epa=("epa", "sum"), season=("season", "first"), week=("week", "first"),
+        kick_ns=("kick_ns", "first"), home=("home", "first"), last=("order", "max")).reset_index()
+    tot = g.groupby(["game_id", "team"])["n"].transform("sum")
+    qn = g.groupby(["game_id", "team", "qb"])["n"].transform("sum")
+    g["share"] = (qn / tot).to_numpy(float)
+    # early exit of the schedule's starter
+    away_fr = pd.Series([franchise(c, int(y)) for c, y in zip(info["away_team"], info["season"])], index=info.index)
+    starter = np.where(g["team"].to_numpy() == g["game_id"].map(home_fr).to_numpy(),
+                       g["game_id"].map(info["home_qb_id"] if "home_qb_id" in info else pd.Series(dtype=object)),
+                       np.where(g["team"].to_numpy() == g["game_id"].map(away_fr).to_numpy(),
+                                g["game_id"].map(info["away_qb_id"] if "away_qb_id" in info
+                                                 else pd.Series(dtype=object)), None))
+    g["is_starter"] = pd.Series(starter, dtype=object).astype(str).to_numpy() == g["qb"].astype(str).to_numpy()
+    lastq = g.groupby(["game_id", "team", "qb"])["last"].transform("max")
+    g["after"] = 0.0
+    sm = g["is_starter"].to_numpy(bool)
+    if sm.any():
+        st = g.loc[sm, ["game_id", "team", "qb"]].rename(columns={"qb": "s_qb"})
+        st["s_last"] = lastq[sm].to_numpy()
+        st = st.drop_duplicates(["game_id", "team"])
+        dd = d[["game_id", "team", "qb", "order"]].merge(st, on=["game_id", "team"], how="inner")
+        dd = dd[(dd["order"] > dd["s_last"]) & (dd["qb"].astype(str) != dd["s_qb"].astype(str))]
+        cnt = dd.groupby(["game_id", "team"]).size()
+        g.loc[sm, "after"] = cnt.reindex(pd.MultiIndex.from_frame(g.loc[sm, ["game_id", "team"]])).fillna(0).to_numpy()
+    ords = oa.week_ordinals(sched)
+    g["ord"] = ords.reindex(pd.MultiIndex.from_frame(g[["season", "week"]])).to_numpy()
+    return g.sort_values("kick_ns", kind="stable").reset_index(drop=True)
+
+
+def partial_flags(qg2: pd.DataFrame, v2: QBv2) -> np.ndarray:
+    """True for partial QB-games: share below exit_share, or a starter who left early."""
+    return ((qg2["share"].to_numpy(float) < v2.exit_share)
+            | (qg2["is_starter"].to_numpy(bool) & (qg2["after"].to_numpy(float) >= v2.exit_after)))
+
+
+@dataclass
+class WeekStateV2:
+    """Duck-types `WeekState` for `qb_deltas` and `team_remembered`: the values are precomputed for one k."""
+    vals: np.ndarray
+    team_mix: pd.DataFrame
+    prior: float
+    k: float
+    d_eff: dict               # (defense franchise, season) -> D (opponent adjustment only)
+    h: float
+
+    def values(self, k: float) -> np.ndarray:
+        if float(k) != float(self.k):
+            raise ValueError(f"WeekStateV2 was built for k = {self.k}, not {k}")
+        return self.vals
+
+
+def week_states_v2(qg2: pd.DataFrame, sched: pd.DataFrame, keys, cfg: QBConfig, priors: dict[int, float],
+                   v2: QBv2) -> tuple[dict, pd.Index]:
+    """QB values for each (season, week) key under QB v2, from rows that kicked off before the week's as_of."""
+    from scipy import sparse
+    from scipy.sparse.linalg import spsolve
+
+    qbs = pd.Index(pd.unique(qg2["qb"]))
+    code = qbs.get_indexer(qg2["qb"])
+    asofs, ords = oa.week_asof(sched), oa.week_ordinals(sched)
+    kick, seas, tord = qg2["kick_ns"].to_numpy(), qg2["season"].to_numpy(int), qg2["ord"].to_numpy()
+    n, e, team = qg2["n"].to_numpy(float), qg2["epa"].to_numpy(float), qg2["team"].to_numpy(object)
+    home = qg2["home"].to_numpy(float)
+    defs = qg2["def"].astype(str).to_numpy(object)
+    part = partial_flags(qg2, v2) if v2.exit_weight != 1.0 else np.zeros(len(qg2), bool)
+    mult = np.where(part, v2.exit_weight, 1.0)
+    k = float(cfg.k)
+    out = {}
+    for S, W in sorted(set((int(a), int(b)) for a, b in keys)):
+        end = np.searchsorted(kick, asofs[(S, W)], side="left")
+        w = oa.decay_weights(int(ords[(S, W)]), tord[:end], S, seas[:end], cfg.half_life, cfg.rho) * mult[:end]
+        c = code[:end]
+        prior = priors.get(S, 0.0)
+        N = np.bincount(c, weights=w * n[:end], minlength=len(qbs))
+        E = np.bincount(c, weights=w * e[:end], minlength=len(qbs))
+        vals = (E + k * prior) / (N + k)
+        d_eff, h = {}, 0.0
+        if v2.lam_d > 0 and end:
+            sub = np.flatnonzero((seas[:end] >= S - v2.window_seasons + 1) & (w > 0))
+            if len(sub):
+                uq, qi = np.unique(c[sub], return_inverse=True)
+                dkey = np.array([f"{a}|{b}" for a, b in zip(defs[sub], seas[sub])], dtype=object)
+                ud, di = np.unique(dkey, return_inverse=True)
+                m, nq, nd = len(sub), len(uq), len(ud)
+                p = nq + nd + 1
+                r = np.arange(m)
+                X = sparse.csr_matrix((np.concatenate([np.ones(m), np.ones(m), home[sub]]),
+                                       (np.concatenate([r, r, r]), np.concatenate([qi, nq + di, np.full(m, p - 1)]))),
+                                      shape=(m, p))
+                Wn = w[sub] * n[sub]
+                A = (X.T @ X.multiply(Wn[:, None])).tocsc()
+                pen = np.r_[np.full(nq, k), np.full(nd, float(v2.lam_d)), 1e-9 * max(Wn.sum(), 1.0)]
+                A = A + sparse.diags(pen, format="csc")
+                b = X.T @ (w[sub] * e[sub]) + np.r_[np.full(nq, k * prior), np.zeros(nd + 1)]
+                beta = spsolve(A, b)
+                vals[uq] = beta[:nq]
+                d_eff = {tuple(x.split("|")): float(v) for x, v in zip(ud, beta[nq:nq + nd])}
+                d_eff = {(a, int(b)): v for (a, b), v in d_eff.items()}
+                h = float(beta[-1])
+        win = seas[:end] >= S - 1
+        wmix = oa.decay_weights(int(ords[(S, W)]), tord[:end], S, seas[:end], cfg.half_life, cfg.rho) * n[:end]
+        wmix = np.where(part[:end], 0.0, wmix) if v2.exit_weight != 1.0 else wmix
+        mix = pd.DataFrame({"team": team[:end][win], "qb": c[win], "w": wmix[win]})
+        mix = mix[mix["w"] > 0].groupby(["team", "qb"], as_index=False)["w"].sum()
+        out[(S, W)] = WeekStateV2(vals, mix, prior, k, d_eff, h)
+    return out, qbs
+
+
+def v2_states(pbp, sched, games, cfg: QBConfig, v2: QBv2, keys=None) -> dict:
+    db = dropback_plays(pbp, sched, cfg)
+    qg2 = qb_game_table_v2(db, sched)
+    keys = keys if keys is not None else list(zip(games["season"].astype(int), games["week"].astype(int)))
+    priors = replacement_priors(db, {s for s, _ in keys}, cfg.rookie_dropbacks)
+    states, qbs = week_states_v2(qg2, sched, keys, cfg, priors, v2)
+    return {"db": db, "qg2": qg2, "states": states, "qbs": qbs}
+
+
+def build_features_v2(pbp: pd.DataFrame, sched: pd.DataFrame, games: pd.DataFrame | None = None,
+                      cfg: QBConfig | None = None, starter: str = "actual", v2: QBv2 | None = None) -> pd.DataFrame:
+    """qb_delta_home/away under QB v2. With an inactive `v2` this IS `build_features` (same code path)."""
+    if v2 is None or not v2.active():
+        return build_features(pbp, sched, games, cfg, starter)
+    if starter not in STARTERS:
+        raise ValueError(f"starter must be one of {STARTERS}")
+    cfg = cfg or tuned_config()
+    if "as_of" not in sched.columns:
+        sched = asof_mod.add_asof(sched)
+    games = sched if games is None else games
+    if "as_of" not in games.columns:
+        games = games.merge(sched[["game_id", "kickoff", "as_of"]], on="game_id", how="left")
+    st = v2_states(pbp, sched, games, cfg, v2)
+    starters = (games.set_index("game_id")[["home_qb_id", "away_qb_id"]] if starter == "actual"
+                else last_starters(sched, games))
+    return qb_deltas(st["states"], st["qbs"], games, starters, cfg.k)
+
+
+def score_v2(states: dict, qbs: pd.Index, targets: pd.DataFrame, opp: bool) -> dict:
+    """Dropback-weighted MSE of the starter's game EPA per dropback, predicted before the week.
+
+    `targets` needs season, week, qb, n, epa, and (when `opp`) opp (defense franchise) and home. With
+    `opp`, the prediction is Q + D[opponent, season] + h * home (D = 0 for a defense not yet seen this
+    season); without it, Q alone (the M3 `score_k` prediction).
+    """
+    pred = np.empty(len(targets))
+    for (S, W), idx in targets.groupby(["season", "week"]).groups.items():
+        st = states[(int(S), int(W))]
+        c = qbs.get_indexer(targets.loc[idx, "qb"].astype(str))
+        v = np.where(c >= 0, st.vals[np.maximum(c, 0)], st.prior)
+        if opp:
+            dd = np.array([st.d_eff.get((o, int(S)), 0.0) for o in targets.loc[idx, "opp"]])
+            v = v + dd + st.h * targets.loc[idx, "home"].to_numpy(float)
+        pred[targets.index.get_indexer(idx)] = v
+    n = targets["n"].to_numpy(float)
+    y = targets["epa"].to_numpy(float) / n
+    return {"n_games": int(len(y)), "wmse": float(np.sum(n * (y - pred) ** 2) / n.sum())}
+
+
+# Frozen by `scripts/ml_m8.py tune` (2000-2005, next-game starter EPA per dropback); see context/ml.md, M8.
+# lam_d by the opponent-aware prediction (Q + D[opponent] + h * home), grid 25-3200: 400 (wMSE 0.10796 vs 0.10918
+# for the M3 value). Exit weight alone, grid 0-1: 0 (0.10907). With the opponent adjustment on, the joint grid
+# prefers exit weight 1 (cleaning adds nothing, 0.10796 vs 0.10826 at 0), so (ab) is the two separately tuned
+# pieces together; otherwise it would duplicate (a).
+TUNED_V2_A = QBv2(lam_d=400.0)
+TUNED_V2_B = QBv2(exit_weight=0.0)
+TUNED_V2_AB = QBv2(lam_d=400.0, exit_weight=0.0)

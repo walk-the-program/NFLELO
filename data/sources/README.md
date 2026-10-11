@@ -28,3 +28,12 @@ The actual playoff seeds of every conference, 2002 to 2025 (300 rows: `season, c
 - **Changes made:** rows cut to 2002-2025 (the current eight-division league) and to the four columns; team codes mapped to this project's franchise IDs (`OAK` to `LV`, `SD` to `LAC`, `STL` to `LA`).
 - **License:** the `nfldata` repository has no license file. What is vendored here is a list of facts (which team held which seed), not a creative work; it is used for testing only.
 - **SHA-256 of the vendored file:** `be14411861d8f9f068d167e52cba9c0b5714bfed86d975734d40e5c750377a9c`
+
+## stadiums.csv
+
+One row per nflverse `stadium_id` that appears in the 1999-2026 schedules (70 venues, including relocations, temporary homes such as Baton Rouge 2005 and Champaign 2002, and every international site). Columns: `stadium_id, name, city, country, lat, lon, tz, elevation_m, roof_type, source`. Used only by the M8 context features (`nflelo/ml/features/context.py`: travel distance, time-zone shift, body clock, altitude, roof type).
+
+- **Source:** facts of public record: venue coordinates and elevation as listed on each venue's Wikipedia article (named in the `source` column), the IANA time zone of the venue's city, and the venue's roof type (`outdoor`, `dome`, `retractable`). Compiled 2026-10-11; spot-checked against Wikipedia for Allegiant Stadium, Levi's Stadium and Estadio Azteca (all within 0.001 degrees; Allegiant's elevation corrected to 670 m).
+- **Precision:** coordinates to about 0.001 degrees (100 m), elevation to the nearest 10-50 m. The features only need travel distance in hundreds of kilometres and a 1,000 m altitude threshold (Denver 1,609 m and Mexico City 2,240 m are the only venues above it).
+- **Roof type** is the stadium's construction, a static fact, not the game-day `roof` value in nflverse (`open`/`closed` for retractable roofs is decided on game day and is missing for future games).
+- **License:** a list of facts; no creative content copied.

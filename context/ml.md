@@ -300,6 +300,7 @@ No paid APIs, no cloud.
 | M7a | WP model + fourth-down decisions | M6 | **Holdout 2026-10-05: primary FAIL** (conversion calibration). The WP model passes and beats nflfastR wp (-0.0099 Brier); FG and punt pass. The audit is published. |
 | M7a-v2 | Corrected go-for-it conversion engine | M7a | Built 2026-10-05 (dev only). Pick under the corrected criterion: **v2ad** (mix by distance × field zone + fourth-down conversion offsets): dev ECE 0.019 vs v1 0.033, 4th-and-2 gap +0.004 vs +0.034. Frozen for a **2026 forward test** (run once from 2027-02-15), plus a pooled 2026+2027 secondary. |
 | M7b | Early-down play type × personnel policy (causal, CC BY-SA) | M6 | **Passed 2026-10-05** (holdout): recommended minus observed +0.052 EPA/play [+0.038, +0.067]; placebo includes 0. |
+| M8 | Game model v2: margin targets, QB v2, early-season and context features, stacking (CC BY only) | M3b | Built 2026-10-11 (DEV only). Nothing beats C2d beyond noise; the one-SE pick is **C2d** again (-0.0010 vs A4s, CI [-0.0019, +0.0000]): **DEV acceptance not met**, so A4s stays the headline and C2d the shadow. `freeze` and `forward` are built, not run; forward-test pre-registration written. See "M8 build notes". |
 
 ### M1/M2 build notes (2026-10-03)
 
@@ -1366,3 +1367,102 @@ Season-ahead 2020-2025, early downs (1st and 2nd, outside the last 2 minutes of 
   - The placebo CI's upper end (+0.012) and the placebo's growing count of "clear" cells in later seasons (4 to 10 of 60, though they earn nothing) suggest a small residual bias, perhaps 0.005 EPA per play, well below the +0.052 gain.
   - OPE and the placebo test the pipeline, not unmeasured confounding: teams may know things we don't, such as injuries or the game plan.
   - **Game theory:** if teams all passed more from 12 personnel, defenses would adjust. These are marginal shifts from current tendencies, not a fixed optimal strategy.
+
+### M8 build notes (2026-10-11, DEV only; nothing frozen)
+
+Spec: `context/ml-m8-method.md` (approved by Walker 2026-10-11). Only CC BY data: play-by-play, schedules (including `home_coach`/`away_coach`, `stadium_id`, `surface`, rest days), and the new `data/sources/stadiums.csv`. No participation, no snap counts, nothing PFR-derived. No 2020-2025 number was computed.
+
+**Where things are.** `nflelo/ml/models/margin_target.py` (weighted linear regression on a margin target, P(win) by a normal CDF with fitted sigma or a logistic on the predicted margin), `nflelo/ml/models/stack.py` (non-negative log-odds stack, walk-forward weights, ridge toward equal weights, `STACK_LAM` 0.001 fixed a priori), `nflelo/ml/features/qb.py` (QB v2 behind `QBv2` flags: `qb_game_table_v2`, `partial_flags`, `week_states_v2`, `build_features_v2`, `score_v2`, `TUNED_V2_A/B/AB`; off = the M3 code path), `nflelo/ml/features/context.py` (`m8_context_features`, `m8_early_features`, `team_bases`, `load_stadiums`), `nflelo/ml/features/kalman.py` (`tune_carryover`, `TUNED_CARRYOVER`; `joint_log_likelihood` takes an optional mask), `data/sources/stadiums.csv` (67 venues, every `stadium_id` in the 1999-2026 schedules; sources in `data/sources/README.md`), `scripts/ml_m8.py` (`tune`, `dev`, `leakcheck`, `freeze`, `forward`), `tests/ml/test_m8.py` (20 tests). Small edits: `asof.corrupt_from` now also scrambles `temp` and `wind` (nflverse fills them after the game); `qb.dropback_plays` carries `defteam` (M3's aggregation ignores it; tested); `eval/windows.py` gained `FORWARD = (2026, 2027)` (label `forward`, guarded like DEV). Saved outputs: `data/raw/ml/m8/` (gitignored: `tune.json`, `dev.json`, `leakcheck.json`, `ladder_frame.parquet`, `coefs.parquet`).
+
+**Tuning (2000-2005 only; DEV never read).**
+- *QB v2 (a), opponent adjustment.* Per (season, week), a sparse weighted ridge on QB-game-defense rows from the last 8 seasons: EPA = Q[passer] + D[defense, season] + h x home, M3 weights, Q shrunk to replacement level with k = 100 (M3's), D shrunk to 0 with `lam_d`. Target: each starter's next-game EPA per dropback, predicted by Q + D[opponent] + h x home (3,036 starter-games). **lam_d = 400** (grid 25-3,200): wMSE 0.10796 vs 0.10918 for the M3 value. Q alone (no opponent term) does not predict raw EPA better than the M3 value (0.10981), as expected: the gain is in separating the QB from the defenses.
+- *QB v2 (b), injury-exit cleaning.* A QB-game is partial when the QB had under 50% of his team's non-garbage dropbacks, or he was the schedule's starter and another QB threw 5+ dropbacks after his last one (17.8% of QB-game rows in 2000-2005). Partial rows get weight `exit_weight` in his rating and 0 in the team baseline. **exit_weight 0** (grid 0-1): 0.10907 vs 0.10918. With (a) on, the joint grid prefers 1 (cleaning adds nothing: 0.10796 vs 0.10826 at 0), so E2ab is the two separately tuned pieces together (lam_d 400, exit_weight 0) rather than a duplicate of E2a.
+- *Carry-over.* Kalman (gamma, q_season) re-tuned by joint likelihood of REG weeks 1-4 only (356 games), every other knob at `kalman.TUNED`: **gamma 0.501, q_season 23.1** (TUNED: 0.483, 14.4); -log likelihood 1,409.4 vs 1,410.6. The gamma profile is flat between 0.5 and 0.6.
+- *Blend target.* w x margin + (1 - w) x EPA margin in points (scale 39.9, `kalman.TUNED.scale`), w by leave-one-season-out log loss over REG 2001-2005 with the A4s features: **w = 0.7** (log loss 0.63159 vs 0.63189 for the margin alone and 0.63253 for EPA alone).
+
+**Interpretations recorded.**
+- "Carry-over strength" was read as the Kalman filter's between-season reversion, since C2d is the base model; Elo's carry-over (lambda 0.40) is the site's Elo and was not touched.
+- Context and early-season features are "home minus away" differences; roof uses the stadium's construction (static), not the game-day `roof` value (missing for retractable roofs in future games). A team's base is the venue of most of its non-neutral home games that season, so relocations and temporary homes follow the schedule.
+- The offseason QB change compares this game's starter with the franchise's most frequent REG starter of S-1; the coach change compares this game's head coach with the franchise's coach in its last game of S-1. Both enter as the flag and the flag x weeks played / 17.
+- **`short_diff` was dropped from E4 after the first (unlogged) run**: a Thursday game puts both teams on a short week, so home-minus-away short week is nonzero in only 6 of 4,600 training games and the fits nearly separated on it (coefficient -21, log loss 0.630). This is a degenerate-feature fix, not tuning; short weeks are reported as a split instead. Every logged run is from the second run.
+
+**Ladder** (DEV REG 2006-2019 with moneylines, n = 3,450, games hash `52b8194df3a2ebf4`; A4s reproduces 0.21509 and C2d 0.21413; paired bootstrap, 2,000 reps, seed 20261003; ECE ok = at or below the null p95 or at most 0.01; 1SE = within one SE of the best). Every base model is walk-forward from 2003 so the stacks can train; DEV predictions of the logistic steps are unchanged by that.
+
+| Step | Model | Brier | Log loss | ECE (p95) | minus A4s [95% CI] | minus C2d [95% CI] | 1SE |
+|---|---|---|---|---|---|---|---|
+| A4s | elo_logit + adj_epa_margin + qb_delta_diff | 0.2151 | 0.6197 | 0.011 (0.025) | | +0.0010 [-0.0000, +0.0019] | |
+| **C2d** | **elo_logit + kf_margin + qb_delta_diff** | **0.2141** | **0.6175** | **0.014 (0.026)** | **-0.0010 [-0.0019, +0.0000]** | | **yes, chosen** |
+| E1 A4s margin/epa/blend | margin targets on the A4s features (best: blend, logit) | 0.2150-0.2156 | 0.6194-0.6212 | 0.010-0.022 | -0.0001 to +0.0005 (all include 0) | | |
+| E1 C2d margin, normal | point margin, Phi(mu / sigma), sigma 13.5 | 0.2142 | 0.6178 | 0.014 (0.026) | -0.0009 [-0.0017, -0.0000] | +0.0001 [-0.0004, +0.0006] | yes |
+| E1 C2d margin, logit | point margin, logistic on mu | 0.2140 | 0.6172 | 0.015 (0.026) | -0.0011 [-0.0019, -0.0003] | -0.0002 [-0.0004, +0.0001] | yes |
+| E1 C2d epa, normal / logit | EPA-margin target | 0.2143 / 0.2141 | 0.6182 / 0.6175 | 0.014 / 0.015 | -0.0008 / -0.0010 (both include 0) | +0.0002 / -0.0000 | / yes |
+| E1 C2d blend, normal / logit | 0.7 margin + 0.3 EPA | 0.2142 / 0.2140 | 0.6179 / 0.6172 | 0.015 / 0.016 | -0.0009 [-0.0018, +0.0001] / -0.0011 [-0.0020, -0.0002] | +0.0001 / -0.0001 | yes / yes |
+| E2a | C2d, opponent-adjusted QB value | 0.2144 | 0.6181 | 0.014 (0.026) | -0.0007 [-0.0017, +0.0003] | +0.0003 [+0.0000, +0.0005] | |
+| E2b | C2d, injury-exit cleaning | 0.2142 | 0.6178 | 0.013 (0.026) | -0.0009 [-0.0019, +0.0001] | +0.0001 [-0.0002, +0.0004] | |
+| E2ab | C2d, both | 0.2145 | 0.6184 | 0.016 (0.026) | -0.0005 [-0.0016, +0.0004] | +0.0004 [+0.0001, +0.0007] | |
+| E3a | C2d + new QB since last season (x weeks) | 0.2143 | 0.6178 | 0.020 (0.026) | -0.0008 [-0.0018, +0.0002] | +0.0001 [-0.0003, +0.0006] | |
+| E3b | C2d + new head coach (x weeks) | **0.2139** | 0.6170 | 0.016 (0.025) | -0.0011 [-0.0022, -0.0001] | -0.0002 [-0.0006, +0.0002] | yes (best) |
+| E3c | C2d with the carry-over filter | 0.2142 | 0.6176 | 0.015 (0.026) | -0.0009 [-0.0019, +0.0001] | +0.0000 [-0.0002, +0.0002] | yes |
+| E3abc | all three | 0.2141 | 0.6173 | 0.020 (0.025) | -0.0010 [-0.0021, +0.0001] | -0.0000 [-0.0007, +0.0006] | yes |
+| E4_travel | + travel_diff, tz_diff | 0.2143 | 0.6178 | 0.015 (0.026) | -0.0008 [-0.0021, +0.0004] | +0.0001 [-0.0006, +0.0009] | yes |
+| E4_body | + body clock early, late | 0.2142 | 0.6176 | 0.016 (0.025) | -0.0009 [-0.0023, +0.0004] | +0.0001 [-0.0009, +0.0011] | yes |
+| E4_rest | + rest_diff, bye_diff | 0.2141 | 0.6175 | 0.017 (0.026) | -0.0009 [-0.0021, +0.0001] | +0.0000 [-0.0006, +0.0006] | yes |
+| E4_alt | + altitude exposure | 0.2143 | 0.6181 | 0.013 (0.026) | -0.0008 [-0.0018, +0.0003] | +0.0002 [-0.0002, +0.0006] | |
+| E4_venue | + indoor, turf, surface mismatch, dome team outdoors late | 0.2146 | 0.6185 | 0.008 (0.025) | -0.0005 [-0.0017, +0.0008] | +0.0005 [-0.0004, +0.0012] | |
+| E4_all | every deployable context feature | 0.2151 | 0.6195 | 0.018 (0.025) | -0.0000 [-0.0019, +0.0017] | +0.0009 [-0.0006, +0.0024] | |
+| E4w | weather (not deployable; descriptive) | 0.2145 | 0.6183 | 0.013 (0.026) | -0.0006 [-0.0017, +0.0004] | +0.0004 [-0.0001, +0.0008] | n/a |
+| E5 | C2d + E3b (the only piece that beat C2d alone) | 0.2139 | 0.6170 | 0.016 (0.025) | -0.0011 [-0.0022, -0.0001] | -0.0002 [-0.0006, +0.0002] | yes |
+| E5m | E5 features, point-margin target, logit | 0.2140 | 0.6172 | 0.015 (0.026) | -0.0011 [-0.0019, -0.0002] | -0.0001 [-0.0005, +0.0003] | yes |
+| E6 | stack: E5 + C2d + Elo + A4s | 0.2146 | 0.6184 | 0.014 (0.025) | -0.0005 [-0.0014, +0.0004] | +0.0004 [-0.0000, +0.0010] | |
+| E6b | stack: A4s + C2d + Elo + E1 C2d margin logit | 0.2145 | 0.6184 | 0.012 (0.026) | -0.0005 [-0.0013, +0.0003] | +0.0004 [-0.0001, +0.0009] | |
+| | Elo v2 | 0.2178 | 0.6255 | 0.015 | | | |
+| | Market (benchmark) | 0.2106 | 0.6096 | 0.018 | | | |
+
+Every ECE passes. Leak alarm (better than A4s by more than 0.006): none.
+
+**Choice (one-SE rule).** Best: E3b (0.21394). Within one SE: C2d, five E1 C2d variants, E3b, E3c, E3abc, E4_travel, E4_body, E4_rest, E5, E5m. **Chosen: C2d** (3 features, the simplest). C2d minus A4s -0.00095 [-0.00191, +0.000001]: **DEV acceptance (CI excludes zero) not met**, the same verdict as M3b. Under the spec, A4s stays the headline and C2d keeps running as the shadow; there is nothing new to freeze.
+
+**Splits** (minus C2d [95% CI]; n: weeks 1-4 751, 5-9 969, 10-18 1,730, changed starter 664, short week 179 = games where either team has 5 or fewer days' rest).
+- C2d vs A4s: weeks 1-4 -0.0006 [-0.0023, +0.0011], 10-18 -0.0016 [-0.0029, -0.0002], changed -0.0000 [-0.0021, +0.0021], short week -0.0037 [-0.0077, +0.0001].
+- E3b: weeks 1-4 -0.0004 [-0.0016, +0.0007], changed -0.0010 [-0.0022, +0.0001], short week -0.0012 [-0.0027, +0.0002].
+- E3a (new QB): changed -0.0012 [-0.0023, -0.0002]; E3abc: changed -0.0023 [-0.0040, -0.0007], short week -0.0032 [-0.0060, -0.0002]. These are the only split CIs against C2d that exclude zero, both on changed-starter games, but the same features cost about as much on unchanged games (+0.0005), so nothing moves overall.
+- E1 C2d margin logit: weeks 1-4 -0.0003 [-0.0008, +0.0001], changed -0.0005 [-0.0012, +0.0002].
+- E4_all: weeks 10-18 +0.0021 [-0.0002, +0.0043] (overfits).
+- On changed-starter games every step still trails the market by about 0.007 (C2d 0.2150 vs 0.2072).
+
+**Coefficients** (2019 refit, trained 2001-2018; range over the 14 DEV refits).
+- C2d: intercept -0.014, elo_logit +0.433 [+0.176, +0.496], kf_margin +0.083 [+0.068, +0.114], qb_delta_diff +3.495 [+2.59, +3.67].
+- E3b: coach_new_diff -0.150 [-0.252, -0.025] and coach_new_x_wk +0.439 [+0.082, +0.442] per 17 weeks: a team with a new head coach plays about 0.15 log-odds worse than its ratings in week 1 and that fades to about +0.29 by week 17 (the ratings catch up and overshoot); the rest matches C2d.
+- E1 C2d margin logit: margin = -0.09 + 3.07 elo_logit + 0.61 kf_margin + 26.1 qb_delta_diff points; residual SD 13.5; P = logistic(-0.001 + 0.1375 x mu).
+- E4_all: the signs are sensible (body clock early -0.12 and late -0.21, altitude -0.19, surface mismatch -0.13, turf +0.15 log-odds for the home side) but each is small and noisy, and together they overfit.
+- E6 stack weights (2019): E5 0.50, C2d 0.38, Elo 0.10, A4s 0.07 (sum 1.06), intercept +0.02. E6b: margin model 0.62, C2d 0.36, Elo 0.06, A4s 0.01. The weights in the early refits are fit on 3-5 seasons of base predictions and swing widely (C2d 0.17-0.58), which is why the stack loses to its own bases.
+
+**Read.** Every M8 idea is either noise or a sliver: the margin target (-0.0002 vs C2d), the coach change (-0.0002), the carry-over (0.0000), the QB refinements (+0.0001 to +0.0004), and the context features (+0.0000 to +0.0005 one group at a time, +0.0009 all together). With 3,450 games, the paired SE of a difference with C2d is about 0.0001-0.0002 for one added piece (0.0008 for all context features together), so none of these is distinguishably better than C2d (E2a and E2ab are slightly worse: their CIs against C2d sit at or above zero). The public play-by-play and schedule look exhausted for pregame win probability at this sample size; the remaining market gap (0.0035) sits mostly in changed-starter games and early weeks, where the market has information we don't (practice reports, injury severity, coaching plans).
+
+**Leakage.** `ml_m8.py leakcheck` on real 2014-2017 data, 9 games (2017 weeks 1, 2, 9, 13, 17 and a wild-card game): QB v2 a, b, ab with the actual starter (identity kept, M3-D1) and the last starter (identities scrambled) 9/9 leak-free each; the carry-over filter 9/9; the early-season features 9/9; the deployable context features 9/9. Controls fail as required: weather 0/9 (now scrambled by `corrupt_from`), the filter's post-week margin 0/9. Synthetic versions in `tests/ml/test_m8.py`, plus season-ahead tests for the margin-target and stack walk-forwards (flipping season S outcomes leaves S's predictions unchanged) and the A4s byte-identity tests (QB v2 off = `build_features`; the carried `defteam` column changes no M3 table).
+
+**Registry.** `m8_tune_qb_v2`, `m8_tune_carryover`, `m8_tune_blend` (label tune); `m8_A4s`, `m8_C2d`, `m8_E1_*` (12), `m8_E2a/b/ab`, `m8_E3a/b/c/abc`, `m8_E4_*` (7, E4w flagged `deployable: false`), `m8_E5`, `m8_E5m`, `m8_E6`, `m8_E6b` (label dev, 2006-2019), logged from an uncommitted tree. The `Elo` base is not logged (stack input only).
+
+**Timing.** `tune` 12 s (QB v2 6 s, carry-over 2 s, blend 2 s). `dev` 25 s (features 11.6 s, of which QB v2 7.5 s; ladder fits 1.5 s). `leakcheck` 22 s. Tests 3 s.
+
+**Freeze and forward (built, not run).** `freeze` refuses if `experiments/live/m8_2026.json` exists; it rebuilds the frame through 2025, refits the 2019 model on 2001-2018 and stops unless it matches the logged DEV run (checked on the DEV frame for a logistic, a margin-target and a stack spec: max |diff| 3e-14), then fits the chosen model on REG 2001-2025 and writes the artifact (spec, fit, every knob, training hash, data fingerprint including `stadiums.csv`, git state). No metric is computed on 2020-2025. `forward` refuses before every 2026 REG game has a result, without the frozen artifact, or if an `m8_forward_*` run exists. Since the DEV pick is C2d, a freeze now would refit the existing shadow model (`C2d-2026-6b53b499`, also fit on 2001-2025).
+
+**Open items.**
+- The chosen model is the existing shadow. Whether to freeze anything (for example E3b or E5m as a second shadow, knowing they did not clear the bar) is Walker's call.
+- Live wiring (`ml_predict.py` logging M8, the site and scorecard) is not built; the forward stage expects `experiments/live/2026_m8.csv` in the main ledger's schema.
+- Weather can't be used live from nflverse; a forecast source would be needed, and it showed no gain on DEV anyway.
+
+### M8 forward test (pre-registered 2026-10-11; freeze commit: `<FREEZE COMMIT — fill in before the first live M8 row>`)
+
+Written before any live M8 prediction exists and before anything is frozen. It applies only if Walker decides to freeze an M8 model; the freeze commit above is filled in at that time, and the artifact `experiments/live/m8_2026.json` must be committed before the first live M8 row.
+
+**Frozen.** The model and fit in `experiments/live/m8_2026.json` (`scripts/ml_m8.py freeze`: the DEV-chosen spec fit on REG 2001-2025 with the A4s protocol, every knob listed in the file), unchanged for the whole 2026 season. A4s keeps being logged in `experiments/live/2026.csv` as the frozen 2026 baseline.
+
+**Games.** Every 2026 REG game from the switch week (the week of the first M8 ledger row) to week 18. The scored prediction for each model is its last ledger row before kickoff (M4-D2). Games without a pre-kickoff row in either ledger are listed and left out.
+
+**Primary (exact).** d = Brier(M8) - Brier(A4s) on those games. **PASS iff the upper end of the 95% paired game-level bootstrap CI (2,000 reps, seed 20261003) is below 0.** Run once, after the 2026 regular season is complete, with `python scripts/ml_m8.py forward` (it refuses before every 2026 REG game has a result, without the frozen artifact, or if an `m8_forward_*` run exists). It logs `m8_forward_2026` (label `forward`).
+
+**Secondary.** The same comparison pooled over 2026 and 2027 (the 2027 model refit on 2001-2026 with the same spec and knobs, frozen before 2027 week 1), run once after the 2027 regular season. Descriptive alongside both: log loss, ECE with the one-sided null, weeks 1-4, changed-starter games, and M8 minus market.
+
+**Power, stated plainly.** About 230 games from week 5 on. At the DEV-sized edge (0.001 Brier) and the DEV per-game SD of the C2d-minus-A4s difference (0.028), the CI half-width is about 0.0036, so one season will almost surely not exclude zero; the pooled 2026+2027 secondary is the more informative test, and a fail is weak evidence against.
+

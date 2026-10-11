@@ -84,7 +84,9 @@ def games_before(games: pd.DataFrame, as_of) -> pd.DataFrame:
 
 # Numeric play-level columns that carry outcome information and get scrambled.
 _PLAY_NOISE_COLS = ("epa", "wp", "success", "yards_gained", "wpa", "cpoe")
-_SCHED_NOISE_COLS = ("home_score", "away_score", "result", "total")
+# Game-day weather is recorded after the game (nflverse leaves it blank for unplayed games), so it is
+# not known at as_of either (M8).
+_SCHED_NOISE_COLS = ("home_score", "away_score", "result", "total", "temp", "wind")
 # Who threw the ball on late plays is outcome information too; shuffled among late plays.
 # So is every other player credited on a late play (M5): any column ending in "_player_id"
 # or named in _PLAY_ID_EXTRA, and the play-event flags in _PLAY_EVENT_COLS.
