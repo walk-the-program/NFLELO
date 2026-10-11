@@ -1,0 +1,560 @@
+{
+  "name": "m8_E6b",
+  "label": "dev",
+  "window": {
+    "seasons": [
+      2006,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 3450,
+  "games_hash": "52b8194df3a2ebf4",
+  "metrics": {
+    "n": 3450,
+    "brier": 0.21454129587874832,
+    "logloss": 0.6184259723865205,
+    "accuracy": 0.6515547805870386,
+    "ece": 0.012394628740013246,
+    "ece_null_p95": 0.026161579281224392,
+    "ece_pass": true
+  },
+  "features": [
+    "A4s",
+    "C2d",
+    "Elo",
+    "E1_C2d_margin_logit"
+  ],
+  "params": {
+    "ratings": {
+      "lam": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "qb": {
+      "k": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "rookie_dropbacks": 100,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "kalman": {
+      "q_week": 0.72158,
+      "gamma": 0.48317,
+      "q_season": 14.431,
+      "sigma_m": 12.361,
+      "sigma_e": 13.52,
+      "rho": 0.80709,
+      "scale": 39.921,
+      "q_hfa": 0.00034383,
+      "epa_home": 0.0085843,
+      "p0": 36.0,
+      "h0": 0.0,
+      "ph0": 9.0,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "train_start": 2001,
+    "season_half_life": 8.0,
+    "ties": "two half-weight rows",
+    "elo_config": {
+      "start": 1500.0,
+      "k": 20.0,
+      "lam": 0.4,
+      "hfa_mode": "online",
+      "hfa": 55.0,
+      "hfa_init": 65.0,
+      "k_hfa": 0.5,
+      "hfa_mov": false,
+      "mov_mode": "winner",
+      "mov_cap": null,
+      "expansion_start": 1300.0,
+      "include_playoffs": false
+    },
+    "model": "stack",
+    "target": null,
+    "method": null,
+    "bases": [
+      "A4s",
+      "C2d",
+      "Elo",
+      "E1_C2d_margin_logit"
+    ],
+    "stack": {
+      "lam": 0.001,
+      "first_season": 2003
+    }
+  },
+  "data": {
+    "data/games.csv": "70869b81fd8b785cdaa436cc4955cbd30139b8aae9b4ede68e01673761790779",
+    "data/raw/ml/pbp/1999": "6263ca0dcafed4110f1da80be5126eedc2fba948b3de111dc2e8dd94165ce595",
+    "data/raw/ml/pbp/2000": "29a0904f123de7fe9c10ff07e7605bb29d753ff87f2026659605e60b2c0aa243",
+    "data/raw/ml/pbp/2001": "7b34b78901915ca98449190a1a911308275cc764eb3e565376c3d44667933dc1",
+    "data/raw/ml/pbp/2002": "46fe8b49e4f94e479cf8e5dbb87d90b577d76d0a503d6bf4f2191902f95391a2",
+    "data/raw/ml/pbp/2003": "c45fa61ddb3eba8c316f8c680362284ed01174728ca6e22bdfdba6083d5ec707",
+    "data/raw/ml/pbp/2004": "c95a80bffc740d438965320a6014f9cb839fa57e92e114b2783fc76d8acce653",
+    "data/raw/ml/pbp/2005": "c7e4b4984af805df9719a23004a967593e7d503025b1c301973606e0e4f7cc61",
+    "data/raw/ml/pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+    "data/raw/ml/pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+    "data/raw/ml/pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+    "data/raw/ml/pbp/2009": "5bfb6559343c04092d1ad66c1479782d085d9f390e6806be0a7ca7ec37124806",
+    "data/raw/ml/pbp/2010": "74ad605fea53c27afd00eee71c53b86b5cfbf7133d1a7b5b8f0067d817e55785",
+    "data/raw/ml/pbp/2011": "26727f9d2b0e4f9f616e746b87b9a29359f37a4b484f66f7312baf883d85e958",
+    "data/raw/ml/pbp/2012": "3277aded9792c419cc853cf307f2206c3fb0908d91750b4e1d3d66b567407c66",
+    "data/raw/ml/pbp/2013": "2a31a7cd0e7e2306f626a0f1f4bb96679e5b3e92a8729695858adca35d8b2686",
+    "data/raw/ml/pbp/2014": "c6910558e235dac664b1b7f02654d47ea8d51904ef9ace5d4f015165604e0b12",
+    "data/raw/ml/pbp/2015": "b3314a52b781a00417528b2e3388d2596098cdbe7b565d3c962d7171a98ae70f",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/1999": "b590c0c595ae702489068ed30d25460a1da2f129ce47c4143c8c28618fbb2749",
+    "data/raw/ml/schedules/2000": "d11ca64a246a9b9ce98beb15af6a337887f1a31658a1271d510ef62e094fd927",
+    "data/raw/ml/schedules/2001": "59deb3483354d8e24a55eef5e508f4824a3cdfff44936adea6d02af34c64fffd",
+    "data/raw/ml/schedules/2002": "b394de36fc6286647bdfa1a82383b0fec5f83a5e0aeaefc010336c72f1365545",
+    "data/raw/ml/schedules/2003": "70b3c8a10df7a205ee8bc446fa40dca4f7408f3900d063f1881860119de4834c",
+    "data/raw/ml/schedules/2004": "64d26bdf22af5736b507a04b82c73b17ded7765ad2940c02d880abbe5779d978",
+    "data/raw/ml/schedules/2005": "3535ab82c2c6b866d94623aba9f37eac3b7497fd5ff61898904e03420d80795a",
+    "data/raw/ml/schedules/2006": "04e8c1a0394137e8493db6bf228a75ab1e0e8104eca4056380c13168174fca98",
+    "data/raw/ml/schedules/2007": "ed35269017c5342a04e621717760da8ccdc68421f7a38685eaa355af90d875b2",
+    "data/raw/ml/schedules/2008": "76a274f12d0efbdc6220870e083597fe6669f33bf5f94d30ade9d11efbc3423d",
+    "data/raw/ml/schedules/2009": "b720c554d58f8e8bc4ef4fe3ada0528f1f4065bde6926395f5c4ed46f6c19579",
+    "data/raw/ml/schedules/2010": "c6eb6d6390b8808ab6fe7a1c177d45b2d31c4dc3f7b5ccf3a9ff525c9afe758f",
+    "data/raw/ml/schedules/2011": "367cd43a9a9499d875a00dc12d2476ea3bfabc36dfbb82399a695f5230618232",
+    "data/raw/ml/schedules/2012": "94fd313c6126390c47c936cc04c986ec6a2526cad776f078e61c8e740171ceb0",
+    "data/raw/ml/schedules/2013": "48b55301b46a4acc55b1263555b01d62475fce5196f943176cf5bb23b5b979b6",
+    "data/raw/ml/schedules/2014": "56c8544f26975a429dd1dcd67996b28cb3680c742c79c2367bfea1e35ae93940",
+    "data/raw/ml/schedules/2015": "68c3bf6df90e969fe80aa46eb3351ad624e5e7c3f85c664644811508bbb647c3",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56",
+    "data/sources/stadiums.csv": "e4df8b30c01110788e9d4b492cf570587853c1c17c1242ba6601b22b0faa8e79"
+  },
+  "git": {
+    "sha": "64950423c71a23ea727f7101fd69faca44eaf334",
+    "dirty": false
+  },
+  "timestamp": "2026-10-11T19:18:29+00:00",
+  "notes": "stack of A4s + C2d + Elo + E1_C2d_margin_logit",
+  "group": "E6",
+  "deployable": true,
+  "comparisons": {
+    "vs_a4s": {
+      "n": 3450,
+      "diff": -0.0005446333526418855,
+      "ci_low": -0.001348646191181447,
+      "ci_high": 0.0003041887700781596,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.00043004153976174136,
+      "metric": "brier"
+    },
+    "vs_c2d": {
+      "n": 3450,
+      "diff": 0.000409326914436908,
+      "ci_low": -5.427529024787306e-05,
+      "ci_high": 0.0008885156888772675,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.00024011445158751094,
+      "metric": "brier"
+    },
+    "vs_a4s_logloss": {
+      "n": 3450,
+      "diff": -0.0012395605223036977,
+      "ci_low": -0.0031122379781663313,
+      "ci_high": 0.000684726635280123,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.0009801513055604253,
+      "metric": "logloss"
+    },
+    "vs_c2d_logloss": {
+      "n": 3450,
+      "diff": 0.0009188545142609046,
+      "ci_low": -0.00017873176224148963,
+      "ci_high": 0.0020468073576160955,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.0005652267954877707,
+      "metric": "logloss"
+    },
+    "vs_market": {
+      "n": 3450,
+      "diff": 0.003943063173986245,
+      "ci_low": 0.00157063662949582,
+      "ci_high": 0.006396657971293034,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.0012424780819802186,
+      "metric": "brier"
+    },
+    "vs_best": {
+      "n": 3450,
+      "diff": 0.0005985536507081656,
+      "ci_low": -4.966319249782827e-05,
+      "ci_high": 0.0012106125730956033,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.00031381899152861615,
+      "metric": "brier"
+    }
+  },
+  "one_se": {
+    "best": "E3b",
+    "within": false,
+    "chosen": false,
+    "eligible": [
+      "C2d",
+      "E1_C2d_margin_normal",
+      "E1_C2d_margin_logit",
+      "E1_C2d_epa_logit",
+      "E1_C2d_blend_normal",
+      "E1_C2d_blend_logit",
+      "E3b",
+      "E3c",
+      "E3abc",
+      "E4_travel",
+      "E4_body",
+      "E4_rest",
+      "E5",
+      "E5m"
+    ],
+    "complexity": 15
+  },
+  "accepted": null,
+  "splits": {
+    "weeks_1_4": {
+      "n": 751,
+      "brier": 0.22380157577444657,
+      "brier_a4s": 0.22428234271173858,
+      "brier_c2d": 0.2237095825645462,
+      "brier_market": 0.2198399821591059,
+      "vs_a4s": {
+        "n": 751,
+        "diff": -0.00048076693729199845,
+        "ci_low": -0.0018623725164050974,
+        "ci_high": 0.0008554000095226886,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0007008482934124466,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 751,
+        "diff": 9.199320990039993e-05,
+        "ci_low": -0.0007232943794763178,
+        "ci_high": 0.0009514128585514123,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.00043230080241147525,
+        "metric": "brier"
+      }
+    },
+    "weeks_5_9": {
+      "n": 969,
+      "brier": 0.21180002119692617,
+      "brier_a4s": 0.21256190035320047,
+      "brier_c2d": 0.21239862562945994,
+      "brier_market": 0.20952451455749166,
+      "vs_a4s": {
+        "n": 969,
+        "diff": -0.0007618791562742895,
+        "ci_low": -0.0022754593847745795,
+        "ci_high": 0.0008241805415434661,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0007768343512283003,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 969,
+        "diff": -0.0005986044325337343,
+        "ci_low": -0.0015081869925489164,
+        "ci_high": 0.0002889644226639005,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.00046281931251370497,
+        "metric": "brier"
+      }
+    },
+    "weeks_10_18": {
+      "n": 1730,
+      "brier": 0.21205680163887336,
+      "brier_a4s": 0.2125074768956817,
+      "brier_c2d": 0.2109451608011292,
+      "brier_market": 0.2071877581640065,
+      "vs_a4s": {
+        "n": 1730,
+        "diff": -0.00045067525680834015,
+        "ci_low": -0.0017399746122511081,
+        "ci_high": 0.0007985829241588932,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0006524889145710433,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 1730,
+        "diff": 0.001111640837744116,
+        "ci_low": 0.00040901651055451815,
+        "ci_high": 0.0017916078935458484,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.000348842315884131,
+        "metric": "brier"
+      }
+    },
+    "changed": {
+      "n": 664,
+      "brier": 0.2155566912309073,
+      "brier_a4s": 0.2149932565028571,
+      "brier_c2d": 0.21497924084851158,
+      "brier_market": 0.20721772580836312,
+      "vs_a4s": {
+        "n": 664,
+        "diff": 0.0005634347280502001,
+        "ci_low": -0.0013340554776267056,
+        "ci_high": 0.002544589856375754,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0010155752428103644,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 664,
+        "diff": 0.0005774503823957368,
+        "ci_low": -0.0006010247036418309,
+        "ci_high": 0.001781745401792046,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0006051846751598826,
+        "metric": "brier"
+      }
+    },
+    "unchanged": {
+      "n": 2786,
+      "brier": 0.21429929210493873,
+      "brier_a4s": 0.21510801634256968,
+      "brier_c2d": 0.2139300348181847,
+      "brier_market": 0.21140392422637336,
+      "vs_a4s": {
+        "n": 2786,
+        "diff": -0.0008087242376309541,
+        "ci_low": -0.001717078587505188,
+        "ci_high": 0.00010929926958736487,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.00047082378291057707,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 2786,
+        "diff": 0.0003692572867539709,
+        "ci_low": -0.0001039635463359343,
+        "ci_high": 0.0008874684905838646,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.00024509041853010765,
+        "metric": "brier"
+      }
+    },
+    "short_week": {
+      "n": 179,
+      "brier": 0.2005319955448214,
+      "brier_a4s": 0.20408585837121176,
+      "brier_c2d": 0.20034914406478815,
+      "brier_market": 0.18931231446736935,
+      "vs_a4s": {
+        "n": 179,
+        "diff": -0.003553862826390373,
+        "ci_low": -0.006838124746078411,
+        "ci_high": -0.00023317545482673177,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0017221508332163674,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 179,
+        "diff": 0.00018285148003322542,
+        "ci_low": -0.0015042787629423724,
+        "ci_high": 0.0019631066208644224,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0008809610551742544,
+        "metric": "brier"
+      }
+    }
+  },
+  "coefficients": [
+    {
+      "season": 2006,
+      "n_train": 768,
+      "intercept": 0.008809393843777234,
+      "A4s": 0.0,
+      "C2d": 0.10407253916380034,
+      "Elo": 0.2961328638751297,
+      "E1_C2d_margin_logit": 0.7262322834464182
+    },
+    {
+      "season": 2007,
+      "n_train": 1024,
+      "intercept": -0.04348333230677632,
+      "A4s": 0.0,
+      "C2d": 0.007678047251814866,
+      "Elo": 0.3146013175659759,
+      "E1_C2d_margin_logit": 0.6821347297817791
+    },
+    {
+      "season": 2008,
+      "n_train": 1280,
+      "intercept": -0.03669142342685536,
+      "A4s": 0.0,
+      "C2d": 0.18604232408444474,
+      "Elo": 0.23184560034338533,
+      "E1_C2d_margin_logit": 0.6358511557620374
+    },
+    {
+      "season": 2009,
+      "n_train": 1536,
+      "intercept": -0.02492792892785545,
+      "A4s": 0.08478898481162064,
+      "C2d": 0.22856457913235387,
+      "Elo": 0.14895852839765342,
+      "E1_C2d_margin_logit": 0.6047833761372566
+    },
+    {
+      "season": 2010,
+      "n_train": 1792,
+      "intercept": -0.01860386622673396,
+      "A4s": 0.1554293516438137,
+      "C2d": 0.23302564132527917,
+      "Elo": 0.14944990298644503,
+      "E1_C2d_margin_logit": 0.5413289677396472
+    },
+    {
+      "season": 2011,
+      "n_train": 2048,
+      "intercept": -0.01604141741758086,
+      "A4s": 0.009532457332077261,
+      "C2d": 0.2642853194565187,
+      "Elo": 0.23523780204178524,
+      "E1_C2d_margin_logit": 0.5135665965977619
+    },
+    {
+      "season": 2012,
+      "n_train": 2304,
+      "intercept": -0.019302374535775848,
+      "A4s": 0.0,
+      "C2d": 0.3492051580291697,
+      "Elo": 0.14728109929751873,
+      "E1_C2d_margin_logit": 0.5570958704338393
+    },
+    {
+      "season": 2013,
+      "n_train": 2560,
+      "intercept": -0.010663996133416707,
+      "A4s": 0.0,
+      "C2d": 0.40863738771288155,
+      "Elo": 0.07416958497640828,
+      "E1_C2d_margin_logit": 0.5706096019085305
+    },
+    {
+      "season": 2014,
+      "n_train": 2816,
+      "intercept": 0.01068191925710096,
+      "A4s": 0.0,
+      "C2d": 0.4689640334547659,
+      "Elo": 0.0,
+      "E1_C2d_margin_logit": 0.5983376341828656
+    },
+    {
+      "season": 2015,
+      "n_train": 3072,
+      "intercept": 0.001892598375622355,
+      "A4s": 0.0,
+      "C2d": 0.42311079630333015,
+      "Elo": 0.06033818811310092,
+      "E1_C2d_margin_logit": 0.5973981074580124
+    },
+    {
+      "season": 2016,
+      "n_train": 3328,
+      "intercept": -0.008827767299425528,
+      "A4s": 0.0,
+      "C2d": 0.36552092604531783,
+      "Elo": 0.1125527596969594,
+      "E1_C2d_margin_logit": 0.5731970218058555
+    },
+    {
+      "season": 2017,
+      "n_train": 3584,
+      "intercept": 0.0024417051462349132,
+      "A4s": 0.03109959226490566,
+      "C2d": 0.3110363125408908,
+      "Elo": 0.15370605438653293,
+      "E1_C2d_margin_logit": 0.5554814364357438
+    },
+    {
+      "season": 2018,
+      "n_train": 3840,
+      "intercept": 0.006838058595324755,
+      "A4s": 0.10993796609310982,
+      "C2d": 0.3337165191596682,
+      "Elo": 0.03746572492358574,
+      "E1_C2d_margin_logit": 0.5833985860445902
+    },
+    {
+      "season": 2019,
+      "n_train": 4096,
+      "intercept": 0.023751288552247254,
+      "A4s": 0.00974764887352115,
+      "C2d": 0.3643671625385134,
+      "Elo": 0.061073739799212934,
+      "E1_C2d_margin_logit": 0.6172350136422753
+    }
+  ],
+  "timing": null
+}

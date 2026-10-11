@@ -1,0 +1,559 @@
+{
+  "name": "m8_E2ab",
+  "label": "dev",
+  "window": {
+    "seasons": [
+      2006,
+      2019
+    ],
+    "game_type": "REG"
+  },
+  "holdout": false,
+  "n": 3450,
+  "games_hash": "52b8194df3a2ebf4",
+  "metrics": {
+    "n": 3450,
+    "brier": 0.21454315219193346,
+    "logloss": 0.6184366954327198,
+    "accuracy": 0.6483580354548096,
+    "ece": 0.016211204490128455,
+    "ece_null_p95": 0.0260055043204047,
+    "ece_pass": true
+  },
+  "features": [
+    "elo_logit",
+    "kf_margin",
+    "qb_delta_diff_v2ab"
+  ],
+  "params": {
+    "ratings": {
+      "lam": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "qb": {
+      "k": 100.0,
+      "half_life": 48.0,
+      "rho": 0.25,
+      "rookie_dropbacks": 100,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "kalman": {
+      "q_week": 0.72158,
+      "gamma": 0.48317,
+      "q_season": 14.431,
+      "sigma_m": 12.361,
+      "sigma_e": 13.52,
+      "rho": 0.80709,
+      "scale": 39.921,
+      "q_hfa": 0.00034383,
+      "epa_home": 0.0085843,
+      "p0": 36.0,
+      "h0": 0.0,
+      "ph0": 9.0,
+      "garbage_low": 0.05,
+      "garbage_high": 0.95
+    },
+    "train_start": 2001,
+    "season_half_life": 8.0,
+    "ties": "two half-weight rows",
+    "elo_config": {
+      "start": 1500.0,
+      "k": 20.0,
+      "lam": 0.4,
+      "hfa_mode": "online",
+      "hfa": 55.0,
+      "hfa_init": 65.0,
+      "k_hfa": 0.5,
+      "hfa_mov": false,
+      "mov_mode": "winner",
+      "mov_cap": null,
+      "expansion_start": 1300.0,
+      "include_playoffs": false
+    },
+    "model": "logistic",
+    "target": null,
+    "method": null,
+    "bases": [],
+    "qb_v2": {
+      "a": {
+        "lam_d": 400.0,
+        "exit_weight": 1.0,
+        "exit_share": 0.5,
+        "exit_after": 5,
+        "window_seasons": 8
+      },
+      "b": {
+        "lam_d": 0.0,
+        "exit_weight": 0.0,
+        "exit_share": 0.5,
+        "exit_after": 5,
+        "window_seasons": 8
+      },
+      "ab": {
+        "lam_d": 400.0,
+        "exit_weight": 0.0,
+        "exit_share": 0.5,
+        "exit_after": 5,
+        "window_seasons": 8
+      }
+    }
+  },
+  "data": {
+    "data/games.csv": "70869b81fd8b785cdaa436cc4955cbd30139b8aae9b4ede68e01673761790779",
+    "data/raw/ml/pbp/1999": "6263ca0dcafed4110f1da80be5126eedc2fba948b3de111dc2e8dd94165ce595",
+    "data/raw/ml/pbp/2000": "29a0904f123de7fe9c10ff07e7605bb29d753ff87f2026659605e60b2c0aa243",
+    "data/raw/ml/pbp/2001": "7b34b78901915ca98449190a1a911308275cc764eb3e565376c3d44667933dc1",
+    "data/raw/ml/pbp/2002": "46fe8b49e4f94e479cf8e5dbb87d90b577d76d0a503d6bf4f2191902f95391a2",
+    "data/raw/ml/pbp/2003": "c45fa61ddb3eba8c316f8c680362284ed01174728ca6e22bdfdba6083d5ec707",
+    "data/raw/ml/pbp/2004": "c95a80bffc740d438965320a6014f9cb839fa57e92e114b2783fc76d8acce653",
+    "data/raw/ml/pbp/2005": "c7e4b4984af805df9719a23004a967593e7d503025b1c301973606e0e4f7cc61",
+    "data/raw/ml/pbp/2006": "fc649f335756c10efd512070aa6b978ffb864cb2ec8ec7856cb084b0d313b11e",
+    "data/raw/ml/pbp/2007": "0b04c5c7d2e5806a466d2618579cba8d7f7860b69a82bf76c0bd983e7f67a8ed",
+    "data/raw/ml/pbp/2008": "b58e0ea324ec8c06920cf3047390ff9a2304d95f888eda4287b02fba1f288966",
+    "data/raw/ml/pbp/2009": "5bfb6559343c04092d1ad66c1479782d085d9f390e6806be0a7ca7ec37124806",
+    "data/raw/ml/pbp/2010": "74ad605fea53c27afd00eee71c53b86b5cfbf7133d1a7b5b8f0067d817e55785",
+    "data/raw/ml/pbp/2011": "26727f9d2b0e4f9f616e746b87b9a29359f37a4b484f66f7312baf883d85e958",
+    "data/raw/ml/pbp/2012": "3277aded9792c419cc853cf307f2206c3fb0908d91750b4e1d3d66b567407c66",
+    "data/raw/ml/pbp/2013": "2a31a7cd0e7e2306f626a0f1f4bb96679e5b3e92a8729695858adca35d8b2686",
+    "data/raw/ml/pbp/2014": "c6910558e235dac664b1b7f02654d47ea8d51904ef9ace5d4f015165604e0b12",
+    "data/raw/ml/pbp/2015": "b3314a52b781a00417528b2e3388d2596098cdbe7b565d3c962d7171a98ae70f",
+    "data/raw/ml/pbp/2016": "75fde790db65a5e5765930e5780c1452e96a6a58d4d802c79f10f5842a387bbc",
+    "data/raw/ml/pbp/2017": "0166785545b15de785075a154668996b8cb71294f7a7c3d9acbf4ae90a99f2dc",
+    "data/raw/ml/pbp/2018": "152e44436368be4c253d14c0cb0f8335a53f3790ce5ebdbb7648551371d62d2b",
+    "data/raw/ml/pbp/2019": "3878b8c99f5f3d977203b0e249b55ca913e59db3971420075ed35a0991610f6e",
+    "data/raw/ml/schedules/1999": "b590c0c595ae702489068ed30d25460a1da2f129ce47c4143c8c28618fbb2749",
+    "data/raw/ml/schedules/2000": "d11ca64a246a9b9ce98beb15af6a337887f1a31658a1271d510ef62e094fd927",
+    "data/raw/ml/schedules/2001": "59deb3483354d8e24a55eef5e508f4824a3cdfff44936adea6d02af34c64fffd",
+    "data/raw/ml/schedules/2002": "b394de36fc6286647bdfa1a82383b0fec5f83a5e0aeaefc010336c72f1365545",
+    "data/raw/ml/schedules/2003": "70b3c8a10df7a205ee8bc446fa40dca4f7408f3900d063f1881860119de4834c",
+    "data/raw/ml/schedules/2004": "64d26bdf22af5736b507a04b82c73b17ded7765ad2940c02d880abbe5779d978",
+    "data/raw/ml/schedules/2005": "3535ab82c2c6b866d94623aba9f37eac3b7497fd5ff61898904e03420d80795a",
+    "data/raw/ml/schedules/2006": "04e8c1a0394137e8493db6bf228a75ab1e0e8104eca4056380c13168174fca98",
+    "data/raw/ml/schedules/2007": "ed35269017c5342a04e621717760da8ccdc68421f7a38685eaa355af90d875b2",
+    "data/raw/ml/schedules/2008": "76a274f12d0efbdc6220870e083597fe6669f33bf5f94d30ade9d11efbc3423d",
+    "data/raw/ml/schedules/2009": "b720c554d58f8e8bc4ef4fe3ada0528f1f4065bde6926395f5c4ed46f6c19579",
+    "data/raw/ml/schedules/2010": "c6eb6d6390b8808ab6fe7a1c177d45b2d31c4dc3f7b5ccf3a9ff525c9afe758f",
+    "data/raw/ml/schedules/2011": "367cd43a9a9499d875a00dc12d2476ea3bfabc36dfbb82399a695f5230618232",
+    "data/raw/ml/schedules/2012": "94fd313c6126390c47c936cc04c986ec6a2526cad776f078e61c8e740171ceb0",
+    "data/raw/ml/schedules/2013": "48b55301b46a4acc55b1263555b01d62475fce5196f943176cf5bb23b5b979b6",
+    "data/raw/ml/schedules/2014": "56c8544f26975a429dd1dcd67996b28cb3680c742c79c2367bfea1e35ae93940",
+    "data/raw/ml/schedules/2015": "68c3bf6df90e969fe80aa46eb3351ad624e5e7c3f85c664644811508bbb647c3",
+    "data/raw/ml/schedules/2016": "8f71a4074c589e5a94c43b1b89e6028f65a89f99b950d7a02457bc28657b1790",
+    "data/raw/ml/schedules/2017": "6616b0e0cb9b8358881654e4aa5e22e24bb67958a337cbb13782d27a3c3a04e7",
+    "data/raw/ml/schedules/2018": "0517aae45dacef1cabea9e0345ea2a3bc7dda1299dd76cb1ffd50c4696a58291",
+    "data/raw/ml/schedules/2019": "4db9adbb172de1476cecd73088981b353a6c05e97768dad1cf631dadfa403a56",
+    "data/sources/stadiums.csv": "e4df8b30c01110788e9d4b492cf570587853c1c17c1242ba6601b22b0faa8e79"
+  },
+  "git": {
+    "sha": "64950423c71a23ea727f7101fd69faca44eaf334",
+    "dirty": false
+  },
+  "timestamp": "2026-10-11T19:18:28+00:00",
+  "notes": "both",
+  "group": "E2",
+  "deployable": true,
+  "comparisons": {
+    "vs_a4s": {
+      "n": 3450,
+      "diff": -0.0005427770394567452,
+      "ci_low": -0.0015877807232596367,
+      "ci_high": 0.0004303341911166646,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.000522025681386991,
+      "metric": "brier"
+    },
+    "vs_c2d": {
+      "n": 3450,
+      "diff": 0.0004111832276220483,
+      "ci_low": 7.66878706412263e-05,
+      "ci_high": 0.0007372794177679922,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.00017213582791465528,
+      "metric": "brier"
+    },
+    "vs_a4s_logloss": {
+      "n": 3450,
+      "diff": -0.001228837476104433,
+      "ci_low": -0.00357021307708551,
+      "ci_high": 0.0009507889258241994,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": false,
+      "boot_se": 0.0011582085949504637,
+      "metric": "logloss"
+    },
+    "vs_c2d_logloss": {
+      "n": 3450,
+      "diff": 0.0009295775604601687,
+      "ci_low": 0.00015752190071378466,
+      "ci_high": 0.0016727945022516745,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.0003929947260857757,
+      "metric": "logloss"
+    },
+    "vs_market": {
+      "n": 3450,
+      "diff": 0.003944919487171384,
+      "ci_low": 0.0016230512354622306,
+      "ci_high": 0.00627200533488108,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.0012176315279377214,
+      "metric": "brier"
+    },
+    "vs_best": {
+      "n": 3450,
+      "diff": 0.0006004099638933058,
+      "ci_low": 5.847583368541263e-05,
+      "ci_high": 0.0011355637553063147,
+      "level": 0.95,
+      "reps": 2000,
+      "seed": 20261003,
+      "excludes_zero": true,
+      "boot_se": 0.00027398557400079104,
+      "metric": "brier"
+    }
+  },
+  "one_se": {
+    "best": "E3b",
+    "within": false,
+    "chosen": false,
+    "eligible": [
+      "C2d",
+      "E1_C2d_margin_normal",
+      "E1_C2d_margin_logit",
+      "E1_C2d_epa_logit",
+      "E1_C2d_blend_normal",
+      "E1_C2d_blend_logit",
+      "E3b",
+      "E3c",
+      "E3abc",
+      "E4_travel",
+      "E4_body",
+      "E4_rest",
+      "E5",
+      "E5m"
+    ],
+    "complexity": 3
+  },
+  "accepted": null,
+  "splits": {
+    "weeks_1_4": {
+      "n": 751,
+      "brier": 0.2237545476149455,
+      "brier_a4s": 0.22428234271173858,
+      "brier_c2d": 0.2237095825645462,
+      "brier_market": 0.2198399821591059,
+      "vs_a4s": {
+        "n": 751,
+        "diff": -0.0005277950967930975,
+        "ci_low": -0.0023315267797304187,
+        "ci_high": 0.0012624364982698818,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0009256379572548723,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 751,
+        "diff": 4.496505039930071e-05,
+        "ci_low": -0.0006427513165276103,
+        "ci_high": 0.0006720657148459004,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0003312573332801995,
+        "metric": "brier"
+      }
+    },
+    "weeks_5_9": {
+      "n": 969,
+      "brier": 0.21250621826457208,
+      "brier_a4s": 0.21256190035320047,
+      "brier_c2d": 0.21239862562945994,
+      "brier_market": 0.20952451455749166,
+      "vs_a4s": {
+        "n": 969,
+        "diff": -5.568208862837857e-05,
+        "ci_low": -0.0019884968569235137,
+        "ci_high": 0.0018580132732978433,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0009810700009605217,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 969,
+        "diff": 0.0001075926351121765,
+        "ci_low": -0.0005684979688488944,
+        "ci_high": 0.0008186129272709871,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.000354821765958638,
+        "metric": "brier"
+      }
+    },
+    "weeks_10_18": {
+      "n": 1730,
+      "brier": 0.2116853666502752,
+      "brier_a4s": 0.2125074768956817,
+      "brier_c2d": 0.2109451608011292,
+      "brier_market": 0.2071877581640065,
+      "vs_a4s": {
+        "n": 1730,
+        "diff": -0.0008221102454065066,
+        "ci_low": -0.0023113459795401437,
+        "ci_high": 0.0006621579472714645,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0007575318323371416,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 1730,
+        "diff": 0.0007402058491459494,
+        "ci_low": 0.0002629748386857542,
+        "ci_high": 0.0012179924125447705,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.00024717519163797093,
+        "metric": "brier"
+      }
+    },
+    "changed": {
+      "n": 664,
+      "brier": 0.21564258436101655,
+      "brier_a4s": 0.2149932565028571,
+      "brier_c2d": 0.21497924084851158,
+      "brier_market": 0.20721772580836312,
+      "vs_a4s": {
+        "n": 664,
+        "diff": 0.0006493278581594338,
+        "ci_low": -0.0018792054043966818,
+        "ci_high": 0.003100908245210672,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0012883989995958393,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 664,
+        "diff": 0.0006633435125049704,
+        "ci_low": -0.00064540349400698,
+        "ci_high": 0.001979662478649811,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0006835615324008684,
+        "metric": "brier"
+      }
+    },
+    "unchanged": {
+      "n": 2786,
+      "brier": 0.21428111954287707,
+      "brier_a4s": 0.21510801634256968,
+      "brier_c2d": 0.2139300348181847,
+      "brier_market": 0.21140392422637336,
+      "vs_a4s": {
+        "n": 2786,
+        "diff": -0.0008268967996926187,
+        "ci_low": -0.001890842485833015,
+        "ci_high": 0.00029947413046507585,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0005542037427771765,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 2786,
+        "diff": 0.00035108472469230653,
+        "ci_low": 6.89152091121654e-05,
+        "ci_high": 0.0006490186238534028,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": true,
+        "boot_se": 0.0001475644569676145,
+        "metric": "brier"
+      }
+    },
+    "short_week": {
+      "n": 179,
+      "brier": 0.20114080162402526,
+      "brier_a4s": 0.20408585837121176,
+      "brier_c2d": 0.20034914406478815,
+      "brier_market": 0.18931231446736935,
+      "vs_a4s": {
+        "n": 179,
+        "diff": -0.002945056747186538,
+        "ci_low": -0.0073916120243312945,
+        "ci_high": 0.001476581161762912,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.002268753734428956,
+        "metric": "brier"
+      },
+      "vs_c2d": {
+        "n": 179,
+        "diff": 0.0007916575592370597,
+        "ci_low": -0.0008662268979073955,
+        "ci_high": 0.002592914426059776,
+        "level": 0.95,
+        "reps": 2000,
+        "seed": 20261003,
+        "excludes_zero": false,
+        "boot_se": 0.0008817056396741587,
+        "metric": "brier"
+      }
+    }
+  },
+  "coefficients": [
+    {
+      "season": 2006,
+      "n_train": 1272,
+      "intercept": -0.017535692295141913,
+      "elo_logit": 0.3013200530764943,
+      "kf_margin": 0.09430416082028742,
+      "qb_delta_diff_v2ab": 3.0504637099763006
+    },
+    {
+      "season": 2007,
+      "n_train": 1528,
+      "intercept": -0.0504473766587523,
+      "elo_logit": 0.4394203028897332,
+      "kf_margin": 0.06745111221421014,
+      "qb_delta_diff_v2ab": 3.0978287333812102
+    },
+    {
+      "season": 2008,
+      "n_train": 1784,
+      "intercept": -0.05131339894647316,
+      "elo_logit": 0.37330386887582556,
+      "kf_margin": 0.08084982676262117,
+      "qb_delta_diff_v2ab": 3.3393209058330324
+    },
+    {
+      "season": 2009,
+      "n_train": 2040,
+      "intercept": -0.04870635064731891,
+      "elo_logit": 0.40197403174780594,
+      "kf_margin": 0.07878500309313395,
+      "qb_delta_diff_v2ab": 3.4846041690661886
+    },
+    {
+      "season": 2010,
+      "n_train": 2296,
+      "intercept": -0.04821844219173471,
+      "elo_logit": 0.4326428856402778,
+      "kf_margin": 0.07769961252155712,
+      "qb_delta_diff_v2ab": 3.5685978296618197
+    },
+    {
+      "season": 2011,
+      "n_train": 2552,
+      "intercept": -0.04483817364194223,
+      "elo_logit": 0.3549017734515995,
+      "kf_margin": 0.08415310234407535,
+      "qb_delta_diff_v2ab": 2.7969304469647507
+    },
+    {
+      "season": 2012,
+      "n_train": 2808,
+      "intercept": -0.051404892275063535,
+      "elo_logit": 0.2647853443473807,
+      "kf_margin": 0.09996486844921457,
+      "qb_delta_diff_v2ab": 2.9842250061745768
+    },
+    {
+      "season": 2013,
+      "n_train": 3064,
+      "intercept": -0.0478453652783913,
+      "elo_logit": 0.2028629457960041,
+      "kf_margin": 0.10890227296772219,
+      "qb_delta_diff_v2ab": 2.9989763933753206
+    },
+    {
+      "season": 2014,
+      "n_train": 3320,
+      "intercept": -0.03259363140891221,
+      "elo_logit": 0.17861674458910082,
+      "kf_margin": 0.11413419357972812,
+      "qb_delta_diff_v2ab": 3.233035937999178
+    },
+    {
+      "season": 2015,
+      "n_train": 3576,
+      "intercept": -0.03942960975596285,
+      "elo_logit": 0.2706773263750422,
+      "kf_margin": 0.10496368167164075,
+      "qb_delta_diff_v2ab": 3.1749142871235945
+    },
+    {
+      "season": 2016,
+      "n_train": 3832,
+      "intercept": -0.047657495934060067,
+      "elo_logit": 0.3711083082846585,
+      "kf_margin": 0.08943323972996073,
+      "qb_delta_diff_v2ab": 3.206126691813649
+    },
+    {
+      "season": 2017,
+      "n_train": 4088,
+      "intercept": -0.03606201984490074,
+      "elo_logit": 0.4949472757442058,
+      "kf_margin": 0.0732890959706404,
+      "qb_delta_diff_v2ab": 3.266102599210024
+    },
+    {
+      "season": 2018,
+      "n_train": 4344,
+      "intercept": -0.03479585431154714,
+      "elo_logit": 0.4880483654385259,
+      "kf_margin": 0.07605401931337949,
+      "qb_delta_diff_v2ab": 3.7677172229849987
+    },
+    {
+      "season": 2019,
+      "n_train": 4600,
+      "intercept": -0.017119537025954097,
+      "elo_logit": 0.429555982839652,
+      "kf_margin": 0.08338932890617193,
+      "qb_delta_diff_v2ab": 3.5631945331261483
+    }
+  ],
+  "timing": null
+}
