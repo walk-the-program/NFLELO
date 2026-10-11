@@ -20,8 +20,13 @@ name: Weekly update
 
 on:
   schedule:
-    - cron: "0 14 * * 3"
-    - cron: "0 12 * * 0"
+    # GitHub runs scheduled jobs late (observed 5-6 hours in Oct 2026), so runs start early and repeat.
+    # Rows written at or after a game's kickoff are refused, so extra runs can never pollute the record.
+    - cron: "0 9 * * 2"     # Tue 09:00 UTC: first full refresh of the week
+    - cron: "0 9 * * 3"     # Wed 09:00 UTC: the main weekly run
+    - cron: "0 6 * * 4"     # Thu 06:00 UTC: before Thursday night
+    - cron: "0 6 * * 6"     # Sat 06:00 UTC: starters and injury report
+    - cron: "0 4 * * 0"     # Sun 04:00 UTC: final pre-game refresh before the early (and London) kickoffs
   workflow_dispatch:
 
 permissions:
