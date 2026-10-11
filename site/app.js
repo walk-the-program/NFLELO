@@ -287,8 +287,8 @@
     var p = hasModel ? best.pm : best.pe;
     var gapPts = best.kind === 3 ? (best.pm - best.pv) * 100 : best.kind === 2 ? (best.pe - best.pv) * 100 : null;
     var lead = nameParts(g.home).nick;
-    var stats = [{ l: (hasModel ? 'Model' : 'Elo') + ' · ' + lead + ' win', v: pct(p, 1), c: hasModel ? 'var(--primary)' : 'var(--ink)', clip: hasModel ? 'none' : 'circle(50%)', main: true }];
-    if (hasModel) stats.push({ l: 'Elo', v: pct(best.pe, 1), c: 'var(--ink)', clip: 'circle(50%)', key: 'elo' });
+    var stats = [{ l: (hasModel ? 'Model' : 'Elo') + ' · ' + lead + ' win', v: pct(p, 1), c: hasModel ? 'var(--ink)' : 'var(--primary)', clip: hasModel ? 'none' : 'circle(50%)', main: true }];
+    if (hasModel) stats.push({ l: 'Elo', v: pct(best.pe, 1), c: 'var(--primary)', clip: 'circle(50%)', key: 'elo' });
     stats.push(best.pv != null ? { l: 'Vegas', v: pct(best.pv, 1), c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas', na: true });
     stats.push({ l: (hasModel ? 'Model' : 'Elo') + ' vs Vegas', v: gapPts == null ? 'Needs a line' : signed(gapPts, 1) + ' pts', gap: true, na: gapPts == null });
     return {
@@ -316,8 +316,8 @@
       away: awayAbbr, awayRole: 'Away', home: homeAbbr, homeRole: gm.neutral ? 'Home, neutral site' : 'Home',
       pm: pm, pe: pe, pv: pv, knob: 'model',
       stats: [
-        { l: 'Model · ' + nick + ' win', v: pct(pm, 1), c: 'var(--primary)', clip: 'none', main: true },
-        { l: 'Elo', v: pct(pe, 1), c: 'var(--ink)', clip: 'circle(50%)', key: 'elo' },
+        { l: 'Model · ' + nick + ' win', v: pct(pm, 1), c: 'var(--ink)', clip: 'none', main: true },
+        { l: 'Elo', v: pct(pe, 1), c: 'var(--primary)', clip: 'circle(50%)', key: 'elo' },
         pv != null ? { l: 'Vegas', v: pct(pv, 1), c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas', na: true },
         { l: nameParts(rt.team).nick + ' projected wins', v: f1(rt.proj_model) }],
       aria: homeAbbr + ' win probability. Model ' + pct(pm, 1) + ', Elo ' + pct(pe, 1) + (pv != null ? ', Vegas ' + pct(pv, 1) : '. No Vegas line yet') + '.',
@@ -339,7 +339,7 @@
       away: o.team, awayRole: 'Chance to make the playoffs', home: null,
       pm: o.playoffs, pe: null, pv: null, knob: 'model',
       stats: [
-        { l: 'Make playoffs', v: pct(o.playoffs, 1), c: 'var(--primary)', clip: 'none', main: true },
+        { l: 'Make playoffs', v: pct(o.playoffs, 1), c: 'var(--ink)', clip: 'none', main: true },
         { l: 'Win division', v: pct(o.division, 1) },
         { l: 'Reach Super Bowl', v: pct(o.reach_sb, 1) },
         { l: 'Win Super Bowl', v: pct(o.win_sb, 1) }],
@@ -382,7 +382,7 @@
     v.stats.forEach(function (s) {
       var off = (s.key === 'elo' && !hero.showElo) || (s.key === 'vegas' && !hero.showVegas);
       var dd = h('dd', { text: s.v });
-      var wrap = h('div', { class: 'stat' + (s.main ? ' stat-main' : '') + (s.gap ? ' stat-gap' : '') + (s.na ? ' is-na' : '') + (off ? ' is-off' : ''), style: s.c ? '--c:' + s.c + ';--clip:' + (s.clip || 'none') : null },
+      var wrap = h('div', { class: 'stat' + (s.main ? ' stat-main' : '') + (s.gap ? ' stat-gap' : '') + (s.na ? ' is-na' : '') + (off ? ' is-off' : ''), style: s.c ? '--c:' + s.c + (s.clip === 'circle(50%)' ? ';--clip:none;--rad:50%;--bd:var(--ink)' : ';--clip:' + (s.clip || 'none')) : null },
         h('dt', { class: 'label', text: s.l }), dd);
       stats.appendChild(wrap);
     });
@@ -596,8 +596,8 @@
     var navAfter = document.querySelector('.nav-links a[href="#' + afterId + '"]');
     if (navAfter) navAfter.parentNode.parentNode.insertBefore(h('li', {}, h('a', { href: '#' + sec.id, text: navText })), navAfter.parentNode.nextSibling);
     N.initSlabs();
-    document.querySelectorAll('main > .sec .kicker').forEach(function (k, i) {
-      k.textContent = '[' + (i < 9 ? '0' : '') + (i + 1) + '] ' + k.textContent.replace(/^\[\d+\]\s*/, '');
+    document.querySelectorAll('main > .sec .kicker .kn').forEach(function (k, i) {
+      k.textContent = (i < 9 ? '0' : '') + (i + 1);
     });
   }
 
@@ -607,13 +607,14 @@
   function renderRest() {
     var R = D.ml && D.ml.rest;
     if (!R || !R.teams.length) return;
-    var body = h('div', { id: 'rest-body', class: 'body' });
+    var body = h('div', { id: 'rest-body', class: 'tile-m body' });
     var sec = h('section', { class: 'sec', id: 'rest', 'aria-labelledby': 'rest-h', tabindex: '-1' },
-      h('div', { class: 'wrap' },
-        h('p', { class: 'kicker', text: 'Rest of season' }),
-        h('h2', { class: 'headline', id: 'rest-h', text: R.headline || 'Rest of season' }),
-        h('p', { class: 'deck', text: 'Projected final wins: wins so far plus the model\'s win chance in every game left, with Elo\'s projection beside it. Open a team for its remaining games.' }),
-        body));
+      h('div', { class: 'wrap' }, h('div', { class: 'board sec-board' },
+        h('header', { class: 'sec-head tile-m' }, h('div', { class: 'sec-copy' },
+          h('p', { class: 'kicker' }, h('span', { class: 'kn', text: '00' }), h('span', { class: 'kt', text: 'Rest of season' })),
+          h('h2', { class: 'headline', id: 'rest-h', text: R.headline || 'Rest of season' }),
+          h('p', { class: 'deck', text: 'Projected final wins: wins so far plus the model\'s win chance in every game left, with Elo\'s projection beside it. Open a team for its remaining games.' }))),
+        body)));
     insertSection(sec, 'week', 'Rest of season');
 
     var MAXW = 17;
@@ -691,14 +692,15 @@
     var O = D.ml && D.ml.playoff_odds;
     if (!O || !O.conferences) return;
     var hasBase = !!O.baseline_run_utc;
-    var body = h('div', { id: 'odds-body', class: 'body' });
+    var body = h('div', { id: 'odds-body', class: 'tile-m body' });
     var sec = h('section', { class: 'sec', id: 'odds', 'aria-labelledby': 'odds-h', tabindex: '-1' },
-      h('div', { class: 'wrap' },
-        h('p', { class: 'kicker', text: 'Playoff odds' }),
+      h('div', { class: 'wrap' }, h('div', { class: 'board sec-board' },
+        h('header', { class: 'sec-head tile-m' }, h('div', { class: 'sec-copy' },
+        h('p', { class: 'kicker' }, h('span', { class: 'kn', text: '00' }), h('span', { class: 'kt', text: 'Playoff odds' })),
         h('h2', { class: 'headline', id: 'odds-h', text: O.headline || 'Playoff odds' }),
         h('p', { class: 'deck', text: 'Each team\'s chances from ' + O.n_sims.toLocaleString('en-US') + ' simulations of the rest of the season, seeded with the NFL\'s tiebreakers. ' +
-          (hasBase ? 'Change is in percentage points since the run on ' + runTime(O.baseline_run_utc) + '.' : 'Change since last week appears after the next Wednesday run.') + ' Select a column to sort.' }),
-        body));
+          (hasBase ? 'Change is in percentage points since the run on ' + runTime(O.baseline_run_utc) + '.' : 'Change since last week appears after the next Wednesday run.') + ' Select a column to sort.' }))),
+        body)));
     insertSection(sec, $('#rest') ? 'rest' : 'week', 'Playoff odds');
 
     var COLS = [

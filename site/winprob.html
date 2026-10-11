@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f9f8f5">
+<meta name="theme-color" content="#eaecee">
 <title>NFLELO: win probability</title>
 <meta name="description" content="Win probability for every 2026 game, play by play, from a model that uses no betting-market input, plus an excitement ranking and its test against nflfastR.">
 <link rel="icon" href="data:,">
@@ -22,60 +22,88 @@
   <a class="nav-mark" href="index.html" aria-label="NFLELO, back to the ratings">NFLELO</a>
   <span class="nav-tag">Machine Learning applied to Football</span>
   <ul class="nav-links">
-    <li><a href="index.html"><span class="n">[01]</span> Ratings</a></li>
+    <li><a href="index.html">Ratings</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
-    <li><a href="plays.html"><span class="n">[02]</span> Plays</a></li>
-    <li><a href="winprob.html" aria-current="page"><span class="n">[03]</span> Win prob</a></li>
-    <li><a href="fourth.html"><span class="n">[04]</span> Fourth down</a></li>
-    <li><a href="playcalling.html"><span class="n">[05]</span> Play calling</a></li>
-    <li><a href="models.html"><span class="n">[06]</span> Receipts</a></li>
+    <li><a href="plays.html">Plays</a></li>
+    <li><a href="winprob.html" aria-current="page">Win prob</a></li>
+    <li><a href="fourth.html">Fourth down</a></li>
+    <li><a href="playcalling.html">Play calling</a></li>
+    <li><a href="models.html">Receipts</a></li>
   </ul>
 </nav>
 
-<header class="hero page hero-flow" id="top">
+<header class="hero page" id="top">
   <div class="wrap">
-    <section class="hero-panel" aria-labelledby="page-title">
-      <p class="page-kicker">NFLELO &rarr; Models &rarr; Win probability <span class="lic" id="lic"></span></p>
-      <p class="tagline">Machine Learning applied to Football</p>
-      <h1 class="page-title" id="page-title">Win <span class="hl">probability</span></h1>
-      <p class="hero-line" id="hero-line">Loading results</p>
-      <p class="hero-deck" id="hero-deck">Pick any completed 2026 game and watch each team's chance of winning move snap by snap. The model uses the A4s pregame strength and the game state, and no betting-market input.</p>
-      <p class="cta"><a class="b-primary" href="#chart">Open the game chart <span aria-hidden="true">&darr;</span></a></p>
+    <div class="board hero-board">
+      <section class="tile-m hero-art pat-terrain" aria-labelledby="page-title">
+        <div class="plate hero-plate">
+          <p class="page-kicker">NFLELO &rarr; Models &rarr; Win probability <span class="lic" id="lic"></span></p>
+          <h1 class="page-title" id="page-title">Win <span class="hl">probability</span></h1>
+          <p class="hero-line" id="hero-line">Loading results</p>
+          <p class="hero-deck" id="hero-deck">Pick any completed 2026 game and watch each team's chance of winning move snap by snap. The model uses the A4s pregame strength and the game state, and no betting-market input.</p>
+          <p class="tagline"><span class="b-tag">Machine Learning applied to Football</span></p>
+        </div>
+      </section>
+      <a class="b-primary" href="#chart"><span class="b-primary__n" aria-hidden="true">01</span><span class="b-primary__go" aria-hidden="true">&darr;</span><span class="b-primary__label">Open the game chart</span></a>
       <div class="tiles" id="tiles" aria-label="Headline numbers"></div>
-    </section>
+    </div>
   </div>
 </header>
 
 <main>
   <section class="sec" id="chart" aria-labelledby="chart-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">[01] Game chart</p>
-    <h2 class="headline" id="chart-h">Game chart</h2>
-    <p class="deck">Home win probability at every snap. Move across the chart, or use the left and right arrow keys, to read each moment.</p>
-    <div id="chart-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  <div class="board sec-board">
+  <header class="sec-head tile-m">
+    <div class="sec-copy">
+      <p class="kicker"><span class="kn">01</span><span class="kt">Game chart</span></p>
+      <h2 class="headline" id="chart-h">Game chart</h2>
+      <p class="deck">Home win probability at every snap. Move across the chart, or use the left and right arrow keys, to read each moment.</p>
+    </div>
+  </header>
+<div id="chart-body" class="tile-m tile-stage body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </div>
   </section>
   <section class="sec" id="excite" aria-labelledby="excite-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">[02] Excitement index</p>
-    <h2 class="headline" id="excite-h">Excitement index</h2>
-    <p class="deck">How much the win probability moved over a whole game: the sum of every snap-to-snap change. Select a game to open it in the chart.</p>
-    <div id="excite-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  <div class="board sec-board">
+  <header class="sec-head tile-m">
+    <div class="sec-copy">
+      <p class="kicker"><span class="kn">02</span><span class="kt">Excitement index</span></p>
+      <h2 class="headline" id="excite-h">Excitement index</h2>
+      <p class="deck">How much the win probability moved over a whole game: the sum of every snap-to-snap change. Select a game to open it in the chart.</p>
+    </div>
+  </header>
+<div id="excite-body" class="tile-m body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </div>
   </section>
   <section class="sec" id="receipts" aria-labelledby="receipts-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">[03] Receipts</p>
-    <h2 class="headline" id="receipts-h">Receipts</h2>
-    <p class="deck">The model against nflfastR's public win probability on seasons it never saw, loaded from the committed run record.</p>
-    <div id="receipts-body" class="body" aria-busy="true"><p class="note">Loading</p></div>
+  <div class="board sec-board">
+  <header class="sec-head tile-m">
+    <div class="sec-copy">
+      <p class="kicker"><span class="kn">03</span><span class="kt">Receipts</span></p>
+      <h2 class="headline" id="receipts-h">Receipts</h2>
+      <p class="deck">The model against nflfastR's public win probability on seasons it never saw, loaded from the committed run record.</p>
+    </div>
+  </header>
+<div id="receipts-body" class="tile-m body" aria-busy="true"><p class="note">Loading</p></div>
+  </div>
   </div>
   </section>
+  <div class="wrap band-wrap"><div class="band pat-band"><p class="plate">Pregame strength plus the game state, and nothing else.</p></div></div>
   <section class="sec" id="how" aria-labelledby="how-h" tabindex="-1">
   <div class="wrap">
-    <p class="kicker">[04] How this works</p>
-    <h2 class="headline" id="how-h">How this works</h2>
-    <div class="method how">
+  <div class="board sec-board">
+  <header class="sec-head tile-m">
+    <div class="sec-copy">
+      <p class="kicker"><span class="kn">04</span><span class="kt">How this works</span></p>
+      <h2 class="headline" id="how-h">How this works</h2>
+    </div>
+  </header>
+<div class="method how">
       <div>
         <p><b>What it does.</b> Win probability is the model's estimate of how often a team in a given spot goes on to win: score, time left, down, distance, field position, timeouts and who gets the second-half kickoff, plus how strong the two teams were before the game.</p><p><b>Pregame strength.</b> The pregame input is the A4s game model (Elo, opponent-adjusted efficiency and a quarterback adjustment). No betting line or market number goes in.</p><p><b>The excitement index</b> adds up how far the home win probability moves from snap to snap over the game. A game that swings back and forth scores high; a blowout from the first quarter scores low.</p><p><b>How it was tested.</b> The frozen model was scored once on 2020 to 2025 plays against nflfastR's public model, by Brier score (the average squared miss; lower is better), with the rules written down first.</p>
         <div id="how-dyn" class="how-dyn"></div>
@@ -93,16 +121,22 @@
       </div>
     </div>
   </div>
+  </div>
   </section>
 </main>
 
-<footer class="foot wrap">
-  <div class="foot-card tex-glyph"><p class="motto plate">Nothing hidden. Nothing soft.</p></div>
-  <p id="credit">Data: nflverse (CC BY 4.0).</p>
-  <p>Independent project, not affiliated with the NFL or any team.</p>
-  <p><a href="index.html">Ratings and the weekly ladder</a></p>
-  <p><a href="models.html">Every model and its receipts</a></p>
-  <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
+<footer class="wrap foot">
+  <div class="board foot-board">
+    <div class="tile-m foot-art pat-halftone"><p class="motto plate">One tile, one idea.</p></div>
+    <div class="tile-m foot-links">
+      <p class="foot-dot"><i aria-hidden="true"></i>NFLELO, Machine Learning applied to Football</p>
+      <p id="credit">Data: nflverse (CC BY 4.0).</p>
+      <p>Independent project, not affiliated with the NFL or any team.</p>
+      <p><a href="index.html">Ratings and the weekly ladder</a></p>
+      <p><a href="models.html">Every model and its receipts</a></p>
+      <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
+    </div>
+  </div>
 </footer>
 
 <div id="tip" class="tip" role="presentation" hidden></div>

@@ -74,21 +74,9 @@
   }
   function moveMark(el, cx, cy) { el.setAttribute('transform', 'translate(' + cx + ' ' + cy + ')'); }
 
-  // ------------------------------------------------------------------ Halftone field dividers
-  // A strip of the brand's Halftone field pattern (see brand.css .splash) before every section but the first.
-  // Decorative only. Safe to call again after sections are inserted.
-  function initSlabs() {
-    var secs = document.querySelectorAll('main > .sec');
-    Array.prototype.forEach.call(secs, function (sec, i) {
-      if (i === 0) return;
-      var prev = sec.previousElementSibling;
-      if (prev && prev.classList.contains('splash-div')) return;
-      var d = document.createElement('div');
-      d.className = 'splash splash-div';
-      d.setAttribute('aria-hidden', 'true');
-      sec.parentNode.insertBefore(d, sec);
-    });
-  }
+  // Sections sit on the bento board with the board's own gaps, so there is no divider strip any more.
+  // Kept as a no-op so the page scripts that call it keep working.
+  function initSlabs() {}
 
   // ------------------------------------------------------------------ tooltip
 
@@ -209,7 +197,7 @@
   function setText(id, text) { var n = $('#' + id); if (n && text != null) n.textContent = text; return n; }
   function done(id) { var n = $('#' + id); if (n) n.removeAttribute('aria-busy'); return n; }
 
-  // Segmented control (joined boxes, ink-filled selected segment). options: [{value, label, title}].
+  // Segmented control (pill buttons, primary-filled selected segment). options: [{value, label, title}].
   // Returns {el, set(value), value(), disable(fn)}; onchange(value) fires on user choice only.
   function seg(label, options, value, onchange, cls) {
     var el = h('div', { class: 'b-seg ' + (cls || ''), role: 'group', 'aria-label': label });
@@ -228,14 +216,24 @@
     return api;
   }
 
-  // Hero tiles: [{label, big, sub}] drawn into #tiles.
+  // Hero tiles: [{label, big, sub, bar?, barText?}] drawn into #tiles. The first tile is the lead stat tile; a bar
+  // (0 to 1) draws its secondary progress bar, with barText as its caption and accessible name.
   function heroTiles(list) {
     var tiles = $('#tiles');
     if (!tiles) return;
     clear(tiles);
     list.forEach(function (t) {
-      tiles.appendChild(h('div', { class: 'tile' }, h('h3', {}, t.label), h('div', { class: 'big num' }, t.big), h('p', { class: 'sub' }, t.sub)));
+      tiles.appendChild(h('div', { class: 'tile' }, h('h3', {}, t.label), h('div', { class: 'big num' }, t.big),
+        t.bar != null ? tileBar(t.bar, t.barText) : null, h('p', { class: 'sub' }, t.sub)));
     });
+  }
+
+  // A progress bar: line track, secondary fill with an ink edge. frac is 0 to 1.
+  function tileBar(frac, text) {
+    var w = Math.round(Math.max(0, Math.min(1, frac)) * 1000) / 10;
+    return h('div', { class: 'tbar' },
+      h('div', { class: 'b-bar', role: 'img', 'aria-label': text || '' }, h('i', { style: 'width:' + w + '%' })),
+      text ? h('p', { class: 'tcap', text: text }) : null);
   }
 
   // License chip in the hero kicker row and the credit line in the footer, both from the JSON.
@@ -362,7 +360,7 @@
     tipShow: tipShow, tipHide: tipHide, bindTip: bindTip, live: live,
     watch: watch, tableView: tableView, legend: legend, initNav: initNav,
     REPO: REPO, repoUrl: repoUrl, commitUrl: commitUrl, signed: signed, commas: commas, pct: pct, ciText: ciText,
-    setText: setText, done: done, seg: seg, heroTiles: heroTiles, licenseUI: licenseUI, receiptLinks: receiptLinks,
+    setText: setText, done: done, seg: seg, heroTiles: heroTiles, tileBar: tileBar, licenseUI: licenseUI, receiptLinks: receiptLinks,
     caveatBox: caveatBox, unavailable: unavailable, ciChart: ciChart, tableViewLive: tableViewLive,
     loadTeamNames: loadTeamNames, teamName: teamName, fieldLabel: fieldLabel, ordinal: ordinal,
     mark: mark, moveMark: moveMark, initSlabs: initSlabs

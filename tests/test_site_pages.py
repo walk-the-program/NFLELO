@@ -77,7 +77,12 @@ def test_brand_stylesheet_and_no_retired_theme_code(page):
 
 @pytest.mark.parametrize("page", PAGES)
 def test_one_primary_action_per_page(page):
-    assert read(f"{page}.html").count('class="b-primary"') == 1
+    """Exactly one solid primary action tile (the "01" tile) per page, and only the page markup may carry it."""
+    html = read(f"{page}.html")
+    assert html.count('class="b-primary"') == 1
+    assert html.count("b-primary__n") == 1 and html.count("b-primary__go") == 1 and html.count("b-primary__label") == 1
+    for name in ("common.js", f"{SCRIPT[page]}.js"):
+        assert "b-primary" not in read(name)
 
 
 def test_no_hex_colors_outside_the_brand_tokens():
@@ -85,46 +90,90 @@ def test_no_hex_colors_outside_the_brand_tokens():
         assert not re.search(r"#[0-9a-fA-F]{3,8}\b", read(name)), name
 
 
-# The navy Raw Brutalist brief (context/brand.md): every hex the site may contain, and nothing else.
+# The Bento Grid brief (context/brand-bento.md): every hex the site may contain, and nothing else.
 BRIEF_HEXES = {
-    "#20436b", "#eff8a5", "#ff4d37", "#26221c", "#f9f8f5", "#706d68", "#d9d8d4",
-    "#ffffff", "#141414", "#dfe2e4", "#f7f8e8",
+    "#7db7eb", "#f0c5c6", "#f0ec5e", "#1c2126", "#f5f7f9", "#eaecee", "#64686c", "#cbced0", "#141414", "#aa810e",
+    "#dde6ee", "#ebe6e8", "#fbfbfc", "#f9f0f1", "#e9f1fa", "#f1f1f2", "#8dc0ed", "#6796c1",
 }
 RETIRED_HEXES = {
-    "#a11413", "#d14f34", "#4a3122", "#261c1c", "#f9f5f5", "#706868", "#d9d4d4", "#eedada", "#f3dad6",
+    "#20436b", "#eff8a5", "#ff4d37", "#26221c", "#f9f8f5", "#706d68", "#d9d8d4", "#ffffff", "#dfe2e4", "#f7f8e8",
 }
 
 
-def test_brand_css_defines_only_the_navy_brief_hexes():
+def test_brand_css_defines_only_the_bento_brief_hexes():
     found = {h.lower() for h in re.findall(r"#[0-9a-fA-F]{3,8}\b", read("brand.css"))}
     assert found <= BRIEF_HEXES, found - BRIEF_HEXES
     assert not (found & RETIRED_HEXES)
 
 
-def test_highlighter_band_and_on_tokens_match_the_brief():
+def test_highlight_and_on_tokens_match_the_brief():
     css = read("brand.css")
-    assert re.search(r"--on-secondary:\s*#141414", css) and re.search(r"--on-accent:\s*#141414", css)
-    assert re.search(r"\.hl \{[^}]*background: var\(--accent\); color: var\(--on-accent\)", css)
+    assert re.search(r"--on-primary:\s*#141414", css) and re.search(r"--on-secondary:\s*#141414", css) and re.search(r"--on-accent:\s*#141414", css)
+    assert re.search(r"--accent-ink:\s*#aa810e", css)
+    assert re.search(r"\.hl \{[^}]*color: var\(--accent-ink\)", css)
+    assert not re.search(r"\.hl \{[^}]*background", css)
+
+
+def test_bento_materials_match_the_brief():
+    css = read("brand.css")
+    assert "--r-tile: 28px" in css and "--r-sub: 18px" in css and "--gap: 14px" in css
+    assert "outline: 3px solid var(--primary)" in css and "0 0 0 4px var(--ink)" in css
+
+
+def test_light_only_no_monospace_and_the_two_brand_fonts():
+    for name in ("brand.css", "styles.css", "common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
+        text = read(name).lower()
+        assert "monospace" not in text and "--font-mono" not in text and "ui-monospace" not in text, name
+    css = read("brand.css")
+    assert "Figtree" in css and "Nunito Sans" in css
+    assert "prefers-color-scheme: dark" not in css + read("styles.css")
 
 
 @pytest.mark.parametrize("page", PAGES)
-def test_pages_use_only_brief_hexes_and_a_flow_hero(page):
+def test_pages_use_only_brief_hexes_and_one_pattern_hero(page):
     html = read(f"{page}.html")
     assert {h.lower() for h in re.findall(r"#[0-9a-fA-F]{6}\b", html)} <= BRIEF_HEXES
-    assert html.count("hero-flow") == 1
+    heroes = re.findall(r'class="[^"]*hero-art (pat-(?:aura|terrain))', html)
+    assert heroes == [("pat-aura" if page in ("index", "models") else "pat-terrain")]
+    assert html.count("pat-band") == 1                      # one gradient-pane section band
+    assert html.count("pat-halftone") + html.count("pat-pebbles") == 1   # at most one textured tile
+    assert html.count('class="b-tag"') <= 1
 
 
-@pytest.mark.parametrize("asset", ["pattern-halftone.svg", "pattern-glyphgrid.svg", "hero-flow.svg"])
-def test_pattern_assets_are_in_the_brief_colorway(asset):
+@pytest.mark.parametrize("asset", ["tile-halftone.svg", "band-gradpanes.svg"])
+def test_vector_pattern_assets_are_in_the_brief_colorway(asset):
     svg = (SITE / "assets" / asset).read_text()
     assert {h.lower() for h in re.findall(r"#[0-9a-fA-F]{6}\b", svg)} <= BRIEF_HEXES
+    if asset == "band-gradpanes.svg":
+        assert 'preserveAspectRatio="xMidYMid slice"' in svg[:300]
+
+
+def test_raster_pattern_assets_exist_at_the_brief_sizes():
+    import struct
+    for name, size in {"hero-aura.png": (2560, 1440), "hero-terrain.png": (2560, 1440), "tex-pebbles.png": (1280, 720)}.items():
+        head = (SITE / "assets" / name).read_bytes()[:24]
+        assert head[:8] == b"\x89PNG\r\n\x1a\n"
+        assert struct.unpack(">II", head[16:24]) == size, name
+
+
+def test_retired_brutalist_assets_are_gone_and_all_assets_are_used():
+    for old in ("hero-flow.svg", "pattern-glyphgrid.svg", "pattern-halftone.svg"):
+        assert not (SITE / "assets" / old).exists()
+    css = read("brand.css")
+    for asset in (SITE / "assets").iterdir():
+        assert f"assets/{asset.name}" in css, f"{asset.name} is not used"
 
 
 def test_secondary_is_never_a_line_dot_or_text_color():
-    """Pale yellow is about 1.1:1 on the canvas: no stroke, border, text color or marker uses it without an ink edge."""
-    css = read("styles.css")
-    for decl in re.findall(r"(?:^|[;{\s])((?:stroke|color|border(?:-[a-z]+)?)\s*:[^;}]*var\(--secondary\)[^;}]*)", css):
-        assert False, decl
+    """Pale pink is about 1.1:1 on the surface: no stroke, text color or marker uses it. The brief's secondary button edge
+    is allowed only in a rule that also carries an ink inset ring, so the control still reads."""
+    for name in ("styles.css", "brand.css"):
+        css = read(name)
+        for sel, block in re.findall(r"([^{}]+)\{([^{}]*)\}", css):
+            for decl in re.findall(r"(?:^|[;\s])((?:stroke|color)\s*:[^;}]*var\(--secondary\)[^;}]*)", block):
+                assert False, (name, sel.strip(), decl)
+            if re.search(r"border(?:-[a-z]+)?\s*:[^;}]*var\(--secondary\)", block):
+                assert "inset 0 0 0 1px var(--ink)" in block, (name, sel.strip())
     for name in ("common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
         for line in read(name).splitlines():
             if "var(--secondary)" in line:
