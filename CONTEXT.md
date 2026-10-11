@@ -145,6 +145,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-10 | Walker reverted the site to Raw Brutalist (`context/brand.md`). Editorial Serif is saved at tag `design-editorial`, with its brief in `context/brand-editorial.md`. |
 | 2026-10-10 | The site is updated to the navy Raw Brutalist brief: primary #20436b, secondary #eff8a5, accent #ff4d37. The patterns (flow hero, halftone dividers, one glyph-grid card) are generated exactly from Walker's engine. The pale secondary is never used for lines or text; the Vegas series is muted and dashed. |
 | 2026-10-10 | Walker's final design choice is Bento Grid. Other designs are archived (tags plus `context/archive/`). Overrides: the highlight word is #fbffa0 with an ink outline (one variable to switch to blue), the secondary is white (no pink), and the patterns are pebble field plus posterised terrain only. |
+| 2026-10-11 | Walker approved M8 (`context/ml-m8-method.md`): margin/EPA targets, model blending, QB v2 (opponent-adjusted, injury-exit cleaning), early-season and context features. If M8 beats A4s on DEV 2006-2019, it becomes the site's headline model; A4s keeps logging as the frozen 2026 baseline, and a forward test is pre-registered. |
 
 ## Context file index
 
@@ -164,4 +165,5 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 - `context/ml-m3b-method.md`: M3b game-model refinement (week-varying weights, Kalman-filter team strength, a better QB term).
 - `context/ml-m6-method.md`: M6 play outcome model (a yards distribution from pre-snap situation and personnel; CRPS; a player-identity ablation; CC BY-SA).
 - `context/ml-m7-method.md`: M7 decision support (our own WP model, fourth-down go/FG/punt with uncertainty, early-down play type and personnel through propensity/AIPW/OPE).
+- `context/ml-m8-method.md`: M8 game model v2 (margin targets, blending, QB v2, early-season and context features); becomes the site headline model if it beats A4s on DEV.
 - `context/ml-pages.md`: the data contract for the four model pages (`plays.json`, `winprob.json`, `fourth.json`, `playcalling.json`): paths, refresh, schemas, licenses, headline numbers and required caveats.
