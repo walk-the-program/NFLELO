@@ -1,4 +1,4 @@
-/* NFLELO win probability page. Reads ./data/winprob.json (written by scripts/export_ml_pages.py): one win
+/* NFELO win probability page. Reads ./data/winprob.json (written by scripts/export_ml_pages.py): one win
    probability line per completed 2026 game, an excitement leaderboard, and the model's test against nflfastR.
    No dependencies; helpers come from common.js. */
 (function () {
@@ -116,7 +116,7 @@
     clear(ui.facts);
     [
       ['Final', g.away + ' ' + g.away_score + ', ' + g.home + ' ' + g.home_score, 'Week ' + g.week + (g.overtime ? ', overtime' : '')],
-      ['Pregame, ' + g.home + ' to win', pct(g.pregame_home, 0), 'NFLELO model, before kickoff'],
+      ['Pregame, ' + g.home + ' to win', pct(g.pregame_home, 0), 'NFELO model, before kickoff'],
       ['Excitement index', g.excitement.toFixed(1), rank ? 'rank ' + rank.rank + ' of ' + W.games.length + ' this season' : ''],
       [win ? win + '\'s lowest point' : 'Lowest point', g.winner_min_wp == null ? 'n/a' : pct(g.winner_min_wp, 0), win ? 'comeback measure' : 'no winner'],
       ['Biggest swing', pts(sw.abs) + ' pp', sw.clock]
@@ -298,11 +298,21 @@
   function stat(label, value, small) { return h('div', {}, h('dt', { text: label }), h('dd', { class: 'num' }, value, h('small', { text: small }))); }
 
   function buildHow() {
-    var dyn = $('#how-dyn'), F = W.model_fit, D = W.definitions;
-    dyn.appendChild(h('p', { class: 'stat-note', style: 'margin-top:0', text: 'Fit on ' + F.trained_on[0] + ' to ' + F.trained_on[1] + ' plays (' + commas(F.n_train) + ' snaps), frozen before the ' + W.season + ' season.' }));
+    var dyn = $('#how-dyn'), F = W.model_fit, D = W.definitions, H = W.headline, d = H.ours_minus_nflfastr;
+    // Sources: context/ml-m7-method.md section 2 (model, metric, 0.01 calibration limit) and winprob.json (the rest).
+    dyn.appendChild(N.specList([
+      ['Model', 'Gradient boosting with monotone constraints: more points, more time and better field position never lower the win chance'],
+      ['Inputs', F.inputs + '. No betting-market inputs'],
+      ['Training', F.trained_on[0] + ' to ' + F.trained_on[1] + ' (' + commas(F.n_train) + ' snaps), frozen before the ' + W.season + ' season; each holdout season is fit on earlier seasons only'],
+      ['Test', String(H.window).replace(/ \(.*\)$/, '') + ', ' + commas(d.clusters) + ' games, scored once'],
+      ['Metric', 'Play-level Brier score, lower is better; benchmark is nflfastR\'s public win probability; 95% interval from a bootstrap over games'],
+      ['Result', 'Beats nflfastR; ' + (d.excludes_zero ? 'the interval excludes zero' : 'the interval includes zero')],
+      ['Calibration', 'Error (ECE) ' + H.ece_ours.toFixed(4) + (H.ece_ours <= 0.01 ? ', within the 0.01 limit' : ', above the 0.01 limit')],
+      ['License', W.license.license]
+    ]));
     dyn.appendChild(N.caveatBox(['Overtime is not modelled.'], 'Caveat'));
     dyn.appendChild(h('dl', { class: 'gloss' },
-      [['Excitement index', 'sum of snap-to-snap win probability changes'], ['Biggest swing', 'largest single-play change'], ['Winner\'s low point', 'lowest win chance the winner had'], ['Pregame', 'NFLELO model win chance before kickoff']].map(function (k) { return h('div', {}, h('dt', { text: k[0] }), h('dd', { text: k[1] })); })));
+      [['Excitement index', 'sum of snap-to-snap win probability changes'], ['Biggest swing', 'largest single-play change'], ['Winner\'s low point', 'lowest win chance the winner had'], ['Pregame', 'NFELO model win chance before kickoff']].map(function (k) { return h('div', {}, h('dt', { text: k[0] }), h('dd', { text: k[1] })); })));
   }
 
   // ------------------------------------------------------------------ boot

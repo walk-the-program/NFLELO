@@ -1,4 +1,4 @@
-/* NFLELO play outcomes page. Reads ./data/plays.json (written by scripts/export_ml_pages.py) and draws the play
+/* NFELO play outcomes page. Reads ./data/plays.json (written by scripts/export_ml_pages.py) and draws the play
    console: the model's whole yard distribution for one chosen situation, with an optional pinned setting to compare.
    No dependencies; DOM, tooltip, table-view and fetch helpers come from common.js. */
 (function () {
@@ -49,17 +49,27 @@
   }
 
   function renderHow() {
-    var hc = P.headline.call, hs = P.headline.situation;
+    var hc = P.headline.call, hs = P.headline.situation, every = /every season/.test(P.headline.plain || '');
     var dyn = $('#how-dyn');
     var host = h('div', { class: 'chart ci' });
+    // Specification: sources are context/ml-m6-method.md (type, inputs, metric, bootstrap) and plays.json (the rest).
+    // The first-down calibration note on the strict null is from the M6 holdout record in context/ml-results.md.
+    dyn.appendChild(N.specList([
+      ['Model', 'Gradient-boosted trees: multiclass over ' + P.bins.count + ' yard bins, plus a separate turnover model'],
+      ['Inputs', 'Pre-snap only: down, distance, yard line, score, clock, timeouts, roof and weather, personnel, formation, box count, team ratings, and the run or pass call'],
+      ['Training', P.trained_on[0] + ' to ' + P.trained_on[1] + ' for the live model; each holdout season is fit on earlier seasons only'],
+      ['Test', String(P.headline.window).replace(/ \(.*\)$/, '') + ', ' + commas(hc.crps_model_minus_baseline.clusters) + ' games, scored once'],
+      ['Metric', 'CRPS over yards, lower is better; 95% intervals from a bootstrap over games (2,000 draws)'],
+      ['Result', 'Beats the down, distance and field baseline; ' + (hc.crps_model_minus_baseline.excludes_zero && hs.crps_model_minus_baseline.excludes_zero ? 'both intervals exclude zero' : 'an interval includes zero') + (every ? ', in every season' : '')],
+      ['Calibration', 'P(first down) error ' + hc.p_first_ece.toFixed(4) + (hc.p_first_calibration_ok ? ', within the ' + hc.p_first_ece_floor.toFixed(2) + ' limit' : ', above the ' + hc.p_first_ece_floor.toFixed(2) + ' limit') + '; misses the strict statistical null, as the baseline does'],
+      ['License', P.license.license]
+    ]));
     dyn.appendChild(h('div', {},
       well(host),
       h('p', { class: 'fnote', text: 'Model minus baseline, CRPS yards. Negative is better. 95% intervals.' }),
       h('dl', { class: 'statrow' },
         stat('Call view, model', hc.crps_model.toFixed(3) + ' yd', 'baseline ' + hc.crps_baseline.toFixed(3)),
-        stat('Situation view, model', hs.crps_model.toFixed(3) + ' yd', 'baseline ' + hs.crps_baseline.toFixed(3)),
-        stat('First-down calibration error', hc.p_first_ece.toFixed(4), hc.p_first_calibration_ok ? 'within the ' + hc.p_first_ece_floor.toFixed(2) + ' limit' : 'above the ' + hc.p_first_ece_floor.toFixed(2) + ' limit'),
-        stat('Plays tested', commas(hc.plays), commas(hc.crps_model_minus_baseline.clusters) + ' games'))));
+        stat('Situation view, model', hs.crps_model.toFixed(3) + ' yd', 'baseline ' + hs.crps_baseline.toFixed(3)))));
     watch(host, function () {
       N.ciChart(host, [
         { label: 'Call view (this page)', ci: hc.crps_model_minus_baseline, series: 's3' },

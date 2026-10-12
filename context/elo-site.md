@@ -1,12 +1,12 @@
 # Elo site
 
-Sub-project context for the static NFLELO website in `site/`. General project context is in `CONTEXT.md`; the model is in `context/data-and-elo.md`.
+Sub-project context for the static NFELO website (renamed from NFLELO on 2026-10-11; the repo, package and URLs keep the old spelling) in `site/`. General project context is in `CONTEXT.md`; the model is in `context/data-and-elo.md`.
 
 ## Shape
 
-- Static, no build step, no server. Six pages: `site/index.html` (ratings), `site/models.html` (receipts) and the four model pages below (`plays.html`, `winprob.html`, `fourth.html`, `playcalling.html`), sharing five files: `brand.css` (the brand tokens and material classes), `styles.css` (the page styles on top of it), `assets/` (the halftone and glyph grid tiles and the Flow hero background), `common.js` (DOM builders, tooltip, table views, nav highlight, and the one data fetch) and the page script (`app.js` or `models.js`; plain JS, hand-built SVG charts, no CDN scripts), plus `site/data/*.json`. Only external request: Google Fonts (Figtree for headings, Nunito Sans for body). Must be served over http (it fetches `./data/*.json`); `python3 -m http.server 8765 --directory site`, or `nflelo-site` in `.claude/launch.json`.
+- Static, no build step, no server. Seven pages (see the page map below), sharing: `brand.css` (brand tokens and material classes), `styles.css` (page styles on top of it), `assets/` (the pebble and terrain patterns), `common.js` (DOM builders, tooltip, table views, nav highlight, `specList`, and the one data fetch), `elo-lib.js` (formatting, the hand-built SVG line chart, the Elo data loader and the section reveal; used by the home and Elo pages) and one page script each (plain JS, no CDN scripts), plus `site/data/*.json`. Only external request: Google Fonts (Figtree for headings, Nunito Sans for body). Must be served over http (it fetches `./data/*.json`); `python3 -m http.server 8765 --directory site`, or `nflelo-site` in `.claude/launch.json`.
 - Hostable on GitHub Pages by publishing `site/`. The weekly GitHub Action (`.github/workflows/weekly.yml`) runs `scripts/build.py`, `scripts/ml_predict.py` and `scripts/export_site.py`, then commits `experiments/live/`, `site/data/` and `outputs/`.
-- Sections, in order: header (wordmark, the matchup instrument, four tiles), power ladder, this week, rest of season (only when `data/ml.json` exists), playoff odds (only when it has a simulation run), team explorer, luck board, league history (one tile: the parity line chart, y axis "Std. dev. of team ratings (Elo points)"), model scorecard with methodology. The Records tables and the 32-team x 55-season heatmap were cut on 2026-10-11.
+- Home sections, in order: header (wordmark, the matchup instrument, four tiles), power ladder, this week, rest of season (only when `data/ml.json` exists), playoff odds (only when it has a simulation run). The Elo detail moved to `elo.html` on 2026-10-11. The Records tables and the 32-team x 55-season heatmap were cut earlier the same day.
 
 ## Exporter (`scripts/export_site.py`)
 
@@ -81,6 +81,19 @@ Soft Form is retired (`site/soft-form.css` and `site/theme.js` are gone).
 - Methodology: a "Playoff odds" paragraph (margin model, key numbers, the simulation with season-long shocks, the tiebreaker check, and the DEV calibration caveat in plain words).
 - Without `ml.json`, or with an `ml.json` that has no simulation, the page is unchanged (tested in `tests/ml/test_live.py`).
 - **Gate (2026-10-04, Walker):** the playoff odds and the win range stay off the site until the M4 holdout sign-off. `experiments/live/publish.json` (committed) holds `"publish_sim": false`; the exporter then writes `playoff_odds: null`, `sim_published: false` and null win ranges, even though the weekly job keeps simulating and appending to `sim_<season>.csv`. A missing file also means off. Flip it to true by hand after sign-off (and update `test_committed_publish_flag_keeps_the_simulation_off_the_site`). Margin spreads are not gated.
+
+## Page map (2026-10-11)
+
+Nav on every page: Home, Elo, Plays, Win prob, Fourth down, Play calling, Models. Pages with in-page sections (Home, Elo, Models) list those first, then a divider; the other pages carry the seven links only, and the current one has `aria-current="page"`.
+
+| Page | Script | Content |
+|---|---|---|
+| `index.html` (Home) | `app.js` | Concise: hero matchup, power ladder, this week, projected wins, playoff odds. Each section is a short headline, at most one deck line, minimal footnotes. A ladder row opens `elo.html?team=XXX#explorer`. |
+| `elo.html` | `elo.js` | Hero tiles (Brier and pick accuracy against Vegas, gap, home-field edge now), team explorer, luck board, league parity, Elo scorecard (Brier by season, home-field edge, live record with the shadow line) and a Method tile of label/value lists (Elo settings from `meta.json`, data sources, held-out result; log loss 0.6317 is from `context/data-and-elo.md`). |
+| `plays.html`, `winprob.html`, `fourth.html`, `playcalling.html` | one each | Model pages. Each ends with a "Specification" tile (`N.specList`): model, inputs, training window, test window and games, metric, result, calibration, license, drawn from the page's JSON and the method docs. |
+| `models.html` | `models.js` | Scoreboard cards, each with a one-line `spec` (type and inputs, from `METADATA` in `export_research.py`), the model holdout chart, evidence, how we test. |
+
+The fourth-down page no longer shows the 2020 to 2025 audit (hero tile and "First engine" block): both rested on the engine that failed its conversion calibration test. `holdout_audit_v1` stays in `fourth.json` but is not rendered.
 
 ## Open items
 

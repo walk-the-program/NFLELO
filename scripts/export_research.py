@@ -1,4 +1,4 @@
-"""Export site/data/research.json: every NFLELO model and its pre-registered 2020-2025 result.
+"""Export site/data/research.json: every NFELO model and its pre-registered 2020-2025 result.
 
     python scripts/export_research.py
 
@@ -40,58 +40,69 @@ VERDICT_ORDER = ("pass", "fail", "negative", "shadow")
 # One entry per model, in scoreboard order.
 
 METADATA = [
-    {"id": "M3", "short": "M3", "name": "NFLELO model",
+    {"id": "M3", "short": "M3", "name": "NFELO model",
      "what": "Win chance per game from Elo, efficiency and the starting quarterback.",
+     "spec": "Logistic regression on Elo log-odds, opponent-adjusted EPA margin and starting-QB difference.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
      "reading": "Beat Elo in all six seasons. The market is still ahead.",
      "method_doc": "context/ml-m3-method.md"},
     {"id": "M4-margin", "short": "M4", "name": "Margin model",
      "what": "The full spread of possible final margins.",
+     "spec": "Linear regression on the same three inputs, with a key-number-aware margin distribution (3 and 7).",
      "verdict": "fail", "tested_holdout": True, "license": "CC BY",
      "reading": "Edge over Elo not proven: the interval includes zero.",
      "method_doc": "context/ml-m4-method.md"},
     {"id": "M4-odds", "short": "M4", "name": "Playoff odds",
      "what": "20,000 simulated seasons with real tiebreakers.",
+     "spec": "Monte Carlo season simulation from the model's game probabilities, the remaining schedule and NFL tiebreakers.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
      "reading": "Strength shocks improved the forecast, and the odds were calibrated.",
      "method_doc": "context/ml-m4-method.md"},
     {"id": "M5", "short": "M5", "name": "Lineup values",
      "what": "A value per player from box scores, plus probable lineups.",
+     "spec": "Shrunk per-player box-score values; inputs are game stats, depth charts and injury reports.",
      "verdict": "negative", "tested_holdout": False, "license": "CC BY",
      "reading": "Lineups added nothing measurable, so no holdout was spent.",
      "method_doc": "context/ml-m5-method.md"},
     {"id": "M5b", "short": "M5b", "name": "On-field player ratings",
      "what": "A plus-minus rating for every player, from 177,545 plays.",
+     "spec": "Bayesian ridge plus-minus (RAPM) over the 22 players on each play (participation data, 2016+), with box values as priors.",
      "verdict": "fail", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "Beat team ratings, lost to summed box-score values.",
      "method_doc": "context/ml-m5b-method.md"},
     {"id": "M3b", "short": "M3b", "name": "Shadow model",
      "what": "A team-strength rating (Kalman filter) that carries its own uncertainty.",
+     "spec": "Kalman filter of team strength; inputs are game margins and opponent-adjusted EPA margins.",
      "verdict": "shadow", "tested_holdout": False, "license": "CC BY",
      "reading": "Narrowly missed on development seasons. Running as a live shadow.",
      "method_doc": "context/ml-m3b-method.md"},
     {"id": "M6", "short": "M6", "name": "Play outcome model",
      "what": "The full distribution of yards a play can gain.",
+     "spec": "Gradient-boosted classifier over 53 yard bins; pre-snap inputs only: situation, personnel, formation, box count, team ratings.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "Beat the baseline every season. Players add little.",
      "method_doc": "context/ml-m6-method.md"},
     {"id": "M7a-wp", "short": "M7a", "name": "Win-probability model",
      "what": "Win chance at every snap, with no market input.",
+     "spec": "Monotone gradient boosting; inputs are score, clock, down, distance, field position, timeouts and the pregame model win chance.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
      "reading": "Beats nflfastR. The Vegas-based probability is still better.",
      "method_doc": "context/ml-m7-method.md"},
     {"id": "M7a-4th", "short": "M7a", "name": "Fourth-down tool",
      "what": "Go, kick or punt, compared in win probability.",
+     "spec": "Go, field goal and punt valued in win probability, from the play, kick and win-probability models.",
      "verdict": "fail", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "Field goal and punt parts passed; conversion estimates were off.",
      "method_doc": "context/ml-m7-method.md"},
     {"id": "M7b", "short": "M7b", "name": "Early-down play calling",
      "what": "Run or pass, and personnel, on early downs.",
+     "spec": "Propensity gradient boosting with cross-fit doubly robust (AIPW) estimates; situation and personnel group by run or pass.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "Recommended mix beats actual play calling. Defenses would adapt.",
      "method_doc": "context/ml-m7-method.md"},
-    {"id": "M8", "short": "M8", "name": "NFLELO model upgrades",
-     "what": "Five upgrades to the NFLELO model.",
+    {"id": "M8", "short": "M8", "name": "NFELO model upgrades",
+     "what": "Five upgrades to the NFELO model.",
+     "spec": "Margin and EPA targets, opponent-adjusted QB, early-season and context features, stacked.",
      "verdict": "negative", "tested_holdout": False, "license": "CC BY",
      "reading": "No upgrade beat the shadow model beyond noise.",
      "method_doc": "context/ml-m8-method.md"},
@@ -157,7 +168,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         e, fe = load_run("m3_signoff_elo_v2", runs_dir, holdout=True)
         m, fm = load_run("m3_signoff_market", runs_dir, holdout=True)
         c = a["comparisons"]["A4s_minus_elo_brier"]
-        prim = paired("Brier score, NFLELO model minus Elo (lower is better)", c, 3, n_unit="games", window=reg, file_name=fa)
+        prim = paired("Brier score, NFELO model minus Elo (lower is better)", c, 3, n_unit="games", window=reg, file_name=fa)
         also = [{"text": f"Brier {a['metrics']['brier']:.4f} against Elo {e['metrics']['brier']:.4f} and the Vegas market "
                          f"{m['metrics']['brier']:.4f}", "source": src(fa)}]
         return {"primary": prim, "also": also}
@@ -188,7 +199,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
             raise RunMissing("m5_B3 should be a development run")
         b1, f1 = load_run("m5_B1", runs_dir)
         b2, f2 = load_run("m5_B2", runs_dir)
-        prim = paired("Brier score, best lineup model minus the NFLELO model (lower is better)", d["comparisons"]["vs_B0_brier"], 3,
+        prim = paired("Brier score, best lineup model minus the NFELO model (lower is better)", d["comparisons"]["vs_B0_brier"], 3,
                       n_unit="games", window="development 2012 to 2019", file_name=f)
         also = [{"text": (f"Smaller steps: {sgn(b1['comparisons']['vs_B0_brier']['diff'], 3)} and "
                           f"{sgn(b2['comparisons']['vs_B0_brier']['diff'], 3)}; every interval includes zero"),
@@ -208,7 +219,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         d, f = load_run("m3b_C2d", runs_dir)
         if d.get("holdout"):
             raise RunMissing("m3b_C2d should be a development run")
-        prim = paired("Brier score, shadow model minus NFLELO model (lower is better)", d["comparisons"]["vs_a4s"], 3,
+        prim = paired("Brier score, shadow model minus NFELO model (lower is better)", d["comparisons"]["vs_a4s"], 3,
                       n_unit="games", window="development 2006 to 2019", file_name=f)
         ll = d["comparisons"]["vs_a4s_logloss"]
         also = [{"text": f"Log loss, the stricter score: {interval(ll['diff'], ll['ci_low'], ll['ci_high'], 3)}",
@@ -221,7 +232,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
             raise RunMissing("m8_E5 should be a development run")
         prim = paired("Brier score, best upgrade minus the shadow model (lower is better)", d["comparisons"]["vs_c2d"], 3,
                       n_unit="games", window="development 2006 to 2019", file_name=f)
-        also = [{"text": f"Against the NFLELO model: {interval(d['comparisons']['vs_a4s']['diff'], d['comparisons']['vs_a4s']['ci_low'], d['comparisons']['vs_a4s']['ci_high'], 3)}",
+        also = [{"text": f"Against the NFELO model: {interval(d['comparisons']['vs_a4s']['diff'], d['comparisons']['vs_a4s']['ci_low'], d['comparisons']['vs_a4s']['ci_high'], 3)}",
                  "source": src(f)}]
         return {"primary": prim, "also": also}
 
@@ -293,7 +304,7 @@ def build_chart(runs_dir: Path | None) -> dict:
     ce, cm = cmp_["A4s_minus_elo_brier"], cmp_["A4s_minus_market_brier"]
     rows = []
     for rid, label, series, b, c in (("elo", "Elo", "s1", e["metrics"]["brier"], ce),
-                                     ("model", "NFLELO model", "s3", model_b, None),
+                                     ("model", "NFELO model", "s3", model_b, None),
                                      ("market", "Vegas market (benchmark only)", "s2", m["metrics"]["brier"], cm)):
         row = {"id": rid, "label": label, "series": series, "brier": b, "logloss": None}
         if c is not None:
@@ -353,7 +364,7 @@ def headlines(counts: dict, chart: dict) -> dict:
     beat = chart["model_beats_elo_seasons"]
     n_s = chart["seasons_total"]
     season_text = f"all {n_s} seasons" if beat == n_s else f"{beat} of {n_s} seasons"
-    game = f"The NFLELO model beat Elo in {season_text}. The market is {abs(gap):.3f} Brier ahead."
+    game = f"The NFELO model beat Elo in {season_text}. The market is {abs(gap):.3f} Brier ahead."
     extra = counts["negative"] + counts["shadow"]
     deck = f"{extra} more are development-only: {counts['negative']} negative, {counts['shadow']} shadow."
     return {"hero": hero, "hero_deck": deck, "scoreboard": scoreboard, "chart": game}

@@ -6,9 +6,9 @@ from pathlib import Path
 import pytest
 
 SITE = Path(__file__).resolve().parent.parent / "site"
-PAGES = ["index", "models", "plays", "winprob", "fourth", "playcalling"]
-NAV_LINKS = ["plays.html", "winprob.html", "fourth.html", "playcalling.html", "models.html"]
-SCRIPT = {"index": "app", "models": "models", "plays": "plays", "winprob": "winprob", "fourth": "fourth", "playcalling": "playcalling"}
+PAGES = ["index", "elo", "models", "plays", "winprob", "fourth", "playcalling"]
+NAV_LINKS = ["index.html", "elo.html", "plays.html", "winprob.html", "fourth.html", "playcalling.html", "models.html"]   # Home, Elo, then the model pages, in this order
+SCRIPT = {"index": "app", "elo": "elo", "models": "models", "plays": "plays", "winprob": "winprob", "fourth": "fourth", "playcalling": "playcalling"}
 
 
 def read(name: str) -> str:
@@ -19,10 +19,8 @@ def read(name: str) -> str:
 def test_every_page_has_the_model_nav_links(page):
     html = read(f"{page}.html")
     nav = re.search(r"<ul class=\"nav-links\">(.*?)</ul>", html, re.S).group(1)
-    for href in NAV_LINKS:
-        if href == f"{page}.html":
-            continue  # the page itself is reached through its own section links
-        assert f'href="{href}"' in nav, f"{page}.html nav is missing {href}"
+    hrefs = re.findall(r'<a href="([a-z]+\.html)"', nav)
+    assert hrefs == NAV_LINKS, f"{page}.html nav links are {hrefs}"
 
 
 @pytest.mark.parametrize("page", PAGES)
@@ -86,7 +84,7 @@ def test_one_primary_action_per_page(page):
 
 
 def test_no_hex_colors_outside_the_brand_tokens():
-    for name in ("styles.css", "common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
+    for name in ("styles.css", "common.js", "elo-lib.js", "app.js", "elo.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
         assert not re.search(r"#[0-9a-fA-F]{3,8}\b", read(name)), name
 
 
@@ -123,7 +121,7 @@ def test_bento_materials_match_the_brief():
 
 
 def test_light_only_no_monospace_and_the_two_brand_fonts():
-    for name in ("brand.css", "styles.css", "common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
+    for name in ("brand.css", "styles.css", "common.js", "elo-lib.js", "app.js", "elo.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
         text = read(name).lower()
         assert "monospace" not in text and "--font-mono" not in text and "ui-monospace" not in text, name
     css = read("brand.css")
@@ -169,7 +167,7 @@ def test_secondary_is_never_a_line_dot_or_text_color():
                 assert False, (name, sel.strip(), decl)
             if re.search(r"border(?:-[a-z]+)?\s*:[^;}]*var\(--secondary\)", block):
                 assert "inset 0 0 0 1px var(--ink)" in block, (name, sel.strip())
-    for name in ("common.js", "app.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
+    for name in ("common.js", "elo-lib.js", "app.js", "elo.js", "models.js", "plays.js", "winprob.js", "fourth.js", "playcalling.js"):
         for line in read(name).splitlines():
             if "var(--secondary)" in line:
                 assert "fill:" in line and "pale: true" in line, (name, line.strip())
@@ -269,3 +267,76 @@ def test_no_pts_label_on_a_win_probability_difference():
         js = read(name)
         assert "' pts'" not in js and " pts," not in js and "(points)" not in js, name
     assert "' pts', gap: true" not in read("app.js")
+
+
+# ---- Walker 2026-10-11: the site is called NFELO; home is concise; the Elo page holds the Elo detail ----
+
+def _without_repo_urls(text: str) -> str:
+    return text.replace("walk-the-program/NFLELO", "")
+
+
+def test_site_name_is_nfelo_everywhere_visible():
+    """No visible "NFLELO" in the pages, scripts or published data; only the GitHub repo URL keeps the old spelling."""
+    for f in sorted(SITE.glob("*.html")) + sorted(SITE.glob("*.js")) + sorted((SITE / "data").glob("*.json")):
+        assert "NFLELO" not in _without_repo_urls(f.read_text(encoding="utf-8")), f.name
+    for page in PAGES:
+        html = read(f"{page}.html")
+        assert re.search(r"<title>NFELO: ", html) and html.count('>NFELO</a>') == 1, page
+    assert re.search(r'<h1 class="wordmark">NF<span class="hl">ELO</span></h1>', read("index.html"))
+
+
+def test_elo_page_exists_with_the_moved_sections_and_a_method_tile():
+    html = read("elo.html")
+    for sec in ("explorer", "luck", "history", "scorecard", "method"):
+        assert f'id="{sec}"' in html, sec
+    assert 'id="method-body"' in html and 'class="method how"' in html
+    js = read("elo.js")
+    for fn in ("renderExplorer", "renderLuck", "renderHistory", "renderScorecard", "liveBlock", "renderMethod"):
+        assert f"function {fn}" in js, fn
+    assert "specList" in js and "'Expansion teams'" in js and "'Margin of victory'" in js
+
+
+def test_elo_page_renders_only_existing_data_files_and_known_ids():
+    js, html = read("elo.js"), read("elo.html")
+    files = re.search(r"var FILES = \[(.*?)\]", js).group(1)
+    for name in re.findall(r"'([a-z]+)'", files):
+        assert (SITE / "data" / f"{name}.json").exists(), name
+    ids = set(re.findall(r"\$\('#([a-z][\w-]*)'\)", js))
+    for i in ids:
+        assert f'id="{i}"' in html, f"elo.js looks up #{i}, which elo.html does not have"
+    assert "explorer-body" in html and "scorecard-body" in html and "history-body" in html and "luck-body" in html
+
+
+def test_home_keeps_only_the_concise_sections():
+    html, js = read("index.html"), read("app.js")
+    assert re.findall(r'<section class="sec" id="([a-z]+)"', html) == ["ladder", "week"]   # projected wins and odds are inserted by app.js
+    for gone in ("explorer", "luck", "history", "scorecard"):
+        assert f'id="{gone}' not in html, gone
+        assert f"function render{gone.capitalize()}" not in js, gone
+    assert "function renderRest" in js and "function renderOdds" in js
+    for name in re.findall(r"'([a-z]+)'", re.search(r"var FILES = \[(.*?)\]", js).group(1)):
+        assert (SITE / "data" / f"{name}.json").exists(), name
+    assert "lineChart" not in js     # the chart code lives in elo-lib.js, shared with the Elo page
+    assert "function lineChart" in read("elo-lib.js")
+
+
+@pytest.mark.parametrize("page", ["plays", "winprob", "fourth", "playcalling"])
+def test_model_pages_have_one_specification_tile(page):
+    html, js = read(f"{page}.html"), read(f"{page}.js")
+    assert "<span class=\"kt\">Specification</span>" in html and 'id="how-dyn"' in html
+    assert js.count("N.specList(") == 1
+    for label in ("'Model'", "'Inputs'", "'Training'", "'Test'", "'Metric'", "'Result'", "'Calibration'", "'License'"):
+        assert label in js, (page, label)
+
+
+def test_fourth_down_page_drops_the_failed_engine_audit():
+    js = read("fourth.js")
+    assert "holdout_audit_v1" not in js and "audit" not in js.lower()
+    assert "wp_lost_by_choice" not in js
+
+
+def test_models_cards_carry_a_one_line_technical_spec():
+    import json
+    d = json.loads((SITE / "data" / "research.json").read_text())
+    assert all(m.get("spec") for m in d["models"])
+    assert "mc-spec" in read("models.js")

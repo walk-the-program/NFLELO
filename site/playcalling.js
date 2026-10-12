@@ -1,4 +1,4 @@
-/* NFLELO play calling page. Reads ./data/playcalling.json (written by scripts/export_ml_pages.py): the
+/* NFELO play calling page. Reads ./data/playcalling.json (written by scripts/export_ml_pages.py): the
    off-policy test of the early-down play-calling recommendations, the 60-situation grid by season and score state.
    No dependencies; helpers come from common.js. */
 (function () {
@@ -166,7 +166,23 @@
       })))));
   }
 
-  // ------------------------------------------------------------------ method
+  // ------------------------------------------------------------------ specification
+
+  // Sources: context/ml-m7-method.md section 4 (model, inputs, metric, overlap rule) and playcalling.json (the rest).
+  function buildSpec() {
+    var H = PC.headline, o = H.ope_epa_per_play, p = H.placebo_epa_per_play, D = PC.definitions;
+    $('#how-dyn').appendChild(N.specList([
+      ['Model', 'Propensity gradient boosting, then doubly robust (AIPW) gain estimates cross-fit by season, checked by off-policy evaluation'],
+      ['Inputs', 'Down and distance, field zone and score state (' + D.cells.count + ' situations), team and opponent; actions are a personnel group by run or pass (' + D.actions.list.length + ' actions)'],
+      ['Training', 'Each season\'s recommendations come from earlier seasons only (2016 to the year before)'],
+      ['Test', H.window.replace(/ \(.*\)$/, '') + ', ' + commas(o.clusters) + ' games, scored once'],
+      ['Metric', 'EPA per play of the recommended policy minus observed calling; 95% interval from a bootstrap over games'],
+      ['Result', H.verdict + ': ' + (o.lo > 0 ? 'the interval is above zero' : 'the interval reaches zero') + ' and the placebo interval ' + (p.excludes_zero ? 'excludes' : 'includes') + ' zero'],
+      ['Calibration', 'Not a probability model. Overlap rule: only actions called at least 5% of the time in a situation are eligible'],
+      ['License', PC.license.license]
+    ]));
+  }
+
 
   // ------------------------------------------------------------------ boot
 
@@ -175,6 +191,6 @@
     if (!d || !d.cells) { N.unavailable('The play-calling data', ALL); return; }
     PC = d;
     season = String(PC.seasons[PC.seasons.length - 1]);
-    renderHero(); renderCaveats(); buildOpe(); buildCells();
+    renderHero(); renderCaveats(); buildOpe(); buildCells(); buildSpec();
   }).catch(function (err) { console.error(err); N.unavailable('The play-calling data', ALL); });
 })();

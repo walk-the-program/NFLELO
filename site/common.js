@@ -1,4 +1,4 @@
-/* NFLELO shared front-end helpers, used by app.js (ratings page), models.js (models page) and the four model
+/* NFELO shared front-end helpers, used by app.js (home), elo.js (Elo page), models.js (models page) and the four model
    pages (plays.js, winprob.js, fourth.js, playcalling.js):
    DOM builders, the tooltip, resize watching, table views, legends, the section nav highlight and
    the one place that fetches data. No dependencies. Exposed as window.NFL. */
@@ -255,6 +255,13 @@
     if (el && !el.textContent.trim()) setText('credit', lic.credit);
   }
 
+  // Specification list: tight label/value rows in a <dl>. rows: [[label, value]]; a value may be text or a node.
+  function specList(rows) {
+    return h('dl', { class: 'spec' }, rows.filter(Boolean).map(function (r) {
+      return h('div', {}, h('dt', { text: r[0] }), h('dd', {}, r[1]));
+    }));
+  }
+
   function caveatBox(list, title, cls) {
     return h('div', { class: 'caveats ' + (cls || '') }, h('h3', { text: title || 'Read this first' }),
       h('ul', {}, list.map(function (c) { return h('li', { text: c }); })));
@@ -364,7 +371,7 @@
     watch: watch, tableView: tableView, legend: legend, initNav: initNav,
     REPO: REPO, repoUrl: repoUrl, signed: signed, commas: commas, pct: pct, ciText: ciText,
     setText: setText, done: done, seg: seg, heroTiles: heroTiles, tileBar: tileBar, licenseUI: licenseUI,
-    caveatBox: caveatBox, unavailable: unavailable, ciChart: ciChart, tableViewLive: tableViewLive,
+    caveatBox: caveatBox, specList: specList, unavailable: unavailable, ciChart: ciChart, tableViewLive: tableViewLive,
     loadTeamNames: loadTeamNames, teamName: teamName, fieldLabel: fieldLabel, ordinal: ordinal,
     mark: mark, moveMark: moveMark, initSlabs: initSlabs
   };

@@ -87,7 +87,7 @@ TOSSUP_MARGIN = 0.02
 
 CC_BY = {"license": "CC BY 4.0", "url": "https://creativecommons.org/licenses/by/4.0/"}
 CC_BY_SA = {"license": "CC BY-SA 4.0", "url": "https://creativecommons.org/licenses/by-sa/4.0/"}
-CREDIT_BY = "Data: nflverse (CC BY 4.0). Model: NFLELO win probability (CC BY 4.0)."
+CREDIT_BY = "Data: nflverse (CC BY 4.0). Model: NFELO win probability (CC BY 4.0)."
 CREDIT_SA = ("Data: nflverse (CC BY 4.0); participation data from NFL Next Gen Stats (2016-2022) and "
              "FTN Data (2023+). Numbers on this page: CC BY-SA 4.0.")
 REPO = "https://github.com/walk-the-program/NFLELO"
@@ -603,7 +603,7 @@ def build_winprob(L: Live, runs_dir: Path | None = None) -> dict:
         "schema": SCHEMA, "page": "winprob", "season": L.S,
         "model": "M7a win probability (monotone gradient boosting; no betting-market inputs)",
         "model_fit": {**info, "inputs": ("score, clock, down, distance, field position, timeouts, second-half kickoff, "
-                                         "home, and the pregame NFLELO model win probability")},
+                                         "home, and the pregame NFELO model win probability")},
         "refresh": "weekly (Wednesday and Sunday Action runs)",
         "updated_through": {"week": max(weeks) if weeks else None, "games": len(games),
                             "last_game_date": max((g["date"] for g in games), default=None),
@@ -619,7 +619,7 @@ def build_winprob(L: Live, runs_dir: Path | None = None) -> dict:
             "swing": "the largest single change; the play is the snap that began it (a following kickoff or "
                      "extra point is part of the same change)",
             "winner_min_wp": "lowest WP the eventual winner had (comeback measure; null for a tie)",
-            "pregame_home": "NFLELO model pregame home win probability (logged before kickoff in the live ledger)"},
+            "pregame_home": "NFELO model pregame home win probability (logged before kickoff in the live ledger)"},
         "games_by_excitement": listing,
         "games": games,
         "caveats": [
@@ -704,7 +704,7 @@ def build_chart(comp: fd.Components, S: int) -> dict:
                     "close_call": [bool(x < TOSSUP_MARGIN) for x in m["margin"]]})
     return {"label": "Point estimates without the uncertainty band (no bootstrap)",
             "as_of": f"week 1 of {S}: league-average teams, kicker and punter; outdoors, 60F, 5 mph wind; "
-                     "even teams (NFLELO model 0.5)",
+                     "even teams (NFELO model 0.5)",
             "close_call_margin": TOSSUP_MARGIN, "presets": out}
 
 
@@ -796,11 +796,7 @@ def team_table(rows: pd.DataFrame, fin: pd.DataFrame) -> list[dict]:
 
 
 def fourth_status() -> dict:
-    try:
-        from export_research import FORWARD_TEST
-        ft = dict(FORWARD_TEST)
-    except Exception:
-        ft = {}
+    ft = {"frozen_commit": "5a0b850", "registered_commit": "201ad8e"}  # M7a-v2 freeze and pre-registration
     return {"forward_test": "pending",
             "plain": ("This engine's go-for-it conversion component is under a pre-registered forward test on the 2026 "
                       "season. It was frozen before any 2026 game and will be scored once, with no refit, after the "
@@ -811,6 +807,8 @@ def fourth_status() -> dict:
             "why": ("The first engine (v1) failed its 2020-2025 conversion calibration test (ECE 0.027 against a limit "
                     "of 0.022; it under-predicted 4th and 2). The fix (v2ad: run/pass mix by field zone plus "
                     "fourth-down conversion offsets) was built on development seasons only (dev ECE 0.019 vs 0.033)."),
+            "calibration": {"v1_holdout": {"ece": 0.027, "limit": 0.022, "window": "2020-2025"},
+                            "v2ad_dev": {"ece": 0.019, "v1_ece": 0.033, "window": "2018-2019"}},
             "components_status": {"win_probability": "passed 2020-2025", "field_goal": "passed 2020-2025",
                                   "punt": "passed 2020-2025", "conversion_v1": "failed 2020-2025",
                                   "conversion_v2ad": "forward test pending (2026)"},

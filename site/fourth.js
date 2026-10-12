@@ -1,4 +1,4 @@
-/* NFLELO fourth-down page. Reads ./data/fourth.json (written by scripts/export_ml_pages.py): the decision chart,
+/* NFELO fourth-down page. Reads ./data/fourth.json (written by scripts/export_ml_pages.py): the decision chart,
    the 2026 teams and plays, and the status of the forward test. Every number here is model-estimated; the page
    says so wherever numbers appear. No dependencies; helpers come from common.js. */
 (function () {
@@ -29,15 +29,15 @@
   // ------------------------------------------------------------------ status, hero
 
   function renderHero() {
-    var L = F.live, s = L.summary, a = F.headline.holdout_audit_v1;
+    var L = F.live, s = L.summary;
     var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], run = F.status.earliest_run;
     setText('hero-line', 'First model failed its calibration test. Revised model under test until ' + MONTHS[Number(run.slice(5, 7)) - 1] + ' ' + run.slice(0, 4) + '.');
     setText('hero-deck', 'Go, kick or punt: the best option by yard line and distance.');
     N.heroTiles([
-      { label: 'Matched the model', big: pct(s.matched_share, 0), bar: s.matched_share, barText: 'Through week ' + L.updated_through.week, sub: 'of ' + commas(s.fourth_downs) + ' fourth downs. Model-estimated.' },
+      { label: 'Matched the model', big: pct(s.matched_share, 0), bar: s.matched_share, barText: 'Through week ' + L.updated_through.week, sub: 'of all fourth downs. Model-estimated.' },
       { label: 'Close calls', big: pct(s.tossup_share, 0), sub: 'toss-ups, margin under ' + F.tossup_rule.margin_below + '. Model-estimated.' },
       { label: 'Win probability given up', big: s.wp_lost_per_team_game.toFixed(3), sub: 'wins per team-game, ' + s.wp_lost_total.toFixed(1) + ' total. Model-estimated.' },
-      { label: '2020 to 2025 audit', big: a.wp_lost_per_team_game.toFixed(3), sub: 'wins per team-game, ' + commas(a.fourth_downs) + ' fourth downs; ' + a.wp_lost_by_choice.punt.toFixed(0) + ' of ' + a.wp_lost_total.toFixed(0) + ' wins from punts. Model-estimated.' }
+      { label: 'Fourth downs tracked', big: commas(s.fourth_downs), sub: commas(s.games) + ' games in ' + F.season + ', through week ' + L.updated_through.week + '.' }
     ]);
     N.licenseUI(F.license);
   }
@@ -328,18 +328,19 @@
   // ------------------------------------------------------------------ method
 
   function buildHow() {
-    var dyn = $('#how-dyn'), a = F.headline.holdout_audit_v1, E = F.engine;
-    dyn.appendChild(h('div', {},
-      h('h3', { class: 'sub-h', text: 'The 2020 to 2025 audit' }),
-      h('p', { class: 'stat-note', text: 'Matched on ' + pct(a.matched_share, 0) + ' of ' + commas(a.fourth_downs) + ' fourth downs (' + pct(a.matched_share_clear_calls, 0) + ' of clear calls). Model-estimated.' }),
-      h('dl', { class: 'statrow' },
-        stat('Total given up', a.wp_lost_total.toFixed(1) + ' wins', 'all teams, model-estimated'),
-        stat('By punting', a.wp_lost_by_choice.punt.toFixed(1), 'wins, model-estimated'),
-        stat('By kicking field goals', a.wp_lost_by_choice.fg.toFixed(1), 'wins, model-estimated'),
-        stat('By going for it', a.wp_lost_by_choice.go.toFixed(1), 'wins, model-estimated'),
-        stat('Toss-ups', pct(a.tossup_share, 0), 'of fourth downs')),
-      h('p', { class: 'fnote', text: 'First engine, which failed its conversion test. Its win probability model beat nflfastR (Brier ' + F.headline.wp_model.brier_ours.toFixed(4) + ' vs ' + F.headline.wp_model.brier_nflfastr.toFixed(4) + ').' })));
-    dyn.appendChild(h('p', { class: 'stat-note', style: 'margin-top:0', text: 'Current engine: ' + E.engine.candidate + ', frozen ' + E.engine.frozen_at.slice(0, 10) + '.' }));
+    var dyn = $('#how-dyn'), E = F.engine, S = F.status, C = S.calibration;
+    // Sources: context/ml-m7-method.md section 3 (model, inputs, metric), context/ml-results.md and fourth.json (the rest).
+    dyn.appendChild(N.specList([
+      ['Model', 'Go, field goal and punt each valued by the team\'s win probability afterward. Revised engine: run and pass mix by field zone, plus fourth-down conversion offsets'],
+      ['Inputs', 'Down, distance, field position, score, clock, timeouts; kicker, roof, wind and temperature for field goals'],
+      ['Components', 'Conversion from the play outcome model; field goal make and punt distance models; the win probability model'],
+      ['Training', 'Win probability ' + E.wp.trained_on[0] + ' to ' + E.wp.trained_on[1] + '; play outcomes ' + E.m6.trained_on[0] + ' to ' + E.m6.trained_on[1] + '; frozen ' + E.engine.frozen_at.slice(0, 10) + ', no refit'],
+      ['Test', 'Forward test on the ' + F.season + ' season, scored once, earliest ' + S.earliest_run + '. The first engine was scored on 2020 to 2025'],
+      ['Metric', 'Conversion calibration error (ECE) against a sample-size-aware limit'],
+      ['Result', 'Win probability, field goal and punt parts passed 2020 to 2025. First engine\'s conversion part failed. Revised conversion part: forward test pending'],
+      ['Calibration', 'First engine ' + C.v1_holdout.ece.toFixed(3) + ' against a limit of ' + C.v1_holdout.limit.toFixed(3) + '. Revised engine ' + C.v2ad_dev.ece.toFixed(3) + ' vs ' + C.v2ad_dev.v1_ece.toFixed(3) + ' on ' + C.v2ad_dev.window.replace('-', ' to ') + ' development seasons only'],
+      ['License', F.license.license]
+    ]));
     dyn.appendChild(N.caveatBox(['Teams know things the model does not.'], 'Caveat'));
     dyn.appendChild(h('dl', { class: 'gloss' },
       [['Toss-up', 'margin under ' + F.tossup_rule.margin_below + ' win probability'], ['Margin', 'best option minus second best'], ['Given up', 'best option minus the team\'s choice'], ['Clear call', 'margin of ' + F.tossup_rule.margin_below + ' or more']].map(function (k) { return h('div', {}, h('dt', { text: k[0] }), h('dd', { text: k[1] })); })));

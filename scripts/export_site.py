@@ -493,14 +493,14 @@ def headline_week_ml(games_: list[dict], flagged: list[str]) -> str | None:
         game = f"{subj(g['away'])} at {subj(g['home'])}"
         pm, pv = g["p_home_model"], g["p_market_home"]
         if (pm - 0.5) * (pv - 0.5) < 0:
-            return f"The NFLELO model and Vegas split on {game}."
-        return f"The NFLELO model and Vegas are {pp(abs(g['gap']))} apart on {game}."
+            return f"The NFELO model and Vegas split on {game}."
+        return f"The NFELO model and Vegas are {pp(abs(g['gap']))} apart on {game}."
     have = [g for g in games_ if g["p_home_model"] is not None]
     if not have:
         return None
     g = max(have, key=lambda x: (abs(x["p_home_model"] - 0.5), x["game_id"]))
     fav, dog = (g["home"], g["away"]) if g["p_home_model"] >= 0.5 else (g["away"], g["home"])
-    return f"The NFLELO model's strongest pick is {subj(fav)} over {subj(dog)}, at {max(g['p_home_model'], 1 - g['p_home_model']) * 100:.0f}%."
+    return f"The NFELO model's strongest pick is {subj(fav)} over {subj(dog)}, at {max(g['p_home_model'], 1 - g['p_home_model']) * 100:.0f}%."
 
 
 def headline_rest(teams: list[dict]) -> str | None:

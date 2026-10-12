@@ -6,7 +6,7 @@
 
 **Use only these colors, fonts and rules. No new colors, tints, gradients or fonts.**
 
-- Name: NFLELO. Tagline: Machine Learning applied to Football.
+- Name: NFELO (renamed from NFLELO on 2026-10-11). Tagline: Machine Learning applied to Football.
 - Aesthetic: Bento Grid (Modular · Clear · Product-proud). A grid of rounded tiles, each making one point.
 - Motto: One tile, one idea. Mode: light.
 
