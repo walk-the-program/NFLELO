@@ -44,6 +44,8 @@ SPARK_GAMES = 17          # ladder sparkline length (last N regular-season games
 TOP_N = 10
 DISAGREEMENTS = 3
 MIN_SEASON_GAMES = 200    # fewest market games for a season's market Brier to be reported
+RANGE_SIMS = 20000        # simulated seasons for the projected-wins ranges (model and Elo alike)
+RANGE_SIGMA = 13.5        # margin SD in points, used when the live margin model file is missing
 LUCK_SEASONS_BACK = (1, 0)  # previous season (full) and the current one (to date)
 
 
@@ -550,6 +552,32 @@ def headline_rest(teams: list[dict]) -> str | None:
     return f"{cap(subj(t))} {verb(t, 'projects', 'project')} to {top['proj_model']:.1f} wins, the most in the league."
 
 
+
+def win_ranges(todo: pd.DataFrame, p_home: pd.Series, base: dict, sigma: float, seed: int = 20261011) -> dict:
+    """10th and 90th percentile final wins per team, from the remaining games' home win probabilities.
+
+    Same rating uncertainty as the playoff simulation: each simulated season, every team draws one
+    strength shock, Normal(0, TAU_REST) points, shifting every game it plays (on the logit scale,
+    1.702 * points / sigma). Run identically for the model and for Elo so the two ranges compare.
+    """
+    from nflelo.ml.sim.season import TAU_REST
+    teams = sorted(base)
+    ix = {t: i for i, t in enumerate(teams)}
+    rng = np.random.default_rng(seed)
+    wins = np.tile(np.array([base[t] for t in teams], float), (RANGE_SIMS, 1))
+    if len(todo):
+        h = np.array([ix[t] for t in todo["home"]]); a = np.array([ix[t] for t in todo["away"]])
+        p = np.clip(p_home.reindex(todo["game_id"]).to_numpy(float), 1e-6, 1 - 1e-6)
+        shock = TAU_REST * rng.standard_normal((RANGE_SIMS, len(teams)))
+        z = np.log(p / (1 - p))[None, :] + 1.702 * (shock[:, h] - shock[:, a]) / sigma
+        home_win = rng.random(z.shape) < 1 / (1 + np.exp(-z))
+        for j in range(len(todo)):
+            wins[:, h[j]] += home_win[:, j]
+            wins[:, a[j]] += ~home_win[:, j]
+    lo, hi = np.percentile(wins, [10, 90], axis=0)
+    return {t: (float(lo[i]), float(hi[i])) for t, i in ix.items()}
+
+
 def build_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming: dict, live_dir: Path) -> dict:
     from nflelo.ml import live  # pandas-only module; no ML packages needed (decision D5)
 
@@ -591,6 +619,13 @@ def build_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming:
     fallback = p_model.isna()
     p_model[fallback] = p_elo.reindex(p_model.index)[fallback]
     proj = live.projected_wins(reg, p_model, p_elo)
+    rt = todo.assign(home=[live.franchise(c, int(y)) for c, y in zip(todo["home_team"], todo["season"])],
+                     away=[live.franchise(c, int(y)) for c, y in zip(todo["away_team"], todo["season"])])
+    base = {r.team: r.w + 0.5 * r.t for r in proj.itertuples()}
+    mfile = live_dir / f"margin_{season}.json"
+    sigma = float(json.loads(mfile.read_text())["fit"]["sigma"]) if mfile.exists() else RANGE_SIGMA
+    rng_model = win_ranges(rt, p_model, base, sigma)
+    rng_elo = win_ranges(rt, p_elo.reindex(p_model.index), base, sigma)
     # The simulation is shown only once publish.json allows it (after the M4 sign-off); it still runs weekly.
     sim_published = live.publish_flags(live_dir)["publish_sim"]
     odds = build_playoff_odds(season, live_dir) if sim_published else None
@@ -601,6 +636,7 @@ def build_ml(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, upcoming:
         teams.append({"team": r.team, "w": int(r.w), "l": int(r.l), "t": int(r.t), "remaining": int(r.remaining),
                       "proj_model": float(r.proj_model), "proj_elo": float(r.proj_elo),
                       "wins_p10": x["wins_p10"] if x else None, "wins_p90": x["wins_p90"] if x else None,
+                      "range_model": list(rng_model[r.team]), "range_elo": list(rng_elo[r.team]),
                       "games": r.games})
 
     first_live = reg[reg["week"] == from_week].sort_values(["gameday", "gametime"])

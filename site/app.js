@@ -617,28 +617,33 @@
     insertSection(sec, 'week', 'Rest of season');
 
     var MAXW = 17;
-    function hasRange(r) { return r.wins_p10 != null && r.wins_p90 != null; }
-    function rangeText(r) { return winsText(r.wins_p10) + ' to ' + winsText(r.wins_p90); }
+    function hasRange(r) { return r.range_model != null && r.range_elo != null; }
+    function rangeOf(a) { return winsText(a[0]) + ' to ' + winsText(a[1]); }
     function x(v) { return (Math.max(0, Math.min(MAXW, v)) / MAXW * 100).toFixed(2) + '%'; }
+    function bar(cls, label, v, val, rg) {
+      return h('span', { class: 'wl ' + cls },
+        h('span', { class: 'wk', text: label }),
+        h('span', { class: 'wb' },
+          rg ? h('i', { class: 'rg', style: 'left:' + x(rg[0]) + ';width:' + x(rg[1] - rg[0]) }) : null,
+          h('i', { class: 'fl', style: 'width:' + x(v) })),
+        h('span', { class: 'wv', text: val }));
+    }
     function row(r) {
-      var t = byTeam[r.team], base = r.w + r.t / 2, record = rec(r.w, r.l, r.t);
+      var t = byTeam[r.team], base = r.w + r.t / 2, record = rec(r.w, r.l, r.t), rg = hasRange(r);
       var summary = h('summary', {},
-        h('span', { class: 'sr', text: t.name + ', ' + record + '. Projected ' + f1(r.proj_model) + ' wins by the model, ' + f1(r.proj_elo) + ' by Elo' + (hasRange(r) ? ', likely range ' + rangeText(r) + ' wins' : '') + ', ' + plural(r.remaining, 'game', 'games') + ' left. Show remaining games.' }),
-        h('span', { class: 'abbr', 'aria-hidden': 'true', text: r.team }),
+        h('span', { class: 'sr', text: t.name + ', ' + record + '. Projected ' + f1(r.proj_model) + ' wins by the model' + (rg ? ' (likely ' + rangeOf(r.range_model) + ')' : '') + ', ' + f1(r.proj_elo) + ' by Elo' + (rg ? ' (likely ' + rangeOf(r.range_elo) + ')' : '') + ', ' + plural(r.remaining, 'game', 'games') + ' left. Show remaining games.' }),
+        h('span', { class: 'who', 'aria-hidden': 'true' }, h('span', { class: 'abbr', text: r.team }), h('span', { class: 'meta', text: r.remaining + ' left' })),
         h('span', { class: 'mid', 'aria-hidden': 'true' },
-          h('span', { class: 'wb' },
-            hasRange(r) ? h('i', { class: 'rg', style: 'left:' + x(r.wins_p10) + ';width:' + x(r.wins_p90 - r.wins_p10) }) : null,
-            h('i', { class: 'so', style: 'width:' + x(base) }),
-            h('i', { class: 'pj', style: 'left:' + x(base) + ';width:' + x(r.proj_model - base) }),
-            h('i', { class: 'et', style: 'left:' + x(r.proj_elo) })),
-          h('span', { class: 'meta', text: record + ', ' + r.remaining + ' left' })),
-        h('span', { class: 'pv', 'aria-hidden': 'true' }, h('b', { text: f1(r.proj_model) }), h('small', { text: 'Elo ' + f1(r.proj_elo) })));
+          bar('w-so', 'Wins', base, record),
+          bar('w-md', 'Model', r.proj_model, f1(r.proj_model), rg ? r.range_model : null),
+          bar('w-el', 'Elo', r.proj_elo, f1(r.proj_elo), rg ? r.range_elo : null)));
       bindTip(summary, function () {
         return { title: t.name, rows: [
-          { value: f1(r.proj_model), label: 'model projection', cls: 'wpj' },
-          { value: f1(r.proj_elo), label: 'Elo projection', cls: 'wtk' },
-          hasRange(r) ? { value: rangeText(r), label: 'likely range (10th to 90th percentile)', cls: 'wrg' } : null,
-          { value: record, label: 'so far', cls: 'sm' },
+          { value: f1(r.proj_model), label: 'model projection', cls: 'wmd' },
+          { value: f1(r.proj_elo), label: 'Elo projection', cls: 'wel' },
+          hasRange(r) ? { value: rangeOf(r.range_model), label: 'model likely range', cls: 'wrg' } : null,
+          hasRange(r) ? { value: rangeOf(r.range_elo), label: 'Elo likely range', cls: 'wrg' } : null,
+          { value: record, label: 'so far', cls: 'wso' },
           { value: String(r.remaining), label: r.remaining === 1 ? 'game left' : 'games left' }] };
       });
       var games = h('div', { class: 'rs-games' }, h('table', {},
@@ -653,7 +658,7 @@
     }
 
     var ranged = R.teams.some(hasRange);
-    body.appendChild(legend([['wso', 'Wins so far'], ['wpj', 'Model projection'], ['wtk', 'Elo']].concat(ranged ? [['wrg', 'Likely range']] : [])));
+    body.appendChild(legend([['wso', 'Wins so far'], ['wmd', 'Model'], ['wel', 'Elo']].concat(ranged ? [['wrg', 'Likely range']] : [])));
     var grid = h('div', { class: 'divs' });
     DIVS.forEach(function (d) {
       var teams = R.teams.filter(function (r) { return byTeam[r.team] && byTeam[r.team].div === d; });
@@ -662,8 +667,8 @@
     });
     body.appendChild(grid);
     body.appendChild(h('p', { class: 'fnote', text: 'Bars run from 0 to 17 wins.' + (ranged ? ' Pale band: likely range, 8 in 10 simulated seasons.' : '') }));
-    body.appendChild(tableView('View projected wins as a table', [{ t: 'Team' }, { t: 'Record', r: 1, n: 1 }, { t: 'Left', r: 1, n: 1 }, { t: 'Model', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }].concat(ranged ? [{ t: 'Likely range', r: 1, n: 1 }] : []), function () {
-      return R.teams.map(function (r) { return [byTeam[r.team].name, rec(r.w, r.l, r.t), String(r.remaining), f1(r.proj_model), f1(r.proj_elo)].concat(ranged ? [hasRange(r) ? rangeText(r) : ''] : []); });
+    body.appendChild(tableView('View projected wins as a table', [{ t: 'Team' }, { t: 'Record', r: 1, n: 1 }, { t: 'Left', r: 1, n: 1 }, { t: 'Model', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }].concat(ranged ? [{ t: 'Model range', r: 1, n: 1 }, { t: 'Elo range', r: 1, n: 1 }] : []), function () {
+      return R.teams.map(function (r) { return [byTeam[r.team].name, rec(r.w, r.l, r.t), String(r.remaining), f1(r.proj_model), f1(r.proj_elo)].concat(ranged ? (hasRange(r) ? [rangeOf(r.range_model), rangeOf(r.range_elo)] : ['', '']) : []); });
     }));
   }
 
