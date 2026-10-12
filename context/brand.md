@@ -13,7 +13,7 @@
 ## Walker's overrides (2026-10-10), which take precedence over the brief below
 1. **Highlight word color:** the "ELO" headline word (and each page's one highlight word) uses **`#fbffa0`** (the accent), NOT the brief's darker `--accent-ink #a38400`. The darker shade looked like a bug to him. It must stay legible: the accent alone is 1.12:1 on the canvas, so it carries a **solid ink (#1c2126) text outline**. It sits on ONE CSS variable so it can switch to the blue (`#7db7eb`, also with the outline) in one line if the yellow doesn't read well.
 2. **Secondary is now pure white** (`#ffffff`). The old pinkish secondary (`#f0c5c6`) is removed everywhere.
-3. **Patterns on the site:** Walker's two favorites, **Pebble field** and **Posterised terrain**, used tastefully. The other three (aura, gradient panes, halftone) aren't used.
+3. **Patterns on the site:** **Posterised terrain** (hero) only. The pebble-field banners and the "One tile, one idea" footer tile were removed 2026-10-12 (Walker). The other patterns aren't used.
 
 ## Tokens
 | Token | Hex | Job |
@@ -84,7 +84,7 @@ Material variables:
 ## Patterns (exact, from Walker's engine)
 - **Engine:** `~/Desktop/Branding Designer/js/patterns/`. Load order: `engine.js`, `families/field.js`, `stripe.js`, `grid.js`, `texture.js`, `print2.js`, `op2.js`, `pixel2.js`, `organic2.js`, `glitch2.js`, `collage2.js`, `fit.js`.
 - **INKS:** `Patterns.inksFor({"canvas":"#eaecee","ink":"#1c2126","primary":"#7db7eb","secondary":"#ffffff","accent":"#fbffa0"}, "brand", {"tints":false})`, with seed `brand`. Both are raster, rendered via `Patterns.render` in a browser canvas.
-- **Pebble field, card texture:** `render('pebbles', {"size":1,"gap":0.35,"erode":0.45,"mode":"mixed","lit":0.6,"scale":1,"grain":0.25,"tints":false,"tone":1}, INKS, "brand", …)`, PNG 1x (1280x720), cover. At most one textured card per view, with text on a solid plate.
+- **Pebble field, card texture (not used on the site since 2026-10-12):** `render('pebbles', {"size":1,"gap":0.35,"erode":0.45,"mode":"mixed","lit":0.6,"scale":1,"grain":0.25,"tints":false,"tone":1}, INKS, "brand", …)`, PNG 1x (1280x720), cover. At most one textured card per view, with text on a solid plate.
 - **Posterised terrain, hero background:** `render('terrain', {"levels":6,"pix":0.5,"dither":0.6,"style":"hills","scale":1,"grain":0.08,"tints":false,"tone":1}, INKS, "brand", …)`, PNG 2x (2560x1440), cover. One per page, with text on a solid plate.
 
 ## Do

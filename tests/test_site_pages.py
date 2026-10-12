@@ -135,22 +135,21 @@ def test_pages_use_only_brief_hexes_and_one_pattern_hero(page):
     assert {h.lower() for h in re.findall(r"#[0-9a-fA-F]{6}\b", html)} <= BRIEF_HEXES
     heroes = re.findall(r'class="[^"]*hero-art (pat-[a-z]+)', html)
     assert heroes == ["pat-terrain"]                         # posterised terrain hero, one per page
-    assert html.count("pat-pebbles") == 1                    # one pebble-field textured tile
-    for gone in ("pat-aura", "pat-band", "pat-halftone"):
+    for gone in ("pat-aura", "pat-band", "pat-halftone", "pat-pebbles", "band-wrap", "One tile, one idea"):
         assert gone not in html
     assert html.count('class="b-tag"') <= 1
 
 
 def test_raster_pattern_assets_exist_at_the_brief_sizes():
     import struct
-    for name, size in {"hero-terrain.png": (2560, 1440), "tex-pebbles.png": (1280, 720)}.items():
+    for name, size in {"hero-terrain.png": (2560, 1440)}.items():
         head = (SITE / "assets" / name).read_bytes()[:24]
         assert head[:8] == b"\x89PNG\r\n\x1a\n"
         assert struct.unpack(">II", head[16:24]) == size, name
 
 
 def test_retired_brutalist_assets_are_gone_and_all_assets_are_used():
-    for old in ("hero-flow.svg", "pattern-glyphgrid.svg", "pattern-halftone.svg", "hero-aura.png", "band-gradpanes.svg", "tile-halftone.svg"):
+    for old in ("hero-flow.svg", "pattern-glyphgrid.svg", "pattern-halftone.svg", "hero-aura.png", "band-gradpanes.svg", "tile-halftone.svg", "tex-pebbles.png"):
         assert not (SITE / "assets" / old).exists()
     css = read("brand.css")
     for asset in (SITE / "assets").iterdir():

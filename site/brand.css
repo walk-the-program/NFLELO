@@ -192,7 +192,6 @@
 
 /* ---- pattern materials. Text never sits on a pattern: it sits on a tile plate. ---- */
 .pat-terrain { background: var(--canvas) url("assets/hero-terrain.png") center / cover no-repeat; }
-.pat-pebbles { background: var(--canvas) url("assets/tex-pebbles.png") center / cover no-repeat; }
 /* a plate carries text over a pattern: a sub-level tile, so radius 18 */
 .plate { background: var(--ab-tile); color: var(--ink); border-radius: var(--r-sub); box-shadow: var(--ab-shadow); }
 
