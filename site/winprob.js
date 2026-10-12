@@ -30,14 +30,14 @@
 
   function renderHero() {
     var H = W.headline, d = H.ours_minus_nflfastr, G = W.games, top = W.games_by_excitement[0];
-    setText('hero-line', 'Our win probability beats nflfastR\'s public model on 2020 to 2025: Brier ' + H.brier_ours.toFixed(4) + ' against ' + H.brier_nflfastr.toFixed(4) + ' (difference ' + signed(d.diff, 4) + ', 95% interval ' + signed(d.lo, 4) + ' to ' + signed(d.hi, 4) + '), with no betting-market input.');
-    setText('hero-deck', 'Pick any completed ' + W.season + ' game and watch each team\'s chance of winning move snap by snap. The model reads the game state and a pregame strength estimate, nothing from the betting market.');
+    setText('hero-line', 'Our win probability beats nflfastR: Brier ' + H.brier_ours.toFixed(4) + ' vs ' + H.brier_nflfastr.toFixed(4) + ' (' + signed(d.diff, 4) + ', 95% CI ' + signed(d.lo, 4) + ' to ' + signed(d.hi, 4) + ').');
+    setText('hero-deck', 'Pick a ' + W.season + ' game. Watch win probability move snap by snap.');
     var swingMax = G.reduce(function (a, g) { return !a || g.swing.abs > a.swing.abs ? g : a; }, null);
     N.heroTiles([
-      { label: 'Games charted', big: commas(G.length), bar: W.updated_through.week / 18, barText: 'Through week ' + W.updated_through.week + ' of 18', sub: 'completed ' + W.season + ' regular-season games, through week ' + W.updated_through.week + ' (last game ' + W.updated_through.last_game_date + ')' },
-      { label: 'Most exciting game', big: top ? top.away + ' at ' + top.home : 'n/a', sub: top ? 'Week ' + top.week + ', final ' + top.away_score + '-' + top.home_score + ', excitement index ' + top.excitement.toFixed(1) : '' },
-      { label: 'Biggest single swing', big: swingMax ? pts(swingMax.swing.abs) + ' pts' : 'n/a', sub: swingMax ? 'win probability on one play, ' + matchup(swingMax) + ', week ' + swingMax.week + ', ' + swingMax.swing.clock : '' },
-      { label: 'Test against nflfastR', big: signed(d.diff, 4), sub: 'Brier on ' + commas(H.plays) + ' plays, 2020 to 2025. Negative is better.' }
+      { label: 'Games charted', big: commas(G.length), bar: W.updated_through.week / 18, barText: 'Through week ' + W.updated_through.week + ' of 18', sub: 'completed ' + W.season + ' games, last on ' + W.updated_through.last_game_date },
+      { label: 'Most exciting game', big: top ? top.away + ' at ' + top.home : 'n/a', sub: top ? 'Week ' + top.week + ', final ' + top.away_score + '-' + top.home_score + ', index ' + top.excitement.toFixed(1) : '' },
+      { label: 'Biggest single swing', big: swingMax ? pts(swingMax.swing.abs) + ' pts' : 'n/a', sub: swingMax ? 'one play, ' + matchup(swingMax) + ', week ' + swingMax.week + ', ' + swingMax.swing.clock : '' },
+      { label: 'Test against nflfastR', big: signed(d.diff, 4), sub: 'Brier, ' + commas(H.plays) + ' plays, 2020 to 2025' }
     ]);
     N.licenseUI(W.license);
   }
@@ -104,21 +104,21 @@
     if (!win) line = 'Week ' + g.week + ': ' + matchup(g) + ' ended tied ' + g.away_score + '-' + g.home_score;
     else {
       var lose = win === g.home ? g.away : g.home, ws = Math.max(g.home_score, g.away_score), ls = Math.min(g.home_score, g.away_score);
-      line = 'Week ' + g.week + ': ' + win + (lowest < 0.25 ? ' came back from ' + Math.round(lowest * 100) + '% win probability to beat ' + lose + ' ' + ws + '-' + ls : ' beat ' + lose + ' ' + ws + '-' + ls + ' and never fell below ' + Math.round(lowest * 100) + '% win probability');
+      line = 'Week ' + g.week + ': ' + win + (lowest < 0.25 ? ' rallied from ' + Math.round(lowest * 100) + '% to beat ' + lose + ' ' + ws + '-' + ls : ' beat ' + lose + ' ' + ws + '-' + ls + ', never below ' + Math.round(lowest * 100) + '%');
     }
     setText('chart-h', line);
-    ui.head.textContent = N.teamName(g.away) + ' at ' + N.teamName(g.home) + ', ' + g.date + '. Home win probability by game time; the line starts from the pregame estimate and ends at the result.';
+    ui.head.textContent = N.teamName(g.away) + ' at ' + N.teamName(g.home) + ', ' + g.date;
     var sw = g.swing;
     clear(ui.note);
-    ui.note.append(h('b', { text: 'Biggest swing: ' }), sw.clock + ', ' + sw.offense + ' ball. ' + g.home + '\'s win probability moved from ' + pct(sw.wp_before) + ' to ' + pct(sw.wp_after) + ' (' + signed(sw.delta_home * 100, 1) + ' points). ' + sw.desc);
+    ui.note.append(h('b', { text: 'Biggest swing: ' }), sw.clock + '. ' + g.home + ' ' + pct(sw.wp_before) + ' to ' + pct(sw.wp_after) + ' (' + signed(sw.delta_home * 100, 1) + ' points). ' + sw.desc);
     ui.ot.hidden = !g.overtime;
-    ui.ot.textContent = g.overtime ? 'This game went to overtime. Overtime is not modelled: the line stops at the end of regulation and jumps to the result.' : '';
+    ui.ot.textContent = g.overtime ? 'Overtime is not modelled; the line stops at regulation.' : '';
     clear(ui.facts);
     [
       ['Final', g.away + ' ' + g.away_score + ', ' + g.home + ' ' + g.home_score, 'Week ' + g.week + (g.overtime ? ', overtime' : '')],
-      ['Pregame, ' + g.home + ' to win', pct(g.pregame_home, 0), 'A4s game model, logged before kickoff'],
+      ['Pregame, ' + g.home + ' to win', pct(g.pregame_home, 0), 'A4s model, before kickoff'],
       ['Excitement index', g.excitement.toFixed(1), rank ? 'rank ' + rank.rank + ' of ' + W.games.length + ' this season' : ''],
-      [win ? win + '\'s lowest point' : 'Lowest point', g.winner_min_wp == null ? 'n/a' : pct(g.winner_min_wp, 0), win ? 'win probability, a comeback measure' : 'no winner'],
+      [win ? win + '\'s lowest point' : 'Lowest point', g.winner_min_wp == null ? 'n/a' : pct(g.winner_min_wp, 0), win ? 'comeback measure' : 'no winner'],
       ['Biggest swing', pts(sw.abs) + ' pts', sw.clock]
     ].forEach(function (f) { ui.facts.appendChild(h('div', {}, h('dt', { text: f[0] }), h('dd', { class: 'num' }, f[1], h('small', { text: f[2] })))); });
     drawChart();
@@ -225,16 +225,15 @@
       sortHead('excitement'), sortHead('swing', 'r hide-m'), sortHead('low', 'r hide-m'));
     ui.more = h('button', { type: 'button', class: 'btn xmore' });
     ui.more.addEventListener('click', function () { showAll = !showAll; renderLeaderRows(); });
-    body.appendChild(h('p', { class: 'fnote', style: 'margin-top:0', text: 'Through week ' + W.updated_through.week + ': ' + commas(L.length) + ' games, sorted by the column marked. The excitement index is the sum of the snap-to-snap changes in home win probability; the biggest swing is the largest single change; the winner\'s low point is the lowest win probability the eventual winner had.' }));
+    body.appendChild(h('p', { class: 'fnote', style: 'margin-top:0', text: 'Through week ' + W.updated_through.week + ': ' + commas(L.length) + ' games.' }));
     ui.xseg = N.seg('Sort the games', Object.keys(SORTS).map(function (k) { return { value: k, label: SORTS[k].label }; }), sortKey, function (v) { sortKey = v; showAll = false; renderLeaderRows(); }, 'xseg');
     body.appendChild(ui.xseg.el);
     body.appendChild(h('div', { style: 'margin-top:18px' }, ui.heads, ui.rows));
     body.appendChild(ui.more);
     var hb = W.updated_through.held_back || [];
     if (hb.length) {
-      body.appendChild(h('p', { class: 'fnote heldback', text: 'Held back this update: ' + hb.map(heldName).join(', ') + '. ' + (hb.length === 1 ? 'It is' : 'They are') + ' final in nflverse but wait for the rating update that supplies the pregame input, so ' + (hb.length === 1 ? 'it appears' : 'they appear') + ' on the next update.' }));
+      body.appendChild(h('p', { class: 'fnote heldback', text: 'Held back: ' + hb.map(heldName).join(', ') + '. Added next update.' }));
     }
-    body.appendChild(h('p', { class: 'fnote', text: 'Excitement measures movement in the model\'s estimate, not quality of play or how close the score was.' }));
     renderLeaderRows();
   }
 
@@ -284,30 +283,26 @@
   function buildResult() {
     var body = done('result-body'), H = W.headline, d = H.ours_minus_nflfastr;
     clear(body);
-    setText('result-h', 'Ours beat nflfastR on seasons it never saw');
+    setText('result-h', 'Ours beats nflfastR on unseen seasons');
     var host = h('div', { class: 'chart ci' });
     body.appendChild(h('div', {},
-      h('p', { class: 'stat-note', style: 'margin-top:0', text: H.plain }),
       well(host),
-      h('p', { class: 'fnote', text: 'Brier score difference, ours minus nflfastR\'s public win probability, on ' + commas(H.plays) + ' plays from ' + commas(d.clusters) + ' games (' + H.window + '). The Brier score is the average squared miss of the win probability, so negative means ours is closer. The interval is 95%, resampled by game.' }),
+      h('p', { class: 'fnote', text: 'Brier difference, ours minus nflfastR. Negative is better. ' + commas(H.plays) + ' plays, ' + commas(d.clusters) + ' games, 95% interval.' }),
       h('dl', { class: 'statrow' },
         stat('Brier, ours', H.brier_ours.toFixed(4), 'lower is better'),
-        stat('Brier, nflfastR', H.brier_nflfastr.toFixed(4), 'public model, same plays'),
+        stat('Brier, nflfastR', H.brier_nflfastr.toFixed(4), 'same plays'),
         stat('Difference', signed(d.diff, 4), '95% interval ' + signed(d.lo, 4) + ' to ' + signed(d.hi, 4)),
-        stat('Calibration error (ECE)', H.ece_ours.toFixed(4), 'how far stated chances sit from results'))));
+        stat('Calibration error (ECE)', H.ece_ours.toFixed(4), 'stated chance vs result'))));
     watch(host, function () { N.ciChart(host, [{ label: 'Ours minus nflfastR', ci: d, series: 's3' }], { decimals: 4, axis: 'Brier score, ours minus nflfastR', measure: 'Brier difference', title: 'Ours minus nflfastR' }); });
   }
   function stat(label, value, small) { return h('div', {}, h('dt', { text: label }), h('dd', { class: 'num' }, value, h('small', { text: small }))); }
 
   function buildHow() {
     var dyn = $('#how-dyn'), F = W.model_fit, D = W.definitions;
-    dyn.appendChild(h('div', {},
-      h('h3', { class: 'sub-h', text: 'The model' }),
-      h('p', { class: 'stat-note', text: 'Fit on ' + F.trained_on[0] + ' to ' + F.trained_on[1] + ' plays (' + commas(F.n_train) + ' snaps) as a monotone gradient-boosted model, frozen before the ' + W.season + ' season. Inputs: ' + F.inputs + '. Updated through week ' + W.updated_through.week + '.' })));
-    dyn.appendChild(N.caveatBox(W.caveats, 'Caveats'));
+    dyn.appendChild(h('p', { class: 'stat-note', style: 'margin-top:0', text: 'Fit on ' + F.trained_on[0] + ' to ' + F.trained_on[1] + ' plays (' + commas(F.n_train) + ' snaps), frozen before the ' + W.season + ' season.' }));
+    dyn.appendChild(N.caveatBox(['Overtime is not modelled.'], 'Caveat'));
     dyn.appendChild(h('dl', { class: 'gloss' },
-      h('h3', { text: 'What each number means' }),
-      Object.keys(D).map(function (k) { return h('div', {}, h('dt', { text: k }), h('dd', { text: D[k] })); })));
+      [['Excitement index', 'sum of snap-to-snap win probability changes'], ['Biggest swing', 'largest single-play change'], ['Winner\'s low point', 'lowest win chance the winner had'], ['Pregame', 'A4s win chance before kickoff']].map(function (k) { return h('div', {}, h('dt', { text: k[0] }), h('dd', { text: k[1] })); })));
   }
 
   // ------------------------------------------------------------------ boot

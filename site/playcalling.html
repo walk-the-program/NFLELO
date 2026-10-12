@@ -40,7 +40,7 @@
           <p class="page-kicker">NFLELO &rarr; Models &rarr; Play calling</p>
           <h1 class="page-title" id="page-title">Play <span class="hl">calling</span></h1>
           <p class="hero-line" id="hero-line">Loading results</p>
-          <p class="hero-deck" id="hero-deck">On first and second down, which mix of run or pass and personnel group gained the most expected points in each situation, estimated from earlier seasons and tested on later ones.</p>
+          <p class="hero-deck" id="hero-deck">Best run or pass and personnel group, by situation.</p>
           <p class="tagline"><span class="b-tag">Machine Learning applied to Football</span></p>
         </div>
       </section>
@@ -61,7 +61,6 @@
     <div class="sec-copy">
       <p class="kicker"><span class="kn">01</span><span class="kt">The test</span></p>
       <h2 class="headline" id="ope-h">The test</h2>
-      <p class="deck">The estimated gain from following the recommendations on seasons the method never saw, with a placebo and two stress tests.</p>
     </div>
   </header>
 <div id="ope-body" class="body loose" aria-busy="true"><p class="note">Loading</p></div>
@@ -75,7 +74,6 @@
     <div class="sec-copy">
       <p class="kicker"><span class="kn">02</span><span class="kt">Situation grid</span></p>
       <h2 class="headline" id="cells-h">Situation grid</h2>
-      <p class="deck">60 situations: five down-and-distance groups, four field zones and three score states. Choose a score state and a season. The recommendation for a season uses earlier seasons only.</p>
     </div>
   </header>
 <div id="cells-body" class="tile-m tile-stage body" aria-busy="true"><p class="note">Loading</p></div>
@@ -89,14 +87,13 @@
     <div class="sec-copy">
       <p class="kicker"><span class="kn">03</span><span class="kt">Team view</span></p>
       <h2 class="headline" id="teams-h">Team view, 2025</h2>
-      <p class="deck">Descriptive only: how often each team passed in the situations where 2025's recommendation was a pass. This is observed play calling, not a model evaluation.</p>
     </div>
   </header>
 <div id="teams-body" class="tile-m body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </div>
   </section>
-  <div class="wrap band-wrap"><div class="band pat-pebbles"><p class="plate">An observational estimate: read the caveats before the numbers.</p></div></div>
+  <div class="wrap band-wrap"><div class="band pat-pebbles"><p class="plate">Tested on seasons the method never saw.</p></div></div>
   <section class="sec" id="how" aria-labelledby="how-h" tabindex="-1">
   <div class="wrap">
   <div class="board sec-board">
@@ -108,8 +105,7 @@
   </header>
 <div class="method how">
       <div>
-        <p><b>What it does.</b> Teams call plays based on things the data partly captures. The method estimates, for each situation, what the average play would have gained had the team called each candidate action, by correcting for how often teams chose each action (a doubly robust, "AIPW", estimate). An action is a personnel group plus run or pass.</p><p><b>What the gain means.</b> Gain is expected points added per play, compared with the teams' current mix on the same plays. A situation is marked "clear best" only when the best action's interval sits above zero. "No clear best" means the data cannot rank the actions, not that they are equal.</p><p><b>The test.</b> Recommendations for each season come from earlier seasons only. The policy is then scored on the later season by off-policy evaluation. A placebo with shuffled actions should show no gain, and it does not.</p><p><b>The limits.</b> This is an observational estimate. Read the caveats at the top of the page before using any single number.</p>
-        <div id="how-dyn" class="how-dyn"></div>
+        <p>For each situation, the method estimates the gain of every run or pass and personnel option, using earlier seasons only. Gain is EPA (expected points added) per play.</p>
       </div>
     </div>
   </div>
@@ -122,9 +118,9 @@
     <div class="tile-m foot-art foot-plain"><p class="motto plate">One tile, one idea.</p></div>
     <div class="tile-m foot-links">
       <p class="foot-dot"><i aria-hidden="true"></i>NFLELO, Machine Learning applied to Football</p>
-      <p id="credit">Data: nflverse (CC BY 4.0); participation data from NFL Next Gen Stats via nflverse (2016-2022) and FTN Data via nflverse (2023+). Numbers on this page derive from participation data and are released under CC BY-SA 4.0.</p>
-      <p>Independent project, not affiliated with the NFL or any team.</p>
-      <p><a href="index.html">Ratings and the weekly ladder</a></p>
+      <p id="credit">Data: nflverse (CC BY 4.0); participation data from NFL Next Gen Stats (2016-2022) and FTN Data (2023+). Numbers on this page: CC BY-SA 4.0.</p>
+      <p>Independent. Not affiliated with the NFL.</p>
+      <p><a href="index.html">Ratings</a></p>
       <p><a href="models.html">All models</a></p>
       <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
     </div>

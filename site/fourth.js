@@ -30,27 +30,20 @@
   function renderStatus() {
     var body = done('status-body'), S = F.status;
     clear(body);
-    var comps = F.status.components_status || {};
-    var labels = { win_probability: 'Win probability', field_goal: 'Field goal', punt: 'Punt', conversion_v1: 'Conversion, first engine', conversion_v2ad: 'Conversion, current engine' };
     body.appendChild(h('span', { class: 'vchip v-negative', text: 'Under test' }));
     body.appendChild(h('div', {},
-      h('p', { text: S.plain }),
-      h('p', { text: 'First scored run: ' + S.earliest_run + ' at the earliest. Pooled with 2027 as a secondary check: ' + S.pooled_2026_2027_secondary_earliest + ' at the earliest. ' + S.why }),
-      h('ul', { class: 'comp', 'aria-label': 'Status of each component' }, Object.keys(comps).map(function (k) {
-        var t = comps[k], cls = /fail/.test(t) ? 'v-fail' : /pending/.test(t) ? 'v-shadow' : 'v-pass';
-        return h('li', {}, h('span', { class: 'vchip ' + cls, text: /fail/.test(t) ? 'Failed' : /pending/.test(t) ? 'Pending' : 'Passed' }), (labels[k] || k) + ': ' + t);
-      }))));
+      h('p', { text: 'Under test until ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][Number(S.earliest_run.slice(5, 7)) - 1] + ' ' + S.earliest_run.slice(0, 4) + '.' })));
   }
 
   function renderHero() {
     var L = F.live, s = L.summary, a = F.headline.holdout_audit_v1;
-    setText('hero-line', 'Model-estimated: through week ' + L.updated_through.week + ' of ' + F.season + ', teams chose what the model prefers on ' + pct(s.matched_share, 0) + ' of ' + commas(s.fourth_downs) + ' fourth downs, giving up an estimated ' + s.wp_lost_per_team_game.toFixed(3) + ' wins per team-game. In 2020 to 2025 it was ' + pct(a.matched_share, 0) + ' and ' + a.wp_lost_per_team_game.toFixed(3) + ', mostly by punting.');
-    setText('hero-deck', 'For each yard line and distance, which option gives the team the best chance to win: go for it, kick a field goal or punt. Every number on this page is model-estimated, and the conversion model is still under a pre-registered test.');
+    setText('hero-line', 'Model-estimated: teams chose the model\'s pick on ' + pct(s.matched_share, 0) + ' of ' + commas(s.fourth_downs) + ' fourth downs, giving up ' + s.wp_lost_per_team_game.toFixed(3) + ' wins per team-game (2020 to 2025: ' + pct(a.matched_share, 0) + ', ' + a.wp_lost_per_team_game.toFixed(3) + ').');
+    setText('hero-deck', 'Go, kick or punt: the best option by yard line and distance.');
     N.heroTiles([
-      { label: 'Matched the model', big: pct(s.matched_share, 0), bar: s.matched_share, barText: 'Teams matched the model on ' + pct(s.matched_share, 0) + ' of fourth downs', sub: 'of ' + commas(s.fourth_downs) + ' fourth downs in ' + commas(s.games) + ' games. Model-estimated.' },
-      { label: 'Close calls', big: pct(s.tossup_share, 0), sub: 'toss-ups: the best option beats the second best by under ' + F.tossup_rule.margin_below + ' win probability. Model-estimated.' },
-      { label: 'Win probability given up', big: s.wp_lost_per_team_game.toFixed(3), sub: 'wins per team-game, ' + s.wp_lost_total.toFixed(1) + ' in total, by not taking the model\'s best option. Model-estimated.' },
-      { label: '2020 to 2025 audit', big: a.wp_lost_per_team_game.toFixed(3), sub: 'wins per team-game over ' + commas(a.fourth_downs) + ' fourth downs; ' + a.wp_lost_by_choice.punt.toFixed(0) + ' of ' + a.wp_lost_total.toFixed(0) + ' wins from punts. Model-estimated, first engine.' }
+      { label: 'Matched the model', big: pct(s.matched_share, 0), bar: s.matched_share, barText: 'Through week ' + L.updated_through.week, sub: 'of ' + commas(s.fourth_downs) + ' fourth downs. Model-estimated.' },
+      { label: 'Close calls', big: pct(s.tossup_share, 0), sub: 'toss-ups, margin under ' + F.tossup_rule.margin_below + '. Model-estimated.' },
+      { label: 'Win probability given up', big: s.wp_lost_per_team_game.toFixed(3), sub: 'wins per team-game, ' + s.wp_lost_total.toFixed(1) + ' total. Model-estimated.' },
+      { label: '2020 to 2025 audit', big: a.wp_lost_per_team_game.toFixed(3), sub: 'wins per team-game, ' + commas(a.fourth_downs) + ' fourth downs; ' + a.wp_lost_by_choice.punt.toFixed(0) + ' of ' + a.wp_lost_total.toFixed(0) + ' wins from punts. Model-estimated.' }
     ]);
     N.licenseUI(F.license);
   }
@@ -91,7 +84,7 @@
         var sw = h('input', { type: 'checkbox', class: 'b-switch', id: 'mark-toss', role: 'switch' });
     sw.addEventListener('change', function () { marks = sw.checked; if (ui.svg) ui.svg.classList.toggle('tossups', marks); });
     ui.state = h('p', { class: 'fnote', style: 'margin-top:12px' });
-    ui.detail = h('div', { class: 'pdetail fx-detail', 'aria-live': 'polite', text: 'Move over a square, tap one, or use the arrow keys on the chart to read its numbers.' });
+    ui.detail = h('div', { class: 'pdetail fx-detail', 'aria-live': 'polite', text: 'Hover, tap or use arrow keys on a square.' });
     ui.heat = h('div', { class: 'chart hm-wrap' });
     ui.tv = N.tableViewLive('View this chart as a table',
       function () { return [{ t: 'Yard line' }, { t: 'To go', r: 1, n: 1 }, { t: 'Best' }, { t: 'Margin (points)', r: 1, n: 1 }, { t: 'Go win prob.', r: 1, n: 1 }, { t: 'Field goal win prob.', r: 1, n: 1 }, { t: 'Punt win prob.', r: 1, n: 1 }, { t: 'P(convert)', r: 1, n: 1 }, { t: 'P(make kick)', r: 1, n: 1 }, { t: 'Toss-up' }]; },
@@ -107,7 +100,7 @@
       h('div', {}, h('p', { class: 'label', style: 'margin-bottom:8px', text: 'Game state' }), ui.preset.el),
       h('label', { class: 'b-toggle', for: 'mark-toss', style: 'flex-direction:row-reverse;justify-content:flex-end' }, h('span', { text: 'Mark toss-ups with a dot' }), sw)));
     body.appendChild(ui.state);
-    body.appendChild(h('p', { class: 'fnote' }, me(), ' ' + C.label + '. Squares are colored by the best option: a pale square is a toss-up, an outlined square a lean, a solid square a clear call. Held fixed: ' + C.as_of.replace(/^week \d+ of \d+: /, '') + '.'));
+    body.appendChild(h('p', { class: 'fnote' }, me(), ' Point estimates. Held fixed: ' + C.as_of.replace(/^week \d+ of \d+: /, '') + '.'));
     body.appendChild(h('div', { style: 'margin-top:14px' },
       h('div', { class: 'scale', style: 'margin:0 0 14px' },
         h('span', { class: 'sw' }, h('i', { class: 'sw-go' }), 'Go for it'),
@@ -128,8 +121,8 @@
     for (var i = 0; i < p.close_call.length; i++) if (p.close_call[i]) close++;
     var counts = { go: 0, fg: 0, punt: 0 };
     p.best.forEach(function (b) { counts[b]++; });
-    ui.state.textContent = p.label + ' (averaged over ' + p.state.averaged_over + '). Of ' + p.best.length + ' squares, ' + counts.go + ' favor going, ' + counts.fg + ' a field goal and ' + counts.punt + ' a punt; ' + close + ' are toss-ups. Model-estimated.';
-    setText('chart-h', 'Go, kick or punt: the model\'s best fourth-down option by yard line and distance');
+    ui.state.textContent = p.label + '. Of ' + p.best.length + ' squares, ' + counts.go + ' favor going, ' + counts.fg + ' a field goal, ' + counts.punt + ' a punt; ' + close + ' are toss-ups. Model-estimated.';
+    setText('chart-h', 'Go, kick or punt: the best option by yard line and distance');
   }
 
   function drawHeat() {
@@ -160,7 +153,7 @@
     });
     sv('text', { class: 'tick a-start', x: m.l, y: Ht - 10, text: 'Own goal line', style: 'fill:var(--muted)' }, svg);
     sv('text', { class: 'tick a-end', x: Wd - m.r, y: Ht - 10, text: 'Opponent\'s goal line', style: 'fill:var(--muted)' }, svg);
-    sv('text', { class: 'tick a-mid', x: m.l + iw / 2, y: Ht - 10, text: 'Field position (yards from the goal line the offense is attacking)', style: 'fill:var(--muted)' }, svg);
+    sv('text', { class: 'tick a-mid', x: m.l + iw / 2, y: Ht - 10, text: 'Field position', style: 'fill:var(--muted)' }, svg);
 
     var sel = null;
     function mark(yl, dd) {
@@ -220,17 +213,17 @@
   function buildLive() {
     var body = done('ytd-body'), L = F.live, s = L.summary;
     clear(body);
-    setText('ytd-h', 'Teams matched the model on ' + pct(s.matched_share, 0) + ' of fourth downs, and about ' + pct(s.tossup_share, 0) + ' were toss-ups');
+    setText('ytd-h', 'Teams matched the model on ' + pct(s.matched_share, 0) + ' of fourth downs; ' + pct(s.tossup_share, 0) + ' were toss-ups');
     var hb = L.updated_through.held_back || [];
     body.appendChild(h('div', {},
       h('dl', { class: 'statrow', style: 'margin-top:0' },
-        stat('Fourth downs', commas(s.fourth_downs), commas(s.games) + ' games through week ' + L.updated_through.week + ', last on ' + L.updated_through.last_game_date),
+        stat('Fourth downs', commas(s.fourth_downs), commas(s.games) + ' games, last on ' + L.updated_through.last_game_date),
         stat('Matched the model', pct(s.matched_share, 1), 'model-estimated'),
-        stat('Toss-ups', pct(s.tossup_share, 1), 'model-estimated; margin under ' + F.tossup_rule.margin_below),
+        stat('Toss-ups', pct(s.tossup_share, 1), 'model-estimated'),
         stat('Win probability given up', s.wp_lost_total.toFixed(1) + ' wins', s.wp_lost_per_team_game.toFixed(3) + ' per team-game, model-estimated')),
       h('div', { class: 'mix', role: 'group', 'aria-label': 'What teams chose against what the model recommended, as counts' },
         mixRow('Teams chose', s.choices), mixRow('Model preferred', s.recommended)),
-      h('p', { class: 'fnote', text: 'Counts of what teams did are observed. What the model preferred, and everything about win probability, is model-estimated.' })));
+      h('p', { class: 'fnote', text: 'Team choices are observed; the rest is model-estimated.' })));
 
     // teams
     ui.teamBody = h('tbody');
@@ -245,7 +238,7 @@
     })));
     body.appendChild(h('div', { style: 'margin-top:48px' },
       h('h3', { class: 'sub-h', style: 'margin-top:0' }, 'Teams ', me()),
-      h('p', { class: 'fnote', style: 'margin-top:0', text: 'Sort by any column. Select a team to filter the plays below. "Went when it said go" is the share of fourth downs where the model preferred going and the team went for it; "clear calls" counts only those with a margin of at least ' + F.tossup_rule.margin_below + '. Every figure except the fourth-down counts is model-estimated.' }),
+      h('p', { class: 'fnote', style: 'margin-top:0', text: 'Select a team to filter the plays below. Model-estimated except fourth-down counts.' }),
       h('div', { class: 'tbl-wrap', style: 'margin-top:14px' }, h('table', { class: 'tmt', 'aria-label': 'Teams, model-estimated' }, ui.teamHead, ui.teamBody))));
     renderTeams();
 
@@ -264,8 +257,8 @@
       h('div', { class: 'pfilters' }, h('div', { class: 'field' }, h('label', { for: 'play-team', text: 'Team' }), h('div', { class: 'sel' }, ui.teamSel)), ui.modeSeg.el),
       ui.pcount, ui.plist, ui.pmore));
     renderPlays();
-    if (hb.length) body.appendChild(h('p', { class: 'fnote heldback', text: 'Held back this update: ' + hb.map(function (id) { var q = id.split('_'); return q.length === 4 ? 'week ' + Number(q[1]) + ', ' + q[2] + ' at ' + q[3] : id; }).join(', ') + '. Final in nflverse, waiting for the rating update; it appears next time.' }));
-    body.appendChild(h('p', { class: 'fnote', text: 'Ties, overtime, penalties and kneel-downs are excluded. Teams know things the model does not.' }));
+    if (hb.length) body.appendChild(h('p', { class: 'fnote heldback', text: 'Held back: ' + hb.map(function (id) { var q = id.split('_'); return q.length === 4 ? 'week ' + Number(q[1]) + ', ' + q[2] + ' at ' + q[3] : id; }).join(', ') + '. Added next update.' }));
+    body.appendChild(h('p', { class: 'fnote', text: 'Excludes ties, overtime, penalties and kneel-downs.' }));
   }
 
   function stat(label, value, small) { return h('div', {}, h('dt', { text: label }), h('dd', { class: 'num' }, value, h('small', { text: small }))); }
@@ -314,7 +307,7 @@
     });
     list.sort(function (a, b) { return b.week - a.week || a.game_id.localeCompare(b.game_id) || a.play_id - b.play_id; });
     var n = Math.min(playLimit, list.length);
-    ui.pcount.textContent = commas(list.length) + ' fourth downs' + (teamFilter ? ' for ' + N.teamName(teamFilter) : '') + (playMode === 'differed' ? ' where the team did something other than the model\'s best option' : playMode === 'tossup' ? ' that were toss-ups' : '') + '. Showing ' + n + ', newest week first. Model-estimated.';
+    ui.pcount.textContent = commas(list.length) + ' fourth downs' + (teamFilter ? ' for ' + N.teamName(teamFilter) : '') + (playMode === 'differed' ? ' where the team differed from the model' : playMode === 'tossup' ? ' that were toss-ups' : '') + '. Showing ' + n + ', newest first. Model-estimated.';
     clear(ui.plist);
     list.slice(0, n).forEach(function (o) {
       ui.plist.appendChild(h('details', { class: 'prow' },
@@ -323,14 +316,14 @@
           h('span', { class: 'ps' }, o.team + (o.home ? ' vs ' : ' at ') + o.opponent, h('small', { text: o.clock + ', 4th and ' + o.ydstogo + ' at ' + N.fieldLabel(o.yardline_100) + ', ' + scoreText(o.score_diff) })),
           h('span', { class: 'pc' }, h('b', {}, cat(o.choice), CHOICE[o.choice]), o.matched ? null : h('span', { class: 'arrow', text: 'model prefers' }), o.matched ? null : h('b', {}, cat(o.recommended), CHOICE[o.recommended]),
             o.tossup ? h('span', { class: 'tag-fill', text: 'Toss-up' }) : null,
-            h('small', { text: (o.matched ? 'Matched the model' : 'Team chose ' + CHOICE[o.choice].toLowerCase() + '; the model preferred ' + CHOICE[o.recommended].toLowerCase()) })),
+            h('small', { text: (o.matched ? 'Matched the model' : 'Chose ' + CHOICE[o.choice].toLowerCase() + '; model preferred ' + CHOICE[o.recommended].toLowerCase()) })),
           h('span', { class: 'pg num' }, pts(o.wp_given_up) + ' pts', h('small', { text: 'given up, model-estimated' }))),
         h('div', { class: 'prow-body' },
           h('div', { class: 'opts' },
-            h('span', { class: 'opt-go' }, 'Go: ', h('b', { text: pct(o.wp_go) }), ' win probability, ' + pct(o.p_convert, 0) + ' to convert'),
+            h('span', { class: 'opt-go' }, 'Go: ', h('b', { text: pct(o.wp_go) }), ' win, ' + pct(o.p_convert, 0) + ' to convert'),
             h('span', { class: 'opt-fg' }, 'Field goal: ', h('b', { text: pct(o.wp_fg) }), ', ' + pct(o.p_fg_make, 0) + ' to make'),
             h('span', { class: 'opt-punt' }, 'Punt: ', h('b', { text: pct(o.wp_punt) }))),
-          h('span', {}, 'Margin between the best and second best: ' + pts(o.margin) + ' points' + (o.tossup ? ', a toss-up' : '') + '. Everything above is model-estimated.'),
+          h('span', {}, 'Margin ' + pts(o.margin) + ' points' + (o.tossup ? ', a toss-up' : '') + '. Model-estimated.'),
           h('span', { text: o.desc }))));
     });
     if (!list.length) ui.plist.appendChild(h('p', { class: 'note empty', text: 'No fourth downs match this filter.' }));
@@ -341,23 +334,21 @@
   // ------------------------------------------------------------------ method
 
   function buildHow() {
-    var dyn = $('#how-dyn'), a = F.headline.holdout_audit_v1, E = F.engine, D = F.definitions;
+    var dyn = $('#how-dyn'), a = F.headline.holdout_audit_v1, E = F.engine;
     dyn.appendChild(h('div', {},
-      h('h3', { class: 'sub-h', text: 'The 2020 to 2025 audit (first engine)' }),
-      h('p', { class: 'stat-note', text: 'Teams matched the model on ' + pct(a.matched_share, 0) + ' of ' + commas(a.fourth_downs) + ' fourth downs (' + pct(a.matched_share_clear_calls, 0) + ' of the clear calls) and gave up an estimated ' + a.wp_lost_per_team_game.toFixed(3) + ' wins per team-game, mostly by punting (model-estimated).' }),
+      h('h3', { class: 'sub-h', text: 'The 2020 to 2025 audit' }),
+      h('p', { class: 'stat-note', text: 'Matched on ' + pct(a.matched_share, 0) + ' of ' + commas(a.fourth_downs) + ' fourth downs (' + pct(a.matched_share_clear_calls, 0) + ' of clear calls). Model-estimated.' }),
       h('dl', { class: 'statrow' },
-        stat('Total given up', a.wp_lost_total.toFixed(1) + ' wins', 'across all teams, 2020 to 2025, model-estimated'),
+        stat('Total given up', a.wp_lost_total.toFixed(1) + ' wins', 'all teams, model-estimated'),
         stat('By punting', a.wp_lost_by_choice.punt.toFixed(1), 'wins, model-estimated'),
         stat('By kicking field goals', a.wp_lost_by_choice.fg.toFixed(1), 'wins, model-estimated'),
         stat('By going for it', a.wp_lost_by_choice.go.toFixed(1), 'wins, model-estimated'),
-        stat('Toss-ups', pct(a.tossup_share, 0), 'of fourth downs, with the first engine\'s 50-refit bands')),
-      h('p', { class: 'fnote', text: 'This audit used the first engine, which failed its conversion calibration test; it is context, not validation of the current engine. The win probability model behind it passed against nflfastR (Brier ' + F.headline.wp_model.brier_ours.toFixed(4) + ' against ' + F.headline.wp_model.brier_nflfastr.toFixed(4) + ').' })));
-    dyn.appendChild(h('div', {},
-      h('h3', { class: 'sub-h', text: 'The engine' }),
-      h('p', { class: 'stat-note', text: 'Candidate ' + E.engine.candidate + ' of ' + E.engine.name + ', frozen ' + E.engine.frozen_at.slice(0, 10) + '. ' + F.tossup_rule.plain })));
-    dyn.appendChild(N.caveatBox(F.caveats, 'Caveats'));
-    dyn.appendChild(h('dl', { class: 'gloss' }, h('h3', { text: 'What each number means' }),
-      Object.keys(D).map(function (k) { return h('div', {}, h('dt', { text: k }), h('dd', { text: D[k] })); })));
+        stat('Toss-ups', pct(a.tossup_share, 0), 'of fourth downs')),
+      h('p', { class: 'fnote', text: 'First engine, which failed its conversion test. Its win probability model beat nflfastR (Brier ' + F.headline.wp_model.brier_ours.toFixed(4) + ' vs ' + F.headline.wp_model.brier_nflfastr.toFixed(4) + ').' })));
+    dyn.appendChild(h('p', { class: 'stat-note', style: 'margin-top:0', text: 'Current engine: ' + E.engine.candidate + ', frozen ' + E.engine.frozen_at.slice(0, 10) + '.' }));
+    dyn.appendChild(N.caveatBox(['Teams know things the model does not.'], 'Caveat'));
+    dyn.appendChild(h('dl', { class: 'gloss' },
+      [['Toss-up', 'margin under ' + F.tossup_rule.margin_below + ' win probability'], ['Margin', 'best option minus second best'], ['Given up', 'best option minus the team\'s choice'], ['Clear call', 'margin of ' + F.tossup_rule.margin_below + ' or more']].map(function (k) { return h('div', {}, h('dt', { text: k[0] }), h('dd', { text: k[1] })); })));
   }
 
   // ------------------------------------------------------------------ boot

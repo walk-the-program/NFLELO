@@ -41,59 +41,59 @@ VERDICT_ORDER = ("pass", "fail", "negative", "shadow")
 
 METADATA = [
     {"id": "M3", "short": "M3", "name": "Game model",
-     "what": "Win chance for each game from Elo, opponent-adjusted efficiency (EPA, expected points added) and the starting quarterback.",
+     "what": "Win chance per game from Elo, efficiency and the starting quarterback.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
-     "reading": "It beat Elo in all six seasons. The market is still ahead. Its calibration error missed a bar that was too tight for 1,615 games.",
+     "reading": "Beat Elo in all six seasons. The market is still ahead.",
      "method_doc": "context/ml-m3-method.md"},
     {"id": "M4-margin", "short": "M4", "name": "Margin model",
-     "what": "The full spread of possible final margins, aware that 3 and 7 are common margins.",
+     "what": "The full spread of possible final margins.",
      "verdict": "fail", "tested_holdout": True, "license": "CC BY",
-     "reading": "Its error was lower than Elo's spread, but the interval includes zero, so the edge is not proven. It still drives the site's spreads and the simulation.",
+     "reading": "Edge over Elo not proven: the interval includes zero.",
      "method_doc": "context/ml-m4-method.md"},
     {"id": "M4-odds", "short": "M4", "name": "Playoff odds",
-     "what": "20,000 simulated seasons with the real NFL tiebreakers and a season-long strength shock for each team.",
+     "what": "20,000 simulated seasons with real tiebreakers.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
-     "reading": "Adding the strength shock improved the made-playoffs forecast, and the odds were calibrated. Live on the site.",
+     "reading": "Strength shocks improved the forecast, and the odds were calibrated.",
      "method_doc": "context/ml-m4-method.md"},
     {"id": "M5", "short": "M5", "name": "Lineup values",
-     "what": "A value for each player from box-score stats, and the probable lineup each team will field.",
+     "what": "A value per player from box scores, plus probable lineups.",
      "verdict": "negative", "tested_holdout": False, "license": "CC BY",
-     "reading": "Knowing who plays added nothing measurable to the game model on development seasons, so it was never sent to the holdout.",
+     "reading": "Lineups added nothing measurable, so no holdout was spent.",
      "method_doc": "context/ml-m5-method.md"},
     {"id": "M5b", "short": "M5b", "name": "On-field player ratings",
-     "what": "A plus-minus rating for every player, from who was on the field for each of 177,545 plays (2016 on).",
+     "what": "A plus-minus rating for every player, from 177,545 plays.",
      "verdict": "fail", "tested_holdout": True, "license": "CC BY-SA",
-     "reading": "Beat team ratings, but lost to simply adding up box-score values. Public data cannot split credit among the 22 players better than that. Kept as a descriptive view.",
+     "reading": "Beat team ratings, lost to summed box-score values.",
      "method_doc": "context/ml-m5b-method.md"},
     {"id": "M3b", "short": "M3b", "name": "Kalman strength model",
-     "what": "A team-strength rating that carries its own uncertainty, combined with Elo and the quarterback term.",
+     "what": "A team-strength rating that carries its own uncertainty.",
      "verdict": "shadow", "tested_holdout": False, "license": "CC BY",
-     "reading": "It narrowly missed the bar on development seasons, so no holdout was spent on it. It is logged before kickoff next to the live model as a clean forward test.",
+     "reading": "Narrowly missed on development seasons. Running as a live shadow.",
      "method_doc": "context/ml-m3b-method.md"},
     {"id": "M6", "short": "M6", "name": "Play outcome model",
-     "what": "The whole distribution of yards a play can gain, from the pre-snap situation and personnel.",
+     "what": "The full distribution of yards a play can gain.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY-SA",
-     "reading": "More accurate than the situation-only baseline in every season and in both data eras. Knowing the individual players adds only a small amount.",
+     "reading": "Beat the baseline every season. Players add little.",
      "method_doc": "context/ml-m6-method.md"},
     {"id": "M7a-wp", "short": "M7a", "name": "Win-probability model",
-     "what": "Win chance at every snap of a game, built without any betting-market input.",
+     "what": "Win chance at every snap, with no market input.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
-     "reading": "More accurate than the public nflfastR model. The Vegas-based probability is still better.",
+     "reading": "Beats nflfastR. The Vegas-based probability is still better.",
      "method_doc": "context/ml-m7-method.md"},
     {"id": "M7a-4th", "short": "M7a", "name": "Fourth-down tool",
-     "what": "Go for it, kick a field goal, or punt, compared in win probability with an uncertainty band.",
+     "what": "Go, kick or punt, compared in win probability.",
      "verdict": "fail", "tested_holdout": True, "license": "CC BY-SA",
-     "reading": "The field-goal and punt parts passed. The go-for-it conversion estimate was off, so the tool failed. A corrected version is frozen for 2026.",
+     "reading": "Field goal and punt parts passed; conversion estimates were off.",
      "method_doc": "context/ml-m7-method.md"},
     {"id": "M7b", "short": "M7b", "name": "Early-down play calling",
-     "what": "Run or pass, and from which personnel group, on first and second down, using causal methods.",
+     "what": "Run or pass, and personnel, on early downs.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY-SA",
-     "reading": "The recommended mix beats what teams actually did, and the placebo check came back near zero. Defenses would adapt, so treat it as a direction, not a guarantee.",
+     "reading": "Recommended mix beats actual play calling. Defenses would adapt.",
      "method_doc": "context/ml-m7-method.md"},
     {"id": "M8", "short": "M8", "name": "Game model v2",
-     "what": "Five upgrades to the game model: training on point margin, blending models, an opponent-adjusted quarterback rating, early-season fixes, and travel, time-zone and rest features.",
+     "what": "Five upgrades to the game model.",
      "verdict": "negative", "tested_holdout": False, "license": "CC BY",
-     "reading": "None beat the Kalman candidate beyond noise on development seasons, so nothing was promoted. Weather was dropped because nflverse records it only after a game, and even actual game-day weather did not help.",
+     "reading": "No upgrade beat the Kalman candidate beyond noise.",
      "method_doc": "context/ml-m8-method.md"},
 ]
 
@@ -175,7 +175,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         d, f = load_run("m4_signoff_playoff_odds", runs_dir, holdout=True)
         pm = d["result"]["metrics"]["playoffs"]
         prim = paired("Made-playoffs Brier score, with strength shocks minus without (lower is better)", pm["diff"], 4,
-                      n_unit="team forecasts", window=reg + ", 4 starting weeks each", file_name=f)
+                      n_unit="team forecasts", window=reg + ", 4 starting weeks", file_name=f)
         also = [{"text": f"Brier {pm['brier']:.4f} against {pm['brier_tau0']:.4f} without the shocks",
                  "source": src(f)},
                 {"text": "The tiebreaker code reproduces all 48 actual conference seedings, 2002 to 2025",
@@ -189,7 +189,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         b1, f1 = load_run("m5_B1", runs_dir)
         b2, f2 = load_run("m5_B2", runs_dir)
         prim = paired("Brier score, best lineup model minus the game model (lower is better)", d["comparisons"]["vs_B0_brier"], 4,
-                      n_unit="games", window="development seasons 2012 to 2019, no holdout run", file_name=f)
+                      n_unit="games", window="development 2012 to 2019", file_name=f)
         also = [{"text": (f"Smaller steps: {sgn(b1['comparisons']['vs_B0_brier']['diff'], 4)} and "
                           f"{sgn(b2['comparisons']['vs_B0_brier']['diff'], 4)}; every interval includes zero"),
                  "source": src(f1)}]
@@ -199,7 +199,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         d, f = load_run("m5b_signoff_rapm", runs_dir, holdout=True)
         c = d["comparisons"]
         prim = paired("Play-level squared error, RAPM minus box-score values (lower is better)", c["box"], 4,
-                      n_unit="plays", window="seasons 2020 to 2025, forecast one season ahead", file_name=f)
+                      n_unit="plays", window="seasons 2020 to 2025", file_name=f)
         also = [{"text": f"Against team ratings: {interval(c['team']['diff'], c['team']['ci_low'], c['team']['ci_high'], 4)}",
                  "source": src(f)}]
         return {"primary": prim, "also": also}
@@ -209,7 +209,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         if d.get("holdout"):
             raise RunMissing("m3b_C2d should be a development run")
         prim = paired("Brier score, Kalman candidate minus the live model (lower is better)", d["comparisons"]["vs_a4s"], 4,
-                      n_unit="games", window="development seasons 2006 to 2019, no holdout run", file_name=f)
+                      n_unit="games", window="development 2006 to 2019", file_name=f)
         ll = d["comparisons"]["vs_a4s_logloss"]
         also = [{"text": f"Log loss, the stricter score: {interval(ll['diff'], ll['ci_low'], ll['ci_high'], 4)}",
                  "source": src(f)}]
@@ -220,7 +220,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         if d.get("holdout"):
             raise RunMissing("m8_E5 should be a development run")
         prim = paired("Brier score, best upgrade minus the Kalman candidate (lower is better)", d["comparisons"]["vs_c2d"], 4,
-                      n_unit="games", window="development seasons 2006 to 2019, no holdout run", file_name=f)
+                      n_unit="games", window="development 2006 to 2019", file_name=f)
         also = [{"text": f"Against the live model: {interval(d['comparisons']['vs_a4s']['diff'], d['comparisons']['vs_a4s']['ci_low'], d['comparisons']['vs_a4s']['ci_high'], 4)}",
                  "source": src(f)}]
         return {"primary": prim, "also": also}
@@ -230,7 +230,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         call, fc = load_run("m6_signoff_call_gbm", runs_dir, holdout=True)
         cs, cc = sit["result"]["vs_baseline"]["crps"], call["result"]["vs_baseline"]["crps"]
         prim = paired("Yards error (CRPS), model minus the situation baseline (lower is better)", cs, 4,
-                      n_unit="plays", window="seasons 2020 to 2025, forecast one season ahead", file_name=fs)
+                      n_unit="plays", window="seasons 2020 to 2025", file_name=fs)
         also = [{"text": f"With the play call known: {interval(cc['diff'], cc['ci_low'], cc['ci_high'], 4)}",
                  "source": src(fc)}]
         return {"primary": prim, "also": also}
@@ -268,7 +268,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         o = d["metrics"]["ope_epa"]
         p = pl["metrics"]["ope_epa"]
         prim = paired("EPA per early-down play, recommended mix minus observed (higher is better)", o, 3,
-                      n_unit="plays", window="seasons 2020 to 2025, forecast one season ahead", file_name=f, better="higher")
+                      n_unit="plays", window="seasons 2020 to 2025", file_name=f, better="higher")
         also = [{"text": f"Placebo check, should be about zero: {interval(p['diff'], p['ci_low'], p['ci_high'], 3)}",
                  "source": src(fpl)}]
         return {"primary": prim, "also": also}
@@ -311,7 +311,7 @@ def build_chart(runs_dir: Path | None) -> dict:
     return {"metric": "Brier score", "n": a["metrics"]["n"], "window": a["window"]["seasons"], "rows": rows,
             "seasons": seasons, "model_beats_elo_seasons": sum(1 for s in seasons if s["model"] < s["elo"]),
             "seasons_total": len(seasons), "source": src(fa),
-            "whisker_note": "Whiskers show the 95% interval of each row's gap to the model (paired bootstrap)."}
+            "whisker_note": "Whiskers: 95% interval."}
 
 
 def build_findings(runs_dir: Path | None) -> list[dict]:
@@ -321,19 +321,15 @@ def build_findings(runs_dir: Path | None) -> list[dict]:
     wins = audit["metrics"]["wp_lost_per_team_game"]
     return [
         {"n": 1, "title": "The quarterback is most of the story.",
-         "text": "In the game model, nearly all of the gain over Elo comes from knowing the starting quarterback, and it depends on knowing who actually starts."},
-        {"n": 2, "title": "Player-level beats team-level, but public data limits individual credit.",
-         "text": ("Box-score credit summed over the players on the field beats team ratings when predicting the next season. "
-                  "On-field plus-minus does not beat box credit, and lineup effects do not move game predictions.")},
+         "text": "Nearly all of the gain over Elo comes from knowing the starting QB."},
+        {"n": 2, "title": "Player credit beats team ratings.",
+         "text": "On-field plus-minus adds nothing beyond box-score credit."},
         {"n": 3, "title": "Elo's edge is memory.",
-         "text": ("Elo carries what it learned across seasons. On development seasons our features alone tie Elo overall: "
-                  "Elo wins in weeks 1 to 4, and our features win in weeks 10 to 18.")},
+         "text": "Elo wins weeks 1 to 4; our features win weeks 10 to 18."},
         {"n": 4, "title": "Teams are still too conservative.",
-         "text": (f"The fourth-down audit estimates about {wins:.2f} wins per team-game given up, mostly by punting "
-                  "(model-estimated). The early-down policy says pass more, especially from 12 personnel on 1st and 10.")},
+         "text": f"Fourth downs cost about {wins:.2f} wins per team-game (model-estimated)."},
         {"n": 5, "title": "The market is still better at game prediction.",
-         "text": (f"Brier {m['metrics']['brier']:.4f} against our {a['metrics']['brier']:.4f} on 2020 to 2025. "
-                  "Our models are independent of the market by design, so the edge we measured over Elo and nflfastR is real.")},
+         "text": f"Brier {m['metrics']['brier']:.4f} against our {a['metrics']['brier']:.4f}, 2020 to 2025."},
     ]
 
 
@@ -350,7 +346,7 @@ def count_verdicts(models: list[dict]) -> dict:
 
 def headlines(counts: dict, chart: dict) -> dict:
     t, p, f = counts["holdout_tested"], counts["holdout_pass"], counts["holdout_fail"]
-    hero = f"{t} models tested once on seasons they never saw. {p} passed, {f} failed."
+    hero = f"{t} models tested once on unseen seasons. {p} passed, {f} failed."
     parts = [f"{counts['pass']} passed", f"{counts['fail']} failed"]
     if counts["negative"]:
         parts.append(f"{counts['negative']} negative result" + ("" if counts["negative"] == 1 else "s"))
@@ -361,10 +357,9 @@ def headlines(counts: dict, chart: dict) -> dict:
     beat = chart["model_beats_elo_seasons"]
     n_s = chart["seasons_total"]
     season_text = f"all {n_s} seasons" if beat == n_s else f"{beat} of {n_s} seasons"
-    game = f"The game model beat Elo in {season_text} and finished {abs(gap):.4f} Brier behind the market."
+    game = f"The game model beat Elo in {season_text}. The market is {abs(gap):.4f} Brier ahead."
     extra = counts["negative"] + counts["shadow"]
-    deck = (f"{extra} more are reported as development-only results: {counts['negative']} negative "
-            f"and {counts['shadow']} still running live as a shadow model.")
+    deck = f"{extra} more are development-only: {counts['negative']} negative, {counts['shadow']} shadow."
     return {"hero": hero, "hero_deck": deck, "scoreboard": scoreboard, "chart": game}
 
 

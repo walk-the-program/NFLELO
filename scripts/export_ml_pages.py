@@ -87,11 +87,9 @@ TOSSUP_MARGIN = 0.02
 
 CC_BY = {"license": "CC BY 4.0", "url": "https://creativecommons.org/licenses/by/4.0/"}
 CC_BY_SA = {"license": "CC BY-SA 4.0", "url": "https://creativecommons.org/licenses/by-sa/4.0/"}
-CREDIT_BY = ("Data: nflverse play-by-play and schedules (CC BY 4.0). Model: NFLELO M7a win probability "
-             "(CC BY 4.0).")
-CREDIT_SA = ("Data: nflverse (CC BY 4.0); participation data from NFL Next Gen Stats via nflverse (2016-2022) and "
-             "FTN Data via nflverse (2023+). Numbers on this page derive from participation data and are released "
-             "under CC BY-SA 4.0.")
+CREDIT_BY = "Data: nflverse (CC BY 4.0). Model: NFLELO win probability (CC BY 4.0)."
+CREDIT_SA = ("Data: nflverse (CC BY 4.0); participation data from NFL Next Gen Stats (2016-2022) and "
+             "FTN Data (2023+). Numbers on this page: CC BY-SA 4.0.")
 REPO = "https://github.com/walk-the-program/NFLELO"
 
 # Fields that must never appear in these files (Vegas is a benchmark elsewhere on the site, never here).

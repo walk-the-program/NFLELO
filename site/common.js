@@ -235,10 +235,11 @@
       text ? h('p', { class: 'tcap', text: text }) : null);
   }
 
-  // The credit line in the footer, from the JSON.
+  // The footer credit is fixed text in each page's HTML (short, license-required); the JSON only carries the license name.
   function licenseUI(lic) {
     if (!lic) return;
-    setText('credit', lic.credit);
+    var el = $('#credit');
+    if (el && !el.textContent.trim()) setText('credit', lic.credit);
   }
 
   function caveatBox(list, title, cls) {
@@ -249,12 +250,12 @@
   // "Data not available yet": hero line plus every body id.
   function unavailable(what, bodyIds) {
     setText('hero-line', 'Data not available yet');
-    setText('hero-deck', what + ' has not been published yet. It is written by scripts/export_ml_pages.py and appears here after the next update.');
+    setText('hero-deck', what + ' is not published yet.');
     (bodyIds || []).forEach(function (id) {
       var b = done(id);
       if (!b) return;
       clear(b);
-      b.appendChild(h('p', { class: 'note empty', text: 'Data not available yet. ' + what + ' will appear here once it is published.' }));
+      b.appendChild(h('p', { class: 'note empty', text: 'Not available yet.' }));
     });
   }
 

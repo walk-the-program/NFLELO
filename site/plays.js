@@ -37,13 +37,13 @@
   function renderHero() {
     var hc = P.headline.call, hs = P.headline.situation, d = hc.crps_model_minus_baseline;
     var every = /every season/.test(P.headline.plain || '');
-    setText('hero-line', 'On the locked 2020 to 2025 seasons the play model beat the historical baseline: ' + hc.crps_model.toFixed(3) + ' against ' + hc.crps_baseline.toFixed(3) + ' yards of average error' + (every ? ', in every season' : '') + '.');
-    setText('hero-deck', 'Set a situation and see the whole spread of yards the play model expects, not just an average. It sees only what is known before the snap, and it was tested on seasons it never saw.');
+    setText('hero-line', 'Play model error ' + hc.crps_model.toFixed(3) + ' yards vs ' + hc.crps_baseline.toFixed(3) + ' for the baseline' + (every ? ', every season' : '') + '.');
+    setText('hero-deck', 'Pick a situation. See every yard result.');
     N.heroTiles([
-      { label: 'Gain over the baseline', big: signed(d.diff, 3), sub: 'yards of CRPS, 95% interval ' + signed(d.lo, 3) + ' to ' + signed(d.hi, 3) + '. Negative is better.' },
-      { label: 'Model error (CRPS)', big: [hc.crps_model.toFixed(3), h('small', { text: ' yd' })], sub: 'against ' + hc.crps_baseline.toFixed(3) + ' for the down, distance and field position baseline' },
-      { label: 'Plays scored once', big: commas(hc.plays), sub: P.headline.window.replace(', locked holdout, scored once', '') },
-      { label: 'Situations to explore', big: commas(P.grid.cells), sub: 'trained on ' + commas(P.n_train_plays) + ' plays, ' + P.trained_on[0] + ' to ' + P.trained_on[1] }
+      { label: 'Gain over the baseline', big: signed(d.diff, 3), sub: 'CRPS yards, 95% CI ' + signed(d.lo, 3) + ' to ' + signed(d.hi, 3) },
+      { label: 'Model error (CRPS)', big: [hc.crps_model.toFixed(3), h('small', { text: ' yd' })], sub: 'baseline ' + hc.crps_baseline.toFixed(3) },
+      { label: 'Plays scored once', big: commas(hc.plays), sub: String(P.headline.window).split(',')[0] + ', scored once' },
+      { label: 'Situations to explore', big: commas(P.grid.cells), sub: 'from ' + commas(P.n_train_plays) + ' plays' }
     ]);
     N.licenseUI(P.license);
   }
@@ -53,14 +53,12 @@
     var dyn = $('#how-dyn');
     var host = h('div', { class: 'chart ci' });
     dyn.appendChild(h('div', {},
-      h('h3', { class: 'sub-h', text: 'The result' }),
-      h('p', { class: 'stat-note', text: P.headline.plain }),
       well(host),
-      h('p', { class: 'fnote', text: 'Model minus baseline, in yards of CRPS (average error of the whole yard distribution). Negative means the model is closer. The call view is the one on this page; the situation view leaves out the called play type. Intervals are 95%, resampled by game.' }),
+      h('p', { class: 'fnote', text: 'Model minus baseline, CRPS yards. Negative is better. 95% intervals.' }),
       h('dl', { class: 'statrow' },
         stat('Call view, model', hc.crps_model.toFixed(3) + ' yd', 'baseline ' + hc.crps_baseline.toFixed(3)),
         stat('Situation view, model', hs.crps_model.toFixed(3) + ' yd', 'baseline ' + hs.crps_baseline.toFixed(3)),
-        stat('Chain-moving chance, calibration error', hc.p_first_ece.toFixed(4), hc.p_first_calibration_ok ? 'within the ' + hc.p_first_ece_floor.toFixed(2) + ' floor set before the test' : 'above the ' + hc.p_first_ece_floor.toFixed(2) + ' floor'),
+        stat('First-down calibration error', hc.p_first_ece.toFixed(4), hc.p_first_calibration_ok ? 'within the ' + hc.p_first_ece_floor.toFixed(2) + ' limit' : 'above the ' + hc.p_first_ece_floor.toFixed(2) + ' limit'),
         stat('Plays tested', commas(hc.plays), commas(hc.crps_model_minus_baseline.clusters) + ' games'))));
     watch(host, function () {
       N.ciChart(host, [
@@ -68,17 +66,14 @@
         { label: 'Situation view', ci: hs.crps_model_minus_baseline, series: 's3' }
       ], { decimals: 3, axis: 'yards of CRPS, model minus baseline', measure: 'CRPS difference', title: 'Model minus baseline' });
     });
-    dyn.appendChild(N.caveatBox(P.caveats, 'Caveats'));
-    dyn.appendChild(h('div', {},
-      h('h3', { class: 'sub-h', text: 'Held neutral' }),
-      h('p', { class: 'stat-note', text: heldText(true) })));
+    dyn.appendChild(N.caveatBox(['A prediction for the snap, not a promise.'], 'Caveat'));
   }
   function stat(label, value, small) { return h('div', {}, h('dt', { text: label }), h('dd', { class: 'num' }, value, h('small', { text: small }))); }
 
-  function heldText(long) {
+  function heldText() {
     var g = P.held_neutral, clock = String(g.clock || '').split(' (')[0];
     var t = (g.score_diff === 0 ? 'tied game' : 'score difference ' + g.score_diff) + ', ' + clock + ', ' + String(g.timeouts) + ' timeouts, ' + (g.roof || 'outdoors') + ' at ' + g.temp_f + 'F and ' + g.wind_mph + ' mph wind, league-average teams, home field averaged.';
-    return long ? 'Everything not on the console is held at: ' + t + ' Defensive personnel, formation and box count are not fixed: each result averages the model over 32 real defensive looks that fit the offense and the call. Home field is averaged.' : 'Held neutral: ' + t.replace(', home field averaged.', '.');
+    return 'Held neutral: ' + t.replace(', home field averaged.', '.');
   }
 
   // ------------------------------------------------------------------ console
@@ -129,7 +124,7 @@
       tableRows);
     var out = h('div', { class: 'console-out', 'aria-live': 'polite' },
       ui.title, ui.sub, ui.thin, well(ui.chart), ui.bigs, ui.tv.el,
-      h('p', { class: 'held', text: heldText(false) + ' Result probabilities are model estimates for the snap, not promises.' }));
+      h('p', { class: 'held', text: heldText() }));
 
     body.appendChild(h('div', { class: 'console' }, controls, out));
     watch(ui.chart, function () { drawChart(); });
@@ -152,25 +147,23 @@
     ui.slider.setAttribute('aria-valuetext', N.fieldLabel(S.yl));
     ui.fieldVal.textContent = N.fieldLabel(S.yl) + (S.ydstogo === S.yl ? ', goal to go' : '');
     ui.persCap.textContent = P.grid.personnel[S.pers] || '';
-    ui.distCap.textContent = P.grid.ydstogo.some(function (v) { return v > S.yl; }) ? 'Distances longer than the field position are not possible and are dimmed.' : '';
+    ui.distCap.textContent = '';
     ui.pinBtn.textContent = pinned ? 'Clear pin' : 'Pin this setting';
     ui.pinBtn.setAttribute('aria-pressed', pinned ? 'true' : 'false');
-    ui.pinTxt.textContent = pinned ? 'Pinned (outline): ' + desc(pinned) + '. The solid bars show the current setting.' : 'Pin a setting, then change the console to compare. The pinned distribution is drawn as an outline.';
+    ui.pinTxt.textContent = pinned ? 'Pinned (outline): ' + desc(pinned) + '.' : 'Pin a setting, then change the console to compare.';
 
     var c = cellFor(S);
     var call = S.call === 'run' ? 'run' : 'pass';
     var goal = S.ydstogo === S.yl;
     ui.title.textContent = desc(S);
-    ui.sub.textContent = c ? 'Spread of yards on the snap, from the model, as of the situation held neutral below.' : 'This combination is not in the grid.';
-    setText('console-h', c ? situation(S) + ': a ' + call + ' from ' + S.pers + ' personnel gains about ' + c.exp_yards.toFixed(1) + ' yards and ' + (goal ? 'scores' : 'reaches the line to gain or scores') + ' ' + pct(c.p_first_or_td, 0) + ' of the time' : 'No data for this setting');
+    ui.sub.textContent = c ? 'Chance of each yard result on the snap.' : 'This combination is not in the grid.';
+    setText('console-h', c ? situation(S) + ': a ' + call + ' gains about ' + c.exp_yards.toFixed(1) + ' yards and ' + (goal ? 'scores' : 'moves the chains') + ' ' + pct(c.p_first_or_td, 0) + ' of the time' : 'No data for this setting');
 
     clear(ui.thin);
     if (c && c.n_similar < 30) {
       ui.thin.hidden = false;
       ui.thin.appendChild(h('span', { class: 'vchip v-negative', text: 'Thin support' }));
-      ui.thin.appendChild(h('span', { text: c.n_similar === 0
-        ? 'Thin support: few similar real plays. There are none in 2016 to 2025 with this down, distance, call and personnel near this yard line, so this estimate rests on the model\'s smoothing, not on direct data.'
-        : 'Thin support: few similar real plays. Only ' + c.n_similar + ' in 2016 to 2025 had this down, distance, call and personnel near this yard line, so treat the shape as approximate.' }));
+      ui.thin.appendChild(h('span', { text: c.n_similar === 0 ? 'No similar real plays since 2016.' : 'Only ' + c.n_similar + ' similar real plays since 2016.' }));
     } else ui.thin.hidden = true;
 
     drawStats(c);

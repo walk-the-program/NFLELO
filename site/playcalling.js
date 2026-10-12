@@ -29,19 +29,19 @@
   function renderCaveats() {
     var body = done('caveats-body');
     clear(body);
-    body.appendChild(N.caveatBox(PC.caveats, 'Read this first: what these numbers can and cannot tell you', 'big'));
+    body.appendChild(N.caveatBox(['Observational estimate. Defenses would adapt.'], 'Caveat', 'big'));
   }
 
   function renderHero() {
     var H = PC.headline, o = H.ope_epa_per_play, p = H.placebo_epa_per_play, s1 = H.sensitivity['overlap_threshold_0.10'], s2 = H.sensitivity.weights_trimmed_at_10;
-    setText('hero-line', 'Following the recommendations would have gained about ' + o.diff.toFixed(2) + ' expected points per early-down play on seasons the method never saw (95% interval ' + epa(o.lo) + ' to ' + epa(o.hi) + '). A placebo with shuffled actions shows no gain.');
-    setText('hero-deck', 'On first and second down, which personnel group and run or pass gained the most, situation by situation, estimated from earlier seasons and tested on later ones. It is an observational estimate, so read the caveats first.');
+    setText('hero-line', 'Following the recommendations gains about ' + o.diff.toFixed(2) + ' points per early-down play on unseen seasons (95% CI ' + epa(o.lo) + ' to ' + epa(o.hi) + ').');
+    setText('hero-deck', 'Best run or pass and personnel group, by situation.');
     var lo = Math.min(s1.diff, s2.diff), hi = Math.max(s1.diff, s2.diff);
     N.heroTiles([
-      { label: 'Estimated gain per play', big: epa(o.diff), sub: 'EPA per early-down play, 95% interval ' + epa(o.lo) + ' to ' + epa(o.hi) + ', ' + commas(H.plays) + ' plays' },
-      { label: 'Placebo (shuffled actions)', big: epa(p.diff), sub: '95% interval ' + epa(p.lo) + ' to ' + epa(p.hi) + (p.excludes_zero ? ', excludes zero' : ', includes zero: no gain') },
-      { label: 'Stress tests', big: epa(lo) + ' to ' + epa(hi), sub: 'with a stricter overlap rule and with weights trimmed; the gain holds' },
-      { label: 'Where it applies', big: pct(H.share_of_plays_policy_applies, 0), sub: 'of early-down plays differ from the recommendation; ' + epa(H.epa_per_affected_play) + ' EPA per affected play' }
+      { label: 'Estimated gain per play', big: epa(o.diff), sub: 'EPA per play, 95% CI ' + epa(o.lo) + ' to ' + epa(o.hi) },
+      { label: 'Placebo (shuffled actions)', big: epa(p.diff), sub: '95% CI ' + epa(p.lo) + ' to ' + epa(p.hi) + (p.excludes_zero ? '' : ', includes zero') },
+      { label: 'Stress tests', big: epa(lo) + ' to ' + epa(hi), sub: 'two stricter checks; the gain holds' },
+      { label: 'Where it applies', big: pct(H.share_of_plays_policy_applies, 0), sub: 'of plays change; ' + epa(H.epa_per_affected_play) + ' EPA each' }
     ]);
     N.licenseUI(PC.license);
   }
@@ -51,18 +51,18 @@
   function buildOpe() {
     var body = done('ope-body'), H = PC.headline, o = H.ope_epa_per_play;
     clear(body);
-    setText('ope-h', 'The gain holds up on unseen seasons, and a placebo shows nothing');
+    setText('ope-h', 'The gain holds; the placebo shows none');
     var host = h('div', { class: 'chart ci' }), host2 = h('div', { class: 'chart ci' });
     var s1 = H.sensitivity['overlap_threshold_0.10'], s2 = H.sensitivity.weights_trimmed_at_10;
     var seasons = Object.keys(H.per_season);
     var weak = seasons.filter(function (k) { return !H.per_season[k].ope_epa.excludes_zero; });
     var plac = seasons.filter(function (k) { return H.per_season[k].placebo_epa.excludes_zero; });
-    var seasonNote = 'In ' + (weak.length ? weak.join(' and ') + ' the gain\'s interval includes zero' : 'every season the gain\'s interval excludes zero') + (plac.length ? '; in ' + plac.join(' and ') + ' the placebo\'s interval excludes zero (a hint of leftover bias)' : '') + '. The pooled result is tighter than any single season.';
+    var seasonNote = [weak.length ? 'Gain interval includes zero in ' + weak.join(' and ') : 'Gain interval excludes zero every season', plac.length ? 'placebo interval excludes zero in ' + plac.join(' and ') : ''].filter(Boolean).join('; ') + '.';
     body.appendChild(h('div', { class: 'split' },
       h('div', {},
         h('h3', { class: 'sub-h', style: 'margin-top:0', text: 'All of 2020 to 2025' }),
         well(host),
-        h('p', { class: 'fnote', text: 'EPA per early-down play, gain over the teams\' actual mix of calls, off-policy estimate with a 95% interval resampled by game (' + commas(o.clusters) + ' games). The placebo shuffles actions within situations; it should show zero. Pass rule, fixed in advance: ' + H.rule + '.' }),
+        h('p', { class: 'fnote', text: 'EPA per early-down play over the actual mix of calls. 95% intervals, ' + commas(o.clusters) + ' games.' }),
         h('dl', { class: 'statrow' },
           stat('Success rate gain', signed(H.ope_success_rate.diff * 100, 1) + ' pts', '95% interval ' + signed(H.ope_success_rate.lo * 100, 1) + ' to ' + signed(H.ope_success_rate.hi * 100, 1)),
           stat('Plays the policy changes', pct(H.share_of_plays_policy_applies, 0), epa(H.epa_per_affected_play) + ' EPA per affected play'),
@@ -111,11 +111,10 @@
     body.appendChild(h('div', { class: 'legend', style: 'margin-top:20px;margin-bottom:0' },
       h('span', {}, h('i', { class: 'sc pass' }), 'Clear best is a pass'),
       h('span', {}, h('i', { class: 'sc run' }), 'Clear best is a run'),
-      h('span', {}, h('i', { class: 'sc none' }), 'No clear best: the data cannot rank the actions'),
-      h('span', {}, h('i', { class: 'sc pass t0' }), h('i', { class: 'sc pass t1' }), h('i', { class: 'sc pass' }), 'Gain: pale under 0.07, outlined to 0.14, solid above (EPA per play)')));
+      h('span', {}, h('i', { class: 'sc none' }), 'No clear best'),
+      h('span', {}, h('i', { class: 'sc pass t0' }), h('i', { class: 'sc pass t1' }), h('i', { class: 'sc pass' }), 'Gain (EPA per play): pale under 0.07, outlined to 0.14, solid above')));
     body.appendChild(ui.grid);
     body.appendChild(ui.detail);
-    body.appendChild(h('p', { class: 'fnote', text: 'Gain is expected points added per play against the teams\' current mix on the same plays. A situation is "clear best" only when the best action\'s 95% interval is above zero. "No clear best" is not evidence that the actions are equal. Recommendations for a season use earlier seasons only.' }));
     body.appendChild(ui.tv.el);
     drawGrid();
   }
@@ -144,7 +143,7 @@
                   : [h('span', { class: 'pa', text: 'No clear best' }), h('span', { class: 'pn', text: 'n ' + commas(b.n_train_plays) })]);
         btn.addEventListener('click', function () { selCell = { dd: d[0], zone: z[0] }; drawGrid(); });
         bindTip(btn, function () {
-          var rows = b.clear ? [{ value: actName(b.best), label: actLong(b.best) }, { value: epa(b.gain), label: 'EPA per play, 95% interval [' + signed(b.gain_lo, 3) + ', ' + signed(b.gain_hi, 3) + ']' }] : [{ value: 'No clear best', label: 'the data cannot rank the actions here' }];
+          var rows = b.clear ? [{ value: actName(b.best), label: actLong(b.best) }, { value: epa(b.gain), label: 'EPA per play, 95% interval [' + signed(b.gain_lo, 3) + ', ' + signed(b.gain_hi, 3) + ']' }] : [{ value: 'No clear best', label: 'the actions cannot be ranked' }];
           rows.push({ value: commas(b.n_train_plays), label: 'training plays, ' + (PC.seasons[0] - 4) + ' to ' + (Number(season) - 1) });
           return { title: d[1] + ', ' + z[1] + ', ' + score + ', ' + season, rows: rows };
         });
@@ -160,7 +159,7 @@
     var sc = SCORES.filter(function (s) { return s[0] === score; })[0][1];
     clear(ui.detail);
     ui.detail.appendChild(h('h3', { text: dd[1] + ', ' + z[1] + ', ' + sc.toLowerCase() + ', ' + season }));
-    ui.detail.appendChild(h('p', { text: (b.clear ? 'Clear best: ' + actLong(b.best) + ', a gain of ' + epa(b.gain) + ' EPA per play (95% interval ' + signed(b.gain_lo, 3) + ' to ' + signed(b.gain_hi, 3) + ').' : 'No clear best: the leading action\'s interval includes zero, so the data cannot rank the actions here.') + ' Estimated from ' + commas(b.n_train_plays) + ' plays in earlier seasons; ' + b.candidates + ' candidate actions.' }));
+    ui.detail.appendChild(h('p', { text: (b.clear ? 'Clear best: ' + actLong(b.best) + ', ' + epa(b.gain) + ' EPA per play (95% CI ' + signed(b.gain_lo, 3) + ' to ' + signed(b.gain_hi, 3) + ').' : 'No clear best: the top interval includes zero.') + ' ' + commas(b.n_train_plays) + ' training plays, ' + b.candidates + ' actions.' }));
     ui.detail.appendChild(h('div', { class: 'tbl-wrap' }, h('table', {},
       h('thead', {}, h('tr', {}, [['Action', ''], ['Gain (EPA per play)', 'r'], ['95% interval', 'r'], ['Share of plays that called it', 'r']].map(function (t) { return h('th', { class: t[1], scope: 'col', text: t[0] }); }))),
       h('tbody', {}, b.actions.map(function (a) {
@@ -173,12 +172,12 @@
   function buildTeams() {
     var body = done('teams-body'), T = PC.team_view_2025;
     clear(body);
-    setText('teams-h', 'Passing in the pass-recommended situations: ' + T.teams[0].team + ' led at ' + pct(T.teams[0].pass_rate, 0) + ', ' + T.teams[T.teams.length - 1].team + ' trailed at ' + pct(T.teams[T.teams.length - 1].pass_rate, 0));
+    setText('teams-h', 'Pass rate where passing is best: ' + T.teams[0].team + ' ' + pct(T.teams[0].pass_rate, 0) + ', ' + T.teams[T.teams.length - 1].team + ' ' + pct(T.teams[T.teams.length - 1].pass_rate, 0));
     ui.tlist = h('div', { class: 'tlist' });
     var sortSeg = N.seg('Sort teams', [{ value: 'pass_rate', label: 'Pass rate' }, { value: 'name', label: 'Team A to Z' }], teamSort, function (v) { teamSort = v; drawTeams(); });
     var cellsTv = N.tableView('View the ' + T.pass_cells.length + ' situations where the 2025 recommendation is a pass', [{ t: 'Situation' }, { t: 'Recommended action' }], function () { return T.pass_cells.map(function (c) { return [c.cell, actLong(c.recommended)]; }); });
     body.appendChild(h('div', {},
-      h('p', { class: 'fnote', style: 'margin-top:0' }, h('span', { class: 'me', text: 'descriptive' }), ' Observed ' + T.season + ' play calls. Pass rate is each team\'s share of passes in the ' + T.pass_cells.length + ' situations where the 2025 recommendation is a pass (league ' + pct(T.league.pass_rate, 0) + ' over ' + commas(T.league.plays) + ' plays). The gap to the league does not adjust for each team\'s mix of situations, and it is not a model evaluation.'),
+      h('p', { class: 'fnote', style: 'margin-top:0' }, h('span', { class: 'me', text: 'descriptive' }), ' Observed ' + T.season + ' calls in the ' + T.pass_cells.length + ' pass-best situations. League ' + pct(T.league.pass_rate, 0) + ' over ' + commas(T.league.plays) + ' plays.'),
       h('div', { style: 'margin-top:16px;width:fit-content;max-width:100%' }, sortSeg.el),
       h('div', { style: 'margin-top:22px' }, ui.tlist),
       cellsTv));
@@ -192,7 +191,7 @@
     function at(v) { return ((v - lo) / (hi - lo) * 100).toFixed(2) + '%'; }
     clear(ui.tlist);
     ui.tlist.appendChild(h('div', { class: 'tvrow tvhead' }, h('span', { text: 'Team' }),
-      h('span', { class: 'axisrow', text: pct(lo, 0) + ' pass rate to ' + pct(hi, 0) + '; the tick is the league (' + pct(lg.pass_rate, 0) + ')' }),
+      h('span', { class: 'axisrow', text: pct(lo, 0) + ' to ' + pct(hi, 0) + ' pass rate; tick = league ' + pct(lg.pass_rate, 0) }),
       h('span', { class: 'r', text: 'Pass rate' }), h('span', { class: 'r', text: 'vs league' }), h('span', { class: 'r em', text: 'Exact match' })));
     list.forEach(function (t) {
       var row = h('div', { class: 'tvrow', tabindex: 0, 'aria-label': N.teamName(t.team) + ', pass rate ' + pct(t.pass_rate, 1) + ', ' + signed(t.vs_league * 100, 1) + ' points against the league' },
@@ -212,16 +211,6 @@
 
   // ------------------------------------------------------------------ method
 
-  function buildHow() {
-    var dyn = $('#how-dyn'), D = PC.definitions;
-    dyn.appendChild(h('div', {},
-      h('h3', { class: 'sub-h', text: 'The sample' }),
-      h('p', { class: 'stat-note', text: D.sample + '. Each of the ' + D.cells.count + ' situations is a down-and-distance group, a field zone and a score state, with twelve candidate actions (a personnel group plus run or pass).' })));
-    dyn.appendChild(h('dl', { class: 'gloss' }, h('h3', { text: 'What each term means' }),
-      ['gain', 'best', 'clear', 'candidate', 'by_season'].map(function (k) { return h('div', {}, h('dt', { text: k.replace('_', ' ') }), h('dd', { text: D[k] })); })));
-    dyn.appendChild(h('p', { class: 'fnote', text: 'The caveats are at the top of this page. The advice in these tables is a statement about the data, not a game plan: defenses would adapt to a team that always followed it.' }));
-  }
-
   // ------------------------------------------------------------------ boot
 
   var ALL = ['caveats-body', 'ope-body', 'cells-body', 'teams-body'];
@@ -229,6 +218,6 @@
     if (!d || !d.cells) { N.unavailable('The play-calling data', ALL); return; }
     PC = d;
     season = String(PC.seasons[PC.seasons.length - 1]);
-    renderHero(); renderCaveats(); buildOpe(); buildCells(); buildTeams(); buildHow();
+    renderHero(); renderCaveats(); buildOpe(); buildCells(); buildTeams();
   }).catch(function (err) { console.error(err); N.unavailable('The play-calling data', ALL); });
 })();

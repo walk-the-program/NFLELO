@@ -32,7 +32,6 @@
   function renderHero() {
     var c = R.counts, hl = R.headlines;
     setText('hero-line', hl.hero);
-    setText('hero-deck', hl.hero_deck);
     var tiles = $('#tiles');
     clear(tiles);
     function tile(label, big, sub, bar, barText) {
@@ -40,10 +39,10 @@
     }
     var dev = c.negative + c.shadow;
     tiles.append(
-      tile('Tested once', c.holdout_tested, 'models scored on seasons they never saw', c.holdout_tested ? c.holdout_pass / c.holdout_tested : null, c.holdout_pass + ' of ' + c.holdout_tested + ' passed'),
-      tile('Passed', c.holdout_pass, 'met every rule set in advance'),
-      tile('Failed', c.holdout_fail, 'missed a rule, published anyway'),
-      tile('Not on the holdout', dev, c.negative + ' negative result, ' + c.shadow + ' shadow model running live'));
+      tile('Tested once', c.holdout_tested, 'on unseen seasons', c.holdout_tested ? c.holdout_pass / c.holdout_tested : null, c.holdout_pass + ' of ' + c.holdout_tested + ' passed'),
+      tile('Passed', c.holdout_pass, 'met every rule'),
+      tile('Failed', c.holdout_fail, 'missed a rule'),
+      tile('Not on the holdout', dev, c.negative + ' negative, ' + c.shadow + ' shadow'));
   }
 
   // ------------------------------------------------------------------ scoreboard
@@ -69,8 +68,7 @@
         h('p', { class: 'mc-ci num', text: (p.kind === 'calibration' ? '' : '95% interval ') + limitText(p) }),
         h('p', { class: 'mc-n', text: commas(p.n) + ' ' + p.n_unit + ', ' + p.window })),
       h('div', { class: 'mc-text' },
-        h('p', { class: 'mc-read', text: m.reading }),
-        h('ul', { class: 'mc-also' }, m.also.map(function (a) { return h('li', { text: a.text }); }))),
+        h('p', { class: 'mc-read', text: m.reading })),
       h('div', { class: 'mc-links' }, h('a', { href: repoUrl(m.method_doc), text: 'Method' })));
   }
 
@@ -79,12 +77,10 @@
     return h('article', { class: 'mcard mc-sum', 'aria-labelledby': 'mc-sum' },
       h('div', { class: 'mc-top' }, h('span', { class: 'mc-id', text: 'All models' })),
       h('h3', { class: 'mc-name', id: 'mc-sum', text: c.total + ' models' }),
-      h('p', { class: 'mc-what', text: rows.map(function (r) { return r[0] + ' ' + r[1]; }).join(', ') + '.' }),
+      h('p', { class: 'mc-what', text: c.holdout_tested + ' scored once, ' + c.holdout_pass + ' passed.' }),
       h('ul', { class: 'mc-metric mc-tally', 'aria-label': 'Models by outcome' }, rows.map(function (r) {
         return h('li', {}, h('b', { class: 'num', text: String(r[0]) }), h('span', { text: r[1] }));
-      })),
-      h('div', { class: 'mc-text' },
-        h('p', { class: 'mc-read', text: c.holdout_tested + ' were scored once on the locked seasons, ' + c.holdout_pass + ' passed. The rest are development-only results or are still running live.' })));
+      })));
   }
 
   function renderScoreboard() {
@@ -121,13 +117,13 @@
       }));
     body.appendChild(h('dl', { class: 'gloss' },
       h('h3', { text: 'Reading the numbers' }),
-      gl('Brier score', 'The average squared miss of a win probability. Lower is better. Always guessing 50% scores 0.25.'),
-      gl('95% interval', 'The range that would hold the true difference in 95 of 100 repeats of the test. If it includes zero, the edge is not proven.'),
-      gl('EPA', 'Expected points added: how much a play changed the offense\'s chance to score, in points.'),
-      gl('CRPS', 'A score for a whole forecast distribution, here the spread of yards a play might gain. Lower is better.'),
-      gl('Calibration error (ECE)', 'How far stated chances sit from what really happened. 0 is perfect; the limit allows for luck at that sample size.'),
-      gl('RAPM', 'Regularized adjusted plus-minus: a player\'s effect on results, adjusted for who else was on the field.'),
-      gl('Shadow model', 'A model logged before kickoff next to the live one, scored on the same games, but not used for the live forecast.')));
+      gl('Brier score', 'Squared forecast miss. Lower is better.'),
+      gl('95% interval', 'If it includes zero, the edge is unproven.'),
+      gl('EPA', 'Expected points added per play.'),
+      gl('CRPS', 'Forecast error across all yard outcomes.'),
+      gl('Calibration error (ECE)', 'How far stated chances sit from results.'),
+      gl('RAPM', 'Player effect, adjusted for teammates and opponents.'),
+      gl('Shadow model', 'Logged live beside the main model, not used.')));
   }
 
   function gl(term, text) { return h('div', {}, h('dt', { text: term }), h('dd', { text: text })); }
@@ -196,7 +192,7 @@
       h('div', {},
         legend([['dot s1', 'Elo v2'], ['dot s3', 'NFLELO game model'], ['dot s2', 'Vegas market, benchmark only']]),
         well(host),
-        h('p', { class: 'fnote', text: 'Brier score, lower is better; the axis starts at 0.200, not zero. The model\'s own score has no whisker. ' + C.whisker_note }),
+        h('p', { class: 'fnote', text: 'Brier, lower is better. Axis starts at 0.200. ' + C.whisker_note }),
         tableView('View the comparison as a table', [{ t: 'Season' }, { t: 'Games', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }, { t: 'Game model', r: 1, n: 1 }, { t: 'Vegas market', r: 1, n: 1 }], function () {
           var all = [[C.window[0] + ' to ' + C.window[1], commas(C.n), elo.brier.toFixed(4), C.rows.filter(function (r) { return r.id === 'model'; })[0].brier.toFixed(4), mkt.brier.toFixed(4)]];
           return all.concat(C.seasons.map(function (s) { return [String(s.season), String(s.n), s.elo.toFixed(4), s.model.toFixed(4), s.market.toFixed(4)]; }));
@@ -231,7 +227,7 @@
       var b = done(id + '-body');
       if (!b) return;
       clear(b);
-      b.appendChild(h('p', { class: 'note err', text: 'The results file could not be loaded. Serve this folder over http, for example with python3 -m http.server --directory site.' }));
+      b.appendChild(h('p', { class: 'note err', text: 'Results could not be loaded.' }));
     });
     setText('hero-line', 'Results unavailable');
   }

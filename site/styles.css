@@ -370,13 +370,19 @@ main > .sec { padding-top: var(--gap); outline: none; }
 .rs[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
 .rs .abbr { font-size: 17px; }
 .rs .mid { min-width: 0; }
-.wb { position: relative; display: block; height: 22px; }
-.wb::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--line); }
-.wb i { position: absolute; top: 4px; height: 14px; display: block; }
-.wb .so { left: 0; background: var(--muted); border-radius: 999px 0 0 999px; }
-.wb .pj { background: var(--ink); border-radius: 0 999px 999px 0; }
-.wb .et { top: 0; height: 22px; width: 6px; margin-left: -3px; background: var(--primary); border-radius: 3px; box-shadow: 0 0 0 1.5px var(--ink); }
-.wb .rg { top: 19px; height: 3px; background: var(--ink); }
+.wb { position: relative; display: block; height: 20px; }
+.wb::before { content: ''; position: absolute; left: 0; right: 0; top: 4px; height: 12px; border-radius: 999px; background: var(--ab-sub); box-shadow: inset 0 0 0 1px var(--line); }
+.wb i { position: absolute; top: 4px; height: 12px; display: block; }
+.wb .rg { background: var(--pri-tint); border-radius: 999px; }
+.wb .so { left: 0; background: var(--ink); border-radius: 999px 0 0 999px; }
+.wb .pj { background: var(--primary); border-radius: 0 999px 999px 0; box-shadow: inset 0 0 0 1px var(--ink); }
+.wb .et { top: 0; height: 20px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; }
+.legend i.wso, .legend i.wpj, .legend i.wrg, .tip i.wrg { width: 18px; height: 12px; border: 0; clip-path: none; border-radius: 999px; }
+.legend i.wso, .tip i.wso { background: var(--ink); }
+.legend i.wpj, .tip i.wpj { background: var(--primary); box-shadow: inset 0 0 0 1px var(--ink); }
+.legend i.wrg, .tip i.wrg { background: var(--pri-tint); box-shadow: inset 0 0 0 1px var(--line); }
+.legend i.wtk, .tip i.wtk { width: 2px; height: 16px; border: 0; clip-path: none; background: var(--ink); margin: 0 4px; }
+.legend i.wso::after, .legend i.wpj::after, .legend i.wrg::after, .legend i.wtk::after, .tip i.wpj::after, .tip i.wrg::after, .tip i.wtk::after { display: none; }
 .rs .meta { display: block; font: 600 12px/1.2 var(--font-body); color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rs .pv { text-align: right; line-height: 1.05; }
 .rs .pv b { display: block; font: 700 24px/1 var(--font-heading); letter-spacing: -0.03em; }
