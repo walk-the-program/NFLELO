@@ -603,7 +603,7 @@ def build_winprob(L: Live, runs_dir: Path | None = None) -> dict:
         "schema": SCHEMA, "page": "winprob", "season": L.S,
         "model": "M7a win probability (monotone gradient boosting; no betting-market inputs)",
         "model_fit": {**info, "inputs": ("score, clock, down, distance, field position, timeouts, second-half kickoff, "
-                                         "home, and the pregame A4s win probability (our game model)")},
+                                         "home, and the pregame NFLELO model win probability")},
         "refresh": "weekly (Wednesday and Sunday Action runs)",
         "updated_through": {"week": max(weeks) if weeks else None, "games": len(games),
                             "last_game_date": max((g["date"] for g in games), default=None),
@@ -619,7 +619,7 @@ def build_winprob(L: Live, runs_dir: Path | None = None) -> dict:
             "swing": "the largest single change; the play is the snap that began it (a following kickoff or "
                      "extra point is part of the same change)",
             "winner_min_wp": "lowest WP the eventual winner had (comeback measure; null for a tie)",
-            "pregame_home": "A4s pregame home win probability (logged before kickoff in the live ledger)"},
+            "pregame_home": "NFLELO model pregame home win probability (logged before kickoff in the live ledger)"},
         "games_by_excitement": listing,
         "games": games,
         "caveats": [
@@ -704,7 +704,7 @@ def build_chart(comp: fd.Components, S: int) -> dict:
                     "close_call": [bool(x < TOSSUP_MARGIN) for x in m["margin"]]})
     return {"label": "Point estimates without the uncertainty band (no bootstrap)",
             "as_of": f"week 1 of {S}: league-average teams, kicker and punter; outdoors, 60F, 5 mph wind; "
-                     "even teams (A4s 0.5)",
+                     "even teams (NFLELO model 0.5)",
             "close_call_margin": TOSSUP_MARGIN, "presets": out}
 
 
@@ -988,7 +988,6 @@ def build_playcalling(runs_dir: Path | None = None, m7b_dir: Path | None = None)
             "n_train_plays": "training plays in the cell (seasons 2016..S-1)"},
         "seasons": seasons,
         "cells": out_cells,
-        "team_view_2025": team_view_2025(d, recs),
         "caveats": [
             "Unmeasured confounding: teams know things the data does not (injuries, the game plan, the opponent's "
             "tendencies). The method removes measured selection, not all of it.",
@@ -1001,39 +1000,6 @@ def build_playcalling(runs_dir: Path | None = None, m7b_dir: Path | None = None)
         ],
     }
     return checked(obj)
-
-
-def team_view_2025(m7b_dir: Path, recs: pd.DataFrame, season: int = 2025) -> dict:
-    """Descriptive: each team's 2025 REG early-down pass rate in the cells where the 2025 recommendation (fit on
-    2016-2024) is a clear pass, against the league. Observed play calls only; no model is scored."""
-    plays = pd.read_parquet(m7b_dir / "plays_holdout.parquet",
-                            columns=["season", "season_type", "off_team", "cell", "action"])
-    p = plays[(plays["season"] == season) & (plays["season_type"] == "REG")].copy()
-    r = recs[(recs["season"] == season) & recs["clear"]]
-    pass_cells = r[r["best"].str.endswith("_pass")].set_index("cell")["best"]
-    act = np.array(pol.ACTIONS, dtype=object)[p["action"].to_numpy(int)]
-    p["is_pass"] = np.char.endswith(act.astype(str), "_pass")
-    p["match"] = act == p["cell"].map(pass_cells).to_numpy(object)
-    q = p[p["cell"].isin(pass_cells.index)]
-    lg_rate, lg_all = float(q["is_pass"].mean()), float(p["is_pass"].mean())
-    teams = []
-    for team, g in q.groupby("off_team"):
-        allp = p[p["off_team"] == team]
-        teams.append({"team": team, "plays": int(len(g)), "pass_rate": rnd(g["is_pass"].mean(), 3),
-                      "vs_league": rnd(g["is_pass"].mean() - lg_rate, 3),
-                      "exact_match_rate": rnd(g["match"].mean(), 3),
-                      "early_down_pass_rate_all_cells": rnd(allp["is_pass"].mean(), 3)})
-    teams.sort(key=lambda t: -(t["pass_rate"] or 0))
-    return {"season": season, "game_type": "REG", "label": "descriptive (observed 2025 play calls)",
-            "pass_cells": [{"cell": c, "recommended": b} for c, b in pass_cells.items()],
-            "league": {"plays": int(len(q)), "pass_rate": rnd(lg_rate, 3),
-                       "exact_match_rate": rnd(q["match"].mean(), 3),
-                       "early_down_pass_rate_all_cells": rnd(lg_all, 3)},
-            "teams": teams,
-            "fields": {"pass_rate": "team's pass share in the cells where 2025's clear recommendation is a pass",
-                       "vs_league": "pass_rate minus the league's in the same cells (mix of cells differs by team)",
-                       "exact_match_rate": "share of those plays that used the recommended personnel and call",
-                       "early_down_pass_rate_all_cells": "team's pass share on every early down in the sample"}}
 
 
 # =========================================================================== orchestration

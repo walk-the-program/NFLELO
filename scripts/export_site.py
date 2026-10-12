@@ -4,7 +4,7 @@
 
 Reads outputs/elo_games.csv, outputs/ratings_current.json, outputs/model_report.md
 and the cached nflverse schedule data/raw/schedules.csv (upcoming games and lines).
-Writes meta, ladder, upcoming, history, luck, tapestry, records, scorecard and headlines JSON,
+Writes meta, ladder, upcoming, history, luck, parity, scorecard and headlines JSON,
 plus ml.json when the ML prediction ledger (experiments/live/<season>.csv) exists.
 Output is deterministic (no timestamps; same inputs give identical bytes).
 `scripts/build.py` calls export() at the end of every run.
@@ -18,8 +18,8 @@ Conventions
 - History downsampling: none needed. One point per team per regular-season game
   week (post-game rating), 1970 to now, about 30k points (~0.4 MB). Playoff games
   do not update ratings in Elo v2, so they add no points.
-- The season in progress is partial: it is excluded from season-end records and
-  the scorecard, and marked partial in the tapestry.
+- The season in progress is partial: it is excluded from season-end parity and
+  the scorecard, and marked partial in parity.json.
 """
 import json
 import re
@@ -41,7 +41,6 @@ REPORT_MD = config.OUT_DIR / "model_report.md"
 CREDIT = "Data: nflverse (CC BY 4.0); 1970–1998 results: FiveThirtyEight (CC BY 4.0)."
 REPO_URL = "https://github.com/walk-the-program/NFLELO"
 SPARK_GAMES = 17          # ladder sparkline length (last N regular-season games)
-TOP_N = 10
 DISAGREEMENTS = 3
 MIN_SEASON_GAMES = 200    # fewest market games for a season's market Brier to be reported
 RANGE_SIMS = 20000        # simulated seasons for the projected-wins ranges (model and Elo alike)
@@ -259,11 +258,12 @@ def build_upcoming(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame) -> 
     todo["p_mkt"] = market_prob(todo)
     todo["vegas_spread"] = pd.to_numeric(todo["spread_line"], errors="coerce")
     todo["diff"] = todo["elo_spread"] - todo["vegas_spread"]
+    todo["gap"] = 100 * (todo["p_home"] - todo["p_mkt"])      # Elo vs Vegas win-probability gap, percentage points
     todo = todo.sort_values(["gameday", "gametime", "game_id"], kind="stable")
 
     flagged = []
-    if todo["diff"].notna().any():
-        flagged = todo.loc[todo["diff"].abs().sort_values(ascending=False, kind="stable").index[:DISAGREEMENTS],
+    if todo["gap"].notna().any():
+        flagged = todo.loc[todo["gap"].abs().sort_values(ascending=False, kind="stable").index[:DISAGREEMENTS],
                            "game_id"].tolist()
     games = []
     for r in todo.itertuples():
@@ -277,6 +277,7 @@ def build_upcoming(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame) -> 
             "elo_spread": round(float(r.elo_spread), 1),
             "vegas_spread": clean(r.vegas_spread),
             "diff": None if pd.isna(r.diff) else round(float(r.diff), 1),
+            "gap": None if pd.isna(r.gap) else round(float(r.gap), 1),
             "p_market_home": None if pd.isna(r.p_mkt) else round(float(r.p_mkt), 4),
             "flagged": r.game_id in flagged,
         })
@@ -324,50 +325,15 @@ def build_luck(long: pd.DataFrame, season: int) -> dict:
             "note": "Luck is actual wins minus expected wins, where expected wins is the sum of each game's pre-game win probability."}
 
 
-def build_tapestry(ends: pd.DataFrame, partial_season: int | None) -> dict:
+def build_parity(ends: pd.DataFrame, partial_season: int | None) -> dict:
+    """Spread (population SD) of season-end ratings by season, for the league-parity chart."""
     seasons = list(range(int(ends["season"].min()), int(ends["season"].max()) + 1))
     pivot = ends.pivot(index="team", columns="season", values="rating").reindex(
         index=team_meta.TEAM_ORDER, columns=seasons)
-    values = [[None if pd.isna(v) else round(float(v), 1) for v in row] for row in pivot.to_numpy()]
     parity = [round(float(np.std(pivot[s].dropna().to_numpy())), 1) for s in seasons]
-    return {"seasons": seasons, "teams": team_meta.TEAM_ORDER, "values": values, "parity": parity,
+    return {"seasons": seasons, "parity": parity,
             "teams_count": [int(pivot[s].notna().sum()) for s in seasons],
             "partial_season": partial_season}
-
-
-def game_label(r) -> dict:
-    return {"season": int(r.season), "week": int(r.week), "type": r.game_type, "date": r.date.strftime("%Y-%m-%d"),
-            "home": r.home, "away": r.away, "home_score": int(r.home_score), "away_score": int(r.away_score)}
-
-
-def build_records(elo: pd.DataFrame, ends: pd.DataFrame, partial_season: int | None) -> dict:
-    # Biggest upsets: lowest pre-game win probability among winners (all games incl. playoffs, ties excluded).
-    decided = elo[elo["home_score"] != elo["away_score"]].copy()
-    home_won = decided["home_score"] > decided["away_score"]
-    decided["winner"] = np.where(home_won, decided["home"], decided["away"])
-    decided["p_win"] = np.where(home_won, decided["p_home"], 1.0 - decided["p_home"])
-    upsets = []
-    for r in decided.sort_values(["p_win", "date", "game_id"], kind="stable").head(TOP_N).itertuples():
-        upsets.append({**game_label(r), "winner": r.winner, "p_win": round(float(r.p_win), 4)})
-
-    # Biggest single-game rating changes (the winner's gain; the loser's loss is the same size).
-    upd = decided[decided["updated"]].copy()
-    upd["gain"] = np.where(home_won[upd.index], upd["home_post"] - upd["home_pre"], upd["away_post"] - upd["away_pre"])
-    swings = []
-    for r in upd.sort_values(["gain", "date", "game_id"], ascending=[False, True, True], kind="stable").head(TOP_N).itertuples():
-        swings.append({**game_label(r), "winner": r.winner, "gain": round(float(r.gain), 1),
-                       "p_win": round(float(r.p_win), 4)})
-
-    done = ends[ends["season"] != partial_season]
-
-    def seasons_list(df):
-        return [{"team": r.team, "season": int(r.season), "rating": round(float(r.rating), 1),
-                 "w": int(r.w), "l": int(r.l), "t": int(r.t)} for r in df.itertuples()]
-
-    best = done.sort_values(["rating", "season", "team"], ascending=[False, True, True]).head(TOP_N)
-    worst = done.sort_values(["rating", "season", "team"], ascending=[True, True, True]).head(TOP_N)
-    return {"upsets": upsets, "best_seasons": seasons_list(best), "worst_seasons": seasons_list(worst),
-            "swings": swings}
 
 
 # --------------------------------------------------------------------------- headlines
@@ -388,6 +354,10 @@ def verb(team: str, singular: str, plural: str) -> str:
 
 def points(x: float) -> str:
     return f"{x:.1f} " + ("point" if f"{x:.1f}" == "1.0" else "points")
+
+
+def pp(x: float) -> str:
+    return f"{x:.1f} percentage " + ("point" if f"{x:.1f}" == "1.0" else "points")
 
 
 def games(x: float) -> str:
@@ -413,10 +383,11 @@ def headline_week(upcoming: dict) -> str:
     if upcoming["flagged"]:
         g = by_id[upcoming["flagged"][0]]
         game = f"{subj(g['away'])} at {subj(g['home'])}"
-        elo_home, vegas_home = g["elo_spread"] > 0, g["vegas_spread"] > 0
-        if elo_home != vegas_home and abs(g["elo_spread"]) >= 0.05 and abs(g["vegas_spread"]) >= 0.05:
+        vs = g["vegas_spread"]
+        elo_home, vegas_home = g["elo_spread"] > 0, vs is not None and vs > 0
+        if vs is not None and elo_home != vegas_home and abs(g["elo_spread"]) >= 0.05 and abs(vs) >= 0.05:
             return f"Elo and Vegas split on {game}."
-        return f"Elo and Vegas are {points(abs(g['diff']))} apart on {game}."
+        return f"Elo and Vegas are {pp(abs(g['gap']))} apart on {game}."
     g = max(games_, key=lambda x: (abs(x["p_home"] - 0.5), x["game_id"]))
     fav, dog = (g["home"], g["away"]) if g["p_home"] >= 0.5 else (g["away"], g["home"])
     return f"Elo's strongest pick is {subj(fav)} over {subj(dog)}, at {max(g['p_home'], 1 - g['p_home']) * 100:.0f}%."
@@ -474,9 +445,9 @@ def headline_luck(season_block: dict, current: bool) -> str:
     return f"{cap(subj(t))} won {more} than expected in {year}."
 
 
-def headline_history(tapestry: dict) -> str:
-    partial = tapestry["partial_season"]
-    pairs = [(y, p) for y, p in zip(tapestry["seasons"], tapestry["parity"]) if y != partial]
+def headline_history(parity: dict) -> str:
+    partial = parity["partial_season"]
+    pairs = [(y, p) for y, p in zip(parity["seasons"], parity["parity"]) if y != partial]
     most = min(pairs, key=lambda x: (x[1], x[0]))     # ties go to the earlier season
     least = max(pairs, key=lambda x: (x[1], -x[0]))
     first = pairs[0][0]
@@ -485,31 +456,24 @@ def headline_history(tapestry: dict) -> str:
     return f"{most[0]} was the most balanced season since {first}; {least[0]} was the least."
 
 
-def headline_records(records: dict) -> str:
-    best = records["best_seasons"][0]
-    t = best["team"]
-    return f"The {best['season']} {team_meta.nickname(t)} still own the top rating, {best['rating']:.0f}."
-
-
 def headline_scorecard(card: dict) -> str:
     gap = card["brier_gap_vs_market"]
     if gap > 0:
-        return f"Vegas still wins, by {gap:.4f} Brier."
+        return f"Vegas still wins, by {gap:.3f} Brier."
     if gap < 0:
-        return f"Elo beats Vegas, by {abs(gap):.4f} Brier."
+        return f"Elo beats Vegas, by {abs(gap):.3f} Brier."
     return "Elo and Vegas are level on Brier."
 
 
-def build_headlines(ladder: list[dict], upcoming: dict, history: dict, luck: dict, tapestry: dict,
-                    records: dict, card: dict, season: int, partial: bool) -> dict:
+def build_headlines(ladder: list[dict], upcoming: dict, history: dict, luck: dict, parity: dict,
+                    card: dict, season: int, partial: bool) -> dict:
     ranks = {t["team"]: t["rank"] for t in ladder}
     return {
         "ladder": headline_ladder(ladder),
         "week": headline_week(upcoming),
         "explorer": {t["team"]: headline_explorer(t, season, ranks[t["team"]]) for t in history["teams"]},
         "luck": {k: headline_luck(v, partial and v["season"] == season) for k, v in luck["seasons"].items()},
-        "history": headline_history(tapestry),
-        "records": headline_records(records),
+        "history": headline_history(parity),
         "scorecard": headline_scorecard(card),
     }
 
@@ -529,15 +493,14 @@ def headline_week_ml(games_: list[dict], flagged: list[str]) -> str | None:
         game = f"{subj(g['away'])} at {subj(g['home'])}"
         pm, pv = g["p_home_model"], g["p_market_home"]
         if (pm - 0.5) * (pv - 0.5) < 0:
-            return f"The model and Vegas split on {game}."
-        gap = abs(g["gap"])
-        return f"The model and Vegas are {gap:.0f} percentage {'point' if f'{gap:.0f}' == '1' else 'points'} apart on {game}."
+            return f"The NFLELO model and Vegas split on {game}."
+        return f"The NFLELO model and Vegas are {pp(abs(g['gap']))} apart on {game}."
     have = [g for g in games_ if g["p_home_model"] is not None]
     if not have:
         return None
     g = max(have, key=lambda x: (abs(x["p_home_model"] - 0.5), x["game_id"]))
     fav, dog = (g["home"], g["away"]) if g["p_home_model"] >= 0.5 else (g["away"], g["home"])
-    return f"The model's strongest pick is {subj(fav)} over {subj(dog)}, at {max(g['p_home_model'], 1 - g['p_home_model']) * 100:.0f}%."
+    return f"The NFLELO model's strongest pick is {subj(fav)} over {subj(dog)}, at {max(g['p_home_model'], 1 - g['p_home_model']) * 100:.0f}%."
 
 
 def headline_rest(teams: list[dict]) -> str | None:
@@ -766,13 +729,12 @@ def export() -> dict[str, int]:
         "upcoming.json": upcoming,
         "history.json": build_history(long, ends, partial_season),
         "luck.json": build_luck(long, season),
-        "tapestry.json": build_tapestry(ends, partial_season),
-        "records.json": build_records(elo, ends, partial_season),
+        "parity.json": build_parity(ends, partial_season),
         "scorecard.json": scorecard,
     }
     files["headlines.json"] = build_headlines(
-        files["ladder.json"]["teams"], upcoming, files["history.json"], files["luck.json"], files["tapestry.json"],
-        files["records.json"], headline, season, partial)
+        files["ladder.json"]["teams"], upcoming, files["history.json"], files["luck.json"], files["parity.json"],
+        headline, season, partial)
     sizes = {name: write_json(name, obj) for name, obj in files.items()}
     ml_size = export_ml(schedule, ratings, elo, upcoming)
     if ml_size is not None:

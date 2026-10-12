@@ -29,7 +29,7 @@ REQUIRED = {
     "fourth.json": ["schema", "page", "season", "license", "label", "status", "headline", "tossup_rule", "chart",
                     "live", "definitions", "caveats"],
     "playcalling.json": ["schema", "page", "license", "headline", "definitions", "seasons", "cells",
-                         "team_view_2025", "caveats"],
+                         "caveats"],
 }
 LICENSES = {"plays.json": "CC BY-SA 4.0", "winprob.json": "CC BY 4.0", "fourth.json": "CC BY-SA 4.0",
             "playcalling.json": "CC BY-SA 4.0"}

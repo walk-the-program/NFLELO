@@ -12,10 +12,11 @@
 
   var F = null;                 // fourth.json
   var ui = {};
-  var presetKey = null, marks = false;
+  var presetKey = null;
   var P = {};                   // preset lookups: P[key] = {byCell, rows}
   var cursor = { yl: 40, d: 3 };
   var teamSort = { key: 'wp_lost_total', dir: 'desc' };
+  var TOSS = 0.02, LEAN = 0.04;   // win-probability margins: under TOSS is a toss-up, under LEAN a lean
   var teamFilter = '', playMode = 'all', playLimit = 25;
 
   var OPT = { go: 'Go for it', fg: 'Field goal', punt: 'Punt' };
@@ -27,17 +28,10 @@
 
   // ------------------------------------------------------------------ status, hero
 
-  function renderStatus() {
-    var body = done('status-body'), S = F.status;
-    clear(body);
-    body.appendChild(h('span', { class: 'vchip v-negative', text: 'Under test' }));
-    body.appendChild(h('div', {},
-      h('p', { text: 'Under test until ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][Number(S.earliest_run.slice(5, 7)) - 1] + ' ' + S.earliest_run.slice(0, 4) + '.' })));
-  }
-
   function renderHero() {
     var L = F.live, s = L.summary, a = F.headline.holdout_audit_v1;
-    setText('hero-line', 'Model-estimated: teams chose the model\'s pick on ' + pct(s.matched_share, 0) + ' of ' + commas(s.fourth_downs) + ' fourth downs, giving up ' + s.wp_lost_per_team_game.toFixed(3) + ' wins per team-game (2020 to 2025: ' + pct(a.matched_share, 0) + ', ' + a.wp_lost_per_team_game.toFixed(3) + ').');
+    var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], run = F.status.earliest_run;
+    setText('hero-line', 'First model failed its calibration test. Revised model under test until ' + MONTHS[Number(run.slice(5, 7)) - 1] + ' ' + run.slice(0, 4) + '.');
     setText('hero-deck', 'Go, kick or punt: the best option by yard line and distance.');
     N.heroTiles([
       { label: 'Matched the model', big: pct(s.matched_share, 0), bar: s.matched_share, barText: 'Through week ' + L.updated_through.week, sub: 'of ' + commas(s.fourth_downs) + ' fourth downs. Model-estimated.' },
@@ -70,24 +64,23 @@
   }
   function readout(r) {
     return h('span', {}, h('b', { text: N.ordinal(4) + ' and ' + r.d + ' at ' + N.fieldLabel(r.yl) + ': ' }),
-      'best option is ' + OPT[r.best].toLowerCase() + ' at ' + pct(r[r.best]) + ' win probability, ahead of ' + OPT[second(r)].toLowerCase() + ' by ' + pts(r.margin) + ' points' + (r.close ? ' (a toss-up)' : '') + '. Go ' + pct(r.go) + ', field goal ' + pct(r.fg) + ', punt ' + pct(r.punt) + '. Chance to convert if going: ' + pct(r.pc, 0) + '; chance to make the kick: ' + pct(r.pf, 0) + '. ');
+      'best option is ' + OPT[r.best].toLowerCase() + ' at ' + pct(r[r.best]) + ' win probability, ahead of ' + OPT[second(r)].toLowerCase() + ' by ' + pts(r.margin) + ' percentage points' + (r.close ? ' (a toss-up)' : '') + '. Go ' + pct(r.go) + ', field goal ' + pct(r.fg) + ', punt ' + pct(r.punt) + '. Chance to convert if going: ' + pct(r.pc, 0) + '; chance to make the kick: ' + pct(r.pf, 0) + '. ');
   }
 
   function buildChart() {
     var body = done('chart-body'), C = F.chart;
+    TOSS = F.tossup_rule.margin_below;
     clear(body);
     buildPresets();
     presetKey = C.presets[0].key;
     var SHORT = { tied_q2: 'Tied, Q2', down4_early_q4: 'Down 4, early Q4', up3_late_q4: 'Up 3, late Q4' };
     ui.preset = N.seg('Game state', C.presets.map(function (p) { return { value: p.key, label: SHORT[p.key] || p.label, title: p.label + ' (' + p.state.averaged_over + ')' }; }),
       presetKey, function (v) { presetKey = v; drawHeat(); ui.tv.refresh(); updateState(); });
-        var sw = h('input', { type: 'checkbox', class: 'b-switch', id: 'mark-toss', role: 'switch' });
-    sw.addEventListener('change', function () { marks = sw.checked; if (ui.svg) ui.svg.classList.toggle('tossups', marks); });
     ui.state = h('p', { class: 'fnote', style: 'margin-top:12px' });
     ui.detail = h('div', { class: 'pdetail fx-detail', 'aria-live': 'polite', text: 'Hover, tap or use arrow keys on a square.' });
     ui.heat = h('div', { class: 'chart hm-wrap' });
     ui.tv = N.tableViewLive('View this chart as a table',
-      function () { return [{ t: 'Yard line' }, { t: 'To go', r: 1, n: 1 }, { t: 'Best' }, { t: 'Margin (points)', r: 1, n: 1 }, { t: 'Go win prob.', r: 1, n: 1 }, { t: 'Field goal win prob.', r: 1, n: 1 }, { t: 'Punt win prob.', r: 1, n: 1 }, { t: 'P(convert)', r: 1, n: 1 }, { t: 'P(make kick)', r: 1, n: 1 }, { t: 'Toss-up' }]; },
+      function () { return [{ t: 'Yard line' }, { t: 'To go', r: 1, n: 1 }, { t: 'Best' }, { t: 'Margin (pp)', r: 1, n: 1 }, { t: 'Go win prob.', r: 1, n: 1 }, { t: 'Field goal win prob.', r: 1, n: 1 }, { t: 'Punt win prob.', r: 1, n: 1 }, { t: 'P(convert)', r: 1, n: 1 }, { t: 'P(make kick)', r: 1, n: 1 }, { t: 'Toss-up' }]; },
       function () {
         var q = P[presetKey], out = [];
         for (var i = 0; i < q.n; i++) {
@@ -97,18 +90,15 @@
         return out;
       });
     body.appendChild(h('div', { class: 'fx-bar' },
-      h('div', {}, h('p', { class: 'label', style: 'margin-bottom:8px', text: 'Game state' }), ui.preset.el),
-      h('label', { class: 'b-toggle', for: 'mark-toss', style: 'flex-direction:row-reverse;justify-content:flex-end' }, h('span', { text: 'Mark toss-ups with a dot' }), sw)));
+      h('div', {}, h('p', { class: 'label', style: 'margin-bottom:8px', text: 'Game state' }), ui.preset.el)));
     body.appendChild(ui.state);
     body.appendChild(h('p', { class: 'fnote' }, me(), ' Point estimates. Held fixed: ' + C.as_of.replace(/^week \d+ of \d+: /, '') + '.'));
-    body.appendChild(h('div', { style: 'margin-top:14px' },
-      h('div', { class: 'scale', style: 'margin:0 0 14px' },
-        h('span', { class: 'sw' }, h('i', { class: 'sw-go' }), 'Go for it'),
-        h('span', { class: 'sw' }, h('i', { class: 'sw-fg' }), 'Field goal'),
-        h('span', { class: 'sw' }, h('i', { class: 'sw-punt' }), 'Punt'),
-        h('span', { class: 'sw' }, 'Margin over the second best:',
-          h('span', { class: 'steps', 'aria-hidden': 'true' }, h('i', { class: 's0' }), h('i', { class: 's1' }), h('i', { class: 's2' })),
-          'pale = toss-up (under 0.02), outlined = lean (to 0.04), solid = clear'))));
+    body.appendChild(h('div', { class: 'fx-key', role: 'group', 'aria-label': 'Chart key' },
+      h('span', {}), h('span', { class: 'kh', text: 'Go for it' }), h('span', { class: 'kh', text: 'Field goal' }), h('span', { class: 'kh', text: 'Punt' }),
+      h('span', { class: 'kr', text: 'Clear call' }), h('i', { class: 'kc go' }), h('i', { class: 'kc fg' }), h('i', { class: 'kc punt' }),
+      h('span', { class: 'kr', text: 'Lean' }), h('i', { class: 'kc go lean' }), h('i', { class: 'kc fg lean' }), h('i', { class: 'kc punt lean' }),
+      h('span', { class: 'kr', text: 'Toss-up' }), h('i', { class: 'kc toss' }), h('span', { class: 'kn2', text: 'no option clearly best' })));
+    body.appendChild(h('p', { class: 'fnote', text: 'Margin of the best option over the second best, in win probability: clear ' + LEAN + ' or more, lean ' + TOSS + ' to ' + LEAN + ', toss-up under ' + TOSS + '.' }));
     body.appendChild(well(ui.heat));
     body.appendChild(ui.detail);
     body.appendChild(ui.tv.el);
@@ -119,9 +109,7 @@
   function updateState() {
     var p = P[presetKey].p, close = 0;
     for (var i = 0; i < p.close_call.length; i++) if (p.close_call[i]) close++;
-    var counts = { go: 0, fg: 0, punt: 0 };
-    p.best.forEach(function (b) { counts[b]++; });
-    ui.state.textContent = p.label + '. Of ' + p.best.length + ' squares, ' + counts.go + ' favor going, ' + counts.fg + ' a field goal, ' + counts.punt + ' a punt; ' + close + ' are toss-ups. Model-estimated.';
+    ui.state.textContent = close + ' of ' + p.best.length + ' situations are toss-ups';
     setText('chart-h', 'Go, kick or punt: the best option by yard line and distance');
   }
 
@@ -133,9 +121,16 @@
     var Wd = Math.max(host.clientWidth || 700, 600), ch = Wd > 1100 ? 30 : 26;
     var m = { l: 44, r: 8, t: 8, b: 56 };
     var iw = Wd - m.l - m.r, cw = iw / 99, Ht = m.t + 10 * ch + m.b;
-    var svg = sv('svg', { viewBox: '0 0 ' + Wd + ' ' + Ht, width: Wd, height: Ht, tabindex: 0, role: 'application', class: 'hm' + (marks ? ' tossups' : ''),
+    var svg = sv('svg', { viewBox: '0 0 ' + Wd + ' ' + Ht, width: Wd, height: Ht, tabindex: 0, role: 'application', class: 'hm',
       'aria-label': 'Fourth-down decision map, ' + p.label + '. Rows are yards to go from 1 to 10, columns are yard lines from your own goal line to the opponent\'s. Use the arrow keys to move between squares; the table below lists every square. Point estimates, model-estimated, no uncertainty band.' }, host);
     ui.svg = svg;
+    // Lean cells: the action's color as a diagonal hatch on near-white. One pattern per action, shared across cells.
+    var defs = sv('defs', {}, svg);
+    ['go', 'fg', 'punt'].forEach(function (k) {
+      var pat = sv('pattern', { id: 'hatch-' + k, width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+      sv('rect', { width: 6, height: 6, style: 'fill:var(--ab-tile)' }, pat);
+      sv('rect', { width: 2.6, height: 6, style: 'fill:var(--cat-' + k + ')' }, pat);
+    });
     function cx(yl) { return m.l + (99 - yl) * cw; }
     function cy(d) { return m.t + (10 - d) * ch; }
     for (var d = 1; d <= 10; d++) sv('text', { class: 'tick a-end', x: m.l - 8, y: cy(d) + ch / 2 + 4, text: String(d) }, svg);
@@ -143,10 +138,9 @@
     var rects = {};
     for (var i = 0; i < q.n; i++) {
       var yl = p.yardline_100[i], dd = p.ydstogo[i];
-      var lv = p.close_call[i] ? 0 : p.margin[i] < 0.04 ? 1 : 2;   // three discrete steps: toss-up, lean, clear
+      var lv = p.close_call[i] ? 0 : p.margin[i] < LEAN ? 1 : 2;   // three discrete steps: toss-up, lean, clear
       var r = sv('rect', { class: 'hc c-' + p.best[i] + ' lv-' + lv, x: cx(yl) + 0.3, y: cy(dd) + 0.3, width: Math.max(1, cw - 0.6), height: ch - 0.6 }, svg);
       rects[yl + '|' + dd] = r;
-      if (p.close_call[i]) sv('circle', { class: 'tm', cx: cx(yl) + cw / 2, cy: cy(dd) + ch / 2, r: Math.max(1.3, Math.min(cw / 3.2, 3)) }, svg);
     }
     [90, 80, 70, 60, 50, 40, 30, 20, 10].forEach(function (yl) {
       sv('text', { class: 'tick a-mid', x: cx(yl) + cw / 2, y: m.t + 10 * ch + 16, text: N.fieldLabel(yl).replace('midfield', '50') }, svg);
@@ -165,7 +159,7 @@
       var rows = ['go', 'fg', 'punt'].map(function (o) { return { value: pct(r[o]), label: OPT[o].toLowerCase() + (o === r.best ? ' (best)' : ''), cls: 'sw-' + o }; });
       rows.push({ value: pct(r.pc, 0), label: 'chance to convert if going' });
       rows.push({ value: pct(r.pf, 0), label: 'chance to make the kick' });
-      rows.push({ value: pts(r.margin) + ' pts', label: r.close ? 'margin: a toss-up' : 'margin over the second best' });
+      rows.push({ value: pts(r.margin) + ' pp', label: r.close ? 'margin: a toss-up' : 'margin over the second best' });
       tipShow(x, y, '4th and ' + r.d + ' at ' + N.fieldLabel(r.yl) + ', model-estimated', rows);
     }
     function pick(yl, dd, x, y) {
@@ -317,13 +311,13 @@
           h('span', { class: 'pc' }, h('b', {}, cat(o.choice), CHOICE[o.choice]), o.matched ? null : h('span', { class: 'arrow', text: 'model prefers' }), o.matched ? null : h('b', {}, cat(o.recommended), CHOICE[o.recommended]),
             o.tossup ? h('span', { class: 'tag-fill', text: 'Toss-up' }) : null,
             h('small', { text: (o.matched ? 'Matched the model' : 'Chose ' + CHOICE[o.choice].toLowerCase() + '; model preferred ' + CHOICE[o.recommended].toLowerCase()) })),
-          h('span', { class: 'pg num' }, pts(o.wp_given_up) + ' pts', h('small', { text: 'given up, model-estimated' }))),
+          h('span', { class: 'pg num' }, pts(o.wp_given_up) + ' pp', h('small', { text: 'given up, model-estimated' }))),
         h('div', { class: 'prow-body' },
           h('div', { class: 'opts' },
             h('span', { class: 'opt-go' }, 'Go: ', h('b', { text: pct(o.wp_go) }), ' win, ' + pct(o.p_convert, 0) + ' to convert'),
             h('span', { class: 'opt-fg' }, 'Field goal: ', h('b', { text: pct(o.wp_fg) }), ', ' + pct(o.p_fg_make, 0) + ' to make'),
             h('span', { class: 'opt-punt' }, 'Punt: ', h('b', { text: pct(o.wp_punt) }))),
-          h('span', {}, 'Margin ' + pts(o.margin) + ' points' + (o.tossup ? ', a toss-up' : '') + '. Model-estimated.'),
+          h('span', {}, 'Margin ' + pts(o.margin) + ' pp' + (o.tossup ? ', a toss-up' : '') + '. Model-estimated.'),
           h('span', { text: o.desc }))));
     });
     if (!list.length) ui.plist.appendChild(h('p', { class: 'note empty', text: 'No fourth downs match this filter.' }));
@@ -353,12 +347,11 @@
 
   // ------------------------------------------------------------------ boot
 
-  var ALL = ['status-body', 'chart-body', 'ytd-body'];
+  var ALL = ['chart-body', 'ytd-body'];
   N.loadTeamNames().then(function () { return N.getJSON('data/fourth.json', true); }).then(function (d) {
     if (!d || !d.chart) { N.unavailable('The fourth-down data', ALL); return; }
     F = d;
     renderHero();
-    renderStatus();
     buildChart();
     buildLive();
     buildHow();

@@ -40,7 +40,7 @@
     setText('hero-line', 'Play model error ' + hc.crps_model.toFixed(3) + ' yards vs ' + hc.crps_baseline.toFixed(3) + ' for the baseline' + (every ? ', every season' : '') + '.');
     setText('hero-deck', 'Pick a situation. See every yard result.');
     N.heroTiles([
-      { label: 'Gain over the baseline', big: signed(d.diff, 3), sub: 'CRPS yards, 95% CI ' + signed(d.lo, 3) + ' to ' + signed(d.hi, 3) },
+      { label: 'Gain over the baseline', big: signed(d.diff, 3), sub: 'CRPS yards, call view, 95% CI ' + signed(d.lo, 3) + ' to ' + signed(d.hi, 3) },
       { label: 'Model error (CRPS)', big: [hc.crps_model.toFixed(3), h('small', { text: ' yd' })], sub: 'baseline ' + hc.crps_baseline.toFixed(3) },
       { label: 'Plays scored once', big: commas(hc.plays), sub: String(P.headline.window).split(',')[0] + ', scored once' },
       { label: 'Situations to explore', big: commas(P.grid.cells), sub: 'from ' + commas(P.n_train_plays) + ' plays' }
@@ -177,10 +177,10 @@
     var pc = pinned ? cellFor(pinned) : null;
     var items = [
       ['Expected yards', function (x) { return x.exp_yards.toFixed(1); }, function (a, b) { return signed(a.exp_yards - b.exp_yards, 1); }],
-      ['First down or TD', function (x) { return pct(x.p_first_or_td); }, function (a, b) { return signed((a.p_first_or_td - b.p_first_or_td) * 100, 1) + ' pts'; }],
-      ['20 or more yards', function (x) { return pct(x.p_20plus); }, function (a, b) { return signed((a.p_20plus - b.p_20plus) * 100, 1) + ' pts'; }],
-      ['Yards lost', function (x) { return pct(x.p_loss); }, function (a, b) { return signed((a.p_loss - b.p_loss) * 100, 1) + ' pts'; }],
-      ['Turnover', function (x) { return pct(x.p_turnover); }, function (a, b) { return signed((a.p_turnover - b.p_turnover) * 100, 1) + ' pts'; }]
+      ['First down or TD', function (x) { return pct(x.p_first_or_td); }, function (a, b) { return signed((a.p_first_or_td - b.p_first_or_td) * 100, 1) + ' pp'; }],
+      ['20 or more yards', function (x) { return pct(x.p_20plus); }, function (a, b) { return signed((a.p_20plus - b.p_20plus) * 100, 1) + ' pp'; }],
+      ['Yards lost', function (x) { return pct(x.p_loss); }, function (a, b) { return signed((a.p_loss - b.p_loss) * 100, 1) + ' pp'; }],
+      ['Turnover', function (x) { return pct(x.p_turnover); }, function (a, b) { return signed((a.p_turnover - b.p_turnover) * 100, 1) + ' pp'; }]
     ];
     clear(ui.bigs);
     items.forEach(function (it) {

@@ -101,7 +101,7 @@ Each game:
 | Field | Meaning |
 |---|---|
 | `label` | Always `"model-estimated"`. **Every number from this file must carry that label on the page** |
-| `status` | The forward test. `forward_test` "pending", `plain` (show this sentence verbatim near the top), `earliest_run` 2027-02-15, `pooled_2026_2027_secondary_earliest` 2028-02-15, `frozen_commit`, `why`, `components_status` |
+| `status` | The forward test. `forward_test` "pending", `plain` (the page no longer shows it verbatim; since 2026-10-11 the hero says "First model failed its calibration test. Revised model under test until <month year of earliest_run>."), `earliest_run` 2027-02-15, `pooled_2026_2027_secondary_earliest` 2028-02-15, `frozen_commit`, `why`, `components_status` |
 | `engine` | Model facts: `wp`, `m6`, `engine` (`name`, `candidate`, `frozen_at`, `frozen_file`, `frozen_sha256`) |
 | `headline.holdout_audit_v1` | The locked 2020-2025 audit with the v1 engine (model-estimated): 22,576 fourth downs, `matched_share` 0.667, `matched_share_clear_calls` 0.798, `tossup_share` 0.518, `wp_lost_total` 97.9 wins, `wp_lost_per_team_game` 0.030, `wp_lost_by_choice` |
 | `headline.wp_model` | Same block as `winprob.json` `headline` |
@@ -124,7 +124,7 @@ Each preset is columnar: `columns` names the arrays; `yardline_100` (1-99) and `
 
 `plays` is columnar: `columns` and `rows` (zip them). Columns: `game_id`, `play_id`, `week`, `team`, `opponent`, `home` (bool), `qtr`, `clock`, `score_diff` (team minus opponent), `ydstogo`, `yardline_100`, `choice` (what the team did: go/fg/punt), `recommended`, `second`, `margin`, `wp_go`, `wp_fg`, `wp_punt`, `p_convert`, `p_fg_make`, `wp_given_up` (best minus the choice; 0 when matched), `matched`, `tossup`, `desc` (short play text). Only completed plays of completed games are included (tested).
 
-**Headline to show:** the status sentence first, then the 2026 summary labeled model-estimated, then the v1 holdout audit as context: "2020-2025: teams matched the model on 67% of fourth downs and gave up an estimated 0.03 wins per team-game, mostly by punting (model-estimated)."
+**Headline to show:** the one-line status first (see `status`), then the 2026 summary labeled model-estimated, then the v1 holdout audit as context (the v1 engine failed its conversion calibration test, so do not present its wins-given-up number as evidence): "2020-2025: teams matched the model on 67% of fourth downs and gave up an estimated 0.03 wins per team-game, mostly by punting (model-estimated)."
 
 **Caveats that must appear:** everything is model-estimated (the other choice is never observed); teams know things the model does not; the conversion component is under a forward test until at least 2027-02-15; the chart has no uncertainty band and close calls are toss-ups; ties, overtime, penalties and kneel-downs are excluded.
 
@@ -140,11 +140,10 @@ Each preset is columnar: `columns` names the arrays; `yardline_100` (1-99) and `
 | `definitions` | The sample, the 60 cells (5 down-distance x 4 zones x 3 score states, each with a label), the 12 actions (personnel group x run/pass), and the meaning of gain, best, clear, candidate and the action rows |
 | `seasons` | 2020-2025 |
 | `cells` | 60 objects: `cell`, `down_distance`, `zone`, `score`, `by_season` |
-| `team_view_2025` | Descriptive 2025 team view (below) |
 
 `cells[].by_season["2020"...]`: `best` (an action like "12_pass", or null), `clear` and `label` ("clear best" or "no clear best"), `gain`, `gain_lo`, `gain_hi` (EPA per play vs the current mix, 95% CI), `n_train_plays`, `candidates`, `actions` (rows of `[action, gain, gain_lo, gain_hi, share_called]` for every candidate, best first; `share_called` is the share of the cell's training plays that called it). Season S's recommendations come from seasons 2016..S-1 only.
 
-`team_view_2025`: `pass_cells` (the 17 cells where 2025's clear recommendation is a pass, with the recommended action), `league` (`plays`, `pass_rate`, `exact_match_rate`, `early_down_pass_rate_all_cells`), `teams` (sorted by `pass_rate`: `team`, `plays`, `pass_rate`, `vs_league`, `exact_match_rate`, `early_down_pass_rate_all_cells`), `fields`. Label it **descriptive**: these are observed 2025 REG play calls, not a model evaluation, and `vs_league` does not adjust for each team's mix of cells.
+The descriptive 2025 team view (`team_view_2025`) was removed on 2026-10-11 along with its page section; the file no longer carries it.
 
 **Headline to show:** "Following the recommendations would have gained about 0.05 EPA per early-down play on the unseen 2020-2025 seasons (+0.052, 95% CI +0.038 to +0.067); a placebo with shuffled actions shows no gain. The advice is consistent every season: pass more on early downs, mostly from 12 and 11 personnel, especially on 1st and 10."
 
@@ -167,7 +166,7 @@ Caches (gitignored, `data/raw/ml/pages/`, kept between Action runs by the existi
 
 - **Toss-up without a bootstrap:** margin under 0.02 WP. That cut best matches the 50-refit bootstrap toss-up flags on the 2018-2019 dev seasons (77% agreement). It marks about 59% of 2026 fourth downs so far as toss-ups, against 52% for the bootstrap on 2020-2025.
 - **A4s for 2026 games** is the walk-forward A4s (fit on 2001-2025), computed as in M7a; it matches the live ledger's logged probabilities to within 0.00005.
-- **Held-back games:** a game final in nflverse but not yet in `data/games.csv` waits one run (A4s needs its Elo input). In the Action, `build.py` runs first, so this only happens locally.
+- **Held-back games:** a game final in nflverse but not yet in `data/games.csv` waits one run (the NFLELO model (A4s) needs its Elo input). In the Action, `build.py` runs first, so this only happens locally.
 - **Tie games** are excluded from the fourth-down rows (as in M7a); their WP series is shown, ending at 0.5.
 - **Unknown kicker or punter** (chart only): league-average value.
-- **No new numbers on 2020-2025:** the only computation on those seasons is the descriptive 2025 team view of observed play calls.
+- **No new numbers on 2020-2025:** the exporters only read the logged holdout runs and their saved outputs.

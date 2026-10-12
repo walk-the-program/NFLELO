@@ -40,7 +40,7 @@ VERDICT_ORDER = ("pass", "fail", "negative", "shadow")
 # One entry per model, in scoreboard order.
 
 METADATA = [
-    {"id": "M3", "short": "M3", "name": "Game model",
+    {"id": "M3", "short": "M3", "name": "NFLELO model",
      "what": "Win chance per game from Elo, efficiency and the starting quarterback.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
      "reading": "Beat Elo in all six seasons. The market is still ahead.",
@@ -65,8 +65,8 @@ METADATA = [
      "verdict": "fail", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "Beat team ratings, lost to summed box-score values.",
      "method_doc": "context/ml-m5b-method.md"},
-    {"id": "M3b", "short": "M3b", "name": "Kalman strength model",
-     "what": "A team-strength rating that carries its own uncertainty.",
+    {"id": "M3b", "short": "M3b", "name": "Shadow model",
+     "what": "A team-strength rating (Kalman filter) that carries its own uncertainty.",
      "verdict": "shadow", "tested_holdout": False, "license": "CC BY",
      "reading": "Narrowly missed on development seasons. Running as a live shadow.",
      "method_doc": "context/ml-m3b-method.md"},
@@ -90,10 +90,10 @@ METADATA = [
      "verdict": "pass", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "Recommended mix beats actual play calling. Defenses would adapt.",
      "method_doc": "context/ml-m7-method.md"},
-    {"id": "M8", "short": "M8", "name": "Game model v2",
-     "what": "Five upgrades to the game model.",
+    {"id": "M8", "short": "M8", "name": "NFLELO model upgrades",
+     "what": "Five upgrades to the NFLELO model.",
      "verdict": "negative", "tested_holdout": False, "license": "CC BY",
-     "reading": "No upgrade beat the Kalman candidate beyond noise.",
+     "reading": "No upgrade beat the shadow model beyond noise.",
      "method_doc": "context/ml-m8-method.md"},
 ]
 
@@ -157,7 +157,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         e, fe = load_run("m3_signoff_elo_v2", runs_dir, holdout=True)
         m, fm = load_run("m3_signoff_market", runs_dir, holdout=True)
         c = a["comparisons"]["A4s_minus_elo_brier"]
-        prim = paired("Brier score, model minus Elo (lower is better)", c, 4, n_unit="games", window=reg, file_name=fa)
+        prim = paired("Brier score, NFLELO model minus Elo (lower is better)", c, 3, n_unit="games", window=reg, file_name=fa)
         also = [{"text": f"Brier {a['metrics']['brier']:.4f} against Elo {e['metrics']['brier']:.4f} and the Vegas market "
                          f"{m['metrics']['brier']:.4f}", "source": src(fa)}]
         return {"primary": prim, "also": also}
@@ -174,7 +174,7 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
     if mid == "M4-odds":
         d, f = load_run("m4_signoff_playoff_odds", runs_dir, holdout=True)
         pm = d["result"]["metrics"]["playoffs"]
-        prim = paired("Made-playoffs Brier score, with strength shocks minus without (lower is better)", pm["diff"], 4,
+        prim = paired("Made-playoffs Brier score, with strength shocks minus without (lower is better)", pm["diff"], 3,
                       n_unit="team forecasts", window=reg + ", 4 starting weeks", file_name=f)
         also = [{"text": f"Brier {pm['brier']:.4f} against {pm['brier_tau0']:.4f} without the shocks",
                  "source": src(f)},
@@ -188,10 +188,10 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
             raise RunMissing("m5_B3 should be a development run")
         b1, f1 = load_run("m5_B1", runs_dir)
         b2, f2 = load_run("m5_B2", runs_dir)
-        prim = paired("Brier score, best lineup model minus the game model (lower is better)", d["comparisons"]["vs_B0_brier"], 4,
+        prim = paired("Brier score, best lineup model minus the NFLELO model (lower is better)", d["comparisons"]["vs_B0_brier"], 3,
                       n_unit="games", window="development 2012 to 2019", file_name=f)
-        also = [{"text": (f"Smaller steps: {sgn(b1['comparisons']['vs_B0_brier']['diff'], 4)} and "
-                          f"{sgn(b2['comparisons']['vs_B0_brier']['diff'], 4)}; every interval includes zero"),
+        also = [{"text": (f"Smaller steps: {sgn(b1['comparisons']['vs_B0_brier']['diff'], 3)} and "
+                          f"{sgn(b2['comparisons']['vs_B0_brier']['diff'], 3)}; every interval includes zero"),
                  "source": src(f1)}]
         return {"primary": prim, "also": also}
 
@@ -208,10 +208,10 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         d, f = load_run("m3b_C2d", runs_dir)
         if d.get("holdout"):
             raise RunMissing("m3b_C2d should be a development run")
-        prim = paired("Brier score, Kalman candidate minus the live model (lower is better)", d["comparisons"]["vs_a4s"], 4,
+        prim = paired("Brier score, shadow model minus NFLELO model (lower is better)", d["comparisons"]["vs_a4s"], 3,
                       n_unit="games", window="development 2006 to 2019", file_name=f)
         ll = d["comparisons"]["vs_a4s_logloss"]
-        also = [{"text": f"Log loss, the stricter score: {interval(ll['diff'], ll['ci_low'], ll['ci_high'], 4)}",
+        also = [{"text": f"Log loss, the stricter score: {interval(ll['diff'], ll['ci_low'], ll['ci_high'], 3)}",
                  "source": src(f)}]
         return {"primary": prim, "also": also}
 
@@ -219,9 +219,9 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         d, f = load_run("m8_E5", runs_dir)
         if d.get("holdout"):
             raise RunMissing("m8_E5 should be a development run")
-        prim = paired("Brier score, best upgrade minus the Kalman candidate (lower is better)", d["comparisons"]["vs_c2d"], 4,
+        prim = paired("Brier score, best upgrade minus the shadow model (lower is better)", d["comparisons"]["vs_c2d"], 3,
                       n_unit="games", window="development 2006 to 2019", file_name=f)
-        also = [{"text": f"Against the live model: {interval(d['comparisons']['vs_a4s']['diff'], d['comparisons']['vs_a4s']['ci_low'], d['comparisons']['vs_a4s']['ci_high'], 4)}",
+        also = [{"text": f"Against the NFLELO model: {interval(d['comparisons']['vs_a4s']['diff'], d['comparisons']['vs_a4s']['ci_low'], d['comparisons']['vs_a4s']['ci_high'], 3)}",
                  "source": src(f)}]
         return {"primary": prim, "also": also}
 
@@ -229,19 +229,19 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
         sit, fs = load_run("m6_signoff_situation_gbm", runs_dir, holdout=True)
         call, fc = load_run("m6_signoff_call_gbm", runs_dir, holdout=True)
         cs, cc = sit["result"]["vs_baseline"]["crps"], call["result"]["vs_baseline"]["crps"]
-        prim = paired("Yards error (CRPS), model minus the situation baseline (lower is better)", cs, 4,
-                      n_unit="plays", window="seasons 2020 to 2025", file_name=fs)
-        also = [{"text": f"With the play call known: {interval(cc['diff'], cc['ci_low'], cc['ci_high'], 4)}",
-                 "source": src(fc)}]
+        prim = paired("Yards error (CRPS), call view: model minus baseline (lower is better)", cc, 3,
+                      n_unit="plays", window="seasons 2020 to 2025", file_name=fc)
+        also = [{"text": f"Situation view (play call not known): {interval(cs['diff'], cs['ci_low'], cs['ci_high'], 3)}",
+                 "source": src(fs)}]
         return {"primary": prim, "also": also}
 
     if mid == "M7a-wp":
         d, f = load_run("m7a_signoff_wp", runs_dir, holdout=True)
         cmpd = d["diffs"]
         vg = cmpd["m7a_wp-vegas_wp"]["brier"]
-        prim = paired("Brier score, our model minus nflfastR (lower is better)", cmpd["m7a_wp-nflfastr_wp"]["brier"], 4,
+        prim = paired("Brier score, our model minus nflfastR (lower is better)", cmpd["m7a_wp-nflfastr_wp"]["brier"], 3,
                       n_unit="plays", window="regular seasons 2020 to 2025", file_name=f)
-        also = [{"text": f"Against the Vegas-based probability: {interval(vg['diff'], vg['ci_low'], vg['ci_high'], 4)} (Vegas is better)",
+        also = [{"text": f"Against the Vegas-based probability: {interval(vg['diff'], vg['ci_low'], vg['ci_high'], 3)} (Vegas is better)",
                  "source": src(f)}]
         return {"primary": prim, "also": also}
 
@@ -292,8 +292,8 @@ def build_chart(runs_dir: Path | None) -> dict:
     # row minus model = minus (model minus row), so the interval flips sign and swaps ends
     ce, cm = cmp_["A4s_minus_elo_brier"], cmp_["A4s_minus_market_brier"]
     rows = []
-    for rid, label, series, b, c in (("elo", "Elo v2", "s1", e["metrics"]["brier"], ce),
-                                     ("model", "NFLELO game model", "s3", model_b, None),
+    for rid, label, series, b, c in (("elo", "Elo", "s1", e["metrics"]["brier"], ce),
+                                     ("model", "NFLELO model", "s3", model_b, None),
                                      ("market", "Vegas market (benchmark only)", "s2", m["metrics"]["brier"], cm)):
         row = {"id": rid, "label": label, "series": series, "brier": b, "logloss": None}
         if c is not None:
@@ -317,8 +317,6 @@ def build_chart(runs_dir: Path | None) -> dict:
 def build_findings(runs_dir: Path | None) -> list[dict]:
     a, _ = load_run("m3_signoff_A4s", runs_dir, holdout=True)
     m, _ = load_run("m3_signoff_market", runs_dir, holdout=True)
-    audit, _ = load_run("m7a_signoff_audit", runs_dir, holdout=True)
-    wins = audit["metrics"]["wp_lost_per_team_game"]
     return [
         {"n": 1, "title": "The quarterback is most of the story.",
          "text": "Nearly all of the gain over Elo comes from knowing the starting QB."},
@@ -326,9 +324,7 @@ def build_findings(runs_dir: Path | None) -> list[dict]:
          "text": "On-field plus-minus adds nothing beyond box-score credit."},
         {"n": 3, "title": "Elo's edge is memory.",
          "text": "Elo wins weeks 1 to 4; our features win weeks 10 to 18."},
-        {"n": 4, "title": "Teams are still too conservative.",
-         "text": f"Fourth downs cost about {wins:.2f} wins per team-game (model-estimated)."},
-        {"n": 5, "title": "The market is still better at game prediction.",
+        {"n": 4, "title": "The market is still better at game prediction.",
          "text": f"Brier {m['metrics']['brier']:.4f} against our {a['metrics']['brier']:.4f}, 2020 to 2025."},
     ]
 
@@ -357,7 +353,7 @@ def headlines(counts: dict, chart: dict) -> dict:
     beat = chart["model_beats_elo_seasons"]
     n_s = chart["seasons_total"]
     season_text = f"all {n_s} seasons" if beat == n_s else f"{beat} of {n_s} seasons"
-    game = f"The game model beat Elo in {season_text}. The market is {abs(gap):.4f} Brier ahead."
+    game = f"The NFLELO model beat Elo in {season_text}. The market is {abs(gap):.3f} Brier ahead."
     extra = counts["negative"] + counts["shadow"]
     deck = f"{extra} more are development-only: {counts['negative']} negative, {counts['shadow']} shadow."
     return {"hero": hero, "hero_deck": deck, "scoreboard": scoreboard, "chart": game}

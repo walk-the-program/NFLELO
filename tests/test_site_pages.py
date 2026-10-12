@@ -222,3 +222,50 @@ def test_models_scoreboard_has_a_summary_tile_that_fills_the_grid():
     assert cols == [2, 3, 4] and all(12 % n == 0 for n in cols)
     # tiles stacked in a loose body (the card grid, then the table-view tile) sit the standard 14px apart
     assert re.search(r"\.body\.loose \{[^}]*display: grid[^}]*gap: var\(--gap\)", css)
+
+
+# ---- Walker 2026-10-11: cut Records, the heatmap and the team view; one name per model; honest units ----
+
+def test_cut_sections_and_their_data_are_gone():
+    index_html, pc_html = read("index.html"), read("playcalling.html")
+    assert 'id="records"' not in index_html and "#records" not in index_html
+    assert "heat" not in read("app.js").lower() and "tapestry" not in read("app.js")
+    assert 'id="teams"' not in pc_html and "team_view" not in read("playcalling.js")
+    assert not (SITE / "data" / "records.json").exists() and not (SITE / "data" / "tapestry.json").exists()
+    assert "team_view_2025" not in (SITE / "data" / "playcalling.json").read_text()
+
+
+@pytest.mark.parametrize("page", PAGES)
+def test_section_eyebrows_have_no_gaps(page):
+    nums = [int(n) for n in re.findall(r'<span class="kn">(\d+)</span>', read(f"{page}.html"))]
+    assert nums == list(range(1, len(nums) + 1)), (page, nums)
+
+
+@pytest.mark.parametrize("page", PAGES)
+def test_no_internal_model_codes_in_visible_text(page):
+    text = read(f"{page}.html") + read(f"{SCRIPT[page]}.js") + read("common.js")
+    for code in ("A4s", "Model v1", "Elo v2", "C2d", "2025 model"):
+        assert code not in text, (page, code)
+
+
+def test_win_probability_gaps_read_pp_not_pts():
+    js = read("app.js")
+    assert "signed(gapPts, 1) + ' pp'" in js and "' pts', gap: true" not in js
+    assert "Gap ' + f1(Math.abs(mg.gap)) + ' pp'" in js
+    assert "win probability, %" in js and 'id="mx-axis"' in read("index.html")
+
+
+def test_fourth_down_chart_uses_three_action_colors_and_a_hatch_for_leans():
+    css, js, html = read("styles.css"), read("fourth.js"), read("fourth.html")
+    assert re.search(r"--cat-go:\s*var\(--primary\)", css) and re.search(r"--cat-fg:\s*var\(--ink\)", css) and re.search(r"--cat-punt:\s*var\(--muted\)", css)
+    assert "url(#hatch-go)" in css and "'hatch-' + k" in js and ".hm .hc.lv-0 { fill: var(--ab-sub); }" in css
+    assert "situations are toss-ups" in js and "First model failed its calibration test" in js
+    assert 'id="status"' not in html
+
+
+def test_no_pts_label_on_a_win_probability_difference():
+    """Win-probability differences are percentage points ("pp"); "pts" is for spreads and Elo only."""
+    for name in ("fourth.js", "winprob.js", "plays.js"):
+        js = read(name)
+        assert "' pts'" not in js and " pts," not in js and "(points)" not in js, name
+    assert "' pts', gap: true" not in read("app.js")

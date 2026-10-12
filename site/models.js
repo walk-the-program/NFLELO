@@ -1,5 +1,5 @@
 /* NFLELO models page. Reads ./data/research.json (written by scripts/export_research.py) and draws the
-   scoreboard cards, the game-model holdout chart and the findings. No dependencies; the DOM,
+   scoreboard cards, the NFLELO model holdout chart and the findings. No dependencies; the DOM,
    tooltip, table-view and fetch helpers come from common.js, shared with the ratings page. */
 (function () {
   'use strict';
@@ -123,12 +123,12 @@
       gl('CRPS', 'Forecast error across all yard outcomes.'),
       gl('Calibration error (ECE)', 'How far stated chances sit from results.'),
       gl('RAPM', 'Player effect, adjusted for teammates and opponents.'),
-      gl('Shadow model', 'Logged live beside the main model, not used.')));
+      gl('Shadow model', 'Logged live beside the NFLELO model, not used.')));
   }
 
   function gl(term, text) { return h('div', {}, h('dt', { text: term }), h('dd', { text: text })); }
 
-  // ------------------------------------------------------------------ game-model chart
+  // ------------------------------------------------------------------ NFLELO model chart
 
   function gameChart(host, C) {
     clear(host);
@@ -158,7 +158,7 @@
     rows.forEach(function (r, i) {
       var y0 = m.t + i * rowH, cy = y0 + 56;
       var g = sv('g', { class: 'mrow', tabindex: 0, role: 'img',
-        'aria-label': r.label + ' Brier ' + r.brier.toFixed(4) + (r.gap != null ? '; ' + signed(r.gap, 4) + ' against the game model, 95% interval ' + signed(r.gap_ci_low, 4) + ' to ' + signed(r.gap_ci_high, 4) : '; this is the reference row') }, svg);
+        'aria-label': r.label + ' Brier ' + r.brier.toFixed(4) + (r.gap != null ? '; ' + signed(r.gap, 3) + ' against the NFLELO model, 95% interval ' + signed(r.gap_ci_low, 3) + ' to ' + signed(r.gap_ci_high, 3) : '; this is the reference row') }, svg);
       sv('rect', { class: 'rowhit', x: 0, y: y0 + 2, width: W, height: rowH - 4, fill: 'transparent' }, g);
       sv('text', { class: 'lbl', x: m.l, y: y0 + 22, text: r.label }, g);
       sv('text', { class: 'lbl', x: W - m.r, y: y0 + 22, 'text-anchor': 'end', text: r.brier.toFixed(4) }, g);
@@ -170,7 +170,7 @@
       N.mark(g, r.series, sx(r.brier), cy, 7);
       bindTip(g, function () {
         var rowsT = [{ value: r.brier.toFixed(4), label: 'Brier score', cls: r.series }, { value: r.logloss.toFixed(4), label: 'Log loss' }];
-        if (r.gap != null) rowsT.push({ value: signed(r.gap, 4), label: 'gap to the game model, 95% interval ' + signed(r.gap_ci_low, 4) + ' to ' + signed(r.gap_ci_high, 4) });
+        if (r.gap != null) rowsT.push({ value: signed(r.gap, 3), label: 'gap to the NFLELO model, 95% interval ' + signed(r.gap_ci_low, 3) + ' to ' + signed(r.gap_ci_high, 3) });
         return { title: r.label, rows: rowsT };
       });
     });
@@ -185,15 +185,15 @@
     var mkt = C.rows.filter(function (r) { return r.id === 'market'; })[0];
     var host = h('div', { class: 'chart' });
     var facts = h('dl', { class: 'facts' },
-      fact('Model against Elo', signed(-elo.gap, 4), 'Brier, 95% interval ' + signed(-elo.gap_ci_high, 4) + ' to ' + signed(-elo.gap_ci_low, 4)),
+      fact('NFLELO model against Elo', signed(-elo.gap, 3), 'Brier, 95% interval ' + signed(-elo.gap_ci_high, 3) + ' to ' + signed(-elo.gap_ci_low, 3)),
       fact('Seasons won against Elo', C.model_beats_elo_seasons + ' of ' + C.seasons_total, commas(C.n) + ' games, ' + C.window[0] + ' to ' + C.window[1]),
-      fact('Market against model', signed(mkt.gap, 4), 'Brier, 95% interval ' + signed(mkt.gap_ci_low, 4) + ' to ' + signed(mkt.gap_ci_high, 4)));
+      fact('Market against NFLELO model', signed(mkt.gap, 3), 'Brier, 95% interval ' + signed(mkt.gap_ci_low, 3) + ' to ' + signed(mkt.gap_ci_high, 3)));
     body.appendChild(h('div', { class: 'split' },
       h('div', {},
-        legend([['dot s1', 'Elo v2'], ['dot s3', 'NFLELO game model'], ['dot s2', 'Vegas market, benchmark only']]),
+        legend([['dot s1', 'Elo'], ['dot s3', 'NFLELO model'], ['dot s2', 'Vegas market, benchmark only']]),
         well(host),
         h('p', { class: 'fnote', text: 'Brier, lower is better. Axis starts at 0.200. ' + C.whisker_note }),
-        tableView('View the comparison as a table', [{ t: 'Season' }, { t: 'Games', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }, { t: 'Game model', r: 1, n: 1 }, { t: 'Vegas market', r: 1, n: 1 }], function () {
+        tableView('View the comparison as a table', [{ t: 'Season' }, { t: 'Games', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }, { t: 'NFLELO model', r: 1, n: 1 }, { t: 'Vegas market', r: 1, n: 1 }], function () {
           var all = [[C.window[0] + ' to ' + C.window[1], commas(C.n), elo.brier.toFixed(4), C.rows.filter(function (r) { return r.id === 'model'; })[0].brier.toFixed(4), mkt.brier.toFixed(4)]];
           return all.concat(C.seasons.map(function (s) { return [String(s.season), String(s.n), s.elo.toFixed(4), s.model.toFixed(4), s.market.toFixed(4)]; }));
         })),

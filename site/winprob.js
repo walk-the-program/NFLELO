@@ -36,7 +36,7 @@
     N.heroTiles([
       { label: 'Games charted', big: commas(G.length), bar: W.updated_through.week / 18, barText: 'Through week ' + W.updated_through.week + ' of 18', sub: 'completed ' + W.season + ' games, last on ' + W.updated_through.last_game_date },
       { label: 'Most exciting game', big: top ? top.away + ' at ' + top.home : 'n/a', sub: top ? 'Week ' + top.week + ', final ' + top.away_score + '-' + top.home_score + ', index ' + top.excitement.toFixed(1) : '' },
-      { label: 'Biggest single swing', big: swingMax ? pts(swingMax.swing.abs) + ' pts' : 'n/a', sub: swingMax ? 'one play, ' + matchup(swingMax) + ', week ' + swingMax.week + ', ' + swingMax.swing.clock : '' },
+      { label: 'Biggest single swing', big: swingMax ? pts(swingMax.swing.abs) + ' pp' : 'n/a', sub: swingMax ? 'one play, ' + matchup(swingMax) + ', week ' + swingMax.week + ', ' + swingMax.swing.clock : '' },
       { label: 'Test against nflfastR', big: signed(d.diff, 4), sub: 'Brier, ' + commas(H.plays) + ' plays, 2020 to 2025' }
     ]);
     N.licenseUI(W.license);
@@ -110,16 +110,16 @@
     ui.head.textContent = N.teamName(g.away) + ' at ' + N.teamName(g.home) + ', ' + g.date;
     var sw = g.swing;
     clear(ui.note);
-    ui.note.append(h('b', { text: 'Biggest swing: ' }), sw.clock + '. ' + g.home + ' ' + pct(sw.wp_before) + ' to ' + pct(sw.wp_after) + ' (' + signed(sw.delta_home * 100, 1) + ' points). ' + sw.desc);
+    ui.note.append(h('b', { text: 'Biggest swing: ' }), sw.clock + '. ' + g.home + ' ' + pct(sw.wp_before) + ' to ' + pct(sw.wp_after) + ' (' + signed(sw.delta_home * 100, 1) + ' pp). ' + sw.desc);
     ui.ot.hidden = !g.overtime;
     ui.ot.textContent = g.overtime ? 'Overtime is not modelled; the line stops at regulation.' : '';
     clear(ui.facts);
     [
       ['Final', g.away + ' ' + g.away_score + ', ' + g.home + ' ' + g.home_score, 'Week ' + g.week + (g.overtime ? ', overtime' : '')],
-      ['Pregame, ' + g.home + ' to win', pct(g.pregame_home, 0), 'A4s model, before kickoff'],
+      ['Pregame, ' + g.home + ' to win', pct(g.pregame_home, 0), 'NFLELO model, before kickoff'],
       ['Excitement index', g.excitement.toFixed(1), rank ? 'rank ' + rank.rank + ' of ' + W.games.length + ' this season' : ''],
       [win ? win + '\'s lowest point' : 'Lowest point', g.winner_min_wp == null ? 'n/a' : pct(g.winner_min_wp, 0), win ? 'comeback measure' : 'no winner'],
-      ['Biggest swing', pts(sw.abs) + ' pts', sw.clock]
+      ['Biggest swing', pts(sw.abs) + ' pp', sw.clock]
     ].forEach(function (f) { ui.facts.appendChild(h('div', {}, h('dt', { text: f[0] }), h('dd', { class: 'num' }, f[1], h('small', { text: f[2] })))); });
     drawChart();
     ui.tv.refresh();
@@ -262,10 +262,10 @@
       var full = byId[g.game_id];
       var row = h('button', { type: 'button', class: 'xrow', 'aria-current': curGame && curGame.game_id === g.game_id ? 'true' : null, 'aria-label': 'Open ' + matchup(g) + ', week ' + g.week + ', in the chart. Excitement ' + g.excitement.toFixed(1) },
         h('span', { class: 'rk num', text: String(g.rank) }),
-        h('span', { class: 'gm' }, matchup(g), h('small', {}, g.away_score + '-' + g.home_score + (g.overtime ? ' (OT)' : '') + ', week ' + g.week, h('span', { class: 'mini', text: ', swing ' + pts(g.biggest_swing) + ' pts, winner low ' + (g.winner_min_wp == null ? 'n/a' : pct(g.winner_min_wp, 0)) }))),
+        h('span', { class: 'gm' }, matchup(g), h('small', {}, g.away_score + '-' + g.home_score + (g.overtime ? ' (OT)' : '') + ', week ' + g.week, h('span', { class: 'mini', text: ', swing ' + pts(g.biggest_swing) + ' pp, winner low ' + (g.winner_min_wp == null ? 'n/a' : pct(g.winner_min_wp, 0)) }))),
         h('span', { class: 'wk num', text: 'Wk ' + g.week }),
         h('span', { class: 'xv' }, h('span', { class: 'num', text: g.excitement.toFixed(1) }), h('span', { class: 'xb' }, h('i', { style: 'width:' + (g.excitement / ui.max * 100).toFixed(1) + '%' }))),
-        h('span', { class: 'sw num' }, pts(g.biggest_swing) + ' pts'),
+        h('span', { class: 'sw num' }, pts(g.biggest_swing) + ' pp'),
         h('span', { class: 'lw num' }, g.winner_min_wp == null ? 'n/a' : pct(g.winner_min_wp, 0)));
       row.addEventListener('click', function () {
         pick(g.game_id);
@@ -302,7 +302,7 @@
     dyn.appendChild(h('p', { class: 'stat-note', style: 'margin-top:0', text: 'Fit on ' + F.trained_on[0] + ' to ' + F.trained_on[1] + ' plays (' + commas(F.n_train) + ' snaps), frozen before the ' + W.season + ' season.' }));
     dyn.appendChild(N.caveatBox(['Overtime is not modelled.'], 'Caveat'));
     dyn.appendChild(h('dl', { class: 'gloss' },
-      [['Excitement index', 'sum of snap-to-snap win probability changes'], ['Biggest swing', 'largest single-play change'], ['Winner\'s low point', 'lowest win chance the winner had'], ['Pregame', 'A4s win chance before kickoff']].map(function (k) { return h('div', {}, h('dt', { text: k[0] }), h('dd', { text: k[1] })); })));
+      [['Excitement index', 'sum of snap-to-snap win probability changes'], ['Biggest swing', 'largest single-play change'], ['Winner\'s low point', 'lowest win chance the winner had'], ['Pregame', 'NFLELO model win chance before kickoff']].map(function (k) { return h('div', {}, h('dt', { text: k[0] }), h('dd', { text: k[1] })); })));
   }
 
   // ------------------------------------------------------------------ boot

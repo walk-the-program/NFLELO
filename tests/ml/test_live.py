@@ -255,8 +255,8 @@ def test_live_features_weeks_and_starters(synth_pbp, synth_sched):
 # --------------------------------------------------------------------------- exporter
 
 INPUTS = [config.OUT_DIR / "elo_games.csv", config.OUT_DIR / "ratings_current.json", config.RAW_DIR / "schedules.csv"]
-SITE_FILES = ["meta.json", "ladder.json", "upcoming.json", "history.json", "luck.json", "tapestry.json",
-              "records.json", "scorecard.json", "headlines.json"]
+SITE_FILES = ["meta.json", "ladder.json", "upcoming.json", "history.json", "luck.json", "parity.json",
+              "scorecard.json", "headlines.json"]
 needs_inputs = pytest.mark.skipif(not all(p.exists() for p in INPUTS), reason="needs outputs/ and data/raw/schedules.csv")
 
 

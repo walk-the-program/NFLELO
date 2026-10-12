@@ -67,7 +67,7 @@ def test_numbers_come_from_the_registry_and_signoff_runs_are_holdout(research):
             assert p["ci_low"] <= p["estimate"] <= p["ci_high"]
             assert p["excludes_zero"] == (p["ci_low"] > 0 or p["ci_high"] < 0)
     by_id = {m["id"]: m for m in research["models"]}
-    assert by_id["M3"]["primary"]["text"] == "-0.0035 [-0.0063, -0.0007]"
+    assert by_id["M3"]["primary"]["text"] == "-0.004 [-0.006, -0.001]"
     assert by_id["M4-margin"]["primary"]["excludes_zero"] is False      # the failed primary
     assert by_id["M7a-4th"]["primary"]["estimate"] > by_id["M7a-4th"]["primary"]["limit"]
 

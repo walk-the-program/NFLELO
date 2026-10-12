@@ -1,6 +1,6 @@
 /* NFLELO play calling page. Reads ./data/playcalling.json (written by scripts/export_ml_pages.py): the
-   off-policy test of the early-down play-calling recommendations, the 60-situation grid by season and score state,
-   and a descriptive 2025 team view. No dependencies; helpers come from common.js. */
+   off-policy test of the early-down play-calling recommendations, the 60-situation grid by season and score state.
+   No dependencies; helpers come from common.js. */
 (function () {
   'use strict';
 
@@ -13,7 +13,6 @@
   var PC = null;
   var ui = {};
   var score = 'within 3', season = '2025', selCell = { dd: '1-10+', zone: 'own 21-50' };
-  var teamSort = 'pass_rate';
 
   var DD = [['1-10+', '1st and 10+', '10 or more to go'], ['1-short', '1st, short', 'under 10 to go'], ['2-long', '2nd and long', '8 or more to go'], ['2-mid', '2nd and mid', '4 to 7 to go'], ['2-short', '2nd and short', '1 to 3 to go']];
   var ZONES = [['own 1-20', 'Own 1-20'], ['own 21-50', 'Own 21-50'], ['opp 49-21', 'Opp 49-21'], ['red zone', 'Red zone']];
@@ -64,7 +63,7 @@
         well(host),
         h('p', { class: 'fnote', text: 'EPA per early-down play over the actual mix of calls. 95% intervals, ' + commas(o.clusters) + ' games.' }),
         h('dl', { class: 'statrow' },
-          stat('Success rate gain', signed(H.ope_success_rate.diff * 100, 1) + ' pts', '95% interval ' + signed(H.ope_success_rate.lo * 100, 1) + ' to ' + signed(H.ope_success_rate.hi * 100, 1)),
+          stat('Success rate gain', signed(H.ope_success_rate.diff * 100, 1) + ' pp', '95% interval ' + signed(H.ope_success_rate.lo * 100, 1) + ' to ' + signed(H.ope_success_rate.hi * 100, 1)),
           stat('Plays the policy changes', pct(H.share_of_plays_policy_applies, 0), epa(H.epa_per_affected_play) + ' EPA per affected play'),
           stat('Plays tested', commas(H.plays), 'early downs, ' + PC.seasons[0] + ' to ' + PC.seasons[PC.seasons.length - 1]))),
       h('div', {},
@@ -167,57 +166,15 @@
       })))));
   }
 
-  // ------------------------------------------------------------------ team view
-
-  function buildTeams() {
-    var body = done('teams-body'), T = PC.team_view_2025;
-    clear(body);
-    setText('teams-h', 'Pass rate where passing is best: ' + T.teams[0].team + ' ' + pct(T.teams[0].pass_rate, 0) + ', ' + T.teams[T.teams.length - 1].team + ' ' + pct(T.teams[T.teams.length - 1].pass_rate, 0));
-    ui.tlist = h('div', { class: 'tlist' });
-    var sortSeg = N.seg('Sort teams', [{ value: 'pass_rate', label: 'Pass rate' }, { value: 'name', label: 'Team A to Z' }], teamSort, function (v) { teamSort = v; drawTeams(); });
-    var cellsTv = N.tableView('View the ' + T.pass_cells.length + ' situations where the 2025 recommendation is a pass', [{ t: 'Situation' }, { t: 'Recommended action' }], function () { return T.pass_cells.map(function (c) { return [c.cell, actLong(c.recommended)]; }); });
-    body.appendChild(h('div', {},
-      h('p', { class: 'fnote', style: 'margin-top:0' }, h('span', { class: 'me', text: 'descriptive' }), ' Observed ' + T.season + ' calls in the ' + T.pass_cells.length + ' pass-best situations. League ' + pct(T.league.pass_rate, 0) + ' over ' + commas(T.league.plays) + ' plays.'),
-      h('div', { style: 'margin-top:16px;width:fit-content;max-width:100%' }, sortSeg.el),
-      h('div', { style: 'margin-top:22px' }, ui.tlist),
-      cellsTv));
-    drawTeams();
-  }
-
-  function drawTeams() {
-    var T = PC.team_view_2025, lg = T.league, list = T.teams.slice();
-    if (teamSort === 'name') list.sort(function (a, b) { return a.team.localeCompare(b.team); }); else list.sort(function (a, b) { return b.pass_rate - a.pass_rate; });
-    var lo = Math.floor(Math.min.apply(null, T.teams.map(function (t) { return t.pass_rate; })) * 20) / 20, hi = Math.ceil(Math.max.apply(null, T.teams.map(function (t) { return t.pass_rate; })) * 20) / 20;
-    function at(v) { return ((v - lo) / (hi - lo) * 100).toFixed(2) + '%'; }
-    clear(ui.tlist);
-    ui.tlist.appendChild(h('div', { class: 'tvrow tvhead' }, h('span', { text: 'Team' }),
-      h('span', { class: 'axisrow', text: pct(lo, 0) + ' to ' + pct(hi, 0) + ' pass rate; tick = league ' + pct(lg.pass_rate, 0) }),
-      h('span', { class: 'r', text: 'Pass rate' }), h('span', { class: 'r', text: 'vs league' }), h('span', { class: 'r em', text: 'Exact match' })));
-    list.forEach(function (t) {
-      var row = h('div', { class: 'tvrow', tabindex: 0, 'aria-label': N.teamName(t.team) + ', pass rate ' + pct(t.pass_rate, 1) + ', ' + signed(t.vs_league * 100, 1) + ' points against the league' },
-        h('span', {}, h('span', { class: 'abbr', text: t.team }), h('span', { class: 'nm', text: N.teamName(t.team).replace(/^.* /, '') })),
-        h('span', { class: 'dp' }, h('b', { style: 'left:' + at(lg.pass_rate) }), h('i', { style: 'left:' + at(t.pass_rate) })),
-        h('span', { class: 'r num', text: pct(t.pass_rate, 0) }), h('span', { class: 'r num', text: signed(t.vs_league * 100, 1) + ' pts' }), h('span', { class: 'r em num', text: pct(t.exact_match_rate, 0) }));
-      bindTip(row, function () {
-        return { title: N.teamName(t.team) + ', 2025 (descriptive)', rows: [
-          { value: pct(t.pass_rate, 1), label: 'pass rate in the pass-recommended situations (' + t.plays + ' plays)', cls: 's3' },
-          { value: signed(t.vs_league * 100, 1) + ' pts', label: 'against the league, not adjusted for situation mix' },
-          { value: pct(t.exact_match_rate, 1), label: 'used the exact recommended personnel and call' },
-          { value: pct(t.early_down_pass_rate_all_cells, 1), label: 'pass rate on all early downs' }] };
-      });
-      ui.tlist.appendChild(row);
-    });
-  }
-
   // ------------------------------------------------------------------ method
 
   // ------------------------------------------------------------------ boot
 
-  var ALL = ['caveats-body', 'ope-body', 'cells-body', 'teams-body'];
+  var ALL = ['caveats-body', 'ope-body', 'cells-body'];
   N.loadTeamNames().then(function () { return N.getJSON('data/playcalling.json', true); }).then(function (d) {
     if (!d || !d.cells) { N.unavailable('The play-calling data', ALL); return; }
     PC = d;
     season = String(PC.seasons[PC.seasons.length - 1]);
-    renderHero(); renderCaveats(); buildOpe(); buildCells(); buildTeams();
+    renderHero(); renderCaveats(); buildOpe(); buildCells();
   }).catch(function (err) { console.error(err); N.unavailable('The play-calling data', ALL); });
 })();
