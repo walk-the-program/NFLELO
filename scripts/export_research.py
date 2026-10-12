@@ -108,6 +108,11 @@ METADATA = [
      "verdict": "pass", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "The recommended mix beats what teams actually did, and the placebo check came back near zero. Defenses would adapt, so treat it as a direction, not a guarantee.",
      "method_doc": "context/ml-m7-method.md", "rules_commit": "92ae084", "result_commit": "7b3e703"},
+    {"id": "M8", "short": "M8", "name": "Game model v2",
+     "what": "Five upgrades to the game model: training on point margin, blending models, an opponent-adjusted quarterback rating, early-season fixes, and travel, time-zone and rest features.",
+     "verdict": "negative", "tested_holdout": False, "license": "CC BY",
+     "reading": "None beat the Kalman candidate beyond noise on development seasons, so nothing was promoted. Weather was dropped because nflverse records it only after a game, and even actual game-day weather did not help.",
+     "method_doc": "context/ml-m8-method.md", "rules_commit": None, "result_commit": "f710e6f"},
 ]
 
 MODEL_IDS = [m["id"] for m in METADATA]
@@ -225,6 +230,16 @@ def model_numbers(mid: str, runs_dir: Path | None) -> dict:
                       n_unit="games", window="development seasons 2006 to 2019, no holdout run", file_name=f)
         ll = d["comparisons"]["vs_a4s_logloss"]
         also = [{"text": f"Log loss, the stricter score: {interval(ll['diff'], ll['ci_low'], ll['ci_high'], 4)}",
+                 "source": src(f)}]
+        return {"primary": prim, "also": also}
+
+    if mid == "M8":
+        d, f = load_run("m8_E5", runs_dir)
+        if d.get("holdout"):
+            raise RunMissing("m8_E5 should be a development run")
+        prim = paired("Brier score, best upgrade minus the Kalman candidate (lower is better)", d["comparisons"]["vs_c2d"], 4,
+                      n_unit="games", window="development seasons 2006 to 2019, no holdout run", file_name=f)
+        also = [{"text": f"Against the live model: {interval(d['comparisons']['vs_a4s']['diff'], d['comparisons']['vs_a4s']['ci_low'], d['comparisons']['vs_a4s']['ci_high'], 4)}",
                  "source": src(f)}]
         return {"primary": prim, "also": also}
 

@@ -2,7 +2,7 @@
 
 Every model below was developed on earlier seasons, then judged **once** on the locked 2020-2025 seasons, using pass/fail rules committed to the public repo before that run. The commit hashes are the receipts: anyone can check that the rules came before the results. Failures are listed with the passes. Details and full tables are in `context/ml.md`; the method write-ups are in `context/ml-*-method.md`.
 
-Last updated 2026-10-05.
+Last updated 2026-10-11.
 
 ## Results
 
@@ -20,6 +20,7 @@ Last updated 2026-10-05.
 | M7a | Fourth-down tool | Go / FG / punt in win probability, with an uncertainty band | Conversion calibration ECE 0.027 missed the bar; FG and punt pass | **Fail** (conversion component). Audit published |
 | M7a-v2 | Corrected conversion engine | Run/pass mix by field zone plus fourth-down conversion offsets, frozen before 2026 | Dev only: conversion ECE 0.019 vs 0.033 for v1; 4th-and-2 gap +0.004 vs +0.034 | **Forward test pending** (2026 from 2027-02-15; pooled 2026+2027 secondary) |
 | M7b | **Early-down play calling** | Run or pass by personnel, using causal methods (propensity, AIPW, off-policy evaluation) | Recommended policy +0.052 EPA/play [+0.038, +0.067] over observed; placebo includes 0 | **Pass** |
+| M8 | Game model v2 | Margin targets, blending, opponent-adjusted QB, early-season and context features | Best step vs the Kalman candidate -0.0002 Brier (CI includes 0) on DEV 2006-2019 | **Negative result.** Nothing promoted; weather is unusable live (filled only after games) |
 
 ## What the evidence says
 

@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 import export_research  # noqa: E402
 
-EXPECTED_IDS = ["M3", "M4-margin", "M4-odds", "M5", "M5b", "M3b", "M6", "M7a-wp", "M7a-4th", "M7b"]
+EXPECTED_IDS = ["M3", "M4-margin", "M4-odds", "M5", "M5b", "M3b", "M6", "M7a-wp", "M7a-4th", "M7b", "M8"]
 
 needs_registry = pytest.mark.skipif(not export_research.RUNS_DIR.exists(), reason="needs experiments/runs")
 
@@ -42,7 +42,7 @@ def test_verdict_counts_match_the_metadata(research):
     for v in export_research.VERDICT_ORDER:
         assert counts[v] == sum(1 for m in meta if m["verdict"] == v)
         assert counts[v] == sum(1 for m in research["models"] if m["verdict"] == v)
-    assert counts["total"] == len(meta) == 10
+    assert counts["total"] == len(meta) == 11
     assert counts["holdout_tested"] == sum(1 for m in meta if m["tested_holdout"])
     assert counts["holdout_pass"] + counts["holdout_fail"] == counts["holdout_tested"]
     assert counts["pass"] + counts["fail"] + counts["negative"] + counts["shadow"] == counts["total"]
