@@ -279,12 +279,12 @@
     ui.more.textContent = showAll ? 'Show the top 10' : 'Show all ' + L.length + ' games';
   }
 
-  // ------------------------------------------------------------------ receipts and method
+  // ------------------------------------------------------------------ result and method
 
-  function buildReceipts() {
-    var body = done('receipts-body'), H = W.headline, d = H.ours_minus_nflfastr;
+  function buildResult() {
+    var body = done('result-body'), H = W.headline, d = H.ours_minus_nflfastr;
     clear(body);
-    setText('receipts-h', 'Ours beat nflfastR on seasons it never saw');
+    setText('result-h', 'Ours beat nflfastR on seasons it never saw');
     var host = h('div', { class: 'chart ci' });
     body.appendChild(h('div', {},
       h('p', { class: 'stat-note', style: 'margin-top:0', text: H.plain }),
@@ -308,8 +308,6 @@
     dyn.appendChild(h('dl', { class: 'gloss' },
       h('h3', { text: 'What each number means' }),
       Object.keys(D).map(function (k) { return h('div', {}, h('dt', { text: k }), h('dd', { text: D[k] })); })));
-    $('#how-rcpt').appendChild(N.receiptLinks(W.headline.receipt));
-    setText('how-credit', W.license.credit);
   }
 
   // ------------------------------------------------------------------ boot
@@ -319,12 +317,12 @@
     renderHero();
     buildLeaderboard();
     buildChart();
-    buildReceipts();
+    buildResult();
     buildHow();
     renderLeaderRows();
   }
 
-  var ALL = ['chart-body', 'excite-body', 'receipts-body'];
+  var ALL = ['chart-body', 'excite-body', 'result-body'];
   Promise.all([N.getJSON('data/winprob.json', true), N.loadTeamNames()]).then(function (r) {
     if (!r[0] || !r[0].games) { N.unavailable('The win probability data', ALL); return; }
     W = r[0];

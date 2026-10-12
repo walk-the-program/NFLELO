@@ -188,7 +188,6 @@
 
   var REPO = 'https://github.com/walk-the-program/NFLELO';
   function repoUrl(path) { return REPO + '/blob/main/' + path; }
-  function commitUrl(hash) { return REPO + '/commit/' + hash; }
   // Signed fixed-point text with an ASCII minus; a value that rounds to zero is shown as +0.
   function signed(x, d) { var r = Math.round(x * Math.pow(10, d)) / Math.pow(10, d); return (r >= 0 ? '+' : '-') + Math.abs(r).toFixed(d); }
   function commas(n) { return Number(n).toLocaleString('en-US'); }
@@ -236,20 +235,10 @@
       text ? h('p', { class: 'tcap', text: text }) : null);
   }
 
-  // License chip in the hero kicker row and the credit line in the footer, both from the JSON.
+  // The credit line in the footer, from the JSON.
   function licenseUI(lic) {
     if (!lic) return;
-    var chip = $('#lic');
-    if (chip) { clear(chip); chip.appendChild(h('a', { href: lic.url, rel: 'noopener', text: lic.license })); }
     setText('credit', lic.credit);
-  }
-
-  function receiptLinks(receipt) {
-    if (!receipt) return null;
-    return h('span', { class: 'rcpt' },
-      h('a', { href: repoUrl(receipt.run), text: 'Run record' }), ', ',
-      h('a', { href: commitUrl(receipt.commit), text: 'commit ' + receipt.commit }),
-      ', logged ' + String(receipt.logged_at || '').slice(0, 10));
   }
 
   function caveatBox(list, title, cls) {
@@ -359,8 +348,8 @@
     getJSON: getJSON, $: $, h: h, append: append, sv: sv, clear: clear, well: well,
     tipShow: tipShow, tipHide: tipHide, bindTip: bindTip, live: live,
     watch: watch, tableView: tableView, legend: legend, initNav: initNav,
-    REPO: REPO, repoUrl: repoUrl, commitUrl: commitUrl, signed: signed, commas: commas, pct: pct, ciText: ciText,
-    setText: setText, done: done, seg: seg, heroTiles: heroTiles, tileBar: tileBar, licenseUI: licenseUI, receiptLinks: receiptLinks,
+    REPO: REPO, repoUrl: repoUrl, signed: signed, commas: commas, pct: pct, ciText: ciText,
+    setText: setText, done: done, seg: seg, heroTiles: heroTiles, tileBar: tileBar, licenseUI: licenseUI,
     caveatBox: caveatBox, unavailable: unavailable, ciChart: ciChart, tableViewLive: tableViewLive,
     loadTeamNames: loadTeamNames, teamName: teamName, fieldLabel: fieldLabel, ordinal: ordinal,
     mark: mark, moveMark: moveMark, initSlabs: initSlabs

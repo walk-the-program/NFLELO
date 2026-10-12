@@ -173,3 +173,52 @@ def test_secondary_is_never_a_line_dot_or_text_color():
         for line in read(name).splitlines():
             if "var(--secondary)" in line:
                 assert "fill:" in line and "pale: true" in line, (name, line.strip())
+
+
+# ---- Walker 2026-10-11: no inline sources or receipts; the data credit appears once, in the footer ----
+
+SA_PAGES = ["models", "plays", "fourth", "playcalling"]   # pages whose numbers come from participation data
+
+
+@pytest.mark.parametrize("page", PAGES)
+def test_footer_credit_appears_once_per_page(page):
+    html = read(f"{page}.html")
+    assert html.count('id="credit"') == 1
+    foot = re.search(r"<footer.*?</footer>", html, re.S).group(0)
+    credit = re.search(r'<p id="credit">(.*?)</p>', foot, re.S).group(1)
+    assert "nflverse" in credit and "CC BY" in credit
+    if page in SA_PAGES:
+        assert "CC BY-SA 4.0" in credit
+    if page in ("index", "models"):
+        assert "FiveThirtyEight" in credit
+    # nothing else on the page restates the credit (no second credit element, no per-section credit lines)
+    assert "how-credit" not in html and "foot-credit" not in html
+    assert html.count("Data: nflverse") == 1
+
+
+@pytest.mark.parametrize("page", PAGES)
+def test_no_source_or_receipt_clutter_renders(page):
+    text = read(f"{page}.html") + read(f"{SCRIPT[page]}.js") + read("common.js")
+    for gone in ("experiments/runs", "/commit/", "Rules ' +", "Result ' +", "Rules commit", "Result commit", "how-rcpt", "receiptLinks",
+                 "Run registry", "run registry", "Receipts", "receipts", "Source: ", "Run record", "Data contract"):
+        assert gone not in text, (page, gone)
+
+
+def test_models_page_keeps_one_method_link_per_card_and_one_how_we_test_tile():
+    html, js = read("models.html"), read("models.js")
+    assert html.count('id="how"') == 1 and html.count("How we test") >= 2   # nav link and the section
+    assert "github.com/walk-the-program/NFLELO" in html
+    sec = re.search(r'<section class="sec" id="how".*?</section>', html, re.S).group(0)
+    assert len(re.findall(r"<a ", sec)) == 1 and sec.count('class="deck"') == 2
+    assert "text: 'Method'" in js and js.count("class: 'mc-links'") == 1
+
+
+def test_models_scoreboard_has_a_summary_tile_that_fills_the_grid():
+    js, css = read("models.js"), read("styles.css")
+    assert "summaryCard(c)" in js and "mc-sum" in js
+    assert "development only" in js and "running live" in js
+    # 12 tiles divide evenly into the 2, 3 and 4 column layouts
+    cols = [int(n) for n in re.findall(r"\.mcards \{ grid-template-columns: repeat\((\d+), 1fr\)", css)]
+    assert cols == [2, 3, 4] and all(12 % n == 0 for n in cols)
+    # tiles stacked in a loose body (the card grid, then the table-view tile) sit the standard 14px apart
+    assert re.search(r"\.body\.loose \{[^}]*display: grid[^}]*gap: var\(--gap\)", css)

@@ -28,7 +28,7 @@
     <li><a href="winprob.html">Win prob</a></li>
     <li><a href="fourth.html">Fourth down</a></li>
     <li><a href="playcalling.html" aria-current="page">Play calling</a></li>
-    <li><a href="models.html">Receipts</a></li>
+    <li><a href="models.html">Models</a></li>
   </ul>
 </nav>
 
@@ -37,7 +37,7 @@
     <div class="board hero-board">
       <section class="tile-m hero-art pat-terrain" aria-labelledby="page-title">
         <div class="plate hero-plate">
-          <p class="page-kicker">NFLELO &rarr; Models &rarr; Play calling <span class="lic" id="lic"></span></p>
+          <p class="page-kicker">NFLELO &rarr; Models &rarr; Play calling</p>
           <h1 class="page-title" id="page-title">Play <span class="hl">calling</span></h1>
           <p class="hero-line" id="hero-line">Loading results</p>
           <p class="hero-deck" id="hero-deck">On first and second down, which mix of run or pass and personnel group gained the most expected points in each situation, estimated from earlier seasons and tested on later ones.</p>
@@ -111,17 +111,6 @@
         <p><b>What it does.</b> Teams call plays based on things the data partly captures. The method estimates, for each situation, what the average play would have gained had the team called each candidate action, by correcting for how often teams chose each action (a doubly robust, "AIPW", estimate). An action is a personnel group plus run or pass.</p><p><b>What the gain means.</b> Gain is expected points added per play, compared with the teams' current mix on the same plays. A situation is marked "clear best" only when the best action's interval sits above zero. "No clear best" means the data cannot rank the actions, not that they are equal.</p><p><b>The test.</b> Recommendations for each season come from earlier seasons only. The policy is then scored on the later season by off-policy evaluation. A placebo with shuffled actions should show no gain, and it does not.</p><p><b>The limits.</b> This is an observational estimate. Read the caveats at the top of the page before using any single number.</p>
         <div id="how-dyn" class="how-dyn"></div>
       </div>
-      <div>
-        <h3>Receipts and links</h3>
-        <ul class="linklist">
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-m7-method.md">Method: decision support (M7b)</a><small>Propensity model, cross-fitting, off-policy evaluation</small></li>
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-pages.md">Data contract for this page</a><small>Every field in playcalling.json and what it means</small></li>
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-results.md">Full scoreboard</a><small>Every model and its locked result, failures included</small></li>
-          <li><a href="models.html">All models and receipts</a><small>Pass and fail, with the commits that prove the order</small></li>
-        <li id="how-rcpt" class="rcpt-li"></li>
-        </ul>
-        <p class="fnote" id="how-credit"></p>
-      </div>
     </div>
   </div>
   </div>
@@ -133,10 +122,10 @@
     <div class="tile-m foot-art foot-plain"><p class="motto plate">One tile, one idea.</p></div>
     <div class="tile-m foot-links">
       <p class="foot-dot"><i aria-hidden="true"></i>NFLELO, Machine Learning applied to Football</p>
-      <p id="credit">Data: nflverse (CC BY 4.0).</p>
+      <p id="credit">Data: nflverse (CC BY 4.0); participation data from NFL Next Gen Stats via nflverse (2016-2022) and FTN Data via nflverse (2023+). Numbers on this page derive from participation data and are released under CC BY-SA 4.0.</p>
       <p>Independent project, not affiliated with the NFL or any team.</p>
       <p><a href="index.html">Ratings and the weekly ladder</a></p>
-      <p><a href="models.html">Every model and its receipts</a></p>
+      <p><a href="models.html">All models</a></p>
       <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
     </div>
   </div>

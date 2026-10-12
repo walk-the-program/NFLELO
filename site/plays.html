@@ -28,7 +28,7 @@
     <li><a href="winprob.html">Win prob</a></li>
     <li><a href="fourth.html">Fourth down</a></li>
     <li><a href="playcalling.html">Play calling</a></li>
-    <li><a href="models.html">Receipts</a></li>
+    <li><a href="models.html">Models</a></li>
   </ul>
 </nav>
 
@@ -37,7 +37,7 @@
     <div class="board hero-board">
       <section class="tile-m hero-art pat-terrain" aria-labelledby="page-title">
         <div class="plate hero-plate">
-          <p class="page-kicker">NFLELO &rarr; Models &rarr; Play outcomes <span class="lic" id="lic"></span></p>
+          <p class="page-kicker">NFLELO &rarr; Models &rarr; Play outcomes</p>
           <h1 class="page-title" id="page-title">Play <span class="hl">outcomes</span></h1>
           <p class="hero-line" id="hero-line">Loading results</p>
           <p class="hero-deck" id="hero-deck">Set a situation and see the whole spread of yards the play model expects, not just an average. Built from pre-snap facts only and tested on seasons it never saw.</p>
@@ -80,17 +80,6 @@
         <p><b>What it does.</b> For a given down, distance, field position, call and offensive personnel group, the model predicts the probability of every yard result on the snap. It sees only what is known before the snap: the situation, the personnel and formation on the field, the two teams' ratings, and the weather.</p><p><b>What the bars mean.</b> Each bar is the chance of that exact gain. The bars to the right of the dashed line reach the line to gain. A touchdown is shown as its own bar because it is not a number of yards. Turnover chance comes from a separate model and overlaps the yard bars, so it is drawn as an outline.</p><p><b>What is held fixed.</b> Everything not on the console is set to a neutral value (tied game, mid second quarter, average teams, mild weather), so you compare situations rather than games.</p><p><b>How it was tested.</b> The model was scored once on the 2020 to 2025 seasons, using only earlier seasons to train, against a baseline that knows only down, distance and field position. The score is CRPS, the average miss of the whole yard distribution; lower is better.</p>
         <div id="how-dyn" class="how-dyn"></div>
       </div>
-      <div>
-        <h3>Receipts and links</h3>
-        <ul class="linklist">
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-m6-method.md">Method: the play model (M6)</a><small>Pre-registered rules, data, and the leak checks</small></li>
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-pages.md">Data contract for this page</a><small>Every field in plays.json and what it means</small></li>
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-results.md">Full scoreboard</a><small>Every model and its locked result, failures included</small></li>
-          <li><a href="models.html">All models and receipts</a><small>Pass and fail, with the commits that prove the order</small></li>
-        <li id="how-rcpt" class="rcpt-li"></li>
-        </ul>
-        <p class="fnote" id="how-credit"></p>
-      </div>
     </div>
   </div>
   </div>
@@ -102,10 +91,10 @@
     <div class="tile-m foot-art foot-plain"><p class="motto plate">One tile, one idea.</p></div>
     <div class="tile-m foot-links">
       <p class="foot-dot"><i aria-hidden="true"></i>NFLELO, Machine Learning applied to Football</p>
-      <p id="credit">Data: nflverse (CC BY 4.0).</p>
+      <p id="credit">Data: nflverse (CC BY 4.0); participation data from NFL Next Gen Stats via nflverse (2016-2022) and FTN Data via nflverse (2023+). Numbers on this page derive from participation data and are released under CC BY-SA 4.0.</p>
       <p>Independent project, not affiliated with the NFL or any team.</p>
       <p><a href="index.html">Ratings and the weekly ladder</a></p>
-      <p><a href="models.html">Every model and its receipts</a></p>
+      <p><a href="models.html">All models</a></p>
       <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
     </div>
   </div>

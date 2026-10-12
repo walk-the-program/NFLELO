@@ -49,10 +49,9 @@ def test_verdict_counts_match_the_metadata(research):
     # the hero sentence is counted from the data
     assert research["headlines"]["hero"].startswith(f"{counts['holdout_tested']} models tested once")
     assert f"{counts['holdout_pass']} passed" in research["headlines"]["hero"]
-    # only models with a holdout run have frozen rules; every verdict has a label
+    # every verdict has a label
     for m in research["models"]:
         assert m["verdict_label"] == export_research.VERDICT_LABELS[m["verdict"]]
-        assert bool(m["rules_commit"]) == m["tested_holdout"], m["id"]
 
 
 @needs_registry
@@ -92,22 +91,14 @@ def test_chart_matches_the_game_model_signoff(research):
     assert c["model_beats_elo_seasons"] == 6 == c["seasons_total"] == len(c["seasons"])
 
 
-def test_live_summary_reads_ml_json(tmp_path):
-    assert export_research.build_live(tmp_path) is None
-    (tmp_path / "ml.json").write_text(json.dumps({
-        "season": 2026, "live_from_week": 5, "live_from_date": "2026-10-08", "last_run_utc": "x", "ledger_url": "u",
-        "ledger_rows": 9,
-        "live": {"final": {"n": 3, "model": {"brier": 0.2}, "elo": {"brier": 0.21}}},
-        "shadow": {"n": 3, "shadow": {"brier": 0.19}, "model": {"brier": 0.2}, "brier_diff": -0.01, "ledger_url": "s"}}))
-    live = export_research.build_live(tmp_path)
-    assert live["model"] == {"n_scored": 3, "brier": 0.2, "elo_brier": 0.21}
-    assert live["shadow"]["n_scored"] == 3 and live["shadow"]["brier"] == 0.19
-    (tmp_path / "ml.json").write_text("not json")
-    assert export_research.build_live(tmp_path) is None
-
-
-def test_forward_test_status_is_recorded():
-    assert export_research.FORWARD_TEST["status"] == "Frozen at 5a0b850, runs after 2027-02-15"
+@needs_registry
+def test_citation_fields_are_not_exported(research):
+    """The page no longer shows commit links, the live-record box or the forward-test line, so the file does not carry them."""
+    assert "live" not in research and "forward_test" not in research and "sources" not in research
+    for m in research["models"]:
+        assert "rules_commit" not in m and "result_commit" not in m
+    for f in research["findings"]:
+        assert "source" not in f
 
 
 def test_missing_registry_run_raises_a_clear_error(tmp_path):

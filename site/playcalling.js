@@ -220,8 +220,6 @@
     dyn.appendChild(h('dl', { class: 'gloss' }, h('h3', { text: 'What each term means' }),
       ['gain', 'best', 'clear', 'candidate', 'by_season'].map(function (k) { return h('div', {}, h('dt', { text: k.replace('_', ' ') }), h('dd', { text: D[k] })); })));
     dyn.appendChild(h('p', { class: 'fnote', text: 'The caveats are at the top of this page. The advice in these tables is a statement about the data, not a game plan: defenses would adapt to a team that always followed it.' }));
-    $('#how-rcpt').appendChild(N.receiptLinks(PC.headline.receipt));
-    setText('how-credit', PC.license.credit);
   }
 
   // ------------------------------------------------------------------ boot

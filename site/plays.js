@@ -32,7 +32,7 @@
   }
   function binShort(i) { return i === 0 ? '10+ lost' : i === 51 ? '41+' : (P.bins.yards[i] > 0 ? '+' : '') + P.bins.yards[i]; }
 
-  // ------------------------------------------------------------------ hero and receipts
+  // ------------------------------------------------------------------ hero and method
 
   function renderHero() {
     var hc = P.headline.call, hs = P.headline.situation, d = hc.crps_model_minus_baseline;
@@ -53,7 +53,7 @@
     var dyn = $('#how-dyn');
     var host = h('div', { class: 'chart ci' });
     dyn.appendChild(h('div', {},
-      h('h3', { class: 'sub-h', text: 'The receipt' }),
+      h('h3', { class: 'sub-h', text: 'The result' }),
       h('p', { class: 'stat-note', text: P.headline.plain }),
       well(host),
       h('p', { class: 'fnote', text: 'Model minus baseline, in yards of CRPS (average error of the whole yard distribution). Negative means the model is closer. The call view is the one on this page; the situation view leaves out the called play type. Intervals are 95%, resampled by game.' }),
@@ -72,8 +72,6 @@
     dyn.appendChild(h('div', {},
       h('h3', { class: 'sub-h', text: 'Held neutral' }),
       h('p', { class: 'stat-note', text: heldText(true) })));
-    $('#how-rcpt').appendChild(N.receiptLinks(hc.receipt));
-    setText('how-credit', P.license.credit);
   }
   function stat(label, value, small) { return h('div', {}, h('dt', { text: label }), h('dd', { class: 'num' }, value, h('small', { text: small }))); }
 

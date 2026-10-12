@@ -28,7 +28,7 @@
     <li><a href="winprob.html">Win prob</a></li>
     <li><a href="fourth.html" aria-current="page">Fourth down</a></li>
     <li><a href="playcalling.html">Play calling</a></li>
-    <li><a href="models.html">Receipts</a></li>
+    <li><a href="models.html">Models</a></li>
   </ul>
 </nav>
 
@@ -37,7 +37,7 @@
     <div class="board hero-board">
       <section class="tile-m hero-art pat-terrain" aria-labelledby="page-title">
         <div class="plate hero-plate">
-          <p class="page-kicker">NFLELO &rarr; Models &rarr; Fourth downs <span class="lic" id="lic"></span></p>
+          <p class="page-kicker">NFLELO &rarr; Models &rarr; Fourth downs</p>
           <h1 class="page-title" id="page-title">Fourth <span class="hl">downs</span></h1>
           <p class="hero-line" id="hero-line">Loading results</p>
           <p class="hero-deck" id="hero-deck">For each yard line and distance, which option gives the team the best chance to win: go for it, kick the field goal, or punt. Every number on this page is model-estimated.</p>
@@ -97,17 +97,6 @@
         <p><b>What it does.</b> The engine values each fourth-down option by the team's win probability afterward. Going for it uses the play model (run and pass mix by field zone, with conversion offsets); a field goal uses a kicker-aware make model; a punt uses a punter-aware net-yards model. The best option is the one with the highest win probability.</p><p><b>Toss-ups.</b> When the best option beats the second best by less than 0.02 win probability, the call is a toss-up. The cut-off is fixed; there is no uncertainty band, so treat any close call as a coin flip.</p><p><b>Why it is not validated yet.</b> The first version of the conversion model failed its 2020 to 2025 test. The fix was built on development seasons only, frozen before any 2026 game, and will be scored once, after the 2026 participation data is released. Until then these are a model's view, not a validated tool.</p><p><b>What it ignores.</b> Teams know things the model does not: injuries, matchups, weather at the spot, the game plan. Penalties, kneel-downs, ties and overtime are excluded.</p>
         <div id="how-dyn" class="how-dyn"></div>
       </div>
-      <div>
-        <h3>Receipts and links</h3>
-        <ul class="linklist">
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-m7-method.md">Method: decision support (M7)</a><small>Rules, the first engine's failure, and the frozen fix</small></li>
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml.md">Project record (ml.md)</a><small>The forward-test registration and its dates</small></li>
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-pages.md">Data contract for this page</a><small>Every field in fourth.json and what it means</small></li>
-          <li><a href="models.html">All models and receipts</a><small>Pass and fail, with the commits that prove the order</small></li>
-        <li id="how-rcpt" class="rcpt-li"></li>
-        </ul>
-        <p class="fnote" id="how-credit"></p>
-      </div>
     </div>
   </div>
   </div>
@@ -119,10 +108,10 @@
     <div class="tile-m foot-art foot-plain"><p class="motto plate">One tile, one idea.</p></div>
     <div class="tile-m foot-links">
       <p class="foot-dot"><i aria-hidden="true"></i>NFLELO, Machine Learning applied to Football</p>
-      <p id="credit">Data: nflverse (CC BY 4.0).</p>
+      <p id="credit">Data: nflverse (CC BY 4.0); participation data from NFL Next Gen Stats via nflverse (2016-2022) and FTN Data via nflverse (2023+). Numbers on this page derive from participation data and are released under CC BY-SA 4.0.</p>
       <p>Independent project, not affiliated with the NFL or any team.</p>
       <p><a href="index.html">Ratings and the weekly ladder</a></p>
-      <p><a href="models.html">Every model and its receipts</a></p>
+      <p><a href="models.html">All models</a></p>
       <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
     </div>
   </div>

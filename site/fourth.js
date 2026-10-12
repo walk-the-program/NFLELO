@@ -35,7 +35,7 @@
     body.appendChild(h('span', { class: 'vchip v-negative', text: 'Under test' }));
     body.appendChild(h('div', {},
       h('p', { text: S.plain }),
-      h('p', { text: 'Frozen at commit ' + S.frozen_commit + '. First scored run: ' + S.earliest_run + ' at the earliest. Pooled with 2027 as a secondary check: ' + S.pooled_2026_2027_secondary_earliest + ' at the earliest. ' + S.why }),
+      h('p', { text: 'First scored run: ' + S.earliest_run + ' at the earliest. Pooled with 2027 as a secondary check: ' + S.pooled_2026_2027_secondary_earliest + ' at the earliest. ' + S.why }),
       h('ul', { class: 'comp', 'aria-label': 'Status of each component' }, Object.keys(comps).map(function (k) {
         var t = comps[k], cls = /fail/.test(t) ? 'v-fail' : /pending/.test(t) ? 'v-shadow' : 'v-pass';
         return h('li', {}, h('span', { class: 'vchip ' + cls, text: /fail/.test(t) ? 'Failed' : /pending/.test(t) ? 'Pending' : 'Passed' }), (labels[k] || k) + ': ' + t);
@@ -338,7 +338,7 @@
     ui.pmore.textContent = 'Show ' + Math.min(25, list.length - n) + ' more';
   }
 
-  // ------------------------------------------------------------------ method and receipts
+  // ------------------------------------------------------------------ method
 
   function buildHow() {
     var dyn = $('#how-dyn'), a = F.headline.holdout_audit_v1, E = F.engine, D = F.definitions;
@@ -354,12 +354,10 @@
       h('p', { class: 'fnote', text: 'This audit used the first engine, which failed its conversion calibration test; it is context, not validation of the current engine. The win probability model behind it passed against nflfastR (Brier ' + F.headline.wp_model.brier_ours.toFixed(4) + ' against ' + F.headline.wp_model.brier_nflfastr.toFixed(4) + ').' })));
     dyn.appendChild(h('div', {},
       h('h3', { class: 'sub-h', text: 'The engine' }),
-      h('p', { class: 'stat-note', text: 'Candidate ' + E.engine.candidate + ' of ' + E.engine.name + ', frozen ' + E.engine.frozen_at.slice(0, 10) + ' in ' + E.engine.frozen_file + ' (fingerprint ' + E.engine.frozen_sha256 + '). ' + F.tossup_rule.plain })));
+      h('p', { class: 'stat-note', text: 'Candidate ' + E.engine.candidate + ' of ' + E.engine.name + ', frozen ' + E.engine.frozen_at.slice(0, 10) + '. ' + F.tossup_rule.plain })));
     dyn.appendChild(N.caveatBox(F.caveats, 'Caveats'));
     dyn.appendChild(h('dl', { class: 'gloss' }, h('h3', { text: 'What each number means' }),
       Object.keys(D).map(function (k) { return h('div', {}, h('dt', { text: k }), h('dd', { text: D[k] })); })));
-    $('#how-rcpt').appendChild(N.receiptLinks(a.receipt));
-    setText('how-credit', F.license.credit);
   }
 
   // ------------------------------------------------------------------ boot

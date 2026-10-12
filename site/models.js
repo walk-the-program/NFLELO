@@ -1,10 +1,8 @@
 /* NFLELO models page. Reads ./data/research.json (written by scripts/export_research.py) and draws the
-   scoreboard cards, the game-model holdout chart, the findings and the receipts. No dependencies; the DOM,
+   scoreboard cards, the game-model holdout chart and the findings. No dependencies; the DOM,
    tooltip, table-view and fetch helpers come from common.js, shared with the ratings page. */
 (function () {
   'use strict';
-
-  var REPO = 'https://github.com/walk-the-program/NFLELO';
 
   var N = window.NFL;
   var $ = N.$, h = N.h, sv = N.sv, clear = N.clear, well = N.well;
@@ -23,8 +21,7 @@
   function intervalText(p) { return '[' + signed(p.ci_low, p.decimals) + ', ' + signed(p.ci_high, p.decimals) + ']'; }
   function estimateText(p) { return p.kind === 'calibration' ? p.estimate.toFixed(p.decimals) : signed(p.estimate, p.decimals); }
   function limitText(p) { return p.kind === 'calibration' ? 'limit ' + p.limit.toFixed(p.decimals) : intervalText(p); }
-  function repoUrl(path) { return REPO + '/blob/main/' + path; }
-  function commitUrl(hash) { return REPO + '/commit/' + hash; }
+  function repoUrl(path) { return 'https://github.com/walk-the-program/NFLELO/blob/main/' + path; }
 
   // ------------------------------------------------------------------ state
 
@@ -35,7 +32,7 @@
   function renderHero() {
     var c = R.counts, hl = R.headlines;
     setText('hero-line', hl.hero);
-    setText('hero-deck', hl.hero_deck + ' Every model was built on earlier seasons, then scored once on ' + R.holdout_seasons[0] + ' to ' + R.holdout_seasons[1] + ' under rules committed to a public repository first.');
+    setText('hero-deck', hl.hero_deck);
     var tiles = $('#tiles');
     clear(tiles);
     function tile(label, big, sub, bar, barText) {
@@ -60,10 +57,6 @@
 
   function card(m) {
     var p = m.primary;
-    var links = [h('a', { href: repoUrl(m.method_doc), text: 'Method' })];
-    if (m.rules_commit) links.push(h('a', { href: commitUrl(m.rules_commit), text: 'Rules ' + m.rules_commit }));
-    else links.push(h('span', { class: 'none', text: 'No holdout run' }));
-    if (m.result_commit) links.push(h('a', { href: commitUrl(m.result_commit), text: 'Result ' + m.result_commit }));
     return h('article', { class: 'mcard', 'data-verdict': m.verdict, 'data-holdout': m.tested_holdout ? '1' : '0', 'aria-labelledby': 'mc-' + m.id },
       h('div', { class: 'mc-top' },
         h('span', { class: 'mc-id', text: m.short }),
@@ -78,7 +71,20 @@
       h('div', { class: 'mc-text' },
         h('p', { class: 'mc-read', text: m.reading }),
         h('ul', { class: 'mc-also' }, m.also.map(function (a) { return h('li', { text: a.text }); }))),
-      h('div', { class: 'mc-links' }, links));
+      h('div', { class: 'mc-links' }, h('a', { href: repoUrl(m.method_doc), text: 'Method' })));
+  }
+
+  function summaryCard(c) {
+    var rows = [[c.pass, 'passed'], [c.fail, 'failed'], [c.negative, 'development only'], [c.shadow, 'running live']];
+    return h('article', { class: 'mcard mc-sum', 'aria-labelledby': 'mc-sum' },
+      h('div', { class: 'mc-top' }, h('span', { class: 'mc-id', text: 'All models' })),
+      h('h3', { class: 'mc-name', id: 'mc-sum', text: c.total + ' models' }),
+      h('p', { class: 'mc-what', text: rows.map(function (r) { return r[0] + ' ' + r[1]; }).join(', ') + '.' }),
+      h('ul', { class: 'mc-metric mc-tally', 'aria-label': 'Models by outcome' }, rows.map(function (r) {
+        return h('li', {}, h('b', { class: 'num', text: String(r[0]) }), h('span', { text: r[1] }));
+      })),
+      h('div', { class: 'mc-text' },
+        h('p', { class: 'mc-read', text: c.holdout_tested + ' were scored once on the locked seasons, ' + c.holdout_pass + ' passed. The rest are development-only results or are still running live.' })));
   }
 
   function renderScoreboard() {
@@ -86,7 +92,9 @@
     clear(body);
     setText('scoreboard-h', R.headlines.scoreboard);
 
-    var grid = h('div', { class: 'mcards', id: 'mcards' }, M.map(card));
+    // The 12th tile: a summary computed from the data, shown on the All view only. It also rounds the grid to full rows.
+    var sum = summaryCard(c), shown = M.map(card).concat([sum]);
+    var grid = h('div', { class: 'mcards', id: 'mcards' }, shown);
     var chips = $('#model-filters');
     clear(chips);
     FILTERS.forEach(function (f, i) {
@@ -94,7 +102,8 @@
       var b = h('button', { type: 'button', 'aria-pressed': i === 0 ? 'true' : 'false', text: f[1] + ' ' + n });
       b.addEventListener('click', function () {
         Array.prototype.forEach.call(chips.children, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-        Array.prototype.forEach.call(grid.children, function (el, k) { el.hidden = !f[2](M[k]); });
+        M.forEach(function (m, k) { grid.children[k].hidden = !f[2](m); });
+        sum.hidden = f[0] !== 'all';
         live.textContent = f[1] + ': ' + n + ' of ' + M.length + ' models shown.';
       });
       chips.appendChild(b);
@@ -102,16 +111,14 @@
 
     body.appendChild(grid);
     body.appendChild(tableView('View all models as a table',
-      [{ t: 'Model' }, { t: 'Verdict' }, { t: 'Measure' }, { t: 'Estimate', r: 1, n: 1 }, { t: '95% interval or limit', r: 1, n: 1 }, { t: 'Sample' }, { t: 'Rules commit' }, { t: 'Result commit' }],
+      [{ t: 'Model' }, { t: 'Verdict' }, { t: 'Measure' }, { t: 'Estimate', r: 1, n: 1 }, { t: '95% interval or limit', r: 1, n: 1 }, { t: 'Sample' }],
       function () {
         return M.map(function (m) {
           var p = m.primary;
           return [m.short + ' ' + m.name, m.verdict_label, p.label, estimateText(p), limitText(p),
-            commas(p.n) + ' ' + p.n_unit + ', ' + p.window, m.rules_commit || 'none', m.result_commit || 'none'];
+            commas(p.n) + ' ' + p.n_unit + ', ' + p.window];
         });
       }));
-    body.appendChild(h('p', { class: 'fnote', text: 'Every number comes from the committed run registry (experiments/runs) or, where noted, from the project scoreboard. The models built on participation data (on-field ratings, the play model, the fourth-down tool and early-down play calling) are released under CC BY-SA; the rest under CC BY.' }));
-
     body.appendChild(h('dl', { class: 'gloss' },
       h('h3', { text: 'Reading the numbers' }),
       gl('Brier score', 'The average squared miss of a win probability. Lower is better. Always guessing 50% scores 0.25.'),
@@ -212,70 +219,15 @@
         h('span', { class: 'fn', 'aria-hidden': 'true', text: String(f.n) }),
         h('div', {},
           h('h3', { text: f.title }),
-          h('p', { text: f.text }),
-          h('p', { class: 'fnote' }, 'Source: ', h('a', { href: repoUrl(f.source), text: f.source }))));
+          h('p', { text: f.text })));
     })));
-  }
-
-  // ------------------------------------------------------------------ receipts
-
-  function liveBox() {
-    var L = R.live;
-    if (!L) return null;
-    var box = h('div', { class: 'livebox' }, h('h3', { text: 'Live ' + L.season + ' record' }));
-    var m = L.model, s = L.shadow;
-    if (!m.n_scored) {
-      box.appendChild(h('p', { class: 'sub', text: 'The live record starts with week ' + L.from_week + (L.from_date ? ' (' + L.from_date + ')' : '') + '. No ' + L.season + ' games have been scored yet; ' + commas(L.ledger_rows) + ' predictions are logged so far, each written before kickoff.' }));
-    } else {
-      box.appendChild(h('p', { class: 'sub', text: 'Scored on ' + commas(m.n_scored) + ' completed ' + L.season + ' games since week ' + L.from_week + ', using each game\'s last prediction before kickoff.' }));
-      box.appendChild(h('div', { class: 'score' },
-        h('div', {}, h('h3', { text: 'Brier score, lower is better' }),
-          h('div', { class: 'row' },
-            h('span', {}, h('b', { class: 'num', text: m.brier.toFixed(4) }), 'Game model'),
-            h('span', {}, h('b', { class: 'num', text: m.elo_brier.toFixed(4) }), 'Elo v2'))),
-        s && s.n_scored ? h('div', {}, h('h3', { text: 'Shadow model, same games' }),
-          h('div', { class: 'row' },
-            h('span', {}, h('b', { class: 'num', text: s.brier.toFixed(4) }), 'Kalman (' + commas(s.n_scored) + ' games)'),
-            h('span', {}, h('b', { class: 'num', text: s.model_brier_same_games.toFixed(4) }), 'Game model, same games'))) : null));
-    }
-    if (s && !s.n_scored) box.appendChild(h('p', { class: 'fnote', text: 'The shadow model (' + s.name + ') is logged next to the game model and has no scored games yet.' }));
-    return box;
-  }
-
-  function renderReceipts() {
-    var body = done('receipts-body'), L = R.live, F = R.forward_test;
-    clear(body);
-    var links = [
-      h('li', {}, h('a', { href: repoUrl('context/ml-results.md'), text: 'The full scoreboard (markdown)' }), h('small', { text: 'Every model and its locked result, failures included' })),
-      h('li', {}, h('a', { href: REPO + '/tree/main/experiments/runs', text: 'Run registry' }), h('small', { text: 'One JSON file per run, with its data hashes and the commit it ran on' }))
-    ];
-    if (L && L.ledger_url) links.push(h('li', {}, h('a', { href: L.ledger_url, text: 'Prediction ledger (CSV)' }), h('small', { text: 'Every ' + L.season + ' prediction, written before kickoff' })));
-    if (L && L.shadow && L.shadow.ledger_url) links.push(h('li', {}, h('a', { href: L.shadow.ledger_url, text: 'Shadow ledger (CSV)' }), h('small', { text: 'The Kalman shadow model\'s predictions' })));
-    links.push(h('li', {}, h('a', { href: REPO, text: 'Code and method on GitHub' }), h('small', { text: 'github.com/walk-the-program/NFLELO' })));
-
-    body.appendChild(h('div', { class: 'method' },
-      h('div', {},
-        h('h3', { text: 'The process' }),
-        h('p', {}, h('b', { text: 'A locked holdout. ' }), 'The ' + R.holdout_seasons[0] + ' to ' + R.holdout_seasons[1] + ' seasons were set aside before the models were built. Models were developed and tuned on earlier seasons only. Each one then got a single run on the locked seasons, and that number is reported whatever it turned out to be.'),
-        h('p', {}, h('b', { text: 'Rules first. ' }), 'Before each run, the pass and fail rules were committed to the public repository. The "Rules" hash on each card is that commit; the "Result" hash is the one that recorded the outcome. Anyone can check that the first came before the second.'),
-        h('p', {}, h('b', { text: 'Dated rule changes. ' }), 'When a rule had to change, it changed before the holdout number existed, with the date and reason written down. Examples: the calibration check became one-sided (a forecast should not be marked down for being better calibrated than chance), a 0.01 floor was set for very large samples, and punts are judged on yards error. One bar was simply too tight: the game model\'s calibration limit of 0.02 cannot be met reliably with 1,615 games. It is recorded as a flawed criterion, not quietly moved.'),
-        h('p', {}, h('b', { text: 'Leak checks. ' }), 'Every input is built as of the start of that game\'s week, and a test that corrupts future data proves nothing leaks in. Four real leaks were caught and fixed along the way, such as roster statuses that were season-end values before 2016 and missing formations that gave away fumbles.'),
-        h('p', {}, h('b', { text: 'A live ledger. ' }), 'Predictions for the ' + (L ? L.season : '2026') + ' season are written to an append-only ledger before kickoff and pushed to GitHub, so the timestamps can be audited. It is the only test that cannot be rehearsed.'),
-        liveBox(),
-        h('div', { class: 'livebox' },
-          h('h3', { text: 'Forward test: ' + F.name }),
-          h('p', { class: 'sub' }, h('b', { text: F.status + '. ' }), F.text, ' ', F.dev_note, ' ',
-            h('a', { href: commitUrl(F.frozen_commit), text: 'Frozen commit ' + F.frozen_commit }), '.'))),
-      h('div', {},
-        h('h3', { text: 'Links' }),
-        h('ul', {}, links))));
   }
 
   // ------------------------------------------------------------------ boot
 
   function fail(err) {
     console.error(err);
-    ['scoreboard', 'holdout', 'evidence', 'receipts'].forEach(function (id) {
+    ['scoreboard', 'holdout', 'evidence'].forEach(function (id) {
       var b = done(id + '-body');
       if (!b) return;
       clear(b);
@@ -284,17 +236,12 @@
     setText('hero-line', 'Results unavailable');
   }
 
-  N.getJSON('data/meta.json', true).then(function (m) {
-    if (m && m.credit) setText('credit', m.credit);
-  });
-
   N.getJSON('data/research.json').then(function (d) {
     R = d;
     renderHero();
     renderScoreboard();
     renderHoldout();
     renderEvidence();
-    renderReceipts();
     N.initNav();
   }).catch(fail);
 })();

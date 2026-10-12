@@ -28,7 +28,7 @@
     <li><a href="winprob.html" aria-current="page">Win prob</a></li>
     <li><a href="fourth.html">Fourth down</a></li>
     <li><a href="playcalling.html">Play calling</a></li>
-    <li><a href="models.html">Receipts</a></li>
+    <li><a href="models.html">Models</a></li>
   </ul>
 </nav>
 
@@ -37,7 +37,7 @@
     <div class="board hero-board">
       <section class="tile-m hero-art pat-terrain" aria-labelledby="page-title">
         <div class="plate hero-plate">
-          <p class="page-kicker">NFLELO &rarr; Models &rarr; Win probability <span class="lic" id="lic"></span></p>
+          <p class="page-kicker">NFLELO &rarr; Models &rarr; Win probability</p>
           <h1 class="page-title" id="page-title">Win <span class="hl">probability</span></h1>
           <p class="hero-line" id="hero-line">Loading results</p>
           <p class="hero-deck" id="hero-deck">Pick any completed 2026 game and watch each team's chance of winning move snap by snap. The model uses the A4s pregame strength and the game state, and no betting-market input.</p>
@@ -79,17 +79,17 @@
   </div>
   </div>
   </section>
-  <section class="sec" id="receipts" aria-labelledby="receipts-h" tabindex="-1">
+  <section class="sec" id="result" aria-labelledby="result-h" tabindex="-1">
   <div class="wrap">
   <div class="board sec-board">
   <header class="sec-head tile-m">
     <div class="sec-copy">
-      <p class="kicker"><span class="kn">03</span><span class="kt">Receipts</span></p>
-      <h2 class="headline" id="receipts-h">Receipts</h2>
-      <p class="deck">The model against nflfastR's public win probability on seasons it never saw, loaded from the committed run record.</p>
+      <p class="kicker"><span class="kn">03</span><span class="kt">Result</span></p>
+      <h2 class="headline" id="result-h">Result</h2>
+      <p class="deck">The model against nflfastR's public win probability on seasons it never saw.</p>
     </div>
   </header>
-<div id="receipts-body" class="tile-m body" aria-busy="true"><p class="note">Loading</p></div>
+<div id="result-body" class="tile-m body" aria-busy="true"><p class="note">Loading</p></div>
   </div>
   </div>
   </section>
@@ -108,17 +108,6 @@
         <p><b>What it does.</b> Win probability is the model's estimate of how often a team in a given spot goes on to win: score, time left, down, distance, field position, timeouts and who gets the second-half kickoff, plus how strong the two teams were before the game.</p><p><b>Pregame strength.</b> The pregame input is the A4s game model (Elo, opponent-adjusted efficiency and a quarterback adjustment). No betting line or market number goes in.</p><p><b>The excitement index</b> adds up how far the home win probability moves from snap to snap over the game. A game that swings back and forth scores high; a blowout from the first quarter scores low.</p><p><b>How it was tested.</b> The frozen model was scored once on 2020 to 2025 plays against nflfastR's public model, by Brier score (the average squared miss; lower is better), with the rules written down first.</p>
         <div id="how-dyn" class="how-dyn"></div>
       </div>
-      <div>
-        <h3>Receipts and links</h3>
-        <ul class="linklist">
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-m7-method.md">Method: win probability and decision support (M7)</a><small>Pre-registered rules for the win probability model</small></li>
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-pages.md">Data contract for this page</a><small>Every field in winprob.json and what it means</small></li>
-          <li><a href="https://github.com/walk-the-program/NFLELO/blob/main/context/ml-results.md">Full scoreboard</a><small>Every model and its locked result, failures included</small></li>
-          <li><a href="models.html">All models and receipts</a><small>Pass and fail, with the commits that prove the order</small></li>
-        <li id="how-rcpt" class="rcpt-li"></li>
-        </ul>
-        <p class="fnote" id="how-credit"></p>
-      </div>
     </div>
   </div>
   </div>
@@ -130,10 +119,10 @@
     <div class="tile-m foot-art foot-plain"><p class="motto plate">One tile, one idea.</p></div>
     <div class="tile-m foot-links">
       <p class="foot-dot"><i aria-hidden="true"></i>NFLELO, Machine Learning applied to Football</p>
-      <p id="credit">Data: nflverse (CC BY 4.0).</p>
+      <p id="credit">Data: nflverse play-by-play and schedules (CC BY 4.0). Model: NFLELO M7a win probability (CC BY 4.0).</p>
       <p>Independent project, not affiliated with the NFL or any team.</p>
       <p><a href="index.html">Ratings and the weekly ladder</a></p>
-      <p><a href="models.html">Every model and its receipts</a></p>
+      <p><a href="models.html">All models</a></p>
       <p><a href="https://github.com/walk-the-program/NFLELO">Source on GitHub</a></p>
     </div>
   </div>

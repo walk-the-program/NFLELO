@@ -662,7 +662,7 @@
       grid.appendChild(h('div', { class: 'dv' }, h('h3', {}, d, h('span', { text: 'Projected wins' })), teams.map(row)));
     });
     body.appendChild(grid);
-    body.appendChild(h('p', { class: 'fnote', text: R.note + ' Bars run from 0 to 17 wins. Model numbers are from the run on ' + runTime(D.ml.last_run_utc) + '.' + (ranged ? ' The thin line is the likely range of final wins from the season simulation: in 8 of 10 simulated seasons the team lands inside it.' : '') }));
+    body.appendChild(h('p', { class: 'fnote', text: R.note + ' Bars run from 0 to 17 wins.' + (ranged ? ' The thin line is the likely range of final wins from the season simulation: in 8 of 10 simulated seasons the team lands inside it.' : '') }));
     body.appendChild(tableView('View projected wins as a table', [{ t: 'Team' }, { t: 'Record', r: 1, n: 1 }, { t: 'Left', r: 1, n: 1 }, { t: 'Model', r: 1, n: 1 }, { t: 'Elo', r: 1, n: 1 }].concat(ranged ? [{ t: 'Likely range', r: 1, n: 1 }] : []), function () {
       return R.teams.map(function (r) { return [byTeam[r.team].name, rec(r.w, r.l, r.t), String(r.remaining), f1(r.proj_model), f1(r.proj_elo)].concat(ranged ? [hasRange(r) ? rangeText(r) : ''] : []); });
     }));
@@ -770,8 +770,7 @@
     body.appendChild(h('div', { class: 'odds-grid' }, ['AFC', 'NFC'].map(block)));
     body.appendChild(h('p', { class: 'fnote' },
       'Each simulated season gives every team one random boost or drag for the rest of the year (a spread of ' + f1(O.tau_rest) + ' points), because ratings are estimates and teams change. ' +
-      'Then every game left is played from the model\'s range of final scores, ties included; the tiebreakers seed the field, and the higher seed hosts each playoff game. Last run: ' + runTime(O.run_at_utc) + '. ',
-      h('a', { href: O.history_url, text: 'Every run is kept in a public file' }), '.'));
+      'Then every game left is played from the model\'s range of final scores, ties included; the tiebreakers seed the field, and the higher seed hosts each playoff game.'));
     body.appendChild(tableView('View playoff odds as a table',
       [{ t: 'Team' }, { t: 'Conf' }, { t: 'Playoffs', r: 1, n: 1 }, { t: 'Division', r: 1, n: 1 }, { t: '#1 seed', r: 1, n: 1 }, { t: 'Reach SB', r: 1, n: 1 }, { t: 'Win SB', r: 1, n: 1 }, { t: 'Mean wins', r: 1, n: 1 }, { t: 'Likely wins', r: 1, n: 1 }].concat(hasBase ? [{ t: 'Change', r: 1, n: 1 }] : []),
       function () {
@@ -792,7 +791,7 @@
     var box = h('div', { class: 'livebox' }, h('h3', { text: 'Live ' + ml.season + ' record' }));
     var start = 'The live record starts with Week ' + ml.live_from_week + (ml.live_from_date ? ', ' + dayLong(ml.live_from_date) : '') + '.';
     if (!L.n) {
-      box.appendChild(h('p', { class: 'sub', text: start + ' Each prediction is written to a public ledger before kickoff, and only those count. Weeks 1 to ' + (ml.live_from_week - 1) + ' were never predicted in advance, so they are left out. No live games have been scored yet.' }));
+      box.appendChild(h('p', { class: 'sub', text: start + ' Each prediction is logged before kickoff, and only those count. Weeks 1 to ' + (ml.live_from_week - 1) + ' were never predicted in advance, so they are left out. No live games have been scored yet.' }));
     } else {
       var mk = L.market_games;
       box.appendChild(h('p', { class: 'sub', text: start + ' Scored on the last prediction made before each kickoff, ' + plural(L.n, 'game', 'games') + ' so far. That is a small sample, so treat the gaps as noise for now.' }));
@@ -821,9 +820,8 @@
       box.appendChild(h('p', { class: 'fnote', text: notes.join(' ') }));
       // Shadow model: logged before kickoff in its own ledger, scored on the same games; hidden until one is scored.
       var S = ml.shadow;
-      if (S && S.n) box.appendChild(h('p', { class: 'fnote' }, 'Shadow model (Kalman, testing for 2027): Brier ' + S.shadow.brier.toFixed(4) + ' against the model\'s ' + S.model.brier.toFixed(4) + ' on the same ' + plural(S.n, 'game', 'games') + '. It does not change the model\'s picks. ', h('a', { href: S.ledger_url, text: 'See its ledger' }), '.'));
+      if (S && S.n) box.appendChild(h('p', { class: 'fnote' }, 'Shadow model (Kalman, testing for 2027): Brier ' + S.shadow.brier.toFixed(4) + ' against the model\'s ' + S.model.brier.toFixed(4) + ' on the same ' + plural(S.n, 'game', 'games') + '. It does not change the model\'s picks.'));
     }
-    box.appendChild(h('p', { class: 'fnote' }, 'Last model run: ' + runTime(ml.last_run_utc) + '. ', h('a', { href: ml.ledger_url, text: 'See the prediction ledger' }), '.'));
     return box;
   }
 
@@ -1210,25 +1208,16 @@
       });
     });
 
-    body.appendChild(h('div', { class: 'method' },
+    body.appendChild(h('div', { class: 'method how' },
       h('div', {},
         h('h3', { text: 'How it works' }),
         h('p', {}, h('b', { text: 'Ratings. ' }), 'Every team starts at 1500, the league average. After each game the winner takes points from the loser. The bigger the surprise and the bigger the margin, the more points move. The base size is K = ' + cfg.k + '.'),
         h('p', {}, h('b', { text: 'Offseason. ' }), 'Between seasons every rating moves ' + Math.round(cfg.lam * 100) + '% of the way back to 1500 (lambda = ' + cfg.lam.toFixed(2) + ') because rosters turn over.'),
         h('p', {}, h('b', { text: 'Home field. ' }), 'The home team gets a rating bonus before each prediction, none at neutral sites. The bonus is learned: it started at ' + cfg.hfa_init + ' points in 1970, moves up or down as home teams win more or less than expected, and is ' + f1(D.meta.hfa_pts) + ' now. Elo spread is the rating gap divided by 25.'),
-        h('p', {}, h('b', { text: 'Data. ' }), 'Game results from 1999 on come from nflverse. Results for 1970 to 1998, including playoffs, come from the FiveThirtyEight NFL Elo game file. Both are CC BY 4.0.'),
         h('p', {}, h('b', { text: 'New teams. ' }), 'Franchises that join after 1970 start at ' + cfg.expansion_start + '. The model was tuned on ' + sc.tune_seasons[0] + '-' + sc.tune_seasons[1] + ' and scored on ' + span + '.'),
         h('p', {}, h('b', { text: 'Limits. ' }), 'The Vegas line is still better: a Brier gap of ' + sc.brier_gap_vs_market.toFixed(4) + '. Elo does not know about injuries, starting quarterbacks, or weather.'),
-        D.ml ? h('p', {}, h('b', { text: 'Model. ' }), 'The second forecast is a logistic regression on three inputs: Elo\'s win chance, each team\'s play-by-play efficiency adjusted for its opponents, and how much better or worse this week\'s starting quarterback is than the passing the team\'s recent numbers reflect. It is fit on the 2001 to ' + (D.ml.season - 1) + ' regular seasons and never sees betting lines. On ' + D.ml.holdout.seasons[0] + ' to ' + D.ml.holdout.seasons[1] + ' games it had never seen, it scored a Brier of ' + D.ml.holdout.model_brier.toFixed(4) + ' against ' + D.ml.holdout.elo_brier.toFixed(4) + ' for Elo and ' + D.ml.holdout.market_brier.toFixed(4) + ' for Vegas. Every prediction is added to a ', h('a', { href: D.ml.ledger_url, text: 'public ledger' }), ' before kickoff, and the git history shows when. Last run: ' + runTime(D.ml.last_run_utc) + '.') : null,
-        D.ml && D.ml.playoff_odds ? h('p', {}, h('b', { text: 'Playoff odds. ' }), 'A second model predicts the final score margin, not just the winner, using the same three inputs. Its average is the model\'s line, and its spread of outcomes favors the scores football produces most, such as 3 and 7 points. The season is then played out ' + D.ml.playoff_odds.n_sims.toLocaleString('en-US') + ' times. In each run every team gets one random boost or drag that lasts the rest of the year, because a rating is an estimate and teams get better or worse. The NFL\'s own tiebreakers set the seeds; run on every real season from 2006 to 2025, they reproduce every actual playoff field and seeding. The size of that boost or drag was set by replaying weeks 4, 8, 12 and 16 of the 2006 to 2019 seasons; without it, teams given 80 to 90% made the playoffs only about 74% of the time. Checked once on 2020 to 2025, seasons it never saw, the odds matched how often teams really made the playoffs. Early in the season they are rougher: odds from week 4 miss by more than odds from week 12. The model\'s line is no worse than Elo\'s and was closer in 5 of those 6 seasons, but its edge, about 0.06 points a game, is too small to call proven. Vegas lines are still closer than both.') : null),
-      h('div', {},
-        h('h3', { text: 'Links' }),
-        h('ul', {},
-          h('li', {}, h('a', { href: D.meta.repo, text: 'Code and method on GitHub' }), h('small', { text: 'github.com/walk-the-program/NFLELO' })),
-          h('li', {}, h('a', { href: 'https://nflverse.nflverse.com/', text: 'nflverse' }), h('small', { text: 'Schedules, scores, and betting lines, 1999 on. CC BY 4.0.' })),
-          h('li', {}, h('a', { href: 'https://github.com/fivethirtyeight/data', text: 'FiveThirtyEight' }), h('small', { text: 'NFL game results 1970 to 1998: FiveThirtyEight, CC BY 4.0.' })),
-          h('li', {}, h('a', { href: 'data/ladder.json', text: 'Ladder data (JSON)' }), h('small', { text: 'Rebuilt every Wednesday' })),
-          D.ml ? h('li', {}, h('a', { href: D.ml.ledger_url, text: 'Prediction ledger (CSV)' }), h('small', { text: 'Every model prediction, written before kickoff' })) : null))));
+        D.ml ? h('p', {}, h('b', { text: 'Model. ' }), 'The second forecast is a logistic regression on three inputs: Elo\'s win chance, each team\'s play-by-play efficiency adjusted for its opponents, and how much better or worse this week\'s starting quarterback is than the passing the team\'s recent numbers reflect. It is fit on the 2001 to ' + (D.ml.season - 1) + ' regular seasons and never sees betting lines. On ' + D.ml.holdout.seasons[0] + ' to ' + D.ml.holdout.seasons[1] + ' games it had never seen, it scored a Brier of ' + D.ml.holdout.model_brier.toFixed(4) + ' against ' + D.ml.holdout.elo_brier.toFixed(4) + ' for Elo and ' + D.ml.holdout.market_brier.toFixed(4) + ' for Vegas. Every prediction is logged before kickoff.') : null,
+        D.ml && D.ml.playoff_odds ? h('p', {}, h('b', { text: 'Playoff odds. ' }), 'A second model predicts the final score margin, not just the winner, using the same three inputs. Its average is the model\'s line, and its spread of outcomes favors the scores football produces most, such as 3 and 7 points. The season is then played out ' + D.ml.playoff_odds.n_sims.toLocaleString('en-US') + ' times. In each run every team gets one random boost or drag that lasts the rest of the year, because a rating is an estimate and teams get better or worse. The NFL\'s own tiebreakers set the seeds; run on every real season from 2006 to 2025, they reproduce every actual playoff field and seeding. The size of that boost or drag was set by replaying weeks 4, 8, 12 and 16 of the 2006 to 2019 seasons; without it, teams given 80 to 90% made the playoffs only about 74% of the time. Checked once on 2020 to 2025, seasons it never saw, the odds matched how often teams really made the playoffs. Early in the season they are rougher: odds from week 4 miss by more than odds from week 12. The model\'s line is no worse than Elo\'s and was closer in 5 of those 6 seasons, but its edge, about 0.06 points a game, is too small to call proven. Vegas lines are still closer than both.') : null)));
   }
 
   // ------------------------------------------------------------------ boot

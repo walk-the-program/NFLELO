@@ -2,15 +2,14 @@
 
     python scripts/export_research.py
 
-Feeds the public page site/models.html ("The models and their receipts").
+Feeds the public page site/models.html ("The models and their results").
 
 Numbers come from the committed run registry (experiments/runs/*.json, sign-off runs have
 `holdout: true` and names containing `signoff`). The registry is the source of truth for every
 estimate and confidence interval. The few facts the registry does not hold are marked
 `context/ml-results.md` in their `source` field. The hand-maintained part is the METADATA table
-below: plain-English names, one-sentence descriptions, verdicts, readings, method docs and commits.
+below: plain-English names, one-sentence descriptions, verdicts, readings and method docs.
 
-The live 2026 record and the shadow model are summarised from site/data/ml.json when it exists.
 Output is deterministic: no timestamps, same inputs give identical bytes.
 `scripts/export_site.py` calls export_research() at the end of export(), guarded so that a failure
 here never breaks the main site export.
@@ -37,82 +36,65 @@ VERDICT_LABELS = {
 }
 VERDICT_ORDER = ("pass", "fail", "negative", "shadow")
 
-# The M7a-v2 conversion fix is frozen and waits for the 2026 season; it is a status line, not a card.
-FORWARD_TEST = {
-    "name": "Fourth-down conversion fix (M7a-v2)",
-    "status": "Frozen at 5a0b850, runs after 2027-02-15",
-    "frozen_commit": "5a0b850",
-    "registered_commit": "201ad8e",
-    "runs_after": "2027-02-15",
-    "text": ("The corrected fourth-down conversion engine was frozen before any 2026 game was played. "
-             "It is scored once, on the 2026 season, after the 2027-02-15 data release, with no refit."),
-    "dev_note": ("On development seasons its conversion calibration error was 0.019 against 0.033 for the first "
-                 "version, and the 4th-and-2 gap was +0.004 against +0.034."),
-    "dev_source": RESULTS_DOC,
-    "doc": "context/ml.md",
-}
-
 # --------------------------------------------------------------------------- metadata (hand-maintained)
-# One entry per model, in scoreboard order. `rules_commit` is the commit that wrote the pass/fail rules
-# before the run; `result_commit` is the commit that recorded the result. Both are None when a model had
-# no holdout run (its rules were never frozen for one).
+# One entry per model, in scoreboard order.
 
 METADATA = [
     {"id": "M3", "short": "M3", "name": "Game model",
      "what": "Win chance for each game from Elo, opponent-adjusted efficiency (EPA, expected points added) and the starting quarterback.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
      "reading": "It beat Elo in all six seasons. The market is still ahead. Its calibration error missed a bar that was too tight for 1,615 games.",
-     "method_doc": "context/ml-m3-method.md", "rules_commit": "eb65d61", "result_commit": "5a66c9a"},
+     "method_doc": "context/ml-m3-method.md"},
     {"id": "M4-margin", "short": "M4", "name": "Margin model",
      "what": "The full spread of possible final margins, aware that 3 and 7 are common margins.",
      "verdict": "fail", "tested_holdout": True, "license": "CC BY",
      "reading": "Its error was lower than Elo's spread, but the interval includes zero, so the edge is not proven. It still drives the site's spreads and the simulation.",
-     "method_doc": "context/ml-m4-method.md", "rules_commit": "e51e890", "result_commit": "816c327"},
+     "method_doc": "context/ml-m4-method.md"},
     {"id": "M4-odds", "short": "M4", "name": "Playoff odds",
      "what": "20,000 simulated seasons with the real NFL tiebreakers and a season-long strength shock for each team.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
      "reading": "Adding the strength shock improved the made-playoffs forecast, and the odds were calibrated. Live on the site.",
-     "method_doc": "context/ml-m4-method.md", "rules_commit": "e51e890", "result_commit": "816c327"},
+     "method_doc": "context/ml-m4-method.md"},
     {"id": "M5", "short": "M5", "name": "Lineup values",
      "what": "A value for each player from box-score stats, and the probable lineup each team will field.",
      "verdict": "negative", "tested_holdout": False, "license": "CC BY",
      "reading": "Knowing who plays added nothing measurable to the game model on development seasons, so it was never sent to the holdout.",
-     "method_doc": "context/ml-m5-method.md", "rules_commit": None, "result_commit": "a91d8a3"},
+     "method_doc": "context/ml-m5-method.md"},
     {"id": "M5b", "short": "M5b", "name": "On-field player ratings",
      "what": "A plus-minus rating for every player, from who was on the field for each of 177,545 plays (2016 on).",
      "verdict": "fail", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "Beat team ratings, but lost to simply adding up box-score values. Public data cannot split credit among the 22 players better than that. Kept as a descriptive view.",
-     "method_doc": "context/ml-m5b-method.md", "rules_commit": "8956c97", "result_commit": "e83f7ac"},
+     "method_doc": "context/ml-m5b-method.md"},
     {"id": "M3b", "short": "M3b", "name": "Kalman strength model",
      "what": "A team-strength rating that carries its own uncertainty, combined with Elo and the quarterback term.",
      "verdict": "shadow", "tested_holdout": False, "license": "CC BY",
      "reading": "It narrowly missed the bar on development seasons, so no holdout was spent on it. It is logged before kickoff next to the live model as a clean forward test.",
-     "method_doc": "context/ml-m3b-method.md", "rules_commit": None, "result_commit": "ca705de"},
+     "method_doc": "context/ml-m3b-method.md"},
     {"id": "M6", "short": "M6", "name": "Play outcome model",
      "what": "The whole distribution of yards a play can gain, from the pre-snap situation and personnel.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "More accurate than the situation-only baseline in every season and in both data eras. Knowing the individual players adds only a small amount.",
-     "method_doc": "context/ml-m6-method.md", "rules_commit": "bc0bff7", "result_commit": "fe61c0e"},
+     "method_doc": "context/ml-m6-method.md"},
     {"id": "M7a-wp", "short": "M7a", "name": "Win-probability model",
      "what": "Win chance at every snap of a game, built without any betting-market input.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY",
      "reading": "More accurate than the public nflfastR model. The Vegas-based probability is still better.",
-     "method_doc": "context/ml-m7-method.md", "rules_commit": "a4a24b1", "result_commit": "4e509da"},
+     "method_doc": "context/ml-m7-method.md"},
     {"id": "M7a-4th", "short": "M7a", "name": "Fourth-down tool",
      "what": "Go for it, kick a field goal, or punt, compared in win probability with an uncertainty band.",
      "verdict": "fail", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "The field-goal and punt parts passed. The go-for-it conversion estimate was off, so the tool failed. A corrected version is frozen for 2026.",
-     "method_doc": "context/ml-m7-method.md", "rules_commit": "a4a24b1", "result_commit": "4e509da"},
+     "method_doc": "context/ml-m7-method.md"},
     {"id": "M7b", "short": "M7b", "name": "Early-down play calling",
      "what": "Run or pass, and from which personnel group, on first and second down, using causal methods.",
      "verdict": "pass", "tested_holdout": True, "license": "CC BY-SA",
      "reading": "The recommended mix beats what teams actually did, and the placebo check came back near zero. Defenses would adapt, so treat it as a direction, not a guarantee.",
-     "method_doc": "context/ml-m7-method.md", "rules_commit": "92ae084", "result_commit": "7b3e703"},
+     "method_doc": "context/ml-m7-method.md"},
     {"id": "M8", "short": "M8", "name": "Game model v2",
      "what": "Five upgrades to the game model: training on point margin, blending models, an opponent-adjusted quarterback rating, early-season fixes, and travel, time-zone and rest features.",
      "verdict": "negative", "tested_holdout": False, "license": "CC BY",
      "reading": "None beat the Kalman candidate beyond noise on development seasons, so nothing was promoted. Weather was dropped because nflverse records it only after a game, and even actual game-day weather did not help.",
-     "method_doc": "context/ml-m8-method.md", "rules_commit": None, "result_commit": "f710e6f"},
+     "method_doc": "context/ml-m8-method.md"},
 ]
 
 MODEL_IDS = [m["id"] for m in METADATA]
@@ -333,63 +315,26 @@ def build_chart(runs_dir: Path | None) -> dict:
 
 
 def build_findings(runs_dir: Path | None) -> list[dict]:
-    a, fa = load_run("m3_signoff_A4s", runs_dir, holdout=True)
+    a, _ = load_run("m3_signoff_A4s", runs_dir, holdout=True)
     m, _ = load_run("m3_signoff_market", runs_dir, holdout=True)
-    audit, fau = load_run("m7a_signoff_audit", runs_dir, holdout=True)
+    audit, _ = load_run("m7a_signoff_audit", runs_dir, holdout=True)
     wins = audit["metrics"]["wp_lost_per_team_game"]
     return [
         {"n": 1, "title": "The quarterback is most of the story.",
-         "text": "In the game model, nearly all of the gain over Elo comes from knowing the starting quarterback, and it depends on knowing who actually starts.",
-         "source": RESULTS_DOC},
+         "text": "In the game model, nearly all of the gain over Elo comes from knowing the starting quarterback, and it depends on knowing who actually starts."},
         {"n": 2, "title": "Player-level beats team-level, but public data limits individual credit.",
          "text": ("Box-score credit summed over the players on the field beats team ratings when predicting the next season. "
-                  "On-field plus-minus does not beat box credit, and lineup effects do not move game predictions."),
-         "source": RESULTS_DOC},
+                  "On-field plus-minus does not beat box credit, and lineup effects do not move game predictions.")},
         {"n": 3, "title": "Elo's edge is memory.",
          "text": ("Elo carries what it learned across seasons. On development seasons our features alone tie Elo overall: "
-                  "Elo wins in weeks 1 to 4, and our features win in weeks 10 to 18."),
-         "source": RESULTS_DOC},
+                  "Elo wins in weeks 1 to 4, and our features win in weeks 10 to 18.")},
         {"n": 4, "title": "Teams are still too conservative.",
          "text": (f"The fourth-down audit estimates about {wins:.2f} wins per team-game given up, mostly by punting "
-                  "(model-estimated). The early-down policy says pass more, especially from 12 personnel on 1st and 10."),
-         "source": src(fau)},
+                  "(model-estimated). The early-down policy says pass more, especially from 12 personnel on 1st and 10.")},
         {"n": 5, "title": "The market is still better at game prediction.",
          "text": (f"Brier {m['metrics']['brier']:.4f} against our {a['metrics']['brier']:.4f} on 2020 to 2025. "
-                  "Our models are independent of the market by design, so the edge we measured over Elo and nflfastR is real."),
-         "source": src(fa)},
+                  "Our models are independent of the market by design, so the edge we measured over Elo and nflfastR is real.")},
     ]
-
-
-def build_live(site_data: Path) -> dict | None:
-    """The live 2026 record: the model and the shadow, from ml.json. None when ml.json does not exist."""
-    path = site_data / "ml.json"
-    if not path.exists():
-        return None
-    try:
-        ml = json.loads(path.read_text())
-    except (OSError, ValueError):
-        return None
-    final = (ml.get("live") or {}).get("final") or {}
-    sh = ml.get("shadow") or {}
-    return {
-        "season": ml.get("season"),
-        "from_week": ml.get("live_from_week"),
-        "from_date": ml.get("live_from_date"),
-        "last_run_utc": ml.get("last_run_utc"),
-        "ledger_url": ml.get("ledger_url"),
-        "ledger_rows": ml.get("ledger_rows"),
-        "model": {"n_scored": int(final.get("n") or 0),
-                  "brier": (final.get("model") or {}).get("brier"),
-                  "elo_brier": (final.get("elo") or {}).get("brier")},
-        "shadow": None if not sh else {
-            "name": "Kalman strength model (M3b)",
-            "n_scored": int(sh.get("n") or 0),
-            "brier": (sh.get("shadow") or {}).get("brier"),
-            "model_brier_same_games": (sh.get("model") or {}).get("brier"),
-            "brier_diff": sh.get("brier_diff"),
-            "ledger_url": sh.get("ledger_url"),
-        },
-    }
 
 
 # --------------------------------------------------------------------------- assembly
@@ -433,7 +378,7 @@ def build_research(runs_dir: Path | None = None, site_data: Path | None = None) 
     chart = build_chart(runs_dir)
     return {
         "schema": SCHEMA,
-        "title": "The models and their receipts",
+        "title": "The models and their results",
         "holdout_seasons": [2020, 2025],
         "repo": REPO_URL,
         "headlines": headlines(counts, chart),
@@ -442,9 +387,6 @@ def build_research(runs_dir: Path | None = None, site_data: Path | None = None) 
         "models": models,
         "chart": chart,
         "findings": build_findings(runs_dir),
-        "live": build_live(site_data),
-        "forward_test": FORWARD_TEST,
-        "sources": {"registry": "experiments/runs", "scoreboard_doc": RESULTS_DOC},
     }
 
 
