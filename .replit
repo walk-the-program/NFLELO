@@ -1,0 +1,14 @@
+modules = ["python-3.11", "web"]
+run = "python3 -m http.server 5000 --bind 0.0.0.0 --directory site"
+hidden = [".config", ".git", ".venv", "data", "experiments", "legacy_2025", "nflelo", "notebooks", "outputs", "scripts", "tests"]
+
+[nix]
+channel = "stable-24_05"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[deployment]
+deploymentTarget = "static"
+publicDir = "site"

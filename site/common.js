@@ -10,7 +10,20 @@
   // ------------------------------------------------------------------ data
   // Every data file is revalidated on each load (`no-cache`): after the weekly update, browsers must not
   // keep showing last week's numbers from a heuristic cache. Optional files resolve to null when missing.
+  // Hosted copies (e.g. Replit) read data/ from the repo's main branch, where the weekly Action commits it,
+  // so new weeks show up without a redeploy; local servers, and any failed remote read, use the bundled data/.
+  var REMOTE_DATA = 'https://raw.githubusercontent.com/walk-the-program/NFLELO/main/site/data/';
+  var LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\]|.*\.localhost|.*\.test)$/.test(location.hostname) || location.protocol === 'file:';
   function getJSON(url, optional) {
+    if (!LOCAL_HOST && url.indexOf('data/') === 0) {
+      return fetch(REMOTE_DATA + url.slice(5), { cache: 'no-cache' }).then(function (r) {
+        if (!r.ok) throw new Error(url + ' ' + r.status);
+        return r.json();
+      }).catch(function () { return localJSON(url, optional); });
+    }
+    return localJSON(url, optional);
+  }
+  function localJSON(url, optional) {
     return fetch(url, { cache: 'no-cache' }).then(function (r) {
       if (!r.ok) { if (optional) return null; throw new Error(url + ' ' + r.status); }
       return r.json();
