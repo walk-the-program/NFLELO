@@ -238,6 +238,18 @@ def elo_pick_table(sched: pd.DataFrame, ratings_by_team: dict, hfa: float) -> pd
     return s
 
 
+def kickoff_utc_iso(games: pd.DataFrame) -> pd.Series:
+    """Kickoff instant as an ISO UTC string per row (nflverse gameday + gametime are Eastern wall-clock).
+
+    Reuses the as-of rule's ET reading, so daylight saving is handled by the tz database. A missing or malformed
+    gametime gives None: the page then cannot place the game in a kickoff slot and skips it.
+    """
+    from nflelo.ml import asof, live
+    ok = games["gametime"].astype("string").str.strip().str.match(r"^\d{1,2}:\d{2}$", na=False)
+    utc = asof.kickoff_times(games).dt.tz_convert("UTC")
+    return pd.Series([live.utc_iso(t) if good else None for t, good in zip(utc, ok)], index=games.index, dtype=object)
+
+
 def build_upcoming(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame) -> dict:
     """The next unplayed week: unplayed games with Elo pick, Elo spread, and the Vegas line.
 
@@ -260,6 +272,7 @@ def build_upcoming(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame) -> 
     todo["diff"] = todo["elo_spread"] - todo["vegas_spread"]
     todo["gap"] = 100 * (todo["p_home"] - todo["p_mkt"])      # Elo vs Vegas win-probability gap, percentage points
     todo = todo.sort_values(["gameday", "gametime", "game_id"], kind="stable")
+    todo["kickoff_utc"] = kickoff_utc_iso(todo)
 
     flagged = []
     if todo["gap"].notna().any():
@@ -271,6 +284,7 @@ def build_upcoming(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame) -> 
             "game_id": r.game_id,
             "date": r.gameday,
             "time": clean(r.gametime),
+            "kickoff_utc": r.kickoff_utc,
             "away": r.away_team, "home": r.home_team,
             "neutral": bool(r.location == "Neutral"),
             "p_home": round(float(r.p_home), 4),

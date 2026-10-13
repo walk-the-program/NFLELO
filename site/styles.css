@@ -181,6 +181,24 @@ ul, ol { list-style: none; }
 .stat-gap dd { white-space: nowrap; font-size: clamp(22px, 2.5vw, 34px); }
 .stat.is-na dd { font: 600 14px/1.3 var(--font-body); letter-spacing: 0; color: var(--muted); padding-bottom: 6px; }
 .stat.is-off { opacity: 0.4; }
+.mx-teams[hidden], .mx-grid[hidden] { display: none; }
+/* several games in one kickoff slot: compact sub-tiles, the model's favored side first */
+.mx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: var(--gap); }
+.mxc { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 16px; border-radius: var(--r-sub); background: var(--ab-sub); color: var(--ink); text-decoration: none; transition: transform 140ms ease, box-shadow 140ms ease; }
+.mxc:hover { transform: translateY(-2px); box-shadow: var(--ab-shadow-hi); }
+.mxc:focus-visible { outline: none; box-shadow: var(--ring); }
+.mxc-vs { font: 700 22px/1 var(--font-heading); letter-spacing: -0.02em; }
+.mxc-vs .at { color: var(--muted); font: 600 13px/1 var(--font-body); padding: 0 7px; letter-spacing: 0; }
+.mxc-main { display: flex; flex-direction: column; gap: 4px; }
+.mxc-main b { font: 700 clamp(40px, 4.4vw, 54px)/0.9 var(--font-heading); letter-spacing: -0.05em; }
+.mxc-main span { font: 600 13px/1.3 var(--font-body); color: var(--muted); }
+.mxc-rows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: auto; }
+.mxc-c { min-width: 0; }
+.mxc-c dt { display: flex; align-items: center; gap: 5px; font: 600 12px/1.3 var(--font-body); color: var(--muted); }
+.mxc-c dt i { flex: none; display: block; width: 9px; height: 9px; }
+.mxc-c dd { margin-top: 2px; font: 700 15px/1.2 var(--font-body); white-space: nowrap; }
+.mxc-c dd.na { color: var(--muted); font-weight: 600; }
+.mxc .qbtag { margin: 0; font: 700 12px/1.3 var(--font-body); border-left: 4px solid var(--ink); padding-left: 8px; }
 .mx-foot { display: flex; align-items: center; gap: 12px 28px; flex-wrap: wrap; }
 .mx-foot [hidden] { display: none; }
 .mx-foot .b-link { font: 600 16px/1.2 var(--font-body); }

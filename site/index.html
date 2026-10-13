@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="styles.css">
 <script src="common.js" defer></script>
 <script src="elo-lib.js" defer></script>
+<script src="slot.js" defer></script>
 <script src="app.js" defer></script>
 </head>
 <body>
@@ -54,10 +55,11 @@
           <div class="b-seg" role="group" aria-label="Matchup view" id="mx-view"></div>
           <p class="label" id="mx-eyebrow">Loading</p>
         </div>
-        <div class="mx-teams" aria-live="polite">
+        <div class="mx-teams" id="mx-teams" aria-live="polite">
           <div class="mx-team team-away" id="mx-away"></div>
           <div class="mx-team team-home" id="mx-home"></div>
         </div>
+        <div class="mx-grid" id="mx-grid" hidden></div>
         <div class="mx-meter" id="mx-meter">
           <div class="b-meter" id="mx-meter-img" role="img" aria-label="">
             <div class="b-meter__track" aria-hidden="true"><i>0</i><i>100</i></div>

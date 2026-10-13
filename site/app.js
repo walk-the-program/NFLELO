@@ -89,25 +89,26 @@
 
   var hero = { view: 'week', views: {}, showElo: true, showVegas: true };
 
-  // Unplayed games only (upcoming.json drops played ones), so a game already played never shows.
-  // Picks the largest gap: model vs Vegas, else Elo vs Vegas, else model vs Elo, else the first game.
-  function weekView() {
-    var u = D.upcoming, M = mlWeek();
-    if (!u.week || !u.games.length) return { empty: 'No games are left on the schedule.' };
-    var mlBy = {};
+  // One game's three probabilities (home side) and its largest available gap: model vs Vegas, else Elo vs Vegas,
+  // else model vs Elo. kind 3, 2, 1, 0 says which; `size` is |gap| as a probability difference.
+  function candidate(g, mlBy) {
+    var mg = mlBy[g.game_id];
+    var pm = mg && mg.p_home_model != null ? mg.p_home_model : null, pe = g.p_home;
+    var pv = g.p_market_home != null ? g.p_market_home : (mg && mg.p_market_home != null ? mg.p_market_home : null);
+    var kind = pm != null && pv != null ? 3 : pv != null ? 2 : pm != null ? 1 : 0;
+    var gap = kind === 3 ? pm - pv : kind === 2 ? pe - pv : kind === 1 ? pm - pe : 0;
+    return { g: g, mg: mg, pm: pm, pe: pe, pv: pv, kind: kind, size: Math.abs(gap) };
+  }
+
+  function mlIndex() {
+    var M = mlWeek(), mlBy = {};
     if (M) M.games.forEach(function (x) { mlBy[x.game_id] = x; });
-    var best = null;
-    u.games.forEach(function (g) {
-      var mg = mlBy[g.game_id];
-      var pm = mg && mg.p_home_model != null ? mg.p_home_model : null, pe = g.p_home;
-      var pv = g.p_market_home != null ? g.p_market_home : (mg && mg.p_market_home != null ? mg.p_market_home : null);
-      var kind = pm != null && pv != null ? 3 : pv != null ? 2 : pm != null ? 1 : 0;
-      var gap = kind === 3 ? pm - pv : kind === 2 ? pe - pv : kind === 1 ? pm - pe : 0;
-      var c = { g: g, mg: mg, pm: pm, pe: pe, pv: pv, kind: kind, size: Math.abs(gap) };
-      if (!best || c.kind > best.kind || (c.kind === best.kind && c.size > best.size)) best = c;
-    });
+    return mlBy;
+  }
+
+  // The single-game instrument description for one candidate. `eyebrow` is the line above the teams.
+  function gameView(best, eyebrow) {
     var g = best.g, hasModel = best.pm != null;
-    var basis = best.kind === 3 ? 'largest NFELO model vs Vegas gap' : best.kind === 2 ? 'largest Elo vs Vegas gap' : best.kind === 1 ? 'largest NFELO model vs Elo gap' : 'first game up';
     var p = hasModel ? best.pm : best.pe;
     var gapPts = best.kind === 3 ? (best.pm - best.pv) * 100 : best.kind === 2 ? (best.pe - best.pv) * 100 : null;
     var lead = nameParts(g.home).nick;
@@ -116,13 +117,68 @@
     stats.push(best.pv != null ? { l: 'Vegas', v: pct(best.pv, 1), c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas' } : { l: 'Vegas', v: 'No line yet', c: 'var(--muted)', clip: 'polygon(50% 0,100% 100%,0 100%)', key: 'vegas', na: true });
     stats.push({ l: (hasModel ? 'NFELO model' : 'Elo') + ' vs Vegas', v: gapPts == null ? 'Needs a line' : signed(gapPts, 1) + ' pp', gap: true, na: gapPts == null });
     return {
-      eyebrow: 'Week ' + u.week + ' · ' + shortDay(g.date) + ' · ' + basis,
+      eyebrow: eyebrow,
       away: g.away, awayRole: 'Away', home: g.home, homeRole: g.neutral ? 'Home, neutral site' : 'Home',
       pm: p, pe: hasModel ? best.pe : null, pv: best.pv, knob: hasModel ? 'model' : 'elo', stats: stats,
       aria: g.home + ' win probability. ' + (hasModel ? 'NFELO model ' + pct(best.pm, 1) + ', Elo ' + pct(best.pe, 1) : 'Elo ' + pct(best.pe, 1)) + (best.pv != null ? ', Vegas ' + pct(best.pv, 1) : '. No Vegas line yet') + '.',
       axis: nameParts(g.home).nick + ' win probability, %',
       link: { href: '#week', text: 'All games this week' }, ticks: true
     };
+  }
+
+  // Fallback view (no usable kickoff slot): the week's largest gap among the unplayed games in upcoming.json.
+  function weekView() {
+    var u = D.upcoming;
+    if (!u.week || !u.games.length) return { empty: 'No games are left on the schedule.' };
+    var mlBy = mlIndex(), best = null;
+    u.games.forEach(function (g) {
+      var c = candidate(g, mlBy);
+      if (!best || c.kind > best.kind || (c.kind === best.kind && c.size > best.size)) best = c;
+    });
+    var basis = best.kind === 3 ? 'largest NFELO model vs Vegas gap' : best.kind === 2 ? 'largest Elo vs Vegas gap' : best.kind === 1 ? 'largest NFELO model vs Elo gap' : 'first game up';
+    return gameView(best, 'Week ' + u.week + ' · ' + shortDay(best.g.date) + ' · ' + basis);
+  }
+
+  // The next kickoff slot on the viewer's clock (slot.js): the earliest slot whose kickoff + 3.5 hours is still ahead.
+  // One game keeps the full instrument; several become a grid of compact cards, largest model-vs-Vegas gap first.
+  // Returns null when no game has a usable kickoff, so the caller falls back to weekView().
+  function slotView(nowMs) {
+    var u = D.upcoming;
+    if (!u.week || !u.games.length) return null;
+    var slot = N.slot.pickSlot(u.games, nowMs);
+    if (!slot) return null;
+    var mlBy = mlIndex(), label = N.slot.slotLabel(slot);
+    var cands = slot.games.map(function (g) { return candidate(g, mlBy); });
+    if (cands.length === 1) {
+      var v = slotMeta(gameView(cands[0], label + ' · Week ' + u.week), slot);
+      return v;
+    }
+    cands = cands.map(function (c, i) { c.i = i; return c; });
+    cands.sort(function (a, b) { return b.kind - a.kind || b.size - a.size || a.i - b.i; });
+    return slotMeta({ eyebrow: label + ' · ' + plural(cands.length, 'game', 'games') + ' · Week ' + u.week, cards: cands, link: { href: '#week', text: 'All games this week' } }, slot);
+  }
+
+  function slotMeta(v, slot) { v.slotKey = slot.startMs + ':' + slot.live + ':' + slot.games.length; v.slotLive = slot.live; return v; }
+
+  // One compact card: the model's favored side with its win chance, then Elo, Vegas and the model-vs-Vegas gap on that same side.
+  function matchCard(c) {
+    var g = c.g, hasModel = c.pm != null;
+    var p0 = hasModel ? c.pm : c.pe, homeFav = p0 >= 0.5, side = homeFav ? g.home : g.away;
+    var fav = function (p) { return p == null ? null : homeFav ? p : 1 - p; };
+    var pe = fav(c.pe), pv = fav(c.pv), main = fav(p0);
+    var gap = c.kind === 3 ? fav(c.pm) - pv : c.kind === 2 ? pe - pv : null;
+    var qb = c.mg && c.mg.qb_change;
+    var label = g.away + ' at ' + g.home + '. ' + (hasModel ? 'NFELO model' : 'Elo') + ' gives ' + side + ' ' + pct(main, 1) +
+      (hasModel ? ', Elo ' + pct(pe, 1) : '') + (pv != null ? ', Vegas ' + pct(pv, 1) + ', gap ' + signed(gap * 100, 1) + ' percentage points' : ', no Vegas line yet') + (qb ? '. ' + qbText(qb) : '') + '. Opens this game in This week.';
+    function cell(cls, name, val, na) { return h('div', { class: 'mxc-c' }, h('dt', {}, h('i', { class: cls, 'aria-hidden': 'true' }), name), h('dd', { class: na ? 'na' : '', text: val })); }
+    return h('a', { class: 'mxc', href: '#game-' + g.game_id, 'aria-label': label },
+      h('p', { class: 'mxc-vs' }, g.away, h('span', { class: 'at', text: 'at' }), g.home),
+      h('p', { class: 'mxc-main' }, h('b', { text: pct(main, 0) }), h('span', { text: (hasModel ? 'NFELO model' : 'Elo') + ' · ' + side + ' win' })),
+      h('dl', { class: 'mxc-rows' },
+        hasModel ? cell('k-s1', 'Elo', pct(pe, 0)) : null,
+        cell('k-s2', 'Vegas', pv != null ? pct(pv, 0) : 'No line', pv == null),
+        cell('k-s3', 'Gap', gap == null ? 'n/a' : signed(gap * 100, 1) + ' pp', gap == null)),
+      qb ? h('p', { class: 'qbtag', text: qbText(qb) }) : null);
   }
 
   // The team projected for the most wins, and its next game.
@@ -187,7 +243,19 @@
   function drawInstrument() {
     var v = hero.views[hero.view];
     $('#mx-view').querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === hero.view)); });
-    var meter = $('#mx-meter'), stats = $('#mx-stats'), sw = $('#mx-switches');
+    var meter = $('#mx-meter'), stats = $('#mx-stats'), sw = $('#mx-switches'), teams = $('#mx-teams'), grid = $('#mx-grid');
+    teams.hidden = !!v.cards;
+    grid.hidden = !v.cards;
+    if (v.cards) {
+      // several games in one kickoff slot: compact cards, no meter, no Elo/Vegas switches
+      $('#mx-eyebrow').textContent = v.eyebrow;
+      meter.hidden = true; stats.hidden = true; sw.hidden = true; $('#mx-open').hidden = false;
+      clear(grid);
+      v.cards.forEach(function (c) { grid.appendChild(matchCard(c)); });
+      $('#mx-open').setAttribute('href', v.link.href);
+      $('#mx-open').firstChild.textContent = v.link.text + ' ';
+      return;
+    }
     if (v.empty) {
       $('#mx-eyebrow').textContent = v.empty;
       drawTeam($('#mx-away'), null); drawTeam($('#mx-home'), null);
@@ -222,12 +290,13 @@
   function renderHero() {
     var bar = $('#mx-view');
     if (!bar) return;
-    hero.views.week = weekView();
+    hero.views.week = slotView(Date.now()) || weekView();
+    hero.weekIsSlot = !!hero.views.week.slotKey;
     var rv = restView(), ov = oddsView();
     if (rv) hero.views.rest = rv;
     if (ov) hero.views.playoffs = ov;
     clear(bar);
-    [['week', 'This week'], ['rest', 'Rest of season'], ['playoffs', 'Playoff odds']].forEach(function (t) {
+    [['week', hero.weekIsSlot ? (hero.views.week.slotLive ? 'Live now' : 'Next kickoff') : 'This week'], ['rest', 'Rest of season'], ['playoffs', 'Playoff odds']].forEach(function (t) {
       if (!hero.views[t[0]]) return;
       bar.appendChild(h('button', { type: 'button', 'data-view': t[0], 'aria-pressed': 'false', text: t[1], onclick: function () { hero.view = t[0]; drawInstrument(); } }));
     });
@@ -235,6 +304,17 @@
     $('#mx-sw-elo').addEventListener('change', function (e) { hero.showElo = e.target.checked; drawInstrument(); });
     $('#mx-sw-vegas').addEventListener('change', function (e) { hero.showVegas = e.target.checked; drawInstrument(); });
     drawInstrument();
+    // keep the slot current while the page stays open: re-pick each minute and redraw only when it changed
+    if (hero.weekIsSlot) setInterval(refreshSlot, 60000);
+  }
+
+  function refreshSlot() {
+    var next = slotView(Date.now());
+    if (!next || next.slotKey === hero.views.week.slotKey) return;
+    hero.views.week = next;
+    var btn = $('#mx-view').querySelector('[data-view="week"]');
+    if (btn) btn.textContent = next.slotLive ? 'Live now' : 'Next kickoff';
+    if (hero.view === 'week') drawInstrument();
   }
 
   // ------------------------------------------------------------------ ladder
@@ -360,7 +440,7 @@
         h('div', {}, h('dt', { text: 'Elo line' }), h('dd', { text: lineText(g.home, g.away, g.elo_spread) })),
         g.vegas_spread != null ? h('div', {}, h('dt', { text: 'Vegas line' }), h('dd', { text: lineText(g.home, g.away, g.vegas_spread) })) : h('div', {}, h('dt', { text: 'Vegas line' }), h('dd', { text: 'None yet' })),
         g.diff != null ? h('div', {}, h('dt', { text: 'Spread gap' }), h('dd', { text: f1(Math.abs(g.diff)) + ' pts' })) : null);
-      var card = h('article', { class: 'game', 'aria-label': label },
+      var card = h('article', { class: 'game', id: 'game-' + g.game_id, tabindex: '-1', 'aria-label': label },
         h('div', { class: 'when' }, h('span', { text: shortDay(g.date) + (g.time ? ', ' + clock(g.time) : '') }),
           tag ? h('span', { class: flagged ? 'tag' : '', text: tag }) : null),
         h('div', { class: 'vs' }, g.away, h('span', { class: 'at', text: 'at' }), g.home),
