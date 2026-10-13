@@ -212,6 +212,9 @@ def test_committed_fourth_rows_are_completed_plays():
     if sched_p.exists():
         s = pd.read_parquet(sched_p)
         final = set(s.loc[s["home_score"].notna(), "game_id"])
+        # A local cache older than the committed data can't confirm games played after it was written.
+        cached_on = pd.Timestamp.fromtimestamp(sched_p.stat().st_mtime).strftime("%Y-%m-%d")
+        final |= set(s.loc[s["gameday"].astype(str) >= cached_on, "game_id"])
     cols = live["plays"]["columns"]
     for row in live["plays"]["rows"]:
         assert len(row) == len(cols)
