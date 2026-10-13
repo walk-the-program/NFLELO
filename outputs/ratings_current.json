@@ -3,7 +3,7 @@
   "season": 2026,
   "week": 5,
   "change_is_since": "ratings 7 days before as_of (teams with no earlier game show 0)",
-  "hfa_current": 36.5,
+  "hfa_current": 36.3,
   "config": {
     "start": 1500.0,
     "k": 20.0,
@@ -84,20 +84,20 @@
       "rank_change": -1
     },
     {
-      "franchise": "KC",
-      "rating": 1563.2,
+      "franchise": "BAL",
+      "rating": 1566.4,
       "rank": 9,
-      "last_game_date": "2026-10-04",
-      "rating_change": 0.0,
-      "rank_change": 1
+      "last_game_date": "2026-10-11",
+      "rating_change": 19.7,
+      "rank_change": 2
     },
     {
-      "franchise": "BAL",
-      "rating": 1546.7,
+      "franchise": "KC",
+      "rating": 1563.2,
       "rank": 10,
       "last_game_date": "2026-10-04",
       "rating_change": 0.0,
-      "rank_change": 1
+      "rank_change": 0
     },
     {
       "franchise": "DET",
@@ -112,7 +112,7 @@
       "rating": 1533.9,
       "rank": 12,
       "last_game_date": "2026-10-11",
-      "rating_change": -37.6,
+      "rating_change": -37.7,
       "rank_change": -4
     },
     {
@@ -128,7 +128,7 @@
       "rating": 1522.5,
       "rank": 14,
       "last_game_date": "2026-10-11",
-      "rating_change": 37.6,
+      "rating_change": 37.7,
       "rank_change": 3
     },
     {
@@ -157,10 +157,10 @@
     },
     {
       "franchise": "ATL",
-      "rating": 1494.6,
+      "rating": 1474.9,
       "rank": 18,
-      "last_game_date": "2026-10-05",
-      "rating_change": 33.3,
+      "last_game_date": "2026-10-11",
+      "rating_change": 13.5,
       "rank_change": 5
     },
     {
