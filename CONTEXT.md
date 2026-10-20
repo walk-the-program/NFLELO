@@ -2,7 +2,7 @@
 
 This is the main context document for the project. Read it first. Every decision, data source, and sub-project gets recorded here, or gets its own file under `context/` with a link from the index at the bottom.
 
-Last updated: 2026-10-11 (site cuts and accuracy fixes)
+Last updated: 2026-10-19 (train-everything notebook)
 
 ## What this project is
 
@@ -36,7 +36,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 
 **Live 2026 pipeline.** `.github/workflows/weekly.yml` runs Wednesday and Sunday: Elo rebuild, `scripts/ml_predict.py` (A4s predictions plus the Kalman shadow model, logged before kickoff in `experiments/live/`), the playoff simulation, and the site export. The site in `site/` is not hosted yet.
 
-**Master notebook.** `notebooks/00_nflelo_walkthrough.ipynb` walks through the whole project end to end (data, Elo, features, testing, every model and its result, the live pipeline, what's waiting on data, and a glossary). It calls the real package and script code, recomputes what's cheap on allowed seasons, and loads every 2020-2025 result from `experiments/runs/`. It runs top to bottom in about 3 minutes. Notebooks `01` to `10` go deeper on each milestone.
+**Master notebook.** `notebooks/00_nflelo_walkthrough.ipynb` walks through the whole project end to end (data, Elo, features, testing, every model and its result, the live pipeline, what's waiting on data, and a glossary). It calls the real package and script code, recomputes what's cheap on allowed seasons, and loads every 2020-2025 result from `experiments/runs/`. It runs top to bottom in about 3 minutes. Notebooks `01` to `10` go deeper on each milestone. `notebooks/train_all_models.ipynb` actually retrains every model end to end (about 75 minutes; `scripts/train_all.sh`).
 
 ### Legacy Elo model (2025)
 
@@ -150,6 +150,7 @@ Hard constraints: the data must be **free**, and it must be **safe for commercia
 | 2026-10-11 | M8 result on DEV: no candidate beats C2d beyond noise. The best slivers were the margin/blend target (-0.0002 vs C2d), head-coach change (-0.0002), and E5 = C2d + coach (-0.0002), all with CIs including zero. Opponent-adjusted QB, injury-exit cleaning, carry-over retune, stacking, and travel/time-zone/altitude/rest/surface features did not help (all context together overfit). Weather is filled only after games, so it is unusable live. A4s stays the headline and C2d the shadow; nothing frozen. |
 | 2026-10-11 | Site cuts and accuracy fixes (owner wants less text, simpler visuals). Deleted: index "Records" tables (`records.json` no longer exported), the 32-team heatmap (the parity line chart stays as the history tile, y axis "Std. dev. of team ratings (Elo points)"; `tapestry.json` became `parity.json`), and the playcalling "Team view" (`team_view_2025` dropped from `playcalling.json`). Fixed: fourth-down chart (go primary, field goal ink, punt muted; clear = solid, lean = hatch, toss-up = plain sub-tile; toss-up share line); fourth hero now says the first engine failed its calibration test and the revised one is under test until Feb 2027; the models-page evidence item that cited wins given up on fourth downs is gone; win-probability gaps read "pp" and the hero and "This week" use the same NFLELO-vs-Vegas pp gap; one name per model ("NFLELO model", "shadow model", "Elo") in visible text; the unexplained "2025 model" figure is gone; Plays and Models both show the call view for M6 (-0.019), with Brier and CRPS differences at 3 decimals. Details in `context/elo-site.md` and `context/ml-pages.md`. |
 | 2026-10-11 | Site renamed NFELO (Walker chose it knowing nfeloapp.com uses "nfelo"); the wordmark highlights ELO (NF + ELO). The repo, URLs and Python package names keep NFLELO. The home page is now concise (hero, power ladder, this week, projected wins, playoff odds); a new `site/elo.html` holds the team explorer, luck board, parity chart, Elo scorecard and a Method tile; the model pages (and each models card) carry a technical Specification tile. The fourth-down page dropped the 2020 to 2025 audit, which rested on the engine that failed its calibration test. See the page map in `context/elo-site.md`. |
+| 2026-10-19 | Added `notebooks/train_all_models.ipynb`, a personal notebook that retrains every model (Elo baselines, M3, the no-Elo study, M3b, M4, M5, M5b, M6, M7a with v2, M7b, M8) on development seasons only and checks each result against the run registry. All 126 retrained runs matched in the full run (73 minutes; quick mode is about 23 minutes). It then fits the 2026 models (A4s, the margin model, the C2d shadow) and shows this week's slate and playoff odds without writing anything. The 2020-2025 holdout is loaded, never rerun; run records go to the gitignored `data/raw/ml/_train_all_runs/`, and the last cell asserts the registry and git tree are unchanged. Run with `scripts/train_all.sh [quick\|full]` using the project `.venv` (Python 3.13, `requirements-m6.txt`, and `brew install libomp`). |
 
 ## Context file index
 
