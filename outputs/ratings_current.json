@@ -1,9 +1,9 @@
 {
-  "as_of": "2026-10-19",
+  "as_of": "2026-10-22",
   "season": 2026,
-  "week": 6,
+  "week": 7,
   "change_is_since": "ratings 7 days before as_of (teams with no earlier game show 0)",
-  "hfa_current": 35.1,
+  "hfa_current": 35.4,
   "config": {
     "start": 1500.0,
     "k": 20.0,
@@ -48,7 +48,7 @@
       "rating": 1608.6,
       "rank": 4,
       "last_game_date": "2026-10-15",
-      "rating_change": -13.8,
+      "rating_change": 0.0,
       "rank_change": 1
     },
     {
@@ -64,31 +64,31 @@
       "rating": 1602.0,
       "rank": 6,
       "last_game_date": "2026-10-15",
-      "rating_change": 13.8,
-      "rank_change": 0
-    },
-    {
-      "franchise": "NE",
-      "rating": 1594.2,
-      "rank": 7,
-      "last_game_date": "2026-10-18",
-      "rating_change": 8.1,
+      "rating_change": 0.0,
       "rank_change": 0
     },
     {
       "franchise": "KC",
       "rating": 1577.4,
-      "rank": 8,
+      "rank": 7,
       "last_game_date": "2026-10-18",
       "rating_change": 14.2,
-      "rank_change": 1
+      "rank_change": 2
+    },
+    {
+      "franchise": "NE",
+      "rating": 1574.4,
+      "rank": 8,
+      "last_game_date": "2026-10-22",
+      "rating_change": -11.7,
+      "rank_change": -1
     },
     {
       "franchise": "CHI",
-      "rating": 1554.1,
+      "rating": 1573.9,
       "rank": 9,
-      "last_game_date": "2026-10-18",
-      "rating_change": 20.3,
+      "last_game_date": "2026-10-22",
+      "rating_change": 40.1,
       "rank_change": 3
     },
     {
