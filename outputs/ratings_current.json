@@ -1,9 +1,9 @@
 {
-  "as_of": "2026-10-22",
+  "as_of": "2026-10-25",
   "season": 2026,
   "week": 7,
   "change_is_since": "ratings 7 days before as_of (teams with no earlier game show 0)",
-  "hfa_current": 35.4,
+  "hfa_current": 34.3,
   "config": {
     "start": 1500.0,
     "k": 20.0,
@@ -20,67 +20,67 @@
   },
   "teams": [
     {
-      "franchise": "SF",
-      "rating": 1648.8,
-      "rank": 1,
-      "last_game_date": "2026-10-19",
-      "rating_change": 6.2,
-      "rank_change": 0
-    },
-    {
       "franchise": "BUF",
       "rating": 1632.7,
-      "rank": 2,
+      "rank": 1,
       "last_game_date": "2026-10-18",
-      "rating_change": 7.5,
-      "rank_change": 0
-    },
-    {
-      "franchise": "MIN",
-      "rating": 1624.1,
-      "rank": 3,
-      "last_game_date": "2026-10-11",
-      "rating_change": 0.0,
-      "rank_change": 0
-    },
-    {
-      "franchise": "SEA",
-      "rating": 1608.6,
-      "rank": 4,
-      "last_game_date": "2026-10-15",
       "rating_change": 0.0,
       "rank_change": 1
     },
     {
-      "franchise": "JAX",
-      "rating": 1603.4,
-      "rank": 5,
-      "last_game_date": "2026-10-18",
-      "rating_change": -18.9,
-      "rank_change": -1
+      "franchise": "MIN",
+      "rating": 1631.3,
+      "rank": 2,
+      "last_game_date": "2026-10-25",
+      "rating_change": 7.3,
+      "rank_change": 1
     },
     {
       "franchise": "DEN",
-      "rating": 1602.0,
-      "rank": 6,
+      "rating": 1615.4,
+      "rank": 3,
+      "last_game_date": "2026-10-25",
+      "rating_change": 13.4,
+      "rank_change": 3
+    },
+    {
+      "franchise": "SF",
+      "rating": 1613.3,
+      "rank": 4,
+      "last_game_date": "2026-10-25",
+      "rating_change": -29.3,
+      "rank_change": -3
+    },
+    {
+      "franchise": "SEA",
+      "rating": 1608.6,
+      "rank": 5,
       "last_game_date": "2026-10-15",
       "rating_change": 0.0,
-      "rank_change": 0
+      "rank_change": -1
+    },
+    {
+      "franchise": "JAX",
+      "rating": 1603.4,
+      "rank": 6,
+      "last_game_date": "2026-10-18",
+      "rating_change": 0.0,
+      "rank_change": -1
     },
     {
       "franchise": "KC",
       "rating": 1577.4,
       "rank": 7,
       "last_game_date": "2026-10-18",
-      "rating_change": 14.2,
-      "rank_change": 2
+      "rating_change": 0.0,
+      "rank_change": 1
     },
     {
       "franchise": "NE",
       "rating": 1574.4,
       "rank": 8,
       "last_game_date": "2026-10-22",
-      "rating_change": -11.7,
+      "rating_change": -19.8,
       "rank_change": -1
     },
     {
@@ -88,191 +88,191 @@
       "rating": 1573.9,
       "rank": 9,
       "last_game_date": "2026-10-22",
-      "rating_change": 40.1,
-      "rank_change": 3
-    },
-    {
-      "franchise": "PIT",
-      "rating": 1549.6,
-      "rank": 10,
-      "last_game_date": "2026-10-18",
-      "rating_change": 17.2,
-      "rank_change": 3
-    },
-    {
-      "franchise": "BAL",
-      "rating": 1548.6,
-      "rank": 11,
-      "last_game_date": "2026-10-18",
-      "rating_change": -17.9,
-      "rank_change": -3
-    },
-    {
-      "franchise": "DET",
-      "rating": 1544.1,
-      "rank": 12,
-      "last_game_date": "2026-10-11",
-      "rating_change": 0.0,
-      "rank_change": -1
-    },
-    {
-      "franchise": "LA",
-      "rating": 1540.7,
-      "rank": 13,
-      "last_game_date": "2026-10-18",
-      "rating_change": -19.1,
-      "rank_change": -3
-    },
-    {
-      "franchise": "GB",
-      "rating": 1538.2,
-      "rank": 14,
-      "last_game_date": "2026-10-18",
-      "rating_change": 15.7,
+      "rating_change": 19.8,
       "rank_change": 0
     },
     {
-      "franchise": "HOU",
-      "rating": 1534.1,
-      "rank": 15,
-      "last_game_date": "2026-10-18",
-      "rating_change": 18.9,
-      "rank_change": 1
+      "franchise": "PIT",
+      "rating": 1561.9,
+      "rank": 10,
+      "last_game_date": "2026-10-25",
+      "rating_change": 12.3,
+      "rank_change": 0
+    },
+    {
+      "franchise": "LA",
+      "rating": 1561.0,
+      "rank": 11,
+      "last_game_date": "2026-10-25",
+      "rating_change": 20.3,
+      "rank_change": 2
     },
     {
       "franchise": "CIN",
-      "rating": 1521.3,
-      "rank": 16,
-      "last_game_date": "2026-10-11",
-      "rating_change": 0.0,
+      "rating": 1559.4,
+      "rank": 12,
+      "last_game_date": "2026-10-25",
+      "rating_change": 38.0,
+      "rank_change": 4
+    },
+    {
+      "franchise": "DET",
+      "rating": 1556.1,
+      "rank": 13,
+      "last_game_date": "2026-10-25",
+      "rating_change": 12.0,
       "rank_change": -1
     },
     {
-      "franchise": "CAR",
-      "rating": 1502.2,
+      "franchise": "GB",
+      "rating": 1526.2,
+      "rank": 14,
+      "last_game_date": "2026-10-25",
+      "rating_change": -12.0,
+      "rank_change": 0
+    },
+    {
+      "franchise": "BAL",
+      "rating": 1510.5,
+      "rank": 15,
+      "last_game_date": "2026-10-25",
+      "rating_change": -38.0,
+      "rank_change": -4
+    },
+    {
+      "franchise": "HOU",
+      "rating": 1506.0,
+      "rank": 16,
+      "last_game_date": "2026-10-25",
+      "rating_change": -28.2,
+      "rank_change": -1
+    },
+    {
+      "franchise": "ATL",
+      "rating": 1490.1,
       "rank": 17,
-      "last_game_date": "2026-10-18",
-      "rating_change": 31.0,
-      "rank_change": 2
+      "last_game_date": "2026-10-25",
+      "rating_change": 35.5,
+      "rank_change": 3
     },
     {
       "franchise": "PHI",
       "rating": 1476.8,
       "rank": 18,
       "last_game_date": "2026-10-18",
-      "rating_change": -31.0,
-      "rank_change": -1
-    },
-    {
-      "franchise": "CLE",
-      "rating": 1463.4,
-      "rank": 19,
-      "last_game_date": "2026-10-18",
-      "rating_change": 17.9,
-      "rank_change": 4
-    },
-    {
-      "franchise": "ATL",
-      "rating": 1454.6,
-      "rank": 20,
-      "last_game_date": "2026-10-18",
-      "rating_change": -20.3,
-      "rank_change": -2
-    },
-    {
-      "franchise": "NYG",
-      "rating": 1437.5,
-      "rank": 21,
-      "last_game_date": "2026-10-18",
-      "rating_change": -27.9,
-      "rank_change": -1
-    },
-    {
-      "franchise": "DAL",
-      "rating": 1430.7,
-      "rank": 22,
-      "last_game_date": "2026-10-18",
-      "rating_change": -15.7,
-      "rank_change": 0
-    },
-    {
-      "franchise": "NO",
-      "rating": 1428.7,
-      "rank": 23,
-      "last_game_date": "2026-10-18",
-      "rating_change": 27.9,
-      "rank_change": 5
-    },
-    {
-      "franchise": "LV",
-      "rating": 1426.5,
-      "rank": 24,
-      "last_game_date": "2026-10-18",
-      "rating_change": -7.5,
-      "rank_change": 1
-    },
-    {
-      "franchise": "TB",
-      "rating": 1426.3,
-      "rank": 25,
-      "last_game_date": "2026-10-18",
-      "rating_change": -17.2,
-      "rank_change": -1
-    },
-    {
-      "franchise": "IND",
-      "rating": 1424.9,
-      "rank": 26,
-      "last_game_date": "2026-10-18",
-      "rating_change": -31.9,
-      "rank_change": -5
-    },
-    {
-      "franchise": "LAC",
-      "rating": 1412.1,
-      "rank": 27,
-      "last_game_date": "2026-10-18",
-      "rating_change": -14.2,
-      "rank_change": -1
-    },
-    {
-      "franchise": "WAS",
-      "rating": 1407.4,
-      "rank": 28,
-      "last_game_date": "2026-10-19",
-      "rating_change": -6.2,
-      "rank_change": -1
-    },
-    {
-      "franchise": "ARI",
-      "rating": 1392.4,
-      "rank": 29,
-      "last_game_date": "2026-10-18",
-      "rating_change": 19.1,
-      "rank_change": 1
-    },
-    {
-      "franchise": "NYJ",
-      "rating": 1388.1,
-      "rank": 30,
-      "last_game_date": "2026-10-18",
-      "rating_change": -8.1,
-      "rank_change": -1
-    },
-    {
-      "franchise": "MIA",
-      "rating": 1372.2,
-      "rank": 31,
-      "last_game_date": "2026-10-11",
       "rating_change": 0.0,
       "rank_change": 0
     },
     {
-      "franchise": "TEN",
-      "rating": 1334.1,
-      "rank": 32,
+      "franchise": "TB",
+      "rating": 1473.6,
+      "rank": 19,
+      "last_game_date": "2026-10-25",
+      "rating_change": 47.3,
+      "rank_change": 6
+    },
+    {
+      "franchise": "CLE",
+      "rating": 1473.2,
+      "rank": 20,
+      "last_game_date": "2026-10-25",
+      "rating_change": 9.8,
+      "rank_change": -1
+    },
+    {
+      "franchise": "NYG",
+      "rating": 1465.7,
+      "rank": 21,
+      "last_game_date": "2026-10-25",
+      "rating_change": 28.2,
+      "rank_change": 0
+    },
+    {
+      "franchise": "CAR",
+      "rating": 1454.9,
+      "rank": 22,
+      "last_game_date": "2026-10-25",
+      "rating_change": -47.3,
+      "rank_change": -5
+    },
+    {
+      "franchise": "DAL",
+      "rating": 1430.7,
+      "rank": 23,
       "last_game_date": "2026-10-18",
-      "rating_change": 31.9,
+      "rating_change": 0.0,
+      "rank_change": -1
+    },
+    {
+      "franchise": "IND",
+      "rating": 1417.7,
+      "rank": 24,
+      "last_game_date": "2026-10-25",
+      "rating_change": -7.3,
+      "rank_change": 2
+    },
+    {
+      "franchise": "NO",
+      "rating": 1416.5,
+      "rank": 25,
+      "last_game_date": "2026-10-25",
+      "rating_change": -12.3,
+      "rank_change": -2
+    },
+    {
+      "franchise": "LAC",
+      "rating": 1412.1,
+      "rank": 26,
+      "last_game_date": "2026-10-18",
+      "rating_change": 0.0,
+      "rank_change": 2
+    },
+    {
+      "franchise": "WAS",
+      "rating": 1407.4,
+      "rank": 27,
+      "last_game_date": "2026-10-19",
+      "rating_change": -6.2,
+      "rank_change": 0
+    },
+    {
+      "franchise": "LV",
+      "rating": 1406.2,
+      "rank": 28,
+      "last_game_date": "2026-10-25",
+      "rating_change": -20.3,
+      "rank_change": -4
+    },
+    {
+      "franchise": "MIA",
+      "rating": 1388.5,
+      "rank": 29,
+      "last_game_date": "2026-10-25",
+      "rating_change": 16.2,
+      "rank_change": 2
+    },
+    {
+      "franchise": "ARI",
+      "rating": 1378.9,
+      "rank": 30,
+      "last_game_date": "2026-10-25",
+      "rating_change": -13.4,
+      "rank_change": -1
+    },
+    {
+      "franchise": "NYJ",
+      "rating": 1371.9,
+      "rank": 31,
+      "last_game_date": "2026-10-25",
+      "rating_change": -16.2,
+      "rank_change": -1
+    },
+    {
+      "franchise": "TEN",
+      "rating": 1324.4,
+      "rank": 32,
+      "last_game_date": "2026-10-25",
+      "rating_change": -9.8,
       "rank_change": 0
     }
   ]
