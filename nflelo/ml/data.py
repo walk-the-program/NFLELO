@@ -30,6 +30,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -208,6 +209,26 @@ def _store(dataset: str, season: int, frame, root: Path) -> dict:
     return rec
 
 
+_RETRY_WAITS = (15, 30, 60, 120)  # seconds between the 5 download attempts
+_sleep = time.sleep  # module-level so tests can skip the waiting
+
+
+def _download(dataset: str, season: int):
+    """Call the fetcher, retrying transient network failures (nflverse briefly drops release assets)."""
+    import requests
+    transient = (ConnectionError, OSError, requests.exceptions.RequestException)
+    for attempt, wait in enumerate((*_RETRY_WAITS, None), start=1):
+        try:
+            return FETCHERS[dataset](season)
+        except (DataError, ValueError):
+            raise
+        except transient as e:
+            if wait is None:
+                raise
+            print(f"{dataset} {season}: download failed ({e}); retry {attempt}/{len(_RETRY_WAITS)} in {wait}s")
+            _sleep(wait)
+
+
 def fetch(dataset: str, season: int, root: Path = ML_DIR) -> dict:
     """Download one season of one dataset into the cache and return its manifest record."""
     if dataset not in FETCHERS:
@@ -216,7 +237,7 @@ def fetch(dataset: str, season: int, root: Path = ML_DIR) -> dict:
         raise ValueError(f"nflverse play-by-play starts in {FIRST_PBP_SEASON}")
     if dataset in FIRST_SEASON and season < FIRST_SEASON[dataset]:
         raise ValueError(f"nflverse {dataset} starts in {FIRST_SEASON[dataset]}")
-    frame = FETCHERS[dataset](int(season))
+    frame = _download(dataset, int(season))
     if len(frame) == 0:
         raise DataError(f"{dataset} {season}: download returned no rows")
     if dataset in _SEASON_CHECKED:

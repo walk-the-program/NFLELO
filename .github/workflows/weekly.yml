@@ -7,6 +7,9 @@
 # Schedule. GitHub cron is fixed in UTC, so the Eastern time moves with daylight saving:
 #   Wednesday 14:00 UTC = 10:00 EDT (through Sat 2026-10-31) / 09:00 EST (from Sun 2026-11-01)
 #   Sunday    12:00 UTC = 08:00 EDT                           / 07:00 EST
+# Exact-time runs come from the Mac's LaunchAgent (com.walker.nfelo-update, scripts/scheduled_dispatch.sh):
+# Thu 10 PM, Sun 3 PM, Sun 10 PM, Mon 8 PM Mountain. The last four crons below are backups for when
+# the Mac is off.
 # Both stay ahead of every kickoff they cover: Thursday games are logged by the Wednesday
 # run, and the earliest Sunday kickoff (London, 9:30 ET) is 13:30 UTC in EDT, 14:30 UTC in EST.
 # GitHub can start scheduled runs late under load, which is why the Wednesday run carries
@@ -27,6 +30,12 @@ on:
     - cron: "0 6 * * 4"     # Thu 06:00 UTC: before Thursday night
     - cron: "0 6 * * 6"     # Sat 06:00 UTC: starters and injury report
     - cron: "0 4 * * 0"     # Sun 04:00 UTC: final pre-game refresh before the early (and London) kickoffs
+    # Backups for the Mac's exact-time LaunchAgent, in UTC for MST (UTC-7, through 2027-03-14).
+    # In MDT (from 2027-03-14) they fire an hour late.
+    - cron: "0 5 * * 5"     # Thu 10:00 PM MT
+    - cron: "0 22 * * 0"    # Sun 3:00 PM MT
+    - cron: "0 5 * * 1"     # Sun 10:00 PM MT
+    - cron: "0 3 * * 2"     # Mon 8:00 PM MT
   workflow_dispatch:
 
 permissions:

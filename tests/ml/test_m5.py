@@ -487,3 +487,30 @@ def test_ridge_reads_groups_from_rows_before_asof(world):
     a = pv.RidgeData(rows, st.onfield, st.sched).fit(2023, 3, box, VCFG, "off")
     b = pv.RidgeData(rows, of2, st.sched).fit(2023, 3, box, VCFG, "off")
     assert np.allclose(a["e"].to_numpy(), b["e"].to_numpy()) and list(a["group"]) == list(b["group"])
+
+
+def test_fetch_retries_transient_errors_but_not_data_errors(tmp_path, monkeypatch):
+    from nflelo.ml import data as mld
+    monkeypatch.setattr(mld, "_sleep", lambda s: None)
+    calls = {"n": 0}
+
+    def flaky(season):
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise ConnectionError("404")
+        return pd.DataFrame({"season": [season], "x": [1]})
+
+    monkeypatch.setitem(mld.FETCHERS, "schedules", flaky)
+    rec = mld.fetch("schedules", 2025, root=tmp_path)
+    assert calls["n"] == 3 and rec["rows"] == 1
+
+    calls["n"] = 0
+
+    def bad(season):
+        calls["n"] += 1
+        raise mld.DataError("bad")
+
+    monkeypatch.setitem(mld.FETCHERS, "schedules", bad)
+    with pytest.raises(mld.DataError):
+        mld.fetch("schedules", 2025, root=tmp_path)
+    assert calls["n"] == 1
