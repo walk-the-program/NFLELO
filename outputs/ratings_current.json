@@ -1,9 +1,9 @@
 {
-  "as_of": "2026-11-02",
+  "as_of": "2026-11-05",
   "season": 2026,
-  "week": 8,
+  "week": 9,
   "change_is_since": "ratings 7 days before as_of (teams with no earlier game show 0)",
-  "hfa_current": 34.9,
+  "hfa_current": 34.7,
   "config": {
     "start": 1500.0,
     "k": 20.0,
@@ -28,20 +28,20 @@
       "rank_change": 0
     },
     {
-      "franchise": "DEN",
-      "rating": 1626.7,
+      "franchise": "JAX",
+      "rating": 1640.5,
       "rank": 2,
-      "last_game_date": "2026-11-01",
-      "rating_change": 11.3,
-      "rank_change": 2
+      "last_game_date": "2026-11-05",
+      "rating_change": 37.1,
+      "rank_change": 4
     },
     {
-      "franchise": "JAX",
-      "rating": 1617.7,
+      "franchise": "DEN",
+      "rating": 1626.7,
       "rank": 3,
       "last_game_date": "2026-11-01",
-      "rating_change": 14.3,
-      "rank_change": 3
+      "rating_change": 11.3,
+      "rank_change": 1
     },
     {
       "franchise": "SF",
@@ -128,7 +128,7 @@
       "rating": 1541.0,
       "rank": 14,
       "last_game_date": "2026-10-29",
-      "rating_change": 14.8,
+      "rating_change": 0.0,
       "rank_change": 0
     },
     {
@@ -149,10 +149,10 @@
     },
     {
       "franchise": "BAL",
-      "rating": 1492.7,
+      "rating": 1470.0,
       "rank": 17,
-      "last_game_date": "2026-11-01",
-      "rating_change": -17.8,
+      "last_game_date": "2026-11-05",
+      "rating_change": -40.6,
       "rank_change": -2
     },
     {
@@ -192,7 +192,7 @@
       "rating": 1440.1,
       "rank": 22,
       "last_game_date": "2026-10-29",
-      "rating_change": -14.8,
+      "rating_change": 0.0,
       "rank_change": 0
     },
     {
