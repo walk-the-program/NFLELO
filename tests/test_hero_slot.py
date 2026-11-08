@@ -126,3 +126,32 @@ class TestSlotPicking:
 
     def test_label_uses_the_requested_zone_and_its_abbreviation(self):
         assert pick(NO_LONDON, "2026-10-11T16:00:00Z", "America/Los_Angeles")["label"] == "Next up · Sun 10:00 AM PDT"
+
+
+# ---- upcoming.json "results": finished games stay on the site until play-by-play exists ----
+
+def test_results_hold_recent_scored_games_with_ledger_numbers(tmp_path):
+    cols = ["game_id", "season", "week", "game_type", "gameday", "gametime", "location", "home_team", "away_team",
+            "home_score", "away_score", "spread_line", "home_moneyline", "away_moneyline"]
+    rows = [
+        ["2026_09_A_B", 2026, 9, "REG", "2026-11-08", "13:00", "Home", "B", "A", 20, 17, 3, -150, 130],   # scored today
+        ["2026_09_C_D", 2026, 9, "REG", "2026-11-08", "16:25", "Neutral", "D", "C", 10, 10, None, None, None],  # tie, no ledger
+        ["2026_08_E_F", 2026, 8, "REG", "2026-10-25", "13:00", "Home", "F", "E", 3, 6, None, None, None],  # too old
+        ["2026_09_G_H", 2026, 9, "REG", "2026-11-08", "20:20", "Home", "H", "G", None, None, 2, -120, 100],  # unplayed
+    ]
+    sched = pd.DataFrame(rows, columns=cols)
+    live_dir = tmp_path
+    (live_dir / "2026.csv").write_text(
+        "run_at_utc,kickoff_utc,game_id,p_home_model,spread_model,model_version\n"
+        "2026-11-05T12:00:00Z,2026-11-08T18:00:00Z,2026_09_A_B,0.5,1.0,v\n"
+        "2026-11-07T12:00:00Z,2026-11-08T18:00:00Z,2026_09_A_B,0.61234,2.46,v\n"       # the latest pre-kickoff row wins
+        "2026-11-08T19:00:00Z,2026-11-08T18:00:00Z,2026_09_A_B,0.99,9.9,v\n")          # after kickoff: ignored
+    out = export_site.build_results(sched, "2026-11-08", live_dir)
+    assert [r["game_id"] for r in out] == ["2026_09_A_B", "2026_09_C_D"]
+    a, c = out
+    assert (a["home"], a["away"], a["home_score"], a["away_score"], a["week"], a["neutral"]) == ("B", "A", 20, 17, 9, False)
+    assert (a["p_home_model"], a["spread_model"]) == (0.6123, 2.5)
+    assert a["kickoff_utc"] == "2026-11-08T18:00:00Z"
+    assert c["neutral"] is True and c["p_home_model"] is None and c["spread_model"] is None
+    json.dumps(out, allow_nan=False)
+    assert export_site.build_results(sched, "2026-11-08", tmp_path / "missing") [0]["p_home_model"] is None

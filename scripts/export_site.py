@@ -250,18 +250,60 @@ def kickoff_utc_iso(games: pd.DataFrame) -> pd.Series:
     return pd.Series([live.utc_iso(t) if good else None for t, good in zip(utc, ok)], index=games.index, dtype=object)
 
 
-def build_upcoming(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame) -> dict:
+RESULTS_DAYS = 8   # "results" keeps scored games from the last 8 days so a finished game never drops off the site
+
+
+def build_results(sched: pd.DataFrame, as_of: str, live_dir: Path) -> list[dict]:
+    """Every scored game of the season (any game type) played in the 8 days up to as_of, with the ledger's
+    last pre-kickoff model numbers (null when the game has none). The site shows these as final before
+    play-by-play exists, which can lag the score by hours."""
+    end = pd.Timestamp(as_of)
+    day = pd.to_datetime(sched["gameday"], errors="coerce")
+    done = sched[sched["home_score"].notna() & sched["away_score"].notna()
+                 & (day > end - pd.Timedelta(days=RESULTS_DAYS)) & (day <= end)].copy()
+    if done.empty:
+        return []
+    done = done.sort_values(["gameday", "gametime", "game_id"], kind="stable")
+    done["kickoff_utc"] = kickoff_utc_iso(done)
+    pre = pd.DataFrame(columns=["p_home_model", "spread_model"])
+    from nflelo.ml import live  # pandas-only module
+    path = live.ledger_path(int(done["season"].iloc[0]), live_dir)
+    if path.exists():
+        pre = live.latest_before_kickoff(live.read_ledger(path, market=True)).set_index("game_id")
+
+    def pick(game_id: str, col: str):
+        if game_id not in pre.index or col not in pre.columns or pd.isna(pre.at[game_id, col]):
+            return None
+        return float(pre.at[game_id, col])
+
+    out = []
+    for r in done.itertuples():
+        p, sp = pick(r.game_id, "p_home_model"), pick(r.game_id, "spread_model")
+        out.append({
+            "game_id": r.game_id, "week": int(r.week), "date": r.gameday, "kickoff_utc": r.kickoff_utc,
+            "home": r.home_team, "away": r.away_team, "neutral": bool(r.location == "Neutral"),
+            "home_score": int(r.home_score), "away_score": int(r.away_score),
+            "p_home_model": None if p is None else round(p, 4),
+            "spread_model": None if sp is None else round(sp, 1),
+        })
+    return out
+
+
+def build_upcoming(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame, live_dir: Path | None = None) -> dict:
     """The next unplayed week: unplayed games with Elo pick, Elo spread, and the Vegas line.
 
     Uses the earliest week of the current season that still has unplayed games, so a
     Thursday as_of shows the rest of that week (played games are in the ratings already).
+    "results" lists games finished in the last 8 days, so a game stays on the site between the final
+    whistle and the play-by-play export.
     """
     season = ratings["season"]
     sched = schedule[schedule["season"] == season]
+    results = build_results(sched, ratings["as_of"], LIVE_DIR if live_dir is None else live_dir)
     unplayed = sched[sched["home_score"].isna() & sched["away_score"].isna()]
     if unplayed.empty:
         return {"season": season, "week": None, "games": [], "played": 0, "total": 0, "has_lines": False,
-                "flagged": []}
+                "flagged": [], "results": results}
     week = int(unplayed["week"].min())
     wk = sched[(sched["week"] == week)]
     todo = unplayed[unplayed["week"] == week].copy()
@@ -298,7 +340,7 @@ def build_upcoming(schedule: pd.DataFrame, ratings: dict, elo: pd.DataFrame) -> 
     return {"season": season, "week": week, "played": int(len(wk) - len(todo)), "total": int(len(wk)),
             "has_lines": bool(todo["vegas_spread"].notna().any()),
             "spread_note": "Spreads are from the home team's side, positive when the home team is favored.",
-            "flagged": flagged, "games": games}
+            "flagged": flagged, "games": games, "results": results}
 
 
 def build_history(long: pd.DataFrame, ends: pd.DataFrame, partial_season: int | None) -> dict:
