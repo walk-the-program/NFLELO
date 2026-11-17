@@ -1,8 +1,8 @@
 {
  "season": 2026,
- "run_at_utc": "2026-11-17T05:47:02Z",
+ "run_at_utc": "2026-11-17T11:37:44Z",
  "model_version": "A4s-2026-c6b394e8+M-2026-4aab0795",
- "data_hash": "2cceb29b22e072a9",
+ "data_hash": "dd2ccfa437f10a2d",
  "next_feature_week": 11,
  "note": "Every unplayed game at run time. Only games with logged = true were before kickoff and went into the ledger; the others had already kicked off. No market data here.",
  "games": [
