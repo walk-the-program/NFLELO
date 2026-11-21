@@ -1,8 +1,8 @@
 {
  "season": 2026,
- "run_at_utc": "2026-11-20T13:40:59Z",
+ "run_at_utc": "2026-11-21T14:31:08Z",
  "model_version": "A4s-2026-c6b394e8+M-2026-4aab0795",
- "data_hash": "a2b263132ca5c058",
+ "data_hash": "4d25a6bf7b577061",
  "next_feature_week": 12,
  "note": "Every unplayed game at run time. Only games with logged = true were before kickoff and went into the ledger; the others had already kicked off. No market data here.",
  "games": [
@@ -286,10 +286,10 @@
    "qb_delta_diff": -0.0046,
    "home_qb_id": "00-0026498",
    "home_qb_name": "Matthew Stafford",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0036264",
    "away_qb_name": "Jordan Love",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -308,10 +308,10 @@
    "qb_delta_diff": -0.03134,
    "home_qb_id": "00-0033106",
    "home_qb_name": "Jared Goff",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0039918",
    "away_qb_name": "Caleb Williams",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -330,10 +330,10 @@
    "qb_delta_diff": 0.12122,
    "home_qb_id": "00-0033077",
    "home_qb_name": "Dak Prescott",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0039398",
    "away_qb_name": "Joe Milton III",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -352,10 +352,10 @@
    "qb_delta_diff": -0.00862,
    "home_qb_id": "00-0034857",
    "home_qb_name": "Josh Allen",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0033873",
    "away_qb_name": "Patrick Mahomes",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -374,10 +374,10 @@
    "qb_delta_diff": -0.00241,
    "home_qb_id": "00-0023459",
    "home_qb_name": "Aaron Rodgers",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0039732",
    "away_qb_name": "Bo Nix",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -396,10 +396,10 @@
    "qb_delta_diff": 0.02577,
    "home_qb_id": "00-0036442",
    "home_qb_name": "Joe Burrow",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0040743",
    "away_qb_name": "Tyler Shough",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -418,10 +418,10 @@
    "qb_delta_diff": 0.04131,
    "home_qb_id": "00-0039163",
    "home_qb_name": "C.J. Stroud",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0035993",
    "away_qb_name": "Tyler Huntley",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -431,19 +431,19 @@
    "kickoff_utc": "2026-11-29T18:00:00Z",
    "home_team": "IND",
    "away_team": "NYG",
-   "p_home_model": 0.4219,
-   "spread_model": -2.1,
+   "p_home_model": 0.4488,
+   "spread_model": -1.4,
    "elo_logit": -0.32216,
    "adj_epa_margin": -0.08417,
-   "qb_delta_home": -0.00299,
+   "qb_delta_home": 0.02659,
    "qb_delta_away": -0.01087,
-   "qb_delta_diff": 0.00788,
-   "home_qb_id": "00-0035710",
-   "home_qb_name": "Daniel Jones",
-   "home_qb_source": "last_starter",
+   "qb_delta_diff": 0.03745,
+   "home_qb_id": "00-0039164",
+   "home_qb_name": "Anthony Richardson",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0039923",
    "away_qb_name": "J.J. McCarthy",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -462,10 +462,10 @@
    "qb_delta_diff": -0.12648,
    "home_qb_id": "00-0040014",
    "home_qb_name": "Kyle McCord",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0030565",
    "away_qb_name": "Geno Smith",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -484,10 +484,10 @@
    "qb_delta_diff": 0.12418,
    "home_qb_id": "00-0029604",
    "home_qb_name": "Kirk Cousins",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0039917",
    "away_qb_name": "Michael Penix Jr.",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -506,10 +506,10 @@
    "qb_delta_diff": -0.00021,
    "home_qb_id": "00-0036971",
    "home_qb_name": "Trevor Lawrence",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0040676",
    "away_qb_name": "Cam Ward",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -528,10 +528,10 @@
    "qb_delta_diff": -0.01067,
    "home_qb_id": "00-0036355",
    "home_qb_name": "Justin Herbert",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0039851",
    "away_qb_name": "Drake Maye",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -550,10 +550,10 @@
    "qb_delta_diff": 0.01519,
    "home_qb_id": "00-0035289",
    "home_qb_name": "Gardner Minshew",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0039910",
    "away_qb_name": "Jayden Daniels",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -572,10 +572,10 @@
    "qb_delta_diff": 0.05678,
    "home_qb_id": "00-0037834",
    "home_qb_name": "Brock Purdy",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0034869",
    "away_qb_name": "Sam Darnold",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -594,10 +594,10 @@
    "qb_delta_diff": 0.19922,
    "home_qb_id": "00-0033537",
    "home_qb_name": "Deshaun Watson",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0041562",
    "away_qb_name": "Fernando Mendoza",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
@@ -616,10 +616,10 @@
    "qb_delta_diff": 0.00065,
    "home_qb_id": "00-0034855",
    "home_qb_name": "Baker Mayfield",
-   "home_qb_source": "last_starter",
+   "home_qb_source": "nflverse",
    "away_qb_id": "00-0039150",
    "away_qb_name": "Bryce Young",
-   "away_qb_source": "last_starter",
+   "away_qb_source": "nflverse",
    "logged": true
   },
   {
