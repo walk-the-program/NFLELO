@@ -28,20 +28,20 @@
       "rank_change": 0
     },
     {
-      "franchise": "DEN",
-      "rating": 1645.0,
+      "franchise": "SF",
+      "rating": 1667.8,
       "rank": 2,
       "last_game_date": "2026-11-22",
-      "rating_change": 8.4,
-      "rank_change": 2
+      "rating_change": 30.5,
+      "rank_change": 1
     },
     {
-      "franchise": "SF",
-      "rating": 1637.3,
+      "franchise": "DEN",
+      "rating": 1645.0,
       "rank": 3,
-      "last_game_date": "2026-11-15",
-      "rating_change": 0.0,
-      "rank_change": 0
+      "last_game_date": "2026-11-22",
+      "rating_change": 8.4,
+      "rank_change": 1
     },
     {
       "franchise": "DET",
@@ -68,44 +68,44 @@
       "rank_change": -4
     },
     {
-      "franchise": "MIN",
-      "rating": 1617.7,
+      "franchise": "SEA",
+      "rating": 1615.4,
       "rank": 7,
       "last_game_date": "2026-11-15",
       "rating_change": 0.0,
-      "rank_change": -1
-    },
-    {
-      "franchise": "SEA",
-      "rating": 1615.4,
-      "rank": 8,
-      "last_game_date": "2026-11-15",
-      "rating_change": 0.0,
-      "rank_change": -1
+      "rank_change": 0
     },
     {
       "franchise": "CIN",
       "rating": 1612.3,
-      "rank": 9,
+      "rank": 8,
       "last_game_date": "2026-11-15",
       "rating_change": 0.0,
-      "rank_change": 0
+      "rank_change": 1
     },
     {
       "franchise": "LA",
       "rating": 1605.6,
-      "rank": 10,
+      "rank": 9,
       "last_game_date": "2026-11-15",
       "rating_change": 0.0,
-      "rank_change": 0
+      "rank_change": 1
     },
     {
       "franchise": "KC",
       "rating": 1591.4,
-      "rank": 11,
+      "rank": 10,
       "last_game_date": "2026-11-22",
       "rating_change": 12.0,
-      "rank_change": 0
+      "rank_change": 1
+    },
+    {
+      "franchise": "MIN",
+      "rating": 1587.2,
+      "rank": 11,
+      "last_game_date": "2026-11-22",
+      "rating_change": -30.5,
+      "rank_change": -5
     },
     {
       "franchise": "GB",
