@@ -3,7 +3,7 @@
   "season": 2026,
   "week": 12,
   "change_is_since": "ratings 7 days before as_of (teams with no earlier game show 0)",
-  "hfa_current": 34.1,
+  "hfa_current": 33.9,
   "config": {
     "start": 1500.0,
     "k": 20.0,
@@ -21,10 +21,10 @@
   "teams": [
     {
       "franchise": "BUF",
-      "rating": 1692.3,
+      "rating": 1700.5,
       "rank": 1,
-      "last_game_date": "2026-11-22",
-      "rating_change": 5.5,
+      "last_game_date": "2026-11-26",
+      "rating_change": 13.7,
       "rank_change": 0
     },
     {
@@ -92,20 +92,20 @@
       "rank_change": 0
     },
     {
-      "franchise": "KC",
-      "rating": 1591.4,
-      "rank": 10,
-      "last_game_date": "2026-11-22",
-      "rating_change": 12.0,
-      "rank_change": 1
-    },
-    {
       "franchise": "MIN",
       "rating": 1587.2,
-      "rank": 11,
+      "rank": 10,
       "last_game_date": "2026-11-22",
       "rating_change": -30.5,
-      "rank_change": -5
+      "rank_change": -4
+    },
+    {
+      "franchise": "KC",
+      "rating": 1583.1,
+      "rank": 11,
+      "last_game_date": "2026-11-26",
+      "rating_change": 3.8,
+      "rank_change": 0
     },
     {
       "franchise": "PIT",
@@ -156,20 +156,20 @@
       "rank_change": -1
     },
     {
-      "franchise": "DAL",
-      "rating": 1466.9,
-      "rank": 18,
-      "last_game_date": "2026-11-22",
-      "rating_change": 15.3,
-      "rank_change": 1
-    },
-    {
       "franchise": "CLE",
       "rating": 1463.1,
-      "rank": 19,
+      "rank": 18,
       "last_game_date": "2026-11-15",
       "rating_change": 0.0,
-      "rank_change": -1
+      "rank_change": 0
+    },
+    {
+      "franchise": "DAL",
+      "rating": 1457.8,
+      "rank": 19,
+      "last_game_date": "2026-11-26",
+      "rating_change": 6.2,
+      "rank_change": 0
     },
     {
       "franchise": "WAS",
@@ -205,10 +205,10 @@
     },
     {
       "franchise": "PHI",
-      "rating": 1410.8,
+      "rating": 1419.8,
       "rank": 24,
-      "last_game_date": "2026-11-22",
-      "rating_change": 20.0,
+      "last_game_date": "2026-11-26",
+      "rating_change": 29.1,
       "rank_change": 3
     },
     {
